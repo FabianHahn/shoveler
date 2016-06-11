@@ -9,4 +9,4 @@ set(SHOVELER_SRC
 
 add_executable(shoveler ${SHOVELER_SRC})
 set_property(TARGET shoveler PROPERTY C_STANDARD 99)
-target_link_libraries(shoveler ${GLIB_LIBRARIES} ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES} glfw)
+target_link_libraries(shoveler m ${GLIB_LIBRARIES} ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES} glfw)
