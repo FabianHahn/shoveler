@@ -3,6 +3,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${OPENGL_INCLUDE_DIR} ${GLIB_INC
 set(SHOVELER_SRC
 	input.c
 	log.c
+	material.c
 	opengl.c
 	shader_program.c
 	shoveler.c
