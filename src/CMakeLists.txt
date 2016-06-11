@@ -4,6 +4,7 @@ set(SHOVELER_SRC
 	input.c
 	log.c
 	opengl.c
+	shader_program.c
 	shoveler.c
 )
 
