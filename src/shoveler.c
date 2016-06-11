@@ -5,7 +5,12 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include "input.h"
 #include "log.h"
+
+static void exitKeyHandler(int key, int scancode, int action, int mods);
+
+static GLFWwindow *window;
 
 int main(int argc, char *argv[])
 {
@@ -30,7 +35,6 @@ int main(int argc, char *argv[])
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 
-	GLFWwindow *window;
 	if(fullscreen) {
 		GLFWmonitor *monitor = glfwGetPrimaryMonitor();
 		shovelerLogInfo("Using borderless fullscreen mode on primary monitor '%s'.", glfwGetMonitorName(monitor));
@@ -70,6 +74,9 @@ int main(int argc, char *argv[])
 	}
 	shovelerLogInfo("Using GLEW version '%s'.", glewGetString(GLEW_VERSION));
 
+	shovelerInputInit(window);
+	shovelerInputAddKeyCallback(exitKeyHandler);
+
 	double lastFrameTime = glfwGetTime();
 	while(!glfwWindowShouldClose(window)) {
 		double now = glfwGetTime();
@@ -81,7 +88,17 @@ int main(int argc, char *argv[])
 	}
 	shovelerLogInfo("Exiting main loop, goodbye.");
 
+	shovelerInputTerminate();
 	glfwTerminate();
 	shovelerLogTerminate();
 	return EXIT_SUCCESS;
+}
+
+static void exitKeyHandler(int key, int scancode, int action, int mods)
+{
+	if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+		shovelerLogInfo("Escape key pressed, terminating.");
+		glfwSetWindowShouldClose(window, GLFW_TRUE);
+	}
+
 }
