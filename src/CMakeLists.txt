@@ -6,6 +6,7 @@ set(SHOVELER_SRC
 	opengl.c
 	shader_program.c
 	shoveler.c
+	uniform.c
 )
 
 add_executable(shoveler ${SHOVELER_SRC})
