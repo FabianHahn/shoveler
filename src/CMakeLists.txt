@@ -1,4 +1,4 @@
-include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${GLIB_INCLUDE_DIRS})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${OPENGL_INCLUDE_DIR} ${GLIB_INCLUDE_DIRS} ${GLEW_INCLUDE_DIRS})
 
 set(SHOVELER_SRC
 	log.c
@@ -7,5 +7,4 @@ set(SHOVELER_SRC
 
 add_executable(shoveler ${SHOVELER_SRC})
 set_property(TARGET shoveler PROPERTY C_STANDARD 99)
-target_link_libraries(shoveler ${GLIB_LIBRARIES})
-target_link_libraries(shoveler glfw)
+target_link_libraries(shoveler ${GLIB_LIBRARIES} ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES} glfw)
