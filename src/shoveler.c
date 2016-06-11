@@ -7,6 +7,7 @@
 
 #include "input.h"
 #include "log.h"
+#include "opengl.h"
 
 static void exitKeyHandler(int key, int scancode, int action, int mods);
 
@@ -60,7 +61,20 @@ int main(int argc, char *argv[])
 	}
 
 	glfwMakeContextCurrent(window);
+
+	if(!shovelerOpenGLCheckSuccess()) {
+		glfwTerminate();
+		shovelerLogTerminate();
+		return EXIT_FAILURE;
+	}
+
 	glfwSwapInterval(vsync ? 1 : 0);
+
+	if(!shovelerOpenGLCheckSuccess()) {
+		glfwTerminate();
+		shovelerLogTerminate();
+		return EXIT_FAILURE;
+	}
 
 	shovelerLogInfo("Opened glfw window with name '%s', using OpenGL driver version '%s' by '%s'.", windowTitle, glGetString(GL_VERSION), glGetString(GL_VENDOR));
 
@@ -73,6 +87,16 @@ int main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 	shovelerLogInfo("Using GLEW version '%s'.", glewGetString(GLEW_VERSION));
+
+	GLenum error = glGetError();
+	if(error = GL_INVALID_ENUM) {
+		shovelerLogWarning("Initializing GLEW triggered GL_INVALID_ENUM, ignoring.");
+	} else if(error != GL_NO_ERROR) {
+		shovelerOpenGLHandleError(error);
+		glfwTerminate();
+		shovelerLogTerminate();
+		return EXIT_FAILURE;
+	}
 
 	shovelerInputInit(window);
 	shovelerInputAddKeyCallback(exitKeyHandler);
