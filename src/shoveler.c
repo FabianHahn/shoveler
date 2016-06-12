@@ -8,6 +8,7 @@
 #include "input.h"
 #include "log.h"
 #include "opengl.h"
+#include "sample.h"
 
 static void exitKeyHandler(int key, int scancode, int action, int mods);
 
@@ -101,16 +102,22 @@ int main(int argc, char *argv[])
 	shovelerInputInit(window);
 	shovelerInputAddKeyCallback(exitKeyHandler);
 
+	shovelerSampleInit(width, height);
+
 	double lastFrameTime = glfwGetTime();
 	while(!glfwWindowShouldClose(window)) {
 		double now = glfwGetTime();
 		double dt = now - lastFrameTime;
 		lastFrameTime = now;
 
+		shovelerSampleRender();
+
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
 	shovelerLogInfo("Exiting main loop, goodbye.");
+
+	shovelerSampleTerminate();
 
 	shovelerInputTerminate();
 	glfwTerminate();

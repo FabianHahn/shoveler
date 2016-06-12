@@ -9,6 +9,7 @@ set(SHOVELER_SRC
 	material.c
 	model.c
 	opengl.c
+	sample.c
 	scene.c
 	shader.c
 	shader_program.c
