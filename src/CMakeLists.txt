@@ -7,6 +7,7 @@ set(SHOVELER_SRC
 	shader_program.c
 	shoveler.c
 	uniform.c
+	uniform_map.c
 )
 
 add_executable(shoveler ${SHOVELER_SRC})
