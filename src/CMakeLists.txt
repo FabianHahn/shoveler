@@ -7,6 +7,7 @@ set(SHOVELER_SRC
 	shader_program.c
 	shoveler.c
 	uniform.c
+	uniform_attachment.c
 	uniform_map.c
 )
 
