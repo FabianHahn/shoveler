@@ -2,6 +2,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${OPENGL_INCLUDE_DIR} ${GLIB_INC
 
 set(SHOVELER_SRC
 	drawables/cube.c
+	camera.c
 	input.c
 	log.c
 	material.c
