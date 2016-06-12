@@ -8,6 +8,7 @@ set(SHOVELER_SRC
 	log.c
 	material.c
 	opengl.c
+	shader.c
 	shader_program.c
 	shoveler.c
 	uniform.c
