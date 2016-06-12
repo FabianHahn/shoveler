@@ -9,6 +9,7 @@ set(SHOVELER_SRC
 	material.c
 	model.c
 	opengl.c
+	scene.c
 	shader.c
 	shader_program.c
 	shoveler.c
