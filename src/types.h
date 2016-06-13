@@ -196,4 +196,48 @@ static inline ShovelerVector3 shovelerVector3Normalize(ShovelerVector3 a)
 	return an;
 }
 
+static inline ShovelerVector3 shovelerVector3LinearCombination(float alpha, ShovelerVector3 a, float beta, ShovelerVector3 b)
+{
+	ShovelerVector3 c;
+	c.values[0] = alpha * a.values[0] + beta * b.values[0];
+	c.values[1] = alpha * a.values[1] + beta * b.values[1];
+	c.values[2] = alpha * a.values[2] + beta * b.values[2];
+	return c;
+}
+
+static inline ShovelerMatrix shovelerMatrixCreateRotation(ShovelerVector3 axis, float angle)
+{
+	ShovelerVector3 axisNormalized = shovelerVector3Normalize(axis);
+
+	float c = cosf(angle);
+	float s = sinf(angle);
+	float C = 1 - c;
+	float x = axisNormalized.values[0];
+	float y = axisNormalized.values[1];
+	float z = axisNormalized.values[2];
+	float xs = x * s;
+	float ys = y * s;
+	float zs = z * s;
+	float xC = x * C;
+	float yC = y * C;
+	float zC = z * C;
+	float xyC = x * yC;
+	float yzC = y * zC;
+	float zxC = z * xC;
+
+	ShovelerMatrix rotation = shovelerMatrixIdentity;
+	ShovelerMatrixGet(rotation, 0, 1) = xyC - zs;
+	ShovelerMatrixGet(rotation, 0, 0) = x * xC + c;
+	ShovelerMatrixGet(rotation, 0, 2) = zxC + ys;
+	ShovelerMatrixGet(rotation, 1, 0) = xyC + zs;
+	ShovelerMatrixGet(rotation, 1, 1) = y * yC + c;
+	ShovelerMatrixGet(rotation, 1, 2) = yzC - xs;
+	ShovelerMatrixGet(rotation, 2, 0) = zxC - ys;
+	ShovelerMatrixGet(rotation, 2, 1) = yzC + xs;
+	ShovelerMatrixGet(rotation, 2, 2) = z * zC + c;
+
+	return rotation;
+}
+
+
 #endif
