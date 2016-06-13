@@ -69,6 +69,9 @@ int main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
+	glEnable(GL_CULL_FACE);
+	glEnable(GL_DEPTH_TEST);
+
 	glfwSwapInterval(vsync ? 1 : 0);
 
 	if(!shovelerOpenGLCheckSuccess()) {
