@@ -18,23 +18,49 @@ static const char *vertexShaderSource =
 		"#version 400\n"
 		"\n"
 		"uniform mat4 model;\n"
+		"uniform mat4 modelNormal;\n"
 		"uniform mat4 camera;\n"
 		"\n"
 		"in vec3 position;\n"
+		"in vec3 normal;\n"
+		"\n"
+		"out vec3 worldPosition;"
+		"out vec3 worldNormal;"
 		"\n"
 		"void main()\n"
 		"{\n"
-		"	gl_Position = camera * model * vec4(position, 1.0);\n"
+		"	vec4 worldPosition4 = model * vec4(position, 1.0);\n"
+		"	vec4 worldNormal4 = modelNormal * vec4(normal, 1.0);\n"
+		"	worldPosition = worldPosition4.xyz / worldPosition4.w;\n"
+		"	worldNormal = worldNormal4.xyz / worldNormal4.w;\n"
+		"	gl_Position = camera * worldPosition4;\n"
 		"}\n";
 
 static const char *fragmentShaderSource =
 		"#version 400\n"
 		"\n"
-		"out vec4 color;\n"
+		"uniform vec3 color;\n"
+		"uniform vec3 lightDirection;\n"
+		"uniform vec3 lightColor;\n"
+		"uniform vec3 cameraPosition;\n"
+		"\n"
+		"in vec3 worldPosition;\n"
+		"in vec3 worldNormal;\n"
+		"\n"
+		"out vec4 fragmentColor;\n"
 		"\n"
 		"void main()\n"
 		"{\n"
-		"	color = vec4(1.0, 0.0, 0.0, 1.0);\n"
+		"	vec3 normal = normalize(worldNormal);\n"
+		"	"
+		"	float ambientFactor = 0.2;\n"
+		"	float diffuseFactor = clamp(dot(-lightDirection, normal), 0.0, 1.0);\n"
+		""
+		"	vec3 cameraDirection = normalize(cameraPosition - worldPosition);\n"
+		"	vec3 reflectedLight = -reflect(-lightDirection, normal);\n"
+		"	float specularFactor = pow(clamp(dot(reflectedLight, cameraDirection), 0.0, 1.0), 250.0);\n"
+		""
+		"	fragmentColor = vec4(clamp(ambientFactor * color + diffuseFactor * color + specularFactor * lightColor, 0.0, 1.0), 1.0);\n"
 		"}\n";
 
 static GLFWwindow *window;
@@ -56,6 +82,14 @@ void shovelerSampleInit(GLFWwindow *sampleWindow, int width, int height)
 	GLuint fragmentShaderObject = shovelerShaderProgramCompileFromString(fragmentShaderSource, GL_FRAGMENT_SHADER);
 	GLuint program = shovelerShaderProgramLink(vertexShaderObject, fragmentShaderObject, true);
 	material = shovelerMaterialCreate(program);
+
+	ShovelerUniform *colorUniform = shovelerUniformCreateVector3((ShovelerVector3){1, 0, 0});
+	shovelerUniformMapInsert(material->uniforms, "color", colorUniform);
+	ShovelerUniform *lightDirectionUniform = shovelerUniformCreateVector3(shovelerVector3Normalize((ShovelerVector3){0, 0, 1}));
+	shovelerUniformMapInsert(material->uniforms, "lightDirection", lightDirectionUniform);
+	ShovelerUniform *lightColorUniform = shovelerUniformCreateVector3((ShovelerVector3){1, 1, 1});
+	shovelerUniformMapInsert(material->uniforms, "lightColor", lightColorUniform);
+
 	shovelerOpenGLCheckSuccess();
 
 	cube = shovelerDrawablesCubeCreate();
@@ -79,9 +113,9 @@ void shovelerSampleRender(float dt)
 {
 	handleMovement(dt);
 
-	model->translation.values[0] += dt;
 	model->rotation.values[0] += 0.1f * dt;
-	model->scale.values[0] += 0.1f * dt;
+	model->rotation.values[1] += 0.2f * dt;
+	model->rotation.values[2] += 0.5f * dt;
 	shovelerModelUpdateTransformation(model);
 
 	shovelerSceneRender(scene, perspectiveCamera->camera);
