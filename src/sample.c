@@ -40,6 +40,7 @@ static const char *fragmentShaderSource =
 static GLFWwindow *window;
 static ShovelerMaterial *material;
 static ShovelerDrawable *cube;
+static ShovelerModel *model;
 static ShovelerScene *scene;
 static ShovelerCamerasPerspective *perspectiveCamera;
 static float previousCursorX;
@@ -58,7 +59,7 @@ void shovelerSampleInit(GLFWwindow *sampleWindow, int width, int height)
 	shovelerOpenGLCheckSuccess();
 
 	cube = shovelerDrawablesCubeCreate();
-	ShovelerModel *model = shovelerModelCreate(cube, material);
+	model = shovelerModelCreate(cube, material);
 
 	scene = shovelerSceneCreate();
 	shovelerSceneAddModel(scene, model);
@@ -77,6 +78,12 @@ void shovelerSampleInit(GLFWwindow *sampleWindow, int width, int height)
 void shovelerSampleRender(float dt)
 {
 	handleMovement(dt);
+
+	model->translation.values[0] += dt;
+	model->rotation.values[0] += 0.1f * dt;
+	model->scale.values[0] += 0.1f * dt;
+	shovelerModelUpdateTransformation(model);
+
 	shovelerSceneRender(scene, perspectiveCamera->camera);
 }
 
