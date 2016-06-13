@@ -11,6 +11,12 @@ typedef struct {
 } ShovelerCamerasPerspective;
 
 ShovelerCamerasPerspective *shovelerCamerasPerspectiveCreate(float fieldOfViewY, float aspectRatio, float nearClippingPlane, float farClippingPlane);
+void shovelerCamerasPerspectiveUpdateTransformation(ShovelerCamerasPerspective *perspectiveCamera);
+void shovelerCamerasPerspectiveMoveForward(ShovelerCamerasPerspective *perspectiveCamera, float amount);
+void shovelerCamerasPerspectiveMoveRight(ShovelerCamerasPerspective *perspectiveCamera, float amount);
+void shovelerCamerasPerspectiveMoveUp(ShovelerCamerasPerspective *perspectiveCamera, float amount);
+void shovelerCamerasPerspectiveTiltUp(ShovelerCamerasPerspective *perspectiveCamera, float amount);
+void shovelerCamerasPerspectiveTiltRight(ShovelerCamerasPerspective *perspectiveCamera, float amount);
 void shovelerCamerasPerspectiveFree(ShovelerCamerasPerspective *perspectiveCamera);
 
 #endif

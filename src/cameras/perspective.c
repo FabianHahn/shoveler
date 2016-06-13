@@ -15,21 +15,72 @@ ShovelerCamerasPerspective *shovelerCamerasPerspectiveCreate(float fieldOfViewY,
 	perspectiveCamera->up = (ShovelerVector3){{0, 1, 0}};
 	perspectiveCamera->direction = (ShovelerVector3){{0, 0, 1}};
 	perspectiveCamera->perspective = computePerspectiveTransformation(fieldOfViewY, aspectRatio, nearClippingPlane, farClippingPlane);
-	updateTransformation(perspectiveCamera);
+	shovelerCamerasPerspectiveUpdateTransformation(perspectiveCamera);
 
 	return perspectiveCamera;
+}
+
+void shovelerCamerasPerspectiveUpdateTransformation(ShovelerCamerasPerspective *perspectiveCamera)
+{
+	ShovelerMatrix lookIntoDirection = computeLookIntoDirectionTransformation(perspectiveCamera->camera->position, perspectiveCamera->direction, perspectiveCamera->up);
+	perspectiveCamera->camera->transformation = shovelerMatrixMultiply(perspectiveCamera->perspective, lookIntoDirection);
+}
+
+void shovelerCamerasPerspectiveMoveForward(ShovelerCamerasPerspective *perspectiveCamera, float amount)
+{
+	perspectiveCamera->camera->position = shovelerVector3LinearCombination(1.0, perspectiveCamera->camera->position, amount, perspectiveCamera->direction);
+}
+
+void shovelerCamerasPerspectiveMoveRight(ShovelerCamerasPerspective *perspectiveCamera, float amount)
+{
+	ShovelerVector3 right = shovelerVector3Cross(perspectiveCamera->direction, perspectiveCamera->up);
+	perspectiveCamera->camera->position = shovelerVector3LinearCombination(1.0, perspectiveCamera->camera->position, amount, right);
+}
+
+void shovelerCamerasPerspectiveMoveUp(ShovelerCamerasPerspective *perspectiveCamera, float amount)
+{
+	ShovelerVector3 right = shovelerVector3Cross(perspectiveCamera->direction, perspectiveCamera->up);
+	ShovelerVector3 upwards = shovelerVector3Cross(right, perspectiveCamera->direction);
+	perspectiveCamera->camera->position = shovelerVector3LinearCombination(1.0, perspectiveCamera->camera->position, amount, upwards);
+}
+
+void shovelerCamerasPerspectiveTiltUp(ShovelerCamerasPerspective *perspectiveCamera, float amount)
+{
+	ShovelerVector3 right = shovelerVector3Cross(perspectiveCamera->direction, perspectiveCamera->up);
+
+	// Rotate camera direction
+	ShovelerMatrix rotation = shovelerMatrixCreateRotation(right, amount);
+	ShovelerMatrix normalRotation = shovelerMatrixTranspose(rotation);
+
+	ShovelerVector3 newDirection = shovelerVector3Normalize(shovelerMatrixMultiplyVector3(normalRotation, perspectiveCamera->direction));
+	ShovelerVector3 newUp = shovelerVector3Cross(right, newDirection);
+
+	if(newUp.values[1] >= 0.0f) { // only update if we're not flipping upside down
+		perspectiveCamera->direction = newDirection;
+		perspectiveCamera->up = newUp;
+	}
+}
+
+void shovelerCamerasPerspectiveTiltRight(ShovelerCamerasPerspective *perspectiveCamera, float amount)
+{
+	// Rotate camera direction
+	ShovelerMatrix rotation = shovelerMatrixCreateRotation(perspectiveCamera->up, amount);
+	ShovelerMatrix normalRotation = shovelerMatrixTranspose(rotation);
+
+	ShovelerVector3 newDirection = shovelerVector3Normalize(shovelerMatrixMultiplyVector3(normalRotation, perspectiveCamera->direction));
+	ShovelerVector3 newRight = shovelerVector3Cross(newDirection, perspectiveCamera->up);
+	newRight.values[1] = 0.0f;
+
+	ShovelerVector3 newUp = shovelerVector3Normalize(shovelerVector3Cross(newRight, newDirection));
+
+	perspectiveCamera->direction = newDirection;
+	perspectiveCamera->up = newUp;
 }
 
 void shovelerCamerasPerspectiveFree(ShovelerCamerasPerspective *perspectiveCamera)
 {
 	shovelerCameraFree(perspectiveCamera->camera);
 	free(perspectiveCamera);
-}
-
-static void updateTransformation(ShovelerCamerasPerspective *perspectiveCamera)
-{
-	ShovelerMatrix lookIntoDirection = computeLookIntoDirectionTransformation(perspectiveCamera->camera->position, perspectiveCamera->direction, perspectiveCamera->up);
-	perspectiveCamera->camera->transformation = shovelerMatrixMultiply(perspectiveCamera->perspective, lookIntoDirection);
 }
 
 static ShovelerMatrix computePerspectiveTransformation(float fieldOfViewY, float apsectRatio, float nearClippingPlane, float farClippingPlane)
