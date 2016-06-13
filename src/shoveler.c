@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
 	shovelerInputInit(window);
 	shovelerInputAddKeyCallback(exitKeyHandler);
 
-	shovelerSampleInit(width, height);
+	shovelerSampleInit(window, width, height);
 
 	double lastFrameTime = glfwGetTime();
 	while(!glfwWindowShouldClose(window)) {
@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
 		double dt = now - lastFrameTime;
 		lastFrameTime = now;
 
-		shovelerSampleRender();
+		shovelerSampleRender(dt);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
