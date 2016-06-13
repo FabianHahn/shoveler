@@ -24,6 +24,7 @@ typedef struct {
 } ShovelerModel;
 
 ShovelerModel *shovelerModelCreate(ShovelerDrawable *drawable, ShovelerMaterial *material);
+void shovelerModelUpdateTransformation(ShovelerModel *model);
 bool shovelerModelRender(ShovelerModel *model);
 void shovelerModelFree(ShovelerModel *model);
 
