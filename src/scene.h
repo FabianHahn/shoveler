@@ -10,6 +10,7 @@
 
 typedef struct {
 	GQueue *models;
+	GHashTable *modelShaderCache;
 } ShovelerScene;
 
 ShovelerScene *shovelerSceneCreate();
