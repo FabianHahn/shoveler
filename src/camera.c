@@ -5,7 +5,7 @@
 ShovelerCamera *shovelerCameraCreate()
 {
 	ShovelerCamera *camera = malloc(sizeof(ShovelerCamera));
-	camera->position = (ShovelerVector3){{0, 0, 0}};
+	camera->position = (ShovelerVector3){{0, 0, -5}};
 	camera->transformation = shovelerMatrixIdentity;
 	camera->uniforms = shovelerUniformMapCreate();
 
