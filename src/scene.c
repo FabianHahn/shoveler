@@ -22,6 +22,9 @@ int shovelerSceneRender(ShovelerScene *scene, ShovelerCamera *camera)
 {
 	int rendered = 0;
 
+	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
 	for(GList *iter = scene->models->head; iter != NULL; iter = iter->next) {
 		ShovelerModel *model = iter->data;
 
