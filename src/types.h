@@ -205,6 +205,51 @@ static inline ShovelerVector3 shovelerVector3LinearCombination(float alpha, Shov
 	return c;
 }
 
+static inline ShovelerMatrix shovelerMatrixCreateRotationX(float angle)
+{
+	ShovelerMatrix rotation = shovelerMatrixIdentity;
+
+	float c = cosf(angle);
+	float s = sinf(angle);
+
+	ShovelerMatrixGet(rotation, 1, 1) = c;
+	ShovelerMatrixGet(rotation, 1, 2) = s;
+	ShovelerMatrixGet(rotation, 2, 1) = -s;
+	ShovelerMatrixGet(rotation, 2, 2) = c;
+
+	return rotation;
+}
+
+static inline ShovelerMatrix shovelerMatrixCreateRotationY(float angle)
+{
+	ShovelerMatrix rotation = shovelerMatrixIdentity;
+
+	float c = cosf(angle);
+	float s = sinf(angle);
+
+	ShovelerMatrixGet(rotation, 0, 0) = c;
+	ShovelerMatrixGet(rotation, 0, 2) = -s;
+	ShovelerMatrixGet(rotation, 2, 0) = s;
+	ShovelerMatrixGet(rotation, 2, 2) = c;
+
+	return rotation;
+}
+
+static inline ShovelerMatrix shovelerMatrixCreateRotationZ(float angle)
+{
+	ShovelerMatrix rotation = shovelerMatrixIdentity;
+
+	float c = cosf(angle);
+	float s = sinf(angle);
+
+	ShovelerMatrixGet(rotation, 0, 0) = c;
+	ShovelerMatrixGet(rotation, 0, 1) = s;
+	ShovelerMatrixGet(rotation, 1, 0) = -s;
+	ShovelerMatrixGet(rotation, 1, 1) = c;
+
+	return rotation;
+}
+
 static inline ShovelerMatrix shovelerMatrixCreateRotation(ShovelerVector3 axis, float angle)
 {
 	ShovelerVector3 axisNormalized = shovelerVector3Normalize(axis);
