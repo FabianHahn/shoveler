@@ -111,11 +111,11 @@ static bool drawCube(ShovelerDrawable *cube)
 
 	glBindBuffer(GL_ARRAY_BUFFER, cubeData->vertexBuffer);
 
-	glVertexAttribPointer(SHOVELER_SHADER_PROGRAM_ATTRIBUTE_POSITION, 3, GL_BYTE, GL_FALSE, sizeof(CubeVertex), NULL + offsetof(CubeVertex, position));
+	glVertexAttribPointer(SHOVELER_SHADER_PROGRAM_ATTRIBUTE_POSITION, 3, GL_BYTE, GL_FALSE, sizeof(CubeVertex), (const GLvoid *) offsetof(CubeVertex, position));
 	glEnableVertexAttribArray(SHOVELER_SHADER_PROGRAM_ATTRIBUTE_POSITION);
-	glVertexAttribPointer(SHOVELER_SHADER_PROGRAM_ATTRIBUTE_NORMAL, 3, GL_BYTE, GL_FALSE, sizeof(CubeVertex), NULL + offsetof(CubeVertex, normal));
+	glVertexAttribPointer(SHOVELER_SHADER_PROGRAM_ATTRIBUTE_NORMAL, 3, GL_BYTE, GL_FALSE, sizeof(CubeVertex), (const GLvoid *) offsetof(CubeVertex, normal));
 	glEnableVertexAttribArray(SHOVELER_SHADER_PROGRAM_ATTRIBUTE_NORMAL);
-	glVertexAttribPointer(SHOVELER_SHADER_PROGRAM_ATTRIBUTE_UV, 2, GL_BYTE, GL_FALSE, sizeof(CubeVertex), NULL + offsetof(CubeVertex, uv));
+	glVertexAttribPointer(SHOVELER_SHADER_PROGRAM_ATTRIBUTE_UV, 2, GL_BYTE, GL_FALSE, sizeof(CubeVertex), (const GLvoid *) offsetof(CubeVertex, uv));
 	glEnableVertexAttribArray(SHOVELER_SHADER_PROGRAM_ATTRIBUTE_UV);
 
 	if(!shovelerOpenGLCheckSuccess()) {
