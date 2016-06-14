@@ -17,9 +17,10 @@ GLuint shovelerShaderProgramCompileFromString(const char *source, GLenum type)
 	if(status == 0) {
 		GLint length;
 		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
-		char errorstr[length];
+		char *errorstr = malloc(length * sizeof(char));
 		glGetShaderInfoLog(shader, length, NULL, errorstr);
 		shovelerLogError("Failed to compile shader: %s.", errorstr);
+		free(errorstr);
 		return 0;
 	}
 
@@ -65,9 +66,10 @@ GLuint shovelerShaderProgramLink(GLuint vertexShader, GLuint fragmentShader, boo
 	if(status == 0) {
 		GLint length;
 		glGetProgramiv(program, GL_INFO_LOG_LENGTH, &length);
-		char errorstr[length];
+		char *errorstr = malloc(length * sizeof(char));
 		glGetProgramInfoLog(program, length, NULL, errorstr);
 		shovelerLogError("Failed to link shader program: %s.", errorstr);
+		free(errorstr);
 		return 0;
 	}
 
