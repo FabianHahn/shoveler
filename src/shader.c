@@ -14,6 +14,7 @@ ShovelerShader *shovelerShaderCreate(GLuint program)
 	ShovelerShader *shader = malloc(sizeof(ShovelerShader));
 	shader->program = program;
 	shader->attachments = g_hash_table_new_full(g_str_hash, g_str_equal, free, freeAttachment);
+	return shader;
 }
 
 int shovelerShaderAttachUniforms(ShovelerShader *shader, ShovelerUniformMap *uniformMap)
