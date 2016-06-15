@@ -28,7 +28,7 @@ ShovelerScene *shovelerSceneCreate()
 	return scene;
 }
 
-bool shovelerSceneAddModel(ShovelerScene *scene, ShovelerModel *model)
+void shovelerSceneAddModel(ShovelerScene *scene, ShovelerModel *model)
 {
 	g_queue_push_tail(scene->models, model);
 }

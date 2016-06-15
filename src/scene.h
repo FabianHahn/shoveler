@@ -14,7 +14,7 @@ typedef struct {
 } ShovelerScene;
 
 ShovelerScene *shovelerSceneCreate();
-bool shovelerSceneAddModel(ShovelerScene *scene, ShovelerModel *model);
+void shovelerSceneAddModel(ShovelerScene *scene, ShovelerModel *model);
 int shovelerSceneRender(ShovelerScene *scene, ShovelerCamera *camera);
 void shovelerSceneFree(ShovelerScene *scene);
 
