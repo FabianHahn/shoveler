@@ -39,7 +39,7 @@ void shovelerInputAddKeyCallback(ShovelerInputKeyCallback *keyCallback)
 
 bool shovelerInputRemoveKeyCallback(ShovelerInputKeyCallback *keyCallback)
 {
-	g_queue_remove(keyCallbacks, keyCallback);
+	return g_queue_remove(keyCallbacks, keyCallback);
 }
 
 void shovelerInputAddMouseButtonCallback(ShovelerInputMouseButtonCallback *mouseButtonCallback)
@@ -49,7 +49,7 @@ void shovelerInputAddMouseButtonCallback(ShovelerInputMouseButtonCallback *mouse
 
 bool shovelerInputRemoveMouseButtonCallback(ShovelerInputMouseButtonCallback *mouseButtonCallback)
 {
-	g_queue_remove(mouseButtonCallbacks, mouseButtonCallback);
+	return g_queue_remove(mouseButtonCallbacks, mouseButtonCallback);
 }
 
 void shovelerInputAddCursorPosCallback(ShovelerInputCursorPosCallback *cursorPosCallback)
@@ -59,7 +59,7 @@ void shovelerInputAddCursorPosCallback(ShovelerInputCursorPosCallback *cursorPos
 
 bool shovelerInputRemoveCursorPosCallback(ShovelerInputCursorPosCallback *cursorPosCallback)
 {
-	g_queue_remove(cursorPosCallbacks, cursorPosCallback);
+	return g_queue_remove(cursorPosCallbacks, cursorPosCallback);
 }
 
 void shovelerInputAddScrollCallback(ShovelerInputScrollCallback *scrollCallback)
@@ -69,7 +69,7 @@ void shovelerInputAddScrollCallback(ShovelerInputScrollCallback *scrollCallback)
 
 bool shovelerInputRemoveScrollCallback(ShovelerInputScrollCallback *scrollCallback)
 {
-	g_queue_remove(scrollCallbacks, scrollCallback);
+	return g_queue_remove(scrollCallbacks, scrollCallback);
 }
 
 static void keyHandler(GLFWwindow *window, int key, int scancode, int action, int mods)
