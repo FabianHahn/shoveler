@@ -8,6 +8,7 @@ ShovelerUniformAttachment *shovelerUniformAttachmentCreate(ShovelerUniform *unif
 	ShovelerUniformAttachment *uniformAttachment = malloc(sizeof(ShovelerUniform));
 	uniformAttachment->uniform = uniform;
 	uniformAttachment->location = location;
+	return uniformAttachment;
 }
 
 bool shovelerUniformAttachmentUse(ShovelerUniformAttachment *uniformAttachment)
