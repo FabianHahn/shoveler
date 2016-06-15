@@ -4,7 +4,7 @@
 #include <stdbool.h> // bool
 
 #include <glib.h>
-#include <GL/glew.h>
+#include <glad/glad.h>
 
 #include "uniform.h"
 #include "uniform_map.h"

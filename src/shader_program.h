@@ -3,7 +3,7 @@
 
 #include <stdbool.h> // bool
 
-#include <GL/glew.h>
+#include <glad/glad.h>
 
 typedef enum {
 	SHOVELER_SHADER_PROGRAM_ATTRIBUTE_POSITION = 0,

@@ -2,7 +2,7 @@
 #include <stdlib.h> // EXIT_FAILURE, EXIT_SUCCESS
 #include <stdbool.h> // bool
 
-#include <GL/glew.h>
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 #include "input.h"
@@ -63,6 +63,15 @@ int main(int argc, char *argv[])
 
 	glfwMakeContextCurrent(window);
 
+	if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+		shovelerLogError("Failed to initialize glad.");
+		glfwTerminate();
+		shovelerLogTerminate();
+		return EXIT_FAILURE;
+	}
+
+	shovelerLogInfo("Opened glfw window with name '%s', using OpenGL driver version '%s' by '%s' and GLSL version '%s'.", windowTitle, glGetString(GL_VERSION), glGetString(GL_VENDOR), glGetString(GL_SHADING_LANGUAGE_VERSION));
+
 	if(!shovelerOpenGLCheckSuccess()) {
 		glfwTerminate();
 		shovelerLogTerminate();
@@ -79,29 +88,7 @@ int main(int argc, char *argv[])
 		shovelerLogTerminate();
 		return EXIT_FAILURE;
 	}
-
-	shovelerLogInfo("Opened glfw window with name '%s', using OpenGL driver version '%s' by '%s'.", windowTitle, glGetString(GL_VERSION), glGetString(GL_VENDOR));
-
-	glewExperimental = GL_TRUE;
-	GLenum err = glewInit();
-	if(err != GLEW_OK) {
-		shovelerLogError("Failed to initialize GLEW with error code %d: %s.", err, glewGetErrorString(err));
-		glfwTerminate();
-		shovelerLogTerminate();
-		return EXIT_FAILURE;
-	}
-	shovelerLogInfo("Using GLEW version '%s'.", glewGetString(GLEW_VERSION));
-
-	GLenum error = glGetError();
-	if(error = GL_INVALID_ENUM) {
-		shovelerLogWarning("Initializing GLEW triggered GL_INVALID_ENUM, ignoring.");
-	} else if(error != GL_NO_ERROR) {
-		shovelerOpenGLHandleError(error);
-		glfwTerminate();
-		shovelerLogTerminate();
-		return EXIT_FAILURE;
-	}
-
+	
 	shovelerInputInit(window);
 	shovelerInputAddKeyCallback(exitKeyHandler);
 

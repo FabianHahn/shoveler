@@ -3,7 +3,7 @@
 
 #include <stdbool.h> // bool
 
-#include <GL/glew.h>
+#include <glad/glad.h>
 
 #include "log.h"
 

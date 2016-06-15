@@ -1,7 +1,7 @@
 #include <stdbool.h> // bool
 #include <stdlib.h> // malloc, free
 
-#include <GL/glew.h>
+#include <glad/glad.h>
 
 #include "drawables/cube.h"
 

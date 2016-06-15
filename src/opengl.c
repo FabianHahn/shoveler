@@ -30,12 +30,6 @@ void shovelerOpenGLHandleErrorFull(const char *file, int line, GLenum error)
 		case GL_OUT_OF_MEMORY:
 			shovelerLogMessage(file, line, SHOVELER_LOG_LEVEL_ERROR, "OpenGL GL_OUT_OF_MEMORY error: There is not enough memory left to execute the command.");
 		break;
-		case GL_STACK_UNDERFLOW:
-			shovelerLogMessage(file, line, SHOVELER_LOG_LEVEL_ERROR, "OpenGL GL_STACK_UNDERFLOW error: An attempt has been made to perform an operation that would cause an internal stack to underflow.");
-		break;
-		case GL_STACK_OVERFLOW:
-			shovelerLogMessage(file, line, SHOVELER_LOG_LEVEL_ERROR, "OpenGL GL_STACK_OVERFLOW error: An attempt has been made to perform an operation that would cause an internal stack to overflow.");
-		break;
 		default:
 			shovelerLogMessage(file, line, SHOVELER_LOG_LEVEL_ERROR, "unknown OpenGL error code %d", error);
 		break;

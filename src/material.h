@@ -1,7 +1,7 @@
 #ifndef SHOVELER_MATERIAL_H
 #define SHOVELER_MATERIAL_H
 
-#include <GL/glew.h>
+#include <glad/glad.h>
 
 #include "uniform_map.h"
 
