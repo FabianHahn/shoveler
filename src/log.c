@@ -88,7 +88,7 @@ static void logHandler(const char *file, int line, ShovelerLogLevel level, const
 	if(shouldLog(level)) {
 		char *formatted = formatLogMessage(file, line, level, message);
 		fprintf(logChannel, "%s\n", formatted);
-		free(formatted);
+		g_free(formatted);
 	}
 	fflush(logChannel);
 }
