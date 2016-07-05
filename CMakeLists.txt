@@ -5,7 +5,8 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR})
 
 find_package(glib 2.48 REQUIRED)
 
-add_subdirectory(thirdparty)
 set(GLAD_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/thirdparty/glad/include)
+set(ZLIB_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/thirdparty/zlib)
 
 add_subdirectory(src)
+add_subdirectory(thirdparty)
