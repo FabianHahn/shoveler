@@ -3,6 +3,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${GLIB_INCLUDE_DIRS} ${GLAD_INCL
 set(SHOVELER_SRC
 	cameras/perspective.c
 	drawables/cube.c
+	image/ppm.c
 	camera.c
 	image.c
 	input.c
