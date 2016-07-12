@@ -4,6 +4,7 @@ set(SHOVELER_SRC
 	cameras/perspective.c
 	drawables/cube.c
 	camera.c
+	image.c
 	input.c
 	log.c
 	material.c
