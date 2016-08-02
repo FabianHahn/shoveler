@@ -89,7 +89,8 @@ ShovelerImage *shovelerImagePpmRead(const char *filename)
 	}
 
 	fclose(file);
-	shovelerLogError("Successfully read PPM image of size (%d, %d) from '%s'.", width, height, filename);
+
+	shovelerLogInfo("Successfully read PPM image of size (%d, %d) from '%s'.", width, height, filename);
 	return image;
 }
 
@@ -118,6 +119,7 @@ bool shovelerImagePpmWrite(ShovelerImage *image, const char *filename)
 	}
 
 	fclose(file);
-	shovelerLogError("Successfully wrote PPM image to '%s'.", filename);
+
+	shovelerLogInfo("Successfully wrote PPM image of size (%d, %d) to '%s'.", image->width, image->height, filename);
 	return true;
 }
