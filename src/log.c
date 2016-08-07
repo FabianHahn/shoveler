@@ -70,7 +70,7 @@ static bool shouldLog(ShovelerLogLevel level)
 static char *formatLogMessage(const char *file, int line, ShovelerLogLevel level, const char *message)
 {
 	const char *strippedLocation = file;
-	if(g_str_has_prefix(file, logLocationPrefix)) {
+	if(strncmp(logLocationPrefix, file, strlen(logLocationPrefix)) == 0) {
 		strippedLocation += strlen(logLocationPrefix);
 	}
 
