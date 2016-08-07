@@ -1,0 +1,17 @@
+language: cpp
+compiler:
+    - clang
+    - gcc
+addons:
+    apt:
+        sources:
+            - george-edison55-precise-backports
+        packages:
+            - cmake
+            - cmake-data
+script:
+    - mkdir -p build
+    - cd build
+    - cmake ..
+    - cmake --build .
+    - ctest -V
