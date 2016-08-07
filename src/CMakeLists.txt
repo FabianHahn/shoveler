@@ -25,7 +25,13 @@ set(SHOVELER_SRC
 
 add_executable(shoveler ${SHOVELER_SRC})
 set_property(TARGET shoveler PROPERTY C_STANDARD 99)
-target_link_libraries(shoveler ${GLIB_LIBRARIES} glad glfw png_static zlibstatic)
+target_link_libraries(shoveler glad glfw png_static zlibstatic)
+
+if(shoveler_use_glib)
+	target_link_libraries(shoveler glib)
+else()
+	target_link_libraries(shoveler fakeglibstatic)
+endif()
 
 if(UNIX)
 	target_link_libraries(shoveler m)
