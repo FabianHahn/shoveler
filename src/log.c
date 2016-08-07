@@ -9,7 +9,6 @@
 
 #include "log.h"
 
-static void handleGlibLogMessage(const char *domain, GLogLevelFlags logLevel, const char *message, void *userData);
 static void handleGlfwErrorMessage(int errorCode, const char *message);
 static void logHandler(const char *file, int line, ShovelerLogLevel level, const char *message);
 static bool shouldLog(ShovelerLogLevel level);
@@ -30,7 +29,6 @@ void shovelerLogInitWithLocation(const char *location, ShovelerLogLevel level, F
 
 	logLevel = level;
 	logChannel = channel;
-	g_log_set_default_handler(handleGlibLogMessage, NULL);
 	glfwSetErrorCallback(handleGlfwErrorMessage);
 }
 
@@ -47,35 +45,6 @@ void shovelerLogMessage(const char *file, int line, ShovelerLogLevel level, cons
 	g_string_append_vprintf(assembled, message, va);
 	logHandler(file, line, level, assembled->str);
 	g_string_free(assembled, true);
-}
-
-static void handleGlibLogMessage(const char *domain, GLogLevelFlags glibLogLevel, const char *message, void *userData)
-{
-	const char *fixedDomain = (domain == NULL ? "GLib default" : domain);
-
-	switch(glibLogLevel) {
-		case G_LOG_LEVEL_CRITICAL:
-			shovelerLogMessage("glib", 0, SHOVELER_LOG_LEVEL_ERROR, "%s: CRITICAL: %s", fixedDomain, message);
-		break;
-		case G_LOG_LEVEL_ERROR:
-			shovelerLogMessage("glib", 0, SHOVELER_LOG_LEVEL_ERROR, "%s: %s", fixedDomain, message);
-		break;
-		case G_LOG_LEVEL_WARNING:
-			shovelerLogMessage("glib", 0, SHOVELER_LOG_LEVEL_WARNING, "%s: %s", fixedDomain, message);
-		break;
-		case G_LOG_LEVEL_MESSAGE:
-			shovelerLogMessage("glib", 0, SHOVELER_LOG_LEVEL_INFO, "%s: %s", fixedDomain, message);
-		break;
-		case G_LOG_LEVEL_INFO:
-			shovelerLogMessage("glib", 0, SHOVELER_LOG_LEVEL_INFO, "%s: %s", fixedDomain, message);
-		break;
-		case G_LOG_LEVEL_DEBUG:
-			shovelerLogMessage("glib", 0, SHOVELER_LOG_LEVEL_TRACE, "%s: %s", fixedDomain, message);
-		break;
-		default:
-			shovelerLogMessage("glib", 0, SHOVELER_LOG_LEVEL_WARNING, "Unknown '%s' log type: %d, message: '%s'", fixedDomain, glibLogLevel, message);
-		break;
-	}
 }
 
 static void handleGlfwErrorMessage(int errorCode, const char *message)
