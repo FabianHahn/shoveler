@@ -19,6 +19,24 @@ typedef struct {
 	float values[16];
 } ShovelerMatrix;
 
+static ShovelerVector2 shovelerVector2(float x, float y) { ShovelerVector2 v = {x, y}; return v; }
+static ShovelerVector3 shovelerVector3(float x, float y, float z) { ShovelerVector3 v = {x, y, z}; return v; }
+static ShovelerVector4 shovelerVector4(float x, float y, float z, float w) { ShovelerVector4 v = {x, y, z, w}; return v; }
+
+static ShovelerMatrix shovelerMatrix(
+	float a11, float a12, float a13, float a14,
+	float a21, float a22, float a23, float a24,
+	float a31, float a32, float a33, float a34,
+	float a41, float a42, float a43, float a44)
+{
+	ShovelerMatrix m = {
+		a11, a12, a13, a14,
+		a21, a22, a23, a24,
+		a31, a32, a33, a34,
+		a41, a42, a43, a44};
+	return m;
+}
+
 #define ShovelerMatrixGet(MATRIX, ROW, COL) MATRIX.values[ROW * 4 + COL]
 #define ShovelerMatrixSet(MATRIX, ROW, COL, VALUE) ShovelerMatrixGet(MATRIX, ROW, COL) = VALUE
 
