@@ -6,6 +6,7 @@ set(SHOVELER_SRC
 	image/png.c
 	image/ppm.c
 	camera.c
+	file.c
 	image.c
 	input.c
 	log.c
