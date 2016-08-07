@@ -2,6 +2,7 @@
 
 #include <glib.h>
 
+#include "file.h"
 #include "log.h"
 #include "opengl.h"
 #include "shader_program.h"
@@ -33,12 +34,9 @@ GLuint shovelerShaderProgramCompileFromString(const char *source, GLenum type)
 
 GLuint shovelerShaderProgramCompileFromFile(const char *filename, GLenum type)
 {
-	char *shaderSource;
-	gsize shaderLength;
-	GError *error = NULL;
-	if(g_file_get_contents(filename, &shaderSource, &shaderLength, &error)) {
-		shovelerLogError("Failed to read shader from '%s': %s.", filename, error->message);
-		g_error_free(error);
+	char *shaderSource = shovelerFileRead(filename);
+	if(shaderSource == NULL) {
+		shovelerLogError("Failed to read shader from '%s'.", filename);
 		return 0;
 	}
 
