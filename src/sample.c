@@ -5,6 +5,7 @@
 
 #include "cameras/perspective.h"
 #include "drawables/cube.h"
+#include "constants.h"
 #include "input.h"
 #include "model.h"
 #include "opengl.h"
@@ -98,7 +99,7 @@ void shovelerSampleInit(GLFWwindow *sampleWindow, int width, int height)
 	scene = shovelerSceneCreate();
 	shovelerSceneAddModel(scene, model);
 
-	perspectiveCamera = shovelerCamerasPerspectiveCreate(2.0f * G_PI * 50.0f / 360.0f, (float) width / height, 0.01, 1000);
+	perspectiveCamera = shovelerCamerasPerspectiveCreate(2.0f * SHOVELER_PI * 50.0f / 360.0f, (float) width / height, 0.01, 1000);
 
 	shovelerOpenGLCheckSuccess();
 
