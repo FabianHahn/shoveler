@@ -18,6 +18,7 @@ set(SHOVELER_SRC
 	shader.c
 	shader_program.c
 	shoveler.c
+	texture.c
 	uniform.c
 	uniform_attachment.c
 	uniform_map.c
