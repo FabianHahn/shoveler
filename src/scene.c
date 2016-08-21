@@ -78,7 +78,7 @@ void shovelerSceneFree(ShovelerScene *scene)
 
 static ShovelerShader *generateShader(ShovelerCamera *camera, ShovelerModel *model)
 {
-	ShovelerShader *shader = shovelerShaderCreate(model->material->program);
+	ShovelerShader *shader = shovelerShaderCreate(model->material);
 
 	int materialAttached = shovelerShaderAttachUniforms(shader, model->material->uniforms);
 	int modelAttached = shovelerShaderAttachUniforms(shader, model->uniforms);

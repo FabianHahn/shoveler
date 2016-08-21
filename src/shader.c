@@ -9,10 +9,10 @@
 
 void freeAttachment(void *attachmentPointer);
 
-ShovelerShader *shovelerShaderCreate(GLuint program)
+ShovelerShader *shovelerShaderCreate(ShovelerMaterial *material)
 {
 	ShovelerShader *shader = malloc(sizeof(ShovelerShader));
-	shader->program = program;
+	shader->material = material;
 	shader->attachments = g_hash_table_new_full(g_str_hash, g_str_equal, free, freeAttachment);
 	return shader;
 }
@@ -26,9 +26,9 @@ int shovelerShaderAttachUniforms(ShovelerShader *shader, ShovelerUniformMap *uni
 	ShovelerUniform *uniform;
 	g_hash_table_iter_init(&iter, uniformMap->uniforms);
 	while(g_hash_table_iter_next(&iter, (gpointer *) &name, (gpointer *) &uniform)) {
-		GLint location = glGetUniformLocation(shader->program, name);
+		GLint location = glGetUniformLocation(shader->material->program, name);
 		if(location < 0 || !shovelerOpenGLCheckSuccess()) {
-			shovelerLogWarning("Failed to get uniform location for '%s' when trying to attach uniforms to shader program %d, skipping.", name, shader->program);
+			shovelerLogWarning("Failed to get uniform location for '%s' when trying to attach uniforms to shader program %d, skipping.", name, shader->material->program);
 			continue;
 		}
 
@@ -50,7 +50,16 @@ int shovelerShaderAttachUniforms(ShovelerShader *shader, ShovelerUniformMap *uni
 
 bool shovelerShaderUse(ShovelerShader *shader)
 {
-	glUseProgram(shader->program);
+	glUseProgram(shader->material->program);
+
+	GLint unitIndex = 0;
+	for(GList *iter = shader->material->textures->head; iter != NULL; iter = iter->next, unit++) {
+		ShovelerTexture *texture = iter->data;
+		if(!shovelerTextureUse(texture, unitIndex)) {
+			shovelerLogError("Failed to bind texture %p when trying to use shader", texture);
+			return false;
+		}
+	}
 
 	GHashTableIter iter;
 	char *name;
