@@ -6,12 +6,14 @@
 #include "cameras/perspective.h"
 #include "drawables/cube.h"
 #include "constants.h"
+#include "image.h"
 #include "input.h"
 #include "model.h"
 #include "opengl.h"
 #include "sample.h"
 #include "scene.h"
 #include "shader_program.h"
+#include "texture.h"
 
 static void handleMovement(float dt);
 
@@ -24,9 +26,11 @@ static const char *vertexShaderSource =
 		"\n"
 		"in vec3 position;\n"
 		"in vec3 normal;\n"
+		"in vec2 uv;\n"
 		"\n"
 		"out vec3 worldPosition;"
 		"out vec3 worldNormal;"
+		"out vec2 worldUv;"
 		"\n"
 		"void main()\n"
 		"{\n"
@@ -34,24 +38,27 @@ static const char *vertexShaderSource =
 		"	vec4 worldNormal4 = modelNormal * vec4(normal, 1.0);\n"
 		"	worldPosition = worldPosition4.xyz / worldPosition4.w;\n"
 		"	worldNormal = worldNormal4.xyz / worldNormal4.w;\n"
+		"	worldUv = uv;\n"
 		"	gl_Position = camera * worldPosition4;\n"
 		"}\n";
 
 static const char *fragmentShaderSource =
 		"#version 400\n"
 		"\n"
-		"uniform vec3 color;\n"
 		"uniform vec3 lightDirection;\n"
 		"uniform vec3 lightColor;\n"
 		"uniform vec3 cameraPosition;\n"
+		"uniform sampler2D textureImage;\n"
 		"\n"
 		"in vec3 worldPosition;\n"
 		"in vec3 worldNormal;\n"
+		"in vec2 worldUv;\n"
 		"\n"
 		"out vec4 fragmentColor;\n"
 		"\n"
 		"void main()\n"
 		"{\n"
+		"	vec3 color = texture2D(textureImage, worldUv).rgb;\n"
 		"	vec3 normal = normalize(worldNormal);\n"
 		"	"
 		"	float ambientFactor = 0.2;\n"
@@ -66,6 +73,7 @@ static const char *fragmentShaderSource =
 
 static GLFWwindow *window;
 static ShovelerMaterial *material;
+static ShovelerTexture *texture;
 static ShovelerDrawable *cube;
 static ShovelerModel *model;
 static ShovelerScene *scene;
@@ -84,8 +92,15 @@ void shovelerSampleInit(GLFWwindow *sampleWindow, int width, int height)
 	GLuint program = shovelerShaderProgramLink(vertexShaderObject, fragmentShaderObject, true);
 	material = shovelerMaterialCreate(program);
 
-	ShovelerUniform *colorUniform = shovelerUniformCreateVector3((ShovelerVector3){1, 0, 0});
-	shovelerUniformMapInsert(material->uniforms, "color", colorUniform);
+	ShovelerImage *image = shovelerImageCreate(2, 2, 3);
+	shovelerImageClear(image);
+	shovelerImageGet(image, 0, 0, 0) = 255;
+	shovelerImageGet(image, 0, 1, 1) = 255;
+	shovelerImageGet(image, 1, 0, 2) = 255;
+	texture = shovelerTextureCreate2d(image);
+	shovelerTextureUpdate(texture);
+	shovelerMaterialAttachTexture(material, "textureImage", texture);
+
 	ShovelerUniform *lightDirectionUniform = shovelerUniformCreateVector3(shovelerVector3Normalize((ShovelerVector3){0, 0, 1}));
 	shovelerUniformMapInsert(material->uniforms, "lightDirection", lightDirectionUniform);
 	ShovelerUniform *lightColorUniform = shovelerUniformCreateVector3((ShovelerVector3){1, 1, 1});
@@ -127,6 +142,7 @@ void shovelerSampleTerminate()
 	shovelerSceneFree(scene);
 	shovelerCamerasPerspectiveFree(perspectiveCamera);
 	shovelerDrawableFree(cube);
+	shovelerTextureFree(texture);
 	shovelerMaterialFree(material);
 }
 
