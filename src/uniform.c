@@ -100,6 +100,14 @@ ShovelerUniform *shovelerUniformCreateMatrixPointer(ShovelerMatrix *value)
 	return uniform;
 }
 
+ShovelerUniform *shovelerUniformCreateTextureUnitIndex(GLint value)
+{
+	ShovelerUniform *uniform = malloc(sizeof(ShovelerUniform));
+	uniform->type = SHOVELER_UNIFORM_TYPE_TEXTURE_UNIT_INDEX;
+	uniform->value.textureUnitIndexValue = value;
+	return uniform;
+}
+
 ShovelerUniform *shovelerUniformCopy(const ShovelerUniform *uniform)
 {
 	ShovelerUniform *newUniform = malloc(sizeof(ShovelerUniform));
@@ -146,6 +154,9 @@ bool shovelerUniformUse(ShovelerUniform *uniform, GLint location)
 		break;
 		case SHOVELER_UNIFORM_TYPE_MATRIX_POINTER:
 			glUniformMatrix4fv(location, 1, GL_TRUE, uniform->value.matrixPointerValue->values);
+		break;
+		case SHOVELER_UNIFORM_TYPE_TEXTURE_UNIT_INDEX:
+			glUniform1i(location, uniform->value.textureUnitIndexValue);
 		break;
 	}
 

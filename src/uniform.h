@@ -5,6 +5,7 @@
 
 #include <glad/glad.h>
 
+#include "texture.h"
 #include "types.h"
 
 typedef enum {
@@ -19,7 +20,8 @@ typedef enum {
 	SHOVELER_UNIFORM_TYPE_VECTOR4,
 	SHOVELER_UNIFORM_TYPE_VECTOR4_POINTER,
 	SHOVELER_UNIFORM_TYPE_MATRIX,
-	SHOVELER_UNIFORM_TYPE_MATRIX_POINTER
+	SHOVELER_UNIFORM_TYPE_MATRIX_POINTER,
+	SHOVELER_UNIFORM_TYPE_TEXTURE_UNIT_INDEX
 } ShovelerUniformType;
 
 typedef union {
@@ -35,6 +37,7 @@ typedef union {
 	ShovelerVector4 *vector4PointerValue;
 	ShovelerMatrix matrixValue;
 	ShovelerMatrix *matrixPointerValue;
+	GLint textureUnitIndexValue;
 } ShovelerUniformValue;
 
 typedef struct {
@@ -54,6 +57,7 @@ ShovelerUniform *shovelerUniformCreateVector4(ShovelerVector4 value);
 ShovelerUniform *shovelerUniformCreateVector4Pointer(ShovelerVector4 *value);
 ShovelerUniform *shovelerUniformCreateMatrix(ShovelerMatrix value);
 ShovelerUniform *shovelerUniformCreateMatrixPointer(ShovelerMatrix *value);
+ShovelerUniform *shovelerUniformCreateTextureUnitIndex(GLint value);
 ShovelerUniform *shovelerUniformCopy(const ShovelerUniform *uniform);
 bool shovelerUniformUse(ShovelerUniform *uniform, GLint location);
 void shovelerUniformFree(ShovelerUniform *uniform);
