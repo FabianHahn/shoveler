@@ -202,7 +202,7 @@ static void handleMovement(float dt)
 		moved = true;
 	}
 
-	state = glfwGetKey(window, GLFW_KEY_LEFT_SHIFT);
+	state = glfwGetKey(window, GLFW_KEY_SPACE);
 	if(state == GLFW_PRESS) {
 		shovelerCamerasPerspectiveMoveUp(perspectiveCamera, moveAmount);
 		moved = true;
