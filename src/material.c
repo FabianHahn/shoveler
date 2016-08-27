@@ -12,12 +12,13 @@ ShovelerMaterial *shovelerMaterialCreate(GLuint program)
 	material->program = program;
 	material->uniforms = shovelerUniformMapCreate();
 	material->textures = g_queue_new();
+	material->samplers = g_queue_new();
 	return material;
 }
 
-bool shovelerMaterialAttachTexture(ShovelerMaterial *material, const char *name, ShovelerTexture *texture)
+bool shovelerMaterialAttachTexture(ShovelerMaterial *material, const char *name, ShovelerTexture *texture, ShovelerSampler *sampler)
 {
-	ShovelerUniform *uniform = shovelerUniformCreateTextureUnit(material->textures->length);
+	ShovelerUniform *uniform = shovelerUniformCreateTextureUnitIndex(material->textures->length);
 	if(!shovelerUniformMapInsert(material->uniforms, name, uniform)) {
 		shovelerLogError("Failed to attach texture %p to material %p with name '%s'", texture, material, name);
 		shovelerUniformFree(uniform);
@@ -25,12 +26,14 @@ bool shovelerMaterialAttachTexture(ShovelerMaterial *material, const char *name,
 	}
 
 	g_queue_push_tail(material->textures, texture);
+	g_queue_push_tail(material->samplers, sampler);
 	return true;
 }
 
 void shovelerMaterialFree(ShovelerMaterial *material)
 {
 	shovelerUniformMapFree(material->uniforms);
+	g_queue_free(material->samplers);
 	g_queue_free(material->textures);
 	glDeleteProgram(material->program);
 	free(material);
