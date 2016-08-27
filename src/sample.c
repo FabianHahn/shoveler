@@ -11,6 +11,7 @@
 #include "model.h"
 #include "opengl.h"
 #include "sample.h"
+#include "sampler.h"
 #include "scene.h"
 #include "shader_program.h"
 #include "texture.h"
@@ -74,6 +75,7 @@ static const char *fragmentShaderSource =
 static GLFWwindow *window;
 static ShovelerMaterial *material;
 static ShovelerTexture *texture;
+static ShovelerSampler *sampler;
 static ShovelerDrawable *cube;
 static ShovelerModel *model;
 static ShovelerScene *scene;
@@ -99,7 +101,8 @@ void shovelerSampleInit(GLFWwindow *sampleWindow, int width, int height)
 	shovelerImageGet(image, 1, 0, 2) = 255;
 	texture = shovelerTextureCreate2d(image);
 	shovelerTextureUpdate(texture);
-	shovelerMaterialAttachTexture(material, "textureImage", texture);
+	sampler = shovelerSamplerCreate(false, true);
+	shovelerMaterialAttachTexture(material, "textureImage", texture, sampler);
 
 	ShovelerUniform *lightDirectionUniform = shovelerUniformCreateVector3(shovelerVector3Normalize((ShovelerVector3){0, 0, 1}));
 	shovelerUniformMapInsert(material->uniforms, "lightDirection", lightDirectionUniform);
@@ -142,6 +145,7 @@ void shovelerSampleTerminate()
 	shovelerSceneFree(scene);
 	shovelerCamerasPerspectiveFree(perspectiveCamera);
 	shovelerDrawableFree(cube);
+	shovelerSamplerFree(sampler);
 	shovelerTextureFree(texture);
 	shovelerMaterialFree(material);
 }

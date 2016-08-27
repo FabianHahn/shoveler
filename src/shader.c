@@ -1,3 +1,4 @@
+#include <assert.h> // assert
 #include <stdbool.h> // bool
 #include <stdlib.h> // malloc, free
 #include <string.h> // strdup
@@ -53,10 +54,19 @@ bool shovelerShaderUse(ShovelerShader *shader)
 	glUseProgram(shader->material->program);
 
 	GLint unitIndex = 0;
-	for(GList *iter = shader->material->textures->head; iter != NULL; iter = iter->next, unit++) {
+	GList *samplerIter = shader->material->samplers->head;
+	for(GList *iter = shader->material->textures->head; iter != NULL; iter = iter->next, samplerIter = samplerIter->next, unitIndex++) {
+		assert(samplerIter != NULL);
+
 		ShovelerTexture *texture = iter->data;
 		if(!shovelerTextureUse(texture, unitIndex)) {
 			shovelerLogError("Failed to bind texture %p when trying to use shader", texture);
+			return false;
+		}
+
+		ShovelerSampler *sampler = samplerIter->data;
+		if(!shovelerSamplerUse(sampler, unitIndex)) {
+			shovelerLogError("Failed to bind sampler %p when trying to use shader", sampler);
 			return false;
 		}
 	}
