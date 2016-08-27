@@ -21,6 +21,7 @@ int main(int argc, char *argv[])
 	const char *windowTitle = "shoveler";
 	bool fullscreen = false;
 	bool vsync = true;
+	int samples = 4;
 	int width = 640;
 	int height = 480;
 
@@ -36,6 +37,9 @@ int main(int argc, char *argv[])
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
+
+	// antialiasing
+	glfwWindowHint(GLFW_SAMPLES, samples);
 
 	if(fullscreen) {
 		GLFWmonitor *monitor = glfwGetPrimaryMonitor();
