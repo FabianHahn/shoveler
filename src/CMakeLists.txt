@@ -14,6 +14,7 @@ set(SHOVELER_SRC
 	model.c
 	opengl.c
 	sample.c
+	sampler.c
 	scene.c
 	shader.c
 	shader_program.c
