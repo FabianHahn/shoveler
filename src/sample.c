@@ -164,9 +164,9 @@ static void handleMovement(float dt)
 	float cursorDiffX = newCursorX - previousCursorX;
 	float cursorDiffY = newCursorY - previousCursorY;
 
-	float tiltFactor = 0.05f;
-	float tiltAmountX = tiltFactor * cursorDiffX * dt;
-	float tiltAmountY = tiltFactor * cursorDiffY * dt;
+	float tiltFactor = 0.0005f;
+	float tiltAmountX = tiltFactor * cursorDiffX;
+	float tiltAmountY = tiltFactor * cursorDiffY;
 
 	if(fabs(cursorDiffX) > eps) {
 		shovelerCamerasPerspectiveTiltRight(perspectiveCamera, tiltAmountX);
