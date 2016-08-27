@@ -19,6 +19,7 @@ typedef struct {
 } CubeTriangle;
 
 typedef struct {
+	GLuint vertexArrayObject;
 	GLuint vertexBuffer;
 	GLuint indexBuffer;
 } CubeData;
@@ -84,10 +85,17 @@ ShovelerDrawable *shovelerDrawablesCubeCreate()
 	cube->free = freeCube;
 	cube->data = cubeData;
 
-	// fixme
-	GLuint vao;
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
+	glGenVertexArrays(1, &cubeData->vertexArrayObject);
+	glBindVertexArray(cubeData->vertexArrayObject);
+	glEnableVertexAttribArray(SHOVELER_SHADER_PROGRAM_ATTRIBUTE_POSITION);
+	glEnableVertexAttribArray(SHOVELER_SHADER_PROGRAM_ATTRIBUTE_NORMAL);
+	glEnableVertexAttribArray(SHOVELER_SHADER_PROGRAM_ATTRIBUTE_UV);
+	glVertexAttribFormat(SHOVELER_SHADER_PROGRAM_ATTRIBUTE_POSITION, 3, GL_BYTE, GL_FALSE, offsetof(CubeVertex, position));
+	glVertexAttribFormat(SHOVELER_SHADER_PROGRAM_ATTRIBUTE_NORMAL, 3, GL_BYTE, GL_FALSE, offsetof(CubeVertex, normal));
+	glVertexAttribFormat(SHOVELER_SHADER_PROGRAM_ATTRIBUTE_UV, 2, GL_BYTE, GL_FALSE, offsetof(CubeVertex, uv));
+	glVertexAttribBinding(SHOVELER_SHADER_PROGRAM_ATTRIBUTE_POSITION, 0);
+	glVertexAttribBinding(SHOVELER_SHADER_PROGRAM_ATTRIBUTE_NORMAL, 0);
+	glVertexAttribBinding(SHOVELER_SHADER_PROGRAM_ATTRIBUTE_UV, 0);
 
 	glGenBuffers(1, &cubeData->vertexBuffer);
 	glGenBuffers(1, &cubeData->indexBuffer);
@@ -109,19 +117,8 @@ static bool drawCube(ShovelerDrawable *cube)
 {
 	CubeData *cubeData = cube->data;
 
-	glBindBuffer(GL_ARRAY_BUFFER, cubeData->vertexBuffer);
-
-	glVertexAttribPointer(SHOVELER_SHADER_PROGRAM_ATTRIBUTE_POSITION, 3, GL_BYTE, GL_FALSE, sizeof(CubeVertex), (const GLvoid *) offsetof(CubeVertex, position));
-	glEnableVertexAttribArray(SHOVELER_SHADER_PROGRAM_ATTRIBUTE_POSITION);
-	glVertexAttribPointer(SHOVELER_SHADER_PROGRAM_ATTRIBUTE_NORMAL, 3, GL_BYTE, GL_FALSE, sizeof(CubeVertex), (const GLvoid *) offsetof(CubeVertex, normal));
-	glEnableVertexAttribArray(SHOVELER_SHADER_PROGRAM_ATTRIBUTE_NORMAL);
-	glVertexAttribPointer(SHOVELER_SHADER_PROGRAM_ATTRIBUTE_UV, 2, GL_BYTE, GL_FALSE, sizeof(CubeVertex), (const GLvoid *) offsetof(CubeVertex, uv));
-	glEnableVertexAttribArray(SHOVELER_SHADER_PROGRAM_ATTRIBUTE_UV);
-
-	if(!shovelerOpenGLCheckSuccess()) {
-		return false;
-	}
-
+	glBindVertexArray(cubeData->vertexArrayObject);
+	glBindVertexBuffer(0, cubeData->vertexBuffer, 0, sizeof(CubeVertex));
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cubeData->indexBuffer);
 	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_BYTE, NULL);
 
