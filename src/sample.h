@@ -4,7 +4,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-void shovelerSampleInit(GLFWwindow *window, int width, int height);
+void shovelerSampleInit(GLFWwindow *window, int width, int height, int samples);
 void shovelerSampleRender(float dt);
 void shovelerSampleTerminate();
 

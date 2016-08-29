@@ -6,6 +6,7 @@
 #include "cameras/perspective.h"
 #include "drawables/cube.h"
 #include "constants.h"
+#include "framebuffer.h"
 #include "image.h"
 #include "input.h"
 #include "model.h"
@@ -79,13 +80,14 @@ static ShovelerSampler *sampler;
 static ShovelerDrawable *cube;
 static ShovelerModel *model;
 static ShovelerScene *scene;
+static ShovelerFramebuffer *framebuffer;
 static ShovelerCamerasPerspective *perspectiveCamera;
 static float previousCursorX;
 static float previousCursorY;
 
 static float eps = 1e-9;
 
-void shovelerSampleInit(GLFWwindow *sampleWindow, int width, int height)
+void shovelerSampleInit(GLFWwindow *sampleWindow, int width, int height, int samples)
 {
 	window = sampleWindow;
 
@@ -117,6 +119,12 @@ void shovelerSampleInit(GLFWwindow *sampleWindow, int width, int height)
 	scene = shovelerSceneCreate();
 	shovelerSceneAddModel(scene, model);
 
+	if(samples > 1) {
+		framebuffer = shovelerFramebufferCreateMultisample(width, height, samples);
+	} else {
+		framebuffer = shovelerFramebufferCreate(width, height);
+	}
+
 	perspectiveCamera = shovelerCamerasPerspectiveCreate(2.0f * SHOVELER_PI * 50.0f / 360.0f, (float) width / height, 0.01, 1000);
 
 	shovelerOpenGLCheckSuccess();
@@ -137,11 +145,14 @@ void shovelerSampleRender(float dt)
 	model->rotation.values[2] += 0.5f * dt;
 	shovelerModelUpdateTransformation(model);
 
+	shovelerFramebufferUse(framebuffer);
 	shovelerSceneRender(scene, perspectiveCamera->camera);
+	shovelerFramebufferBlitToDefault(framebuffer);
 }
 
 void shovelerSampleTerminate()
 {
+	shovelerFramebufferFree(framebuffer);
 	shovelerSceneFree(scene);
 	shovelerCamerasPerspectiveFree(perspectiveCamera);
 	shovelerDrawableFree(cube);

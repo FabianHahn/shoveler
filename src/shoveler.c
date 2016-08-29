@@ -38,9 +38,6 @@ int main(int argc, char *argv[])
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 
-	// antialiasing
-	glfwWindowHint(GLFW_SAMPLES, samples);
-
 	if(fullscreen) {
 		GLFWmonitor *monitor = glfwGetPrimaryMonitor();
 		shovelerLogInfo("Using borderless fullscreen mode on primary monitor '%s'.", glfwGetMonitorName(monitor));
@@ -96,7 +93,7 @@ int main(int argc, char *argv[])
 	shovelerInputInit(window);
 	shovelerInputAddKeyCallback(exitKeyHandler);
 
-	shovelerSampleInit(window, width, height);
+	shovelerSampleInit(window, width, height, samples);
 
 	double lastFrameTime = glfwGetTime();
 	while(!glfwWindowShouldClose(window)) {
