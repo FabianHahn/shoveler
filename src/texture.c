@@ -15,8 +15,9 @@ ShovelerTexture *shovelerTextureCreate2d(ShovelerImage *image)
 
 	ShovelerTexture *texture = malloc(sizeof(ShovelerTexture));
 	texture->image = image;
+	texture->target = GL_TEXTURE_2D;
 	glGenTextures(1, &texture->texture);
-	glBindTexture(GL_TEXTURE_2D, texture->texture);
+	glBindTexture(texture->target, texture->texture);
 
 	switch(image->channels) {
 		case 1:
@@ -38,24 +39,84 @@ ShovelerTexture *shovelerTextureCreate2d(ShovelerImage *image)
 	}
 
 	int numMipmapLevels = getNumMipmapLevels(texture->image->width, texture->image->width);
-	glTexStorage2D(GL_TEXTURE_2D, numMipmapLevels, texture->internalFormat, texture->image->width, texture->image->height);
+	glTexStorage2D(texture->target, numMipmapLevels, texture->internalFormat, texture->image->width, texture->image->height);
+
+	return texture;
+}
+
+ShovelerTexture *shovelerTextureCreateRenderTarget(GLsizei width, GLsizei height)
+{
+	ShovelerTexture *texture = malloc(sizeof(ShovelerTexture));
+	texture->image = NULL;
+	texture->target = GL_TEXTURE_2D;
+	glGenTextures(1, &texture->texture);
+	glBindTexture(texture->target, texture->texture);
+
+	texture->internalFormat = GL_RGBA8;
+	texture->format = GL_RGBA;
+	glTexStorage2D(texture->target, 1, texture->internalFormat, width, height);
+
+	return texture;
+}
+
+ShovelerTexture *shovelerTextureCreateMultisampleRenderTarget(GLsizei width, GLsizei height, GLsizei samples)
+{
+	ShovelerTexture *texture = malloc(sizeof(ShovelerTexture));
+	texture->image = NULL;
+	texture->target = GL_TEXTURE_2D_MULTISAMPLE;
+	glGenTextures(1, &texture->texture);
+	glBindTexture(texture->target, texture->texture);
+
+	texture->internalFormat = GL_RGBA8;
+	texture->format = GL_RGBA;
+	glTexStorage2DMultisample(texture->target, samples, texture->internalFormat, width, height, false);
+
+	return texture;
+}
+
+ShovelerTexture *shovelerTextureCreateDepthTarget(GLsizei width, GLsizei height)
+{
+	ShovelerTexture *texture = malloc(sizeof(ShovelerTexture));
+	texture->image = NULL;
+	texture->target = GL_TEXTURE_2D;
+	glGenTextures(1, &texture->texture);
+	glBindTexture(texture->target, texture->texture);
+
+	texture->internalFormat = GL_DEPTH_COMPONENT32F;
+	texture->format = GL_DEPTH_COMPONENT;
+	glTexStorage2D(texture->target, 1, texture->internalFormat, width, height);
+
+	return texture;
+}
+
+ShovelerTexture *shovelerTextureCreateMultisampleDepthTarget(GLsizei width, GLsizei height, GLsizei samples)
+{
+	ShovelerTexture *texture = malloc(sizeof(ShovelerTexture));
+	texture->image = NULL;
+	texture->target = GL_TEXTURE_2D_MULTISAMPLE;
+	glGenTextures(1, &texture->texture);
+	glBindTexture(texture->target, texture->texture);
+
+	texture->internalFormat = GL_DEPTH_COMPONENT32F;
+	texture->format = GL_DEPTH_COMPONENT;
+	glTexStorage2DMultisample(texture->target, samples, texture->internalFormat, width, height, false);
 
 	return texture;
 }
 
 bool shovelerTextureUpdate(ShovelerTexture *texture)
 {
-	glBindTexture(GL_TEXTURE_2D, texture->texture);
+	glBindTexture(texture->target, texture->texture);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, texture->image->width, texture->image->height, texture->format, GL_UNSIGNED_BYTE, texture->image->data);
-	glGenerateMipmap(GL_TEXTURE_2D);
+	glTexSubImage2D(texture->target, 0, 0, 0, texture->image->width, texture->image->height, texture->format, GL_UNSIGNED_BYTE, texture->image->data);
+	glGenerateMipmap(texture->target);
 	return shovelerOpenGLCheckSuccess();
 }
 
 bool shovelerTextureUse(ShovelerTexture *texture, GLuint unitIndex)
 {
 	glActiveTexture(GL_TEXTURE0 + unitIndex);
-	glBindTexture(GL_TEXTURE_2D, texture->texture);
+	glBindTexture(texture->target, texture->texture);
 	return shovelerOpenGLCheckSuccess();
 }
 
