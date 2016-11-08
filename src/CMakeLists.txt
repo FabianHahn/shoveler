@@ -10,6 +10,7 @@ set(SHOVELER_SRC
 	framebuffer.c
 	image.c
 	input.c
+	light.c
 	log.c
 	material.c
 	model.c
