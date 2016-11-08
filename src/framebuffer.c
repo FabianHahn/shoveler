@@ -48,10 +48,35 @@ ShovelerFramebuffer *shovelerFramebufferCreateMultisample(GLsizei width, GLsizei
 	return framebuffer;
 }
 
+ShovelerFramebuffer *shovelerFramebufferCreateDepthOnly(GLsizei width, GLsizei height)
+{
+	ShovelerFramebuffer *framebuffer = malloc(sizeof(ShovelerFramebuffer));
+	glGenFramebuffers(1, &framebuffer->framebuffer);
+	framebuffer->width = width;
+	framebuffer->height = height;
+	framebuffer->renderTarget = NULL;
+	framebuffer->depthTarget = shovelerTextureCreateDepthTarget(width, height);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer->framebuffer);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, framebuffer->depthTarget->target, framebuffer->depthTarget->texture, 0);
+
+	GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	if(status != GL_FRAMEBUFFER_COMPLETE) {
+		handleFramebufferIncomplete(status);
+	}
+
+	return framebuffer;
+}
+
 bool shovelerFramebufferUse(ShovelerFramebuffer *framebuffer)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer->framebuffer);
-	glDrawBuffer(GL_COLOR_ATTACHMENT0);
+
+	if(framebuffer->renderTarget != NULL) {
+		glDrawBuffer(GL_COLOR_ATTACHMENT0);
+	} else {
+		glDrawBuffer(GL_NONE);
+	}
 	return shovelerOpenGLCheckSuccess();
 }
 

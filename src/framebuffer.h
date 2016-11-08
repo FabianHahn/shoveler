@@ -17,6 +17,7 @@ typedef struct {
 
 ShovelerFramebuffer *shovelerFramebufferCreate(GLsizei width, GLsizei height);
 ShovelerFramebuffer *shovelerFramebufferCreateMultisample(GLsizei width, GLsizei height, GLsizei samples);
+ShovelerFramebuffer *shovelerFramebufferCreateDepthOnly(GLsizei width, GLsizei height);
 bool shovelerFramebufferUse(ShovelerFramebuffer *framebuffer);
 bool shovelerFramebufferBlitToDefault(ShovelerFramebuffer *framebuffer);
 void shovelerFramebufferFree(ShovelerFramebuffer *framebuffer);
