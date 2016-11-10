@@ -145,8 +145,7 @@ void shovelerSampleRender(float dt)
 	model->rotation.values[2] += 0.5f * dt;
 	shovelerModelUpdateTransformation(model);
 
-	shovelerFramebufferUse(framebuffer);
-	shovelerSceneRender(scene, perspectiveCamera->camera);
+	shovelerSceneRender(scene, perspectiveCamera->camera, framebuffer);
 	shovelerFramebufferBlitToDefault(framebuffer);
 }
 
