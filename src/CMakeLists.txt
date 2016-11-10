@@ -5,6 +5,7 @@ set(SHOVELER_SRC
 	drawables/cube.c
 	image/png.c
 	image/ppm.c
+	material/depth.c
 	camera.c
 	file.c
 	framebuffer.c
