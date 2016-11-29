@@ -12,6 +12,10 @@ ShovelerLight *shovelerLightCreate(ShovelerCamera *camera, int width, int height
 
 void shovelerLightFree(ShovelerLight *light)
 {
+	if(light == NULL) {
+		return;
+	}
+
 	shovelerFramebufferFree(light->framebuffer);
 	shovelerCameraFree(light->camera);
 	free(light);
