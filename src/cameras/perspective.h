@@ -4,19 +4,19 @@
 #include "camera.h"
 
 typedef struct {
-	ShovelerCamera *camera;
+	ShovelerCamera camera;
 	ShovelerVector3 up;
 	ShovelerVector3 direction;
 	ShovelerMatrix perspective;
 } ShovelerCamerasPerspective;
 
-ShovelerCamerasPerspective *shovelerCamerasPerspectiveCreate(float fieldOfViewY, float aspectRatio, float nearClippingPlane, float farClippingPlane);
-void shovelerCamerasPerspectiveUpdateTransformation(ShovelerCamerasPerspective *perspectiveCamera);
-void shovelerCamerasPerspectiveMoveForward(ShovelerCamerasPerspective *perspectiveCamera, float amount);
-void shovelerCamerasPerspectiveMoveRight(ShovelerCamerasPerspective *perspectiveCamera, float amount);
-void shovelerCamerasPerspectiveMoveUp(ShovelerCamerasPerspective *perspectiveCamera, float amount);
-void shovelerCamerasPerspectiveTiltUp(ShovelerCamerasPerspective *perspectiveCamera, float amount);
-void shovelerCamerasPerspectiveTiltRight(ShovelerCamerasPerspective *perspectiveCamera, float amount);
-void shovelerCamerasPerspectiveFree(ShovelerCamerasPerspective *perspectiveCamera);
+ShovelerCamera *shovelerCamerasPerspectiveCreate(float fieldOfViewY, float aspectRatio, float nearClippingPlane, float farClippingPlane);
+void shovelerCamerasPerspectiveUpdateTransformation(ShovelerCamera *camera);
+void shovelerCamerasPerspectiveMoveForward(ShovelerCamera *camera, float amount);
+void shovelerCamerasPerspectiveMoveRight(ShovelerCamera *camera, float amount);
+void shovelerCamerasPerspectiveMoveUp(ShovelerCamera *camera, float amount);
+void shovelerCamerasPerspectiveTiltUp(ShovelerCamera *camera, float amount);
+void shovelerCamerasPerspectiveTiltRight(ShovelerCamera *camera, float amount);
+void shovelerCamerasPerspectiveFree(ShovelerCamera *camera);
 
 #endif

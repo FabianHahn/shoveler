@@ -12,9 +12,11 @@ typedef struct ShovelerCameraStruct {
 	ShovelerVector3 position;
 	ShovelerMatrix transformation;
 	ShovelerUniformMap *uniforms;
+	void *data;
+	ShovelerCameraFreeDataFunction *freeData;
 } ShovelerCamera;
 
-ShovelerCamera *shovelerCameraCreate();
+void shovelerCameraInit(ShovelerCamera *camera, void *data, ShovelerCameraFreeDataFunction *freeData);
 void shovelerCameraFree(ShovelerCamera *camera);
 
 #endif

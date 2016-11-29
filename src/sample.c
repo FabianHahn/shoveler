@@ -81,7 +81,7 @@ static ShovelerDrawable *cube;
 static ShovelerModel *model;
 static ShovelerScene *scene;
 static ShovelerFramebuffer *framebuffer;
-static ShovelerCamerasPerspective *perspectiveCamera;
+static ShovelerCamera *camera;
 static float previousCursorX;
 static float previousCursorY;
 
@@ -125,7 +125,7 @@ void shovelerSampleInit(GLFWwindow *sampleWindow, int width, int height, int sam
 		framebuffer = shovelerFramebufferCreate(width, height);
 	}
 
-	perspectiveCamera = shovelerCamerasPerspectiveCreate(2.0f * SHOVELER_PI * 50.0f / 360.0f, (float) width / height, 0.01, 1000);
+	camera = shovelerCamerasPerspectiveCreate(2.0f * SHOVELER_PI * 50.0f / 360.0f, (float) width / height, 0.01, 1000);
 
 	shovelerOpenGLCheckSuccess();
 
@@ -145,7 +145,7 @@ void shovelerSampleRender(float dt)
 	model->rotation.values[2] += 0.5f * dt;
 	shovelerModelUpdateTransformation(model);
 
-	shovelerSceneRender(scene, perspectiveCamera->camera, framebuffer);
+	shovelerSceneRender(scene, camera, framebuffer);
 	shovelerFramebufferBlitToDefault(framebuffer);
 }
 
@@ -153,7 +153,7 @@ void shovelerSampleTerminate()
 {
 	shovelerFramebufferFree(framebuffer);
 	shovelerSceneFree(scene);
-	shovelerCamerasPerspectiveFree(perspectiveCamera);
+	shovelerCameraFree(camera);
 	shovelerDrawableFree(cube);
 	shovelerSamplerFree(sampler);
 	shovelerTextureFree(texture);
@@ -179,54 +179,54 @@ static void handleMovement(float dt)
 	float tiltAmountY = tiltFactor * cursorDiffY;
 
 	if(fabs(cursorDiffX) > eps) {
-		shovelerCamerasPerspectiveTiltRight(perspectiveCamera, tiltAmountX);
+		shovelerCamerasPerspectiveTiltRight(camera, tiltAmountX);
 		moved = true;
 	}
 
 	if(fabs(cursorDiffY) > eps) {
-		shovelerCamerasPerspectiveTiltUp(perspectiveCamera, tiltAmountY);
+		shovelerCamerasPerspectiveTiltUp(camera, tiltAmountY);
 		moved = true;
 	}
 
 	state = glfwGetKey(window, GLFW_KEY_W);
 	if(state == GLFW_PRESS) {
-		shovelerCamerasPerspectiveMoveForward(perspectiveCamera, moveAmount);
+		shovelerCamerasPerspectiveMoveForward(camera, moveAmount);
 		moved = true;
 	}
 
 	state = glfwGetKey(window, GLFW_KEY_S);
 	if(state == GLFW_PRESS) {
-		shovelerCamerasPerspectiveMoveForward(perspectiveCamera, -moveAmount);
+		shovelerCamerasPerspectiveMoveForward(camera, -moveAmount);
 		moved = true;
 	}
 
 	state = glfwGetKey(window, GLFW_KEY_A);
 	if(state == GLFW_PRESS) {
-		shovelerCamerasPerspectiveMoveRight(perspectiveCamera, -moveAmount);
+		shovelerCamerasPerspectiveMoveRight(camera, -moveAmount);
 		moved = true;
 	}
 
 	state = glfwGetKey(window, GLFW_KEY_D);
 	if(state == GLFW_PRESS) {
-		shovelerCamerasPerspectiveMoveRight(perspectiveCamera, moveAmount);
+		shovelerCamerasPerspectiveMoveRight(camera, moveAmount);
 		moved = true;
 	}
 
 	state = glfwGetKey(window, GLFW_KEY_SPACE);
 	if(state == GLFW_PRESS) {
-		shovelerCamerasPerspectiveMoveUp(perspectiveCamera, moveAmount);
+		shovelerCamerasPerspectiveMoveUp(camera, moveAmount);
 		moved = true;
 	}
 
 	state = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL);
 	if(state == GLFW_PRESS) {
-		shovelerCamerasPerspectiveMoveUp(perspectiveCamera, -moveAmount);
+		shovelerCamerasPerspectiveMoveUp(camera, -moveAmount);
 		moved = true;
 	}
 
 	if(moved) {
-		shovelerLogTrace("Camera at position (%f, %f, %f)", perspectiveCamera->camera->position.values[0], perspectiveCamera->camera->position.values[1], perspectiveCamera->camera->position.values[2]);
-		shovelerCamerasPerspectiveUpdateTransformation(perspectiveCamera);
+		shovelerLogTrace("Camera at position (%f, %f, %f)", camera->position.values[0], camera->position.values[1], camera->position.values[2]);
+		shovelerCamerasPerspectiveUpdateTransformation(camera);
 	}
 
 	previousCursorX = newCursorX;
