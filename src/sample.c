@@ -128,7 +128,7 @@ void shovelerSampleInit(GLFWwindow *sampleWindow, int width, int height, int sam
 	camera = shovelerCamerasPerspectiveCreate(2.0f * SHOVELER_PI * 50.0f / 360.0f, (float) width / height, 0.01, 1000);
 
 	ShovelerCamera *lightCamera = shovelerCamerasPerspectiveCreate(2.0f * SHOVELER_PI * 50.0f / 360.0f, (float) width / height, 0.01, 1000);
-	ShovelerLight *light = shovelerLightCreate(camera, 1024, 1024);
+	ShovelerLight *light = shovelerLightCreate(lightCamera, 1024, 1024);
 	shovelerSceneAddLight(scene, light);
 
 	shovelerOpenGLCheckSuccess();
