@@ -29,6 +29,10 @@ bool shovelerUniformMapRemove(ShovelerUniformMap *uniformMap, const char *name)
 
 void shovelerUniformMapFree(ShovelerUniformMap *uniformMap)
 {
+	if(uniformMap == NULL) {
+		return;
+	}
+
 	g_hash_table_destroy(uniformMap->uniforms);
 	free(uniformMap);
 }

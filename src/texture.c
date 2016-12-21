@@ -122,6 +122,10 @@ bool shovelerTextureUse(ShovelerTexture *texture, GLuint unitIndex)
 
 void shovelerTextureFree(ShovelerTexture *texture)
 {
+	if(texture == NULL) {
+		return;
+	}
+
 	shovelerImageFree(texture->image);
 	glDeleteTextures(1, &texture->texture);
 	free(texture);

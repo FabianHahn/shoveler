@@ -20,6 +20,10 @@ void shovelerImageClear(ShovelerImage *image)
 
 void shovelerImageFree(ShovelerImage *image)
 {
+	if(image == NULL) {
+		return;
+	}
+
 	free(image->data);
 	free(image);
 }

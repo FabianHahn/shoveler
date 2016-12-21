@@ -18,6 +18,10 @@ void shovelerCameraInit(ShovelerCamera *camera, void *data, ShovelerCameraFreeDa
 
 void shovelerCameraFree(ShovelerCamera *camera)
 {
+	if(camera == NULL) {
+		return;
+	}
+
 	shovelerUniformMapFree(camera->uniforms);
 	camera->freeData(camera->data);
 }
