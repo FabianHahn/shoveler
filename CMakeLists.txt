@@ -13,6 +13,11 @@ if(shoveler_use_glib)
 endif()
 
 set(GLAD_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/thirdparty/glad/include)
+
+set(FAKEGLIB_BUILD_TESTS OFF CACHE BOOL "Disable building fakeglib tests")
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "Disable building glfw examples")
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "Disable building glfw tests")
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "Disable building glfw documentation")
 set(PNG_SHARED OFF CACHE BOOL "Disable building shared libpng library")
 set(PNG_TESTS OFF CACHE BOOL "Disable building libpng tests")
 set(SKIP_INSTALL_ALL ON CACHE BOOL "Skip libpng installation steps")
