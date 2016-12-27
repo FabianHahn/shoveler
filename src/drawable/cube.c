@@ -1,9 +1,9 @@
+#include "../drawable/cube.h"
+
 #include <stdbool.h> // bool
 #include <stdlib.h> // malloc, free
 
 #include <glad/glad.h>
-
-#include "drawables/cube.h"
 
 #include "../shader_program.h"
 #include "opengl.h"
@@ -77,7 +77,7 @@ static CubeTriangle cubeTriangles[] = {
 	{20, 21, 22},
 	{20, 22, 23}};
 
-ShovelerDrawable *shovelerDrawablesCubeCreate()
+ShovelerDrawable *shovelerDrawableCubeCreate()
 {
 	CubeData *cubeData = malloc(sizeof(CubeData));
 	ShovelerDrawable *cube = malloc(sizeof(ShovelerDrawable));

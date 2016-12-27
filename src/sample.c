@@ -4,7 +4,6 @@
 #include <GLFW/glfw3.h>
 
 #include "cameras/perspective.h"
-#include "drawables/cube.h"
 #include "constants.h"
 #include "framebuffer.h"
 #include "image.h"
@@ -12,6 +11,8 @@
 #include "model.h"
 #include "opengl.h"
 #include "sample.h"
+
+#include "drawable/cube.h"
 #include "sampler.h"
 #include "scene.h"
 #include "shader_program.h"
@@ -113,7 +114,7 @@ void shovelerSampleInit(GLFWwindow *sampleWindow, int width, int height, int sam
 
 	shovelerOpenGLCheckSuccess();
 
-	cube = shovelerDrawablesCubeCreate();
+	cube = shovelerDrawableCubeCreate();
 	model = shovelerModelCreate(cube, material);
 
 	scene = shovelerSceneCreate();
