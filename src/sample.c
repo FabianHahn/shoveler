@@ -4,6 +4,9 @@
 #include <GLFW/glfw3.h>
 
 #include "cameras/perspective.h"
+#include "drawable/cube.h"
+#include "drawable/quad.h"
+#include "material/color.h"
 #include "material/texture.h"
 #include "constants.h"
 #include "framebuffer.h"
@@ -12,8 +15,6 @@
 #include "model.h"
 #include "opengl.h"
 #include "sample.h"
-
-#include "drawable/cube.h"
 #include "sampler.h"
 #include "scene.h"
 #include "shader_program.h"
@@ -22,9 +23,11 @@
 static void handleMovement(float dt);
 
 static GLFWwindow *window;
-static ShovelerMaterial *material;
+static ShovelerMaterial *colorMaterial;
+static ShovelerMaterial *textureMaterial;
+static ShovelerDrawable *quad;
 static ShovelerDrawable *cube;
-static ShovelerModel *model;
+static ShovelerModel *cubeModel;
 static ShovelerScene *scene;
 static ShovelerFramebuffer *framebuffer;
 static ShovelerCamera *camera;
@@ -37,6 +40,8 @@ void shovelerSampleInit(GLFWwindow *sampleWindow, int width, int height, int sam
 {
 	window = sampleWindow;
 
+	colorMaterial = shovelerMaterialColorCreate((ShovelerVector4){0.7, 0.7, 0.7, 1.0});
+
 	ShovelerImage *image = shovelerImageCreate(2, 2, 3);
 	shovelerImageClear(image);
 	shovelerImageGet(image, 0, 0, 0) = 255;
@@ -45,20 +50,29 @@ void shovelerSampleInit(GLFWwindow *sampleWindow, int width, int height, int sam
 	ShovelerTexture *texture = shovelerTextureCreate2d(image);
 	shovelerTextureUpdate(texture);
 	ShovelerSampler *sampler = shovelerSamplerCreate(false, true);
-	material = shovelerMaterialTextureCreate(texture, sampler);
-
-	ShovelerUniform *lightDirectionUniform = shovelerUniformCreateVector3(shovelerVector3Normalize((ShovelerVector3){0, 0, 1}));
-	shovelerUniformMapInsert(material->uniforms, "lightDirection", lightDirectionUniform);
-	ShovelerUniform *lightColorUniform = shovelerUniformCreateVector4((ShovelerVector4){1, 1, 1, 1});
-	shovelerUniformMapInsert(material->uniforms, "lightColor", lightColorUniform);
+	textureMaterial = shovelerMaterialTextureCreate(texture, sampler);
 
 	shovelerOpenGLCheckSuccess();
 
+	quad = shovelerDrawableQuadCreate();
+	ShovelerModel *quadModel = shovelerModelCreate(quad, colorMaterial);
+	quadModel->translation.values[0] = -10.0;
+	quadModel->translation.values[1] = -5.0;
+	quadModel->translation.values[2] = 10.0;
+	quadModel->rotation.values[0] = SHOVELER_PI / 2.0f;
+	quadModel->scale.values[0] = 20.0;
+	quadModel->scale.values[1] = 20.0;
+	shovelerModelUpdateTransformation(quadModel);
+
 	cube = shovelerDrawableCubeCreate();
-	model = shovelerModelCreate(cube, material);
+	cubeModel = shovelerModelCreate(cube, textureMaterial);
 
 	scene = shovelerSceneCreate();
-	shovelerSceneAddModel(scene, model);
+	shovelerSceneAddModel(scene, quadModel);
+	shovelerSceneAddModel(scene, cubeModel);
+
+	shovelerUniformMapInsert(scene->uniforms, "lightDirection", shovelerUniformCreateVector3(shovelerVector3Normalize((ShovelerVector3){0, 0, 1})));
+	shovelerUniformMapInsert(scene->uniforms, "lightColor", shovelerUniformCreateVector4((ShovelerVector4){1, 1, 1, 1}));
 
 	if(samples > 1) {
 		framebuffer = shovelerFramebufferCreateMultisample(width, height, samples);
@@ -85,10 +99,10 @@ void shovelerSampleRender(float dt)
 {
 	handleMovement(dt);
 
-	model->rotation.values[0] += 0.1f * dt;
-	model->rotation.values[1] += 0.2f * dt;
-	model->rotation.values[2] += 0.5f * dt;
-	shovelerModelUpdateTransformation(model);
+	cubeModel->rotation.values[0] += 0.1f * dt;
+	cubeModel->rotation.values[1] += 0.2f * dt;
+	cubeModel->rotation.values[2] += 0.5f * dt;
+	shovelerModelUpdateTransformation(cubeModel);
 
 	shovelerSceneRender(scene, camera, framebuffer);
 	shovelerFramebufferBlitToDefault(framebuffer);
@@ -100,7 +114,7 @@ void shovelerSampleTerminate()
 	shovelerSceneFree(scene);
 	shovelerCameraFree(camera);
 	shovelerDrawableFree(cube);
-	shovelerMaterialFree(material);
+	shovelerMaterialFree(textureMaterial);
 }
 
 static void handleMovement(float dt)
