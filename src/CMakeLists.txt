@@ -6,6 +6,7 @@ set(SHOVELER_SRC
 	drawable/quad.c
 	image/png.c
 	image/ppm.c
+	material/color.c
 	material/depth.c
 	material/texture.c
 	camera.c
