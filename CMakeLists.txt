@@ -15,6 +15,7 @@ endif()
 set(GLAD_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/thirdparty/glad/include)
 
 set(FAKEGLIB_BUILD_TESTS OFF CACHE BOOL "Disable building fakeglib tests")
+set(FAKEGLIB_BUILD_SHARED OFF CACHE BOOL "Disable building shared fakeglib")
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "Disable building glfw examples")
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "Disable building glfw tests")
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "Disable building glfw documentation")
