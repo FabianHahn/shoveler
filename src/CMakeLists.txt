@@ -7,6 +7,7 @@ set(SHOVELER_SRC
 	image/png.c
 	image/ppm.c
 	material/depth.c
+	material/texture.c
 	camera.c
 	file.c
 	framebuffer.c
