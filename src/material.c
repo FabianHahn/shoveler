@@ -6,6 +6,8 @@
 #include "material.h"
 #include "uniform.h"
 
+static void freeMaterialData(ShovelerMaterial *material);
+
 ShovelerMaterial *shovelerMaterialCreate(GLuint program)
 {
 	ShovelerMaterial *material = malloc(sizeof(ShovelerMaterial));
@@ -13,6 +15,8 @@ ShovelerMaterial *shovelerMaterialCreate(GLuint program)
 	material->uniforms = shovelerUniformMapCreate();
 	material->textures = g_queue_new();
 	material->samplers = g_queue_new();
+	material->freeData = freeMaterialData;
+	material->data = NULL;
 	return material;
 }
 
@@ -32,9 +36,15 @@ bool shovelerMaterialAttachTexture(ShovelerMaterial *material, const char *name,
 
 void shovelerMaterialFree(ShovelerMaterial *material)
 {
+	material->freeData(material);
 	shovelerUniformMapFree(material->uniforms);
 	g_queue_free(material->samplers);
 	g_queue_free(material->textures);
 	glDeleteProgram(material->program);
 	free(material);
+}
+
+static void freeMaterialData(ShovelerMaterial *material)
+{
+	// do nothing by default
 }

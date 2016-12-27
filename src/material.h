@@ -7,11 +7,17 @@
 #include "texture.h"
 #include "uniform_map.h"
 
-typedef struct {
+struct ShovelerMaterialStruct;
+
+typedef void (ShovelerMaterialFreeDataFunction)(struct ShovelerMaterialStruct *material);
+
+typedef struct ShovelerMaterialStruct {
 	GLuint program;
 	ShovelerUniformMap *uniforms;
 	GQueue *textures;
 	GQueue *samplers;
+	ShovelerMaterialFreeDataFunction *freeData;
+	void *data;
 } ShovelerMaterial;
 
 ShovelerMaterial *shovelerMaterialCreate(GLuint program);
