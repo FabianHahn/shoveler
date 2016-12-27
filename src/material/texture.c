@@ -39,7 +39,7 @@ static const char *fragmentShaderSource =
 		"#version 400\n"
 		"\n"
 		"uniform vec3 lightDirection;\n"
-		"uniform vec3 lightColor;\n"
+		"uniform vec4 lightColor;\n"
 		"uniform vec3 cameraPosition;\n"
 		"uniform sampler2D textureImage;\n"
 		"\n"
@@ -51,7 +51,7 @@ static const char *fragmentShaderSource =
 		"\n"
 		"void main()\n"
 		"{\n"
-		"	vec3 color = texture2D(textureImage, worldUv).rgb;\n"
+		"	vec4 color = vec4(texture2D(textureImage, worldUv).rgb, 1.0);\n"
 		"	vec3 normal = normalize(worldNormal);\n"
 		"	"
 		"	float ambientFactor = 0.2;\n"
@@ -61,7 +61,7 @@ static const char *fragmentShaderSource =
 		"	vec3 reflectedLight = -reflect(-lightDirection, normal);\n"
 		"	float specularFactor = pow(clamp(dot(reflectedLight, cameraDirection), 0.0, 1.0), 250.0);\n"
 		""
-		"	fragmentColor = vec4(clamp(ambientFactor * color + diffuseFactor * color + specularFactor * lightColor, 0.0, 1.0), 1.0);\n"
+		"	fragmentColor = clamp(ambientFactor * color + diffuseFactor * color + specularFactor * lightColor, 0.0, 1.0);\n"
 		"}\n";
 
 ShovelerMaterial *shovelerMaterialTextureCreate(ShovelerTexture *texture, ShovelerSampler *sampler)

@@ -49,7 +49,7 @@ void shovelerSampleInit(GLFWwindow *sampleWindow, int width, int height, int sam
 
 	ShovelerUniform *lightDirectionUniform = shovelerUniformCreateVector3(shovelerVector3Normalize((ShovelerVector3){0, 0, 1}));
 	shovelerUniformMapInsert(material->uniforms, "lightDirection", lightDirectionUniform);
-	ShovelerUniform *lightColorUniform = shovelerUniformCreateVector3((ShovelerVector3){1, 1, 1});
+	ShovelerUniform *lightColorUniform = shovelerUniformCreateVector4((ShovelerVector4){1, 1, 1, 1});
 	shovelerUniformMapInsert(material->uniforms, "lightColor", lightColorUniform);
 
 	shovelerOpenGLCheckSuccess();
