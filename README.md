@@ -1,3 +1,5 @@
+[![Build Status](https://api.travis-ci.org/FabianHahn/shoveler.svg)](https://travis-ci.org/FabianHahn/shoveler)
+
 # shoveler
 
 A minimalistic OpenGL game engine written in C.
