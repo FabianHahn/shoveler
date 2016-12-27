@@ -13,7 +13,7 @@ typedef struct {
 	GHashTable *shaders;
 } MaterialShaderCache;
 
-static ShovelerShader *generateShader(ShovelerCamera *camera, ShovelerModel *model, ShovelerMaterial *material);
+static ShovelerShader *generateShader(ShovelerScene *scene, ShovelerCamera *camera, ShovelerModel *model, ShovelerMaterial *material);
 static ShovelerShader *getCachedShader(ShovelerScene *scene, ShovelerCamera *camera, ShovelerModel *model, ShovelerMaterial *material);
 static ModelShaderCache *createModelShaderCache();
 static MaterialShaderCache *createMaterialShaderCache();
@@ -25,6 +25,7 @@ ShovelerScene *shovelerSceneCreate()
 {
 	ShovelerScene *scene = malloc(sizeof(ShovelerScene));
 	scene->light = NULL;
+	scene->uniforms = shovelerUniformMapCreate();
 	scene->depthMaterial = shovelerMaterialDepthCreate();
 	scene->models = g_queue_new();
 	scene->modelShaderCache = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, freeModelShaderCache);
@@ -116,18 +117,20 @@ void shovelerSceneFree(ShovelerScene *scene)
 		shovelerModelFree(iter->data);
 	}
 	g_queue_free(scene->models);
+	shovelerUniformMapFree(scene->uniforms);
 	free(scene);
 }
 
-static ShovelerShader *generateShader(ShovelerCamera *camera, ShovelerModel *model, ShovelerMaterial *material)
+static ShovelerShader *generateShader(ShovelerScene *scene, ShovelerCamera *camera, ShovelerModel *model, ShovelerMaterial *material)
 {
 	ShovelerShader *shader = shovelerShaderCreate(material);
 
 	int materialAttached = shovelerShaderAttachUniforms(shader, material->uniforms);
 	int modelAttached = shovelerShaderAttachUniforms(shader, model->uniforms);
 	int cameraAttached = shovelerShaderAttachUniforms(shader, camera->uniforms);
+	int sceneAttached = shovelerShaderAttachUniforms(shader, scene->uniforms);
 
-	shovelerLogInfo("Generated shader for camera %p and model %p - attached %d material uniforms, %d model uniforms, and %d camera uniforms.", camera, model, materialAttached, modelAttached, cameraAttached);
+	shovelerLogInfo("Generated shader for camera %p and model %p (uniforms: %d material, %d model, %d camera, %d scene).", camera, model, materialAttached, modelAttached, cameraAttached, sceneAttached);
 	return shader;
 }
 
@@ -147,7 +150,7 @@ static ShovelerShader *getCachedShader(ShovelerScene *scene, ShovelerCamera *cam
 
 	ShovelerShader *shader = g_hash_table_lookup(materialShaderCache->shaders, material);
 	if(shader == NULL) {
-		shader = generateShader(camera, model, material);
+		shader = generateShader(scene, camera, model, material);
 		g_hash_table_insert(materialShaderCache->shaders, material, shader);
 	}
 

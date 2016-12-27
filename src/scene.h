@@ -10,9 +10,11 @@
 #include "light.h"
 #include "material.h"
 #include "model.h"
+#include "uniform_map.h"
 
 typedef struct {
 	ShovelerLight *light;
+	ShovelerUniformMap *uniforms;
 	ShovelerMaterial *depthMaterial;
 	GQueue *models;
 	GHashTable *modelShaderCache;
