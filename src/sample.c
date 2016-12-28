@@ -55,20 +55,20 @@ void shovelerSampleInit(GLFWwindow *sampleWindow, int width, int height, int sam
 	shovelerOpenGLCheckSuccess();
 
 	quad = shovelerDrawableQuadCreate();
-	ShovelerModel *quadModel = shovelerModelCreate(quad, colorMaterial);
-	quadModel->translation.values[0] = -10.0;
-	quadModel->translation.values[1] = -5.0;
-	quadModel->translation.values[2] = 10.0;
-	quadModel->rotation.values[0] = SHOVELER_PI / 2.0f;
-	quadModel->scale.values[0] = 20.0;
-	quadModel->scale.values[1] = 20.0;
-	shovelerModelUpdateTransformation(quadModel);
+	ShovelerModel *groundModel = shovelerModelCreate(quad, colorMaterial);
+	groundModel->translation.values[0] = -10.0;
+	groundModel->translation.values[1] = -5.0;
+	groundModel->translation.values[2] = 10.0;
+	groundModel->rotation.values[0] = SHOVELER_PI / 2.0f;
+	groundModel->scale.values[0] = 20.0;
+	groundModel->scale.values[1] = 20.0;
+	shovelerModelUpdateTransformation(groundModel);
 
 	cube = shovelerDrawableCubeCreate();
 	cubeModel = shovelerModelCreate(cube, textureMaterial);
 
 	scene = shovelerSceneCreate();
-	shovelerSceneAddModel(scene, quadModel);
+	shovelerSceneAddModel(scene, groundModel);
 	shovelerSceneAddModel(scene, cubeModel);
 
 	shovelerUniformMapInsert(scene->uniforms, "lightDirection", shovelerUniformCreateVector3(shovelerVector3Normalize((ShovelerVector3){0, 0, 1})));
