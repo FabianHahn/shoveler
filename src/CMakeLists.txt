@@ -8,6 +8,7 @@ set(SHOVELER_SRC
 	image/ppm.c
 	material/color.c
 	material/depth.c
+	material/screenspace_texture.c
 	material/texture.c
 	camera.c
 	file.c
