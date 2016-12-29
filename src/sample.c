@@ -7,6 +7,7 @@
 #include "drawable/cube.h"
 #include "drawable/quad.h"
 #include "material/color.h"
+#include "material/screenspace_texture.h"
 #include "material/texture.h"
 #include "constants.h"
 #include "framebuffer.h"
@@ -24,6 +25,7 @@ static void handleMovement(float dt);
 
 static GLFWwindow *window;
 static ShovelerMaterial *colorMaterial;
+static ShovelerMaterial *screenspaceTextureMaterial;
 static ShovelerMaterial *textureMaterial;
 static ShovelerDrawable *quad;
 static ShovelerDrawable *cube;
@@ -86,6 +88,16 @@ void shovelerSampleInit(GLFWwindow *sampleWindow, int width, int height, int sam
 	ShovelerLight *light = shovelerLightCreate(lightCamera, 1024, 1024);
 	shovelerSceneAddLight(scene, light);
 
+	screenspaceTextureMaterial = shovelerMaterialScreenspaceTextureCreate(texture, false, sampler, false);
+	ShovelerModel *screenQuadModel = shovelerModelCreate(quad, screenspaceTextureMaterial);
+	screenQuadModel->translation.values[0] = -1.0;
+	screenQuadModel->translation.values[1] = -1.0;
+	screenQuadModel->scale.values[0] = 0.5;
+	screenQuadModel->scale.values[1] = 0.5;
+	shovelerModelUpdateTransformation(screenQuadModel);
+
+	shovelerSceneAddModel(scene, screenQuadModel);
+
 	shovelerOpenGLCheckSuccess();
 
 	double newCursorX;
@@ -114,6 +126,8 @@ void shovelerSampleTerminate()
 	shovelerSceneFree(scene);
 	shovelerCameraFree(camera);
 	shovelerDrawableFree(cube);
+	shovelerMaterialFree(colorMaterial);
+	shovelerMaterialFree(screenspaceTextureMaterial);
 	shovelerMaterialFree(textureMaterial);
 }
 
