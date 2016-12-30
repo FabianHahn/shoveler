@@ -77,6 +77,8 @@ bool shovelerFramebufferUse(ShovelerFramebuffer *framebuffer)
 	} else {
 		glDrawBuffer(GL_NONE);
 	}
+
+	glViewport(0, 0, framebuffer->width, framebuffer->height);
 	return shovelerOpenGLCheckSuccess();
 }
 
