@@ -35,6 +35,7 @@ static const char *vertexShaderSource =
 static const char *fragmentShaderSource =
 		"#version 400\n"
 		"\n"
+		"uniform bool depthTexture;\n"
 		"uniform sampler2D textureImage;\n"
 		"\n"
 		"in vec3 worldPosition;\n"
@@ -44,11 +45,17 @@ static const char *fragmentShaderSource =
 		"\n"
 		"void main()\n"
 		"{\n"
-		"	vec4 color = vec4(texture2D(textureImage, worldUv).rgb, 1.0);\n"
+		"	vec4 color;\n"
+		"	if(depthTexture) {\n"
+		"		color = vec4(texture2D(textureImage, worldUv).r);\n"
+		"	} else {\n"
+		"		color = vec4(texture2D(textureImage, worldUv).rgb, 1.0);\n"
+		"	}\n"
+		"\n"
 		"	fragmentColor = color;\n"
 		"}\n";
 
-ShovelerMaterial *shovelerMaterialScreenspaceTextureCreate(ShovelerTexture *texture, bool manageTexture, ShovelerSampler *sampler, bool manageSampler)
+ShovelerMaterial *shovelerMaterialScreenspaceTextureCreate(ShovelerTexture *texture, bool manageTexture, bool depthTexture, ShovelerSampler *sampler, bool manageSampler)
 {
 	GLuint vertexShaderObject = shovelerShaderProgramCompileFromString(vertexShaderSource, GL_VERTEX_SHADER);
 	GLuint fragmentShaderObject = shovelerShaderProgramCompileFromString(fragmentShaderSource, GL_FRAGMENT_SHADER);
@@ -65,6 +72,7 @@ ShovelerMaterial *shovelerMaterialScreenspaceTextureCreate(ShovelerTexture *text
 	material->freeData = freeMaterialScreenspaceTextureData;
 	material->data = materialScreenspaceTextureData;
 
+	shovelerUniformMapInsert(material->uniforms, "depthTexture", shovelerUniformCreateInt(depthTexture ? 1 : 0));
 	shovelerMaterialAttachTexture(material, "textureImage", texture, sampler);
 
 	return material;
