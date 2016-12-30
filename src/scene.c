@@ -56,7 +56,7 @@ int shovelerSceneRender(ShovelerScene *scene, ShovelerCamera *camera, ShovelerFr
 		for(GList *iter = scene->models->head; iter != NULL; iter = iter->next) {
 			ShovelerModel *model = iter->data;
 
-			if(!model->visible) {
+			if(!model->visible || !model->castsShadow) {
 				continue;
 			}
 

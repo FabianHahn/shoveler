@@ -90,6 +90,7 @@ void shovelerSampleInit(GLFWwindow *sampleWindow, int width, int height, int sam
 
 	screenspaceTextureMaterial = shovelerMaterialScreenspaceTextureCreate(texture, false, false, sampler, false);
 	ShovelerModel *screenQuadModel = shovelerModelCreate(quad, screenspaceTextureMaterial);
+	screenQuadModel->castsShadow = false;
 	screenQuadModel->translation.values[0] = -1.0;
 	screenQuadModel->translation.values[1] = -1.0;
 	screenQuadModel->scale.values[0] = 0.5;
