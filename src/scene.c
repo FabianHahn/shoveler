@@ -48,10 +48,8 @@ int shovelerSceneRender(ShovelerScene *scene, ShovelerCamera *camera, ShovelerFr
 	int rendered = 0;
 
 	if(scene->light != NULL) {
-		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-		glClear(GL_DEPTH_BUFFER_BIT);
-
 		shovelerFramebufferUse(scene->light->framebuffer);
+		glClear(GL_DEPTH_BUFFER_BIT);
 
 		for(GList *iter = scene->models->head; iter != NULL; iter = iter->next) {
 			ShovelerModel *model = iter->data;
@@ -80,7 +78,7 @@ int shovelerSceneRender(ShovelerScene *scene, ShovelerCamera *camera, ShovelerFr
 	shovelerFramebufferUse(framebuffer);
 
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	for(GList *iter = scene->models->head; iter != NULL; iter = iter->next) {
 		ShovelerModel *model = iter->data;
