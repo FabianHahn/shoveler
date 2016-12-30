@@ -18,11 +18,11 @@ static const char *vertexShaderSource =
 static const char *fragmentShaderSource =
 		"#version 400\n"
 		"\n"
-		"out float fragmentDepth;\n"
+		"out vec4 fragmentDepth;\n"
 		"\n"
 		"void main()\n"
 		"{\n"
-		"	fragmentDepth = gl_FragCoord.z;\n"
+		"	fragmentDepth = vec4(gl_FragCoord.z);\n"
 		"}\n";
 
 ShovelerMaterial *shovelerMaterialDepthCreate()
