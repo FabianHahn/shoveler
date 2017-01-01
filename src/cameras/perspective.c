@@ -10,12 +10,12 @@ static void updateTransformation(ShovelerCamerasPerspective *perspectiveCamera);
 static ShovelerMatrix computePerspectiveTransformation(float fovy, float ar, float znear, float zfar);
 static ShovelerMatrix computeLookIntoDirectionTransformation(ShovelerVector3 position, ShovelerVector3 direction, ShovelerVector3 up);
 
-ShovelerCamera *shovelerCamerasPerspectiveCreate(float fieldOfViewY, float aspectRatio, float nearClippingPlane, float farClippingPlane)
+ShovelerCamera *shovelerCamerasPerspectiveCreate(ShovelerVector3 position, ShovelerVector3 direction, ShovelerVector3 up, float fieldOfViewY, float aspectRatio, float nearClippingPlane, float farClippingPlane)
 {
 	ShovelerCamerasPerspective *perspectiveCamera = malloc(sizeof(ShovelerCamerasPerspective));
-	shovelerCameraInit(&perspectiveCamera->camera, perspectiveCamera, freePerspectiveCamera);
-	perspectiveCamera->up = (ShovelerVector3){{0, 1, 0}};
-	perspectiveCamera->direction = (ShovelerVector3){{0, 0, 1}};
+	shovelerCameraInit(&perspectiveCamera->camera, position, perspectiveCamera, freePerspectiveCamera);
+	perspectiveCamera->up = shovelerVector3Normalize(up);
+	perspectiveCamera->direction = shovelerVector3Normalize(direction);
 	perspectiveCamera->perspective = computePerspectiveTransformation(fieldOfViewY, aspectRatio, nearClippingPlane, farClippingPlane);
 	shovelerCamerasPerspectiveUpdateTransformation(&perspectiveCamera->camera);
 

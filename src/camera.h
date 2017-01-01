@@ -16,7 +16,7 @@ typedef struct ShovelerCameraStruct {
 	ShovelerCameraFreeDataFunction *freeData;
 } ShovelerCamera;
 
-void shovelerCameraInit(ShovelerCamera *camera, void *data, ShovelerCameraFreeDataFunction *freeData);
+void shovelerCameraInit(ShovelerCamera *camera, ShovelerVector3 position, void *data, ShovelerCameraFreeDataFunction *freeData);
 void shovelerCameraFree(ShovelerCamera *camera);
 
 #endif

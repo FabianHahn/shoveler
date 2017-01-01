@@ -2,6 +2,7 @@
 #define SHOVELER_CAMERAS_PERSPECTIVE_H
 
 #include "camera.h"
+#include "types.h"
 
 typedef struct {
 	ShovelerCamera camera;
@@ -10,7 +11,7 @@ typedef struct {
 	ShovelerMatrix perspective;
 } ShovelerCamerasPerspective;
 
-ShovelerCamera *shovelerCamerasPerspectiveCreate(float fieldOfViewY, float aspectRatio, float nearClippingPlane, float farClippingPlane);
+ShovelerCamera *shovelerCamerasPerspectiveCreate(ShovelerVector3 position, ShovelerVector3 direction, ShovelerVector3 up, float fieldOfViewY, float aspectRatio, float nearClippingPlane, float farClippingPlane);
 void shovelerCamerasPerspectiveUpdateTransformation(ShovelerCamera *camera);
 void shovelerCamerasPerspectiveMoveForward(ShovelerCamera *camera, float amount);
 void shovelerCamerasPerspectiveMoveRight(ShovelerCamera *camera, float amount);

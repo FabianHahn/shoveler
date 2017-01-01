@@ -78,9 +78,9 @@ void shovelerSampleInit(GLFWwindow *sampleWindow, int width, int height, int sam
 
 	framebuffer = shovelerFramebufferCreate(width, height, samples, 4, 8);
 
-	camera = shovelerCamerasPerspectiveCreate(2.0f * SHOVELER_PI * 50.0f / 360.0f, (float) width / height, 0.01, 1000);
+	camera = shovelerCamerasPerspectiveCreate((ShovelerVector3){0, 0, -5}, (ShovelerVector3){0, 0, 1}, (ShovelerVector3){0, 1, 0}, 2.0f * SHOVELER_PI * 50.0f / 360.0f, (float) width / height, 0.01, 1000);
 
-	ShovelerCamera *lightCamera = shovelerCamerasPerspectiveCreate(2.0f * SHOVELER_PI * 50.0f / 360.0f, 1.0f, 1, 100);
+	ShovelerCamera *lightCamera = shovelerCamerasPerspectiveCreate((ShovelerVector3){0, 5, -5}, (ShovelerVector3){0, -5, 5}, (ShovelerVector3){0, 1, 0}, 2.0f * SHOVELER_PI * 50.0f / 360.0f, 1.0f, 1, 100);
 	ShovelerLight *light = shovelerLightCreate(lightCamera, 512, 512, 1);
 	shovelerSceneAddLight(scene, light);
 
