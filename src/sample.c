@@ -76,16 +76,12 @@ void shovelerSampleInit(GLFWwindow *sampleWindow, int width, int height, int sam
 	shovelerUniformMapInsert(scene->uniforms, "lightDirection", shovelerUniformCreateVector3(shovelerVector3Normalize((ShovelerVector3){0, 0, 1})));
 	shovelerUniformMapInsert(scene->uniforms, "lightColor", shovelerUniformCreateVector4((ShovelerVector4){1, 1, 1, 1}));
 
-	if(samples > 1) {
-		framebuffer = shovelerFramebufferCreateMultisample(width, height, samples);
-	} else {
-		framebuffer = shovelerFramebufferCreate(width, height);
-	}
+	framebuffer = shovelerFramebufferCreate(width, height, samples, 4, 8);
 
 	camera = shovelerCamerasPerspectiveCreate(2.0f * SHOVELER_PI * 50.0f / 360.0f, (float) width / height, 0.01, 1000);
 
 	ShovelerCamera *lightCamera = shovelerCamerasPerspectiveCreate(2.0f * SHOVELER_PI * 50.0f / 360.0f, 1.0f, 1, 100);
-	ShovelerLight *light = shovelerLightCreate(lightCamera, 512, 512);
+	ShovelerLight *light = shovelerLightCreate(lightCamera, 512, 512, 1);
 	shovelerSceneAddLight(scene, light);
 
 	screenspaceTextureMaterial = shovelerMaterialScreenspaceTextureCreate(light->framebuffer->depthTarget, false, true, sampler, false);

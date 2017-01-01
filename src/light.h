@@ -10,7 +10,7 @@ typedef struct {
 	ShovelerFramebuffer *framebuffer;
 } ShovelerLight;
 
-ShovelerLight *shovelerLightCreate(ShovelerCamera *camera, int width, int height);
+ShovelerLight *shovelerLightCreate(ShovelerCamera *camera, int width, int height, GLsizei samples);
 void shovelerLightFree(ShovelerLight *light);
 
 #endif

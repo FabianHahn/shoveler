@@ -2,11 +2,11 @@
 
 #include "light.h"
 
-ShovelerLight *shovelerLightCreate(ShovelerCamera *camera, int width, int height)
+ShovelerLight *shovelerLightCreate(ShovelerCamera *camera, int width, int height, GLsizei samples)
 {
 	ShovelerLight *light = malloc(sizeof(ShovelerLight));
 	light->camera = camera;
-	light->framebuffer = shovelerFramebufferCreateDepthOnly(width, height);
+	light->framebuffer = shovelerFramebufferCreateDepthOnly(width, height, samples);
 	return light;
 }
 

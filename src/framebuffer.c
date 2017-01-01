@@ -6,14 +6,14 @@
 
 static void handleFramebufferIncomplete(GLenum error);
 
-ShovelerFramebuffer *shovelerFramebufferCreate(GLsizei width, GLsizei height)
+ShovelerFramebuffer *shovelerFramebufferCreate(GLsizei width, GLsizei height, GLsizei samples, int channels, int bitsPerChannel)
 {
 	ShovelerFramebuffer *framebuffer = malloc(sizeof(ShovelerFramebuffer));
 	glGenFramebuffers(1, &framebuffer->framebuffer);
 	framebuffer->width = width;
 	framebuffer->height = height;
-	framebuffer->renderTarget = shovelerTextureCreateRenderTarget(width, height);
-	framebuffer->depthTarget = shovelerTextureCreateDepthTarget(width, height);
+	framebuffer->renderTarget = shovelerTextureCreateRenderTarget(width, height, samples, channels, bitsPerChannel);
+	framebuffer->depthTarget = shovelerTextureCreateDepthTarget(width, height, samples);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer->framebuffer);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, framebuffer->renderTarget->target, framebuffer->renderTarget->texture, 0);
@@ -27,35 +27,14 @@ ShovelerFramebuffer *shovelerFramebufferCreate(GLsizei width, GLsizei height)
 	return framebuffer;
 }
 
-ShovelerFramebuffer *shovelerFramebufferCreateMultisample(GLsizei width, GLsizei height, GLsizei samples)
-{
-	ShovelerFramebuffer *framebuffer = malloc(sizeof(ShovelerFramebuffer));
-	glGenFramebuffers(1, &framebuffer->framebuffer);
-	framebuffer->width = width;
-	framebuffer->height = height;
-	framebuffer->renderTarget = shovelerTextureCreateMultisampleRenderTarget(width, height, samples);
-	framebuffer->depthTarget = shovelerTextureCreateMultisampleDepthTarget(width, height, samples);
-
-	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer->framebuffer);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, framebuffer->renderTarget->target, framebuffer->renderTarget->texture, 0);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, framebuffer->depthTarget->target, framebuffer->depthTarget->texture, 0);
-
-	GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-	if(status != GL_FRAMEBUFFER_COMPLETE) {
-		handleFramebufferIncomplete(status);
-	}
-
-	return framebuffer;
-}
-
-ShovelerFramebuffer *shovelerFramebufferCreateDepthOnly(GLsizei width, GLsizei height)
+ShovelerFramebuffer *shovelerFramebufferCreateDepthOnly(GLsizei width, GLsizei height, GLsizei samples)
 {
 	ShovelerFramebuffer *framebuffer = malloc(sizeof(ShovelerFramebuffer));
 	glGenFramebuffers(1, &framebuffer->framebuffer);
 	framebuffer->width = width;
 	framebuffer->height = height;
 	framebuffer->renderTarget = NULL;
-	framebuffer->depthTarget = shovelerTextureCreateDepthTarget(width, height);
+	framebuffer->depthTarget = shovelerTextureCreateDepthTarget(width, height, samples);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer->framebuffer);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, framebuffer->depthTarget->target, framebuffer->depthTarget->texture, 0);
