@@ -59,7 +59,7 @@ void shovelerSampleInit(GLFWwindow *sampleWindow, int width, int height, int sam
 	quad = shovelerDrawableQuadCreate();
 	ShovelerModel *groundModel = shovelerModelCreate(quad, colorMaterial);
 	groundModel->translation.values[0] = -10.0;
-	groundModel->translation.values[1] = -5.0;
+	groundModel->translation.values[1] = -2.0;
 	groundModel->translation.values[2] = 10.0;
 	groundModel->rotation.values[0] = SHOVELER_PI / 2.0f;
 	groundModel->scale.values[0] = 20.0;
@@ -83,6 +83,12 @@ void shovelerSampleInit(GLFWwindow *sampleWindow, int width, int height, int sam
 	ShovelerCamera *lightCamera = shovelerCamerasPerspectiveCreate((ShovelerVector3){0, 5, -5}, (ShovelerVector3){0, -5, 5}, (ShovelerVector3){0, 1, 0}, 2.0f * SHOVELER_PI * 50.0f / 360.0f, 1.0f, 1, 100);
 	ShovelerLight *light = shovelerLightCreate(lightCamera, 512, 512, 1);
 	shovelerSceneAddLight(scene, light);
+
+	shovelerUniformMapInsert(scene->uniforms, "lightExponentialShadowFactor", shovelerUniformCreateFloat(80.0f));
+	shovelerUniformMapInsert(scene->uniforms, "lightPosition", shovelerUniformCreateVector3Pointer(&lightCamera->position));
+	shovelerUniformMapInsert(scene->uniforms, "lightCamera", shovelerUniformCreateMatrixPointer(&lightCamera->transformation));
+	shovelerMaterialAttachTexture(textureMaterial, "shadowMap", light->framebuffer->depthTarget, sampler);
+	shovelerMaterialAttachTexture(colorMaterial, "shadowMap", light->framebuffer->depthTarget, sampler);
 
 	screenspaceTextureMaterial = shovelerMaterialScreenspaceTextureCreate(light->framebuffer->depthTarget, false, true, sampler, false);
 	ShovelerModel *screenQuadModel = shovelerModelCreate(quad, screenspaceTextureMaterial);
