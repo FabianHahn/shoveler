@@ -36,6 +36,10 @@ bool shovelerMaterialAttachTexture(ShovelerMaterial *material, const char *name,
 
 void shovelerMaterialFree(ShovelerMaterial *material)
 {
+	if(material == NULL) {
+		return;
+	}
+
 	material->freeData(material);
 	shovelerUniformMapFree(material->uniforms);
 	g_queue_free(material->samplers);

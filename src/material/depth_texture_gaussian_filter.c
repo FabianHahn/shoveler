@@ -1,0 +1,102 @@
+#include <stdlib.h> // malloc, free
+
+#include "material/depth_texture_gaussian_filter.h"
+#include "shader_program.h"
+
+typedef struct {
+	ShovelerTexture *texture;
+	bool manageTexture;
+	ShovelerSampler *sampler;
+	ShovelerVector2 filterDirection;
+} ShovelerMaterialDepthTextureGaussianFilterData;
+
+static void freeMaterialDepthTextureGaussianFilterData(ShovelerMaterial *material);
+
+static const char *vertexShaderSource =
+		"#version 400\n"
+		""
+		"uniform mat4 model;\n"
+		""
+		"in vec3 position;\n"
+		"in vec3 normal;\n"
+		"in vec2 uv;\n"
+		""
+		"out vec2 worldUv;\n"
+		""
+		"void main()\n"
+		"{\n"
+		"	vec4 worldPosition4 = model * vec4(position, 1.0);\n"
+		"	vec3 worldPosition = worldPosition4.xyz / worldPosition4.w;\n"
+		"	worldUv = uv;\n"
+		"	gl_Position = vec4(worldPosition, 1.0);\n"
+		"}\n";
+
+static const char *fragmentShaderSource =
+		"#version 400\n"
+		""
+		"uniform vec2 filterDirection;\n"
+		"uniform vec2 inverseTextureSize;\n"
+		"uniform sampler2D textureImage;\n"
+		""
+		"in vec2 worldUv;\n"
+		""
+		"out float filteredDepth;\n"
+		""
+		"float gaussianKernel[9] = float[](0.048297, 0.08393, 0.124548, 0.157829, 0.170793, 0.157829, 0.124548, 0.08393, 0.048297);\n"
+		""
+		"void main()\n"
+		"{\n"
+		"	filteredDepth = 0.0;\n"
+		""
+		"	for(int i = 0; i < 9; i++) {\n"
+		"		int offset = i - 4;\n"
+		"		vec2 samplePosition = worldUv + offset * filterDirection * inverseTextureSize;\n"
+		"		float textureSample = texture2D(textureImage, samplePosition).r;\n"
+		"		filteredDepth += gaussianKernel[offset] * textureSample;\n"
+		"	}\n"
+		""
+		"	// filteredDepth = texture2D(textureImage, worldUv).r;\n"
+		"}\n";
+
+ShovelerMaterial *shovelerMaterialDepthTextureGaussianFilterGaussianFilterCreate(ShovelerTexture *texture, bool manageTexture, int width, int height, bool filterX, bool filterY)
+{
+	GLuint vertexShaderObject = shovelerShaderProgramCompileFromString(vertexShaderSource, GL_VERTEX_SHADER);
+	GLuint fragmentShaderObject = shovelerShaderProgramCompileFromString(fragmentShaderSource, GL_FRAGMENT_SHADER);
+	GLuint program = shovelerShaderProgramLink(vertexShaderObject, fragmentShaderObject, true);
+
+	ShovelerMaterial *material = shovelerMaterialCreate(program);
+
+	ShovelerMaterialDepthTextureGaussianFilterData *materialDepthTextureGaussianFilterData = malloc(sizeof(ShovelerMaterialDepthTextureGaussianFilterData));
+	materialDepthTextureGaussianFilterData->texture = texture;
+	materialDepthTextureGaussianFilterData->manageTexture = manageTexture;
+	materialDepthTextureGaussianFilterData->sampler = shovelerSamplerCreate(false, true);
+
+	material->freeData = freeMaterialDepthTextureGaussianFilterData;
+	material->data = materialDepthTextureGaussianFilterData;
+	shovelerMaterialDepthTextureGaussianFilterSetDirection(material, filterX, filterY);
+
+	shovelerUniformMapInsert(material->uniforms, "filterDirection", shovelerUniformCreateVector2Pointer(&materialDepthTextureGaussianFilterData->filterDirection));
+	shovelerUniformMapInsert(material->uniforms, "inverseTextureSize", shovelerUniformCreateVector2(shovelerVector2(1.0 / width, 1.0 / height)));
+	shovelerMaterialAttachTexture(material, "textureImage", texture, materialDepthTextureGaussianFilterData->sampler);
+
+	return material;
+}
+
+void shovelerMaterialDepthTextureGaussianFilterSetDirection(ShovelerMaterial *material, bool filterX, bool filterY)
+{
+	ShovelerMaterialDepthTextureGaussianFilterData *materialDepthTextureGaussianFilterData = material->data;
+	materialDepthTextureGaussianFilterData->filterDirection.values[0] = filterX ? 1 : 0;
+	materialDepthTextureGaussianFilterData->filterDirection.values[1] = filterY ? 1 : 0;
+}
+
+static void freeMaterialDepthTextureGaussianFilterData(ShovelerMaterial *material)
+{
+	ShovelerMaterialDepthTextureGaussianFilterData *materialDepthTextureGaussianFilterData = material->data;
+	shovelerSamplerFree(materialDepthTextureGaussianFilterData->sampler);
+
+	if(materialDepthTextureGaussianFilterData->manageTexture) {
+		shovelerTextureFree(materialDepthTextureGaussianFilterData->texture);
+	}
+
+	free(materialDepthTextureGaussianFilterData);
+}

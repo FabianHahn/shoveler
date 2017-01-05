@@ -1,6 +1,8 @@
 #include <stdlib.h> // malloc, free
 
+#include "drawable/quad.h"
 #include "material/depth.h"
+#include "material/depth_texture_gaussian_filter.h"
 #include "log.h"
 #include "scene.h"
 #include "shader.h"
@@ -27,6 +29,13 @@ ShovelerScene *shovelerSceneCreate()
 	scene->light = NULL;
 	scene->uniforms = shovelerUniformMapCreate();
 	scene->depthMaterial = shovelerMaterialDepthCreate();
+	scene->quad = shovelerDrawableQuadCreate();
+	scene->depthTextureGaussianFilterXFramebuffer = NULL;
+	scene->depthTextureGaussianFilterYFramebuffer = NULL;
+	scene->depthTextureGaussianFilterXMaterial = NULL;
+	scene->depthTextureGaussianFilterYMaterial = NULL;
+	scene->depthTextureGaussianFilterXModel = NULL;
+	scene->depthTextureGaussianFilterYModel = NULL;
 	scene->models = g_queue_new();
 	scene->modelShaderCache = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, freeModelShaderCache);
 	return scene;
@@ -35,7 +44,31 @@ ShovelerScene *shovelerSceneCreate()
 void shovelerSceneAddLight(ShovelerScene *scene, ShovelerLight *light)
 {
 	shovelerLightFree(scene->light);
+	shovelerFramebufferFree(scene->depthTextureGaussianFilterXFramebuffer);
+	shovelerFramebufferFree(scene->depthTextureGaussianFilterYFramebuffer);
+	shovelerModelFree(scene->depthTextureGaussianFilterXModel);
+	shovelerModelFree(scene->depthTextureGaussianFilterYModel);
+	shovelerMaterialFree(scene->depthTextureGaussianFilterXMaterial);
+	shovelerMaterialFree(scene->depthTextureGaussianFilterYMaterial);
 	scene->light = light;
+	scene->depthTextureGaussianFilterXFramebuffer = shovelerFramebufferCreate(light->framebuffer->width, light->framebuffer->height, 1, 1, 32);
+	scene->depthTextureGaussianFilterYFramebuffer = shovelerFramebufferCreate(light->framebuffer->width, light->framebuffer->height, 1, 1, 32);
+	scene->depthTextureGaussianFilterXMaterial = shovelerMaterialDepthTextureGaussianFilterGaussianFilterCreate(light->framebuffer->depthTarget, false, light->framebuffer->width, light->framebuffer->height, true, false);
+	scene->depthTextureGaussianFilterYMaterial = shovelerMaterialDepthTextureGaussianFilterGaussianFilterCreate(scene->depthTextureGaussianFilterXFramebuffer->renderTarget, false, light->framebuffer->width, light->framebuffer->height, false, true);
+
+	scene->depthTextureGaussianFilterXModel = shovelerModelCreate(scene->quad, scene->depthTextureGaussianFilterXMaterial);
+	scene->depthTextureGaussianFilterXModel->translation.values[0] = -1.0;
+	scene->depthTextureGaussianFilterXModel->translation.values[1] = -1.0;
+	scene->depthTextureGaussianFilterXModel->scale.values[0] = 2.0;
+	scene->depthTextureGaussianFilterXModel->scale.values[1] = 2.0;
+	shovelerModelUpdateTransformation(scene->depthTextureGaussianFilterXModel);
+
+	scene->depthTextureGaussianFilterYModel = shovelerModelCreate(scene->quad, scene->depthTextureGaussianFilterYMaterial);
+	scene->depthTextureGaussianFilterYModel->translation.values[0] = -1.0;
+	scene->depthTextureGaussianFilterYModel->translation.values[1] = -1.0;
+	scene->depthTextureGaussianFilterYModel->scale.values[0] = 2.0;
+	scene->depthTextureGaussianFilterYModel->scale.values[1] = 2.0;
+	shovelerModelUpdateTransformation(scene->depthTextureGaussianFilterYModel);
 }
 
 void shovelerSceneAddModel(ShovelerScene *scene, ShovelerModel *model)
@@ -72,6 +105,32 @@ int shovelerSceneRender(ShovelerScene *scene, ShovelerCamera *camera, ShovelerFr
 			}
 
 			rendered++;
+		}
+
+		shovelerFramebufferUse(scene->depthTextureGaussianFilterXFramebuffer);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		ShovelerShader *depthTextureGaussianFilterXShader = getCachedShader(scene, scene->light->camera, scene->depthTextureGaussianFilterXModel, scene->depthTextureGaussianFilterXMaterial);
+
+		if(!shovelerShaderUse(depthTextureGaussianFilterXShader)) {
+			shovelerLogWarning("Failed to use depth texture gaussian filter shader for filter model.");
+		}
+
+		if(!shovelerModelRender(scene->depthTextureGaussianFilterXModel)) {
+			shovelerLogWarning("Failed to render depth texture gaussian filter pass in X direction.");
+		}
+
+		shovelerFramebufferUse(scene->depthTextureGaussianFilterYFramebuffer);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		ShovelerShader *depthTextureGaussianFilterYShader = getCachedShader(scene, scene->light->camera, scene->depthTextureGaussianFilterYModel, scene->depthTextureGaussianFilterYMaterial);
+
+		if(!shovelerShaderUse(depthTextureGaussianFilterYShader)) {
+			shovelerLogWarning("Failed to use depth texture gaussian filter shader for filter model.");
+		}
+
+		if(!shovelerModelRender(scene->depthTextureGaussianFilterYModel)) {
+			shovelerLogWarning("Failed to render depth texture gaussian filter pass in X direction.");
 		}
 	}
 
@@ -110,6 +169,10 @@ void shovelerSceneFree(ShovelerScene *scene)
 {
 	shovelerLightFree(scene->light);
 	shovelerMaterialFree(scene->depthMaterial);
+	shovelerFramebufferFree(scene->depthTextureGaussianFilterXFramebuffer);
+	shovelerFramebufferFree(scene->depthTextureGaussianFilterYFramebuffer);
+	shovelerMaterialFree(scene->depthTextureGaussianFilterXMaterial);
+	shovelerMaterialFree(scene->depthTextureGaussianFilterYMaterial);
 	g_hash_table_destroy(scene->modelShaderCache);
 	for(GList *iter = scene->models->head; iter != NULL; iter = iter->next) {
 		shovelerModelFree(iter->data);

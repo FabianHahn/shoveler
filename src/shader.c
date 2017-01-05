@@ -41,7 +41,7 @@ int shovelerShaderAttachUniforms(ShovelerShader *shader, ShovelerUniformMap *uni
 		ShovelerUniformAttachment *uniformAttachment = shovelerUniformAttachmentCreate(uniform, location);
 		g_hash_table_insert(shader->attachments, strdup(name), uniformAttachment);
 
-		shovelerLogTrace("Attached uniform '%s' to shader.", name);
+		shovelerLogTrace("Attached uniform '%s' to shader program %d.", name, shader->material->program);
 
 		attached++;
 	}

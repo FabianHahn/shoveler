@@ -70,6 +70,10 @@ bool shovelerModelRender(ShovelerModel *model)
 
 void shovelerModelFree(ShovelerModel *model)
 {
+	if(model == NULL) {
+		return;
+	}
+
 	shovelerUniformMapFree(model->uniforms);
 	free(model);
 }
