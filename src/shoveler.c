@@ -16,7 +16,7 @@ static GLFWwindow *window;
 
 int main(int argc, char *argv[])
 {
-	ShovelerLogLevel logLevel = SHOVELER_LOG_LEVEL_ALL;
+	ShovelerLogLevel logLevel = SHOVELER_LOG_LEVEL_INFO_UP;
 	FILE *logChannel = stdout;
 	const char *windowTitle = "shoveler";
 	bool fullscreen = false;
