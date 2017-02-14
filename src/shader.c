@@ -28,20 +28,20 @@ int shovelerShaderAttachUniforms(ShovelerShader *shader, ShovelerUniformMap *uni
 	g_hash_table_iter_init(&iter, uniformMap->uniforms);
 	while(g_hash_table_iter_next(&iter, (gpointer *) &name, (gpointer *) &uniform)) {
 		GLint location = glGetUniformLocation(shader->material->program, name);
-		if(location < 0 || !shovelerOpenGLCheckSuccess()) {
-			shovelerLogWarning("Failed to get uniform location for '%s' when trying to attach uniforms to shader program %d, skipping.", name, shader->material->program);
+		if(!shovelerOpenGLCheckSuccess()) {
 			continue;
-		}
-
-		if(g_hash_table_contains(shader->attachments, name)) {
-			shovelerLogWarning("Shader already contains an attachment for '%s', skipping.", name);
+		} else if(location < 0) {
+			shovelerLogTrace("Material %p with shader program %d does not have a uniform attachment point for '%s', skipping.", shader->material, shader->material->program, name);
+			continue;
+		} else if(g_hash_table_contains(shader->attachments, name)) {
+			shovelerLogTrace("Material %p with shader program %d already contains an attachment for '%s', skipping.", shader->material, shader->material->program, name);
 			continue;
 		}
 
 		ShovelerUniformAttachment *uniformAttachment = shovelerUniformAttachmentCreate(uniform, location);
 		g_hash_table_insert(shader->attachments, strdup(name), uniformAttachment);
 
-		shovelerLogTrace("Attached uniform '%s' to shader.", name);
+		shovelerLogTrace("Attached uniform '%s' to material %p with shader program %d.", name, shader->material, shader->material->program);
 
 		attached++;
 	}
