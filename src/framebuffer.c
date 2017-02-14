@@ -72,6 +72,10 @@ bool shovelerFramebufferBlitToDefault(ShovelerFramebuffer *framebuffer)
 
 void shovelerFramebufferFree(ShovelerFramebuffer *framebuffer)
 {
+	if(framebuffer == NULL) {
+		return;
+	}
+
 	shovelerTextureFree(framebuffer->depthTarget);
 	shovelerTextureFree(framebuffer->renderTarget);
 	glDeleteFramebuffers(1, &framebuffer->framebuffer);
