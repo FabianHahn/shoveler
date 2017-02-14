@@ -128,7 +128,7 @@ static ShovelerShader *generateShader(ShovelerScene *scene, ShovelerCamera *came
 	int cameraAttached = shovelerShaderAttachUniforms(shader, camera->uniforms);
 	int sceneAttached = shovelerShaderAttachUniforms(shader, scene->uniforms);
 
-	shovelerLogInfo("Generated shader for camera %p and model %p (uniforms: %d material, %d model, %d camera, %d scene).", camera, model, materialAttached, modelAttached, cameraAttached, sceneAttached);
+	shovelerLogInfo("Generated shader for scene %p, camera %p, model %p and material %p with shader program %d (uniforms: %d material, %d model, %d camera, %d scene).", scene, camera, model, material, material->program, materialAttached, modelAttached, cameraAttached, sceneAttached);
 	return shader;
 }
 
