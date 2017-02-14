@@ -6,6 +6,7 @@
 #include <glib.h>
 
 #include "camera.h"
+#include "drawable.h"
 #include "framebuffer.h"
 #include "light.h"
 #include "material.h"
@@ -16,6 +17,13 @@ typedef struct {
 	ShovelerLight *light;
 	ShovelerUniformMap *uniforms;
 	ShovelerMaterial *depthMaterial;
+	ShovelerDrawable *quad;
+	ShovelerFramebuffer *depthTextureGaussianFilterXFramebuffer;
+	ShovelerFramebuffer *depthTextureGaussianFilterYFramebuffer;
+	ShovelerMaterial *depthTextureGaussianFilterXMaterial;
+	ShovelerMaterial *depthTextureGaussianFilterYMaterial;
+	ShovelerModel *depthTextureGaussianFilterXModel;
+	ShovelerModel *depthTextureGaussianFilterYModel;
 	GQueue *models;
 	GHashTable *modelShaderCache;
 } ShovelerScene;
