@@ -12,10 +12,9 @@
 #include "model.h"
 #include "uniform_map.h"
 
-typedef struct {
+typedef struct ShovelerSceneStruct {
 	ShovelerLight *light;
 	ShovelerUniformMap *uniforms;
-	ShovelerMaterial *depthMaterial;
 	GQueue *models;
 	GHashTable *modelShaderCache;
 } ShovelerScene;
@@ -23,7 +22,8 @@ typedef struct {
 ShovelerScene *shovelerSceneCreate();
 void shovelerSceneAddLight(ShovelerScene *scene, ShovelerLight *light);
 void shovelerSceneAddModel(ShovelerScene *scene, ShovelerModel *model);
-int shovelerSceneRender(ShovelerScene *scene, ShovelerCamera *camera, ShovelerFramebuffer *framebuffer);
+int shovelerSceneRenderPass(ShovelerScene *scene, ShovelerCamera *camera, ShovelerMaterial *overrideMaterial, bool onlyShadowCasters);
+int shovelerSceneRenderFrame(ShovelerScene *scene, ShovelerCamera *camera, ShovelerFramebuffer *framebuffer);
 void shovelerSceneFree(ShovelerScene *scene);
 
 #endif

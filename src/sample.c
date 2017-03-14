@@ -119,7 +119,7 @@ void shovelerSampleRender(float dt)
 	cubeModel->rotation.values[2] += 0.5f * dt;
 	shovelerModelUpdateTransformation(cubeModel);
 
-	shovelerSceneRender(scene, camera, framebuffer);
+	shovelerSceneRenderFrame(scene, camera, framebuffer);
 	shovelerFramebufferBlitToDefault(framebuffer);
 }
 

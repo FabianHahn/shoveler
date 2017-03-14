@@ -1,6 +1,5 @@
 #include <stdlib.h> // malloc, free
 
-#include "material/depth.h"
 #include "log.h"
 #include "scene.h"
 #include "shader.h"
@@ -26,7 +25,6 @@ ShovelerScene *shovelerSceneCreate()
 	ShovelerScene *scene = malloc(sizeof(ShovelerScene));
 	scene->light = NULL;
 	scene->uniforms = shovelerUniformMapCreate();
-	scene->depthMaterial = shovelerMaterialDepthCreate();
 	scene->models = g_queue_new();
 	scene->modelShaderCache = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, freeModelShaderCache);
 	return scene;
@@ -43,43 +41,9 @@ void shovelerSceneAddModel(ShovelerScene *scene, ShovelerModel *model)
 	g_queue_push_tail(scene->models, model);
 }
 
-int shovelerSceneRender(ShovelerScene *scene, ShovelerCamera *camera, ShovelerFramebuffer *framebuffer)
+int shovelerSceneRenderPass(ShovelerScene *scene, ShovelerCamera *camera, ShovelerMaterial *overrideMaterial, bool onlyShadowCasters)
 {
 	int rendered = 0;
-
-	if(scene->light != NULL) {
-		shovelerFramebufferUse(scene->light->framebuffer);
-		glClear(GL_DEPTH_BUFFER_BIT);
-
-		for(GList *iter = scene->models->head; iter != NULL; iter = iter->next) {
-			ShovelerModel *model = iter->data;
-
-			if(!model->visible || !model->castsShadow) {
-				continue;
-			}
-
-			ShovelerShader *depthShader = getCachedShader(scene, scene->light->camera, model, scene->depthMaterial);
-
-			if(!shovelerShaderUse(depthShader)) {
-				shovelerLogWarning("Failed to use depth shader for model %p and light %p, hiding model.", model, scene->light->camera);
-				model->visible = false;
-			}
-
-			if(!shovelerModelRender(model)) {
-				shovelerLogWarning("Failed to depth render model %p for light %p, hiding model.", model, scene->light);
-				model->visible = false;
-				continue;
-			}
-
-			rendered++;
-		}
-	}
-
-	shovelerFramebufferUse(framebuffer);
-
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 	for(GList *iter = scene->models->head; iter != NULL; iter = iter->next) {
 		ShovelerModel *model = iter->data;
 
@@ -87,7 +51,11 @@ int shovelerSceneRender(ShovelerScene *scene, ShovelerCamera *camera, ShovelerFr
 			continue;
 		}
 
-		ShovelerShader *shader = getCachedShader(scene, camera, model, model->material);
+		if(onlyShadowCasters && !model->castsShadow) {
+			continue;
+		}
+
+		ShovelerShader *shader = getCachedShader(scene, camera, model, overrideMaterial == NULL ? model->material : overrideMaterial);
 
 		if(!shovelerShaderUse(shader)) {
 			shovelerLogWarning("Failed to use shader for model %p and camera %p, hiding model.", model, camera);
@@ -102,6 +70,22 @@ int shovelerSceneRender(ShovelerScene *scene, ShovelerCamera *camera, ShovelerFr
 
 		rendered++;
 	}
+	return rendered;
+}
+
+int shovelerSceneRenderFrame(ShovelerScene *scene, ShovelerCamera *camera, ShovelerFramebuffer *framebuffer)
+{
+	int rendered = 0;
+
+	if(scene->light != NULL) {
+		rendered += shovelerLightRender(scene->light, scene);
+	}
+
+	shovelerFramebufferUse(framebuffer);
+
+	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	rendered += shovelerSceneRenderPass(scene, camera, NULL, false);
 
 	return rendered;
 }
@@ -109,7 +93,6 @@ int shovelerSceneRender(ShovelerScene *scene, ShovelerCamera *camera, ShovelerFr
 void shovelerSceneFree(ShovelerScene *scene)
 {
 	shovelerLightFree(scene->light);
-	shovelerMaterialFree(scene->depthMaterial);
 	g_hash_table_destroy(scene->modelShaderCache);
 	for(GList *iter = scene->models->head; iter != NULL; iter = iter->next) {
 		shovelerModelFree(iter->data);
