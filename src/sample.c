@@ -24,6 +24,8 @@
 static void handleMovement(float dt);
 
 static GLFWwindow *window;
+static ShovelerSampler *nearestNeighborSampler;
+static ShovelerSampler *interpolatingSampler;
 static ShovelerMaterial *colorMaterial;
 static ShovelerMaterial *screenspaceTextureMaterial;
 static ShovelerMaterial *textureMaterial;
@@ -42,6 +44,9 @@ void shovelerSampleInit(GLFWwindow *sampleWindow, int width, int height, int sam
 {
 	window = sampleWindow;
 
+	nearestNeighborSampler = shovelerSamplerCreate(false, true);
+	interpolatingSampler = shovelerSamplerCreate(true, true);
+
 	colorMaterial = shovelerMaterialColorCreate((ShovelerVector4){0.7, 0.7, 0.7, 1.0});
 
 	ShovelerImage *image = shovelerImageCreate(2, 2, 3);
@@ -51,8 +56,7 @@ void shovelerSampleInit(GLFWwindow *sampleWindow, int width, int height, int sam
 	shovelerImageGet(image, 1, 0, 2) = 255;
 	ShovelerTexture *texture = shovelerTextureCreate2d(image);
 	shovelerTextureUpdate(texture);
-	ShovelerSampler *sampler = shovelerSamplerCreate(false, true);
-	textureMaterial = shovelerMaterialTextureCreate(texture, sampler);
+	textureMaterial = shovelerMaterialTextureCreate(texture, nearestNeighborSampler);
 
 	shovelerOpenGLCheckSuccess();
 
@@ -81,16 +85,17 @@ void shovelerSampleInit(GLFWwindow *sampleWindow, int width, int height, int sam
 	camera = shovelerCameraPerspectiveCreate((ShovelerVector3){0, 0, -5}, (ShovelerVector3){0, 0, 1}, (ShovelerVector3){0, 1, 0}, 2.0f * SHOVELER_PI * 50.0f / 360.0f, (float) width / height, 0.01, 1000);
 
 	ShovelerCamera *lightCamera = shovelerCameraPerspectiveCreate((ShovelerVector3){0, 5, -5}, (ShovelerVector3){0, -5, 5}, (ShovelerVector3){0, 1, 0}, 2.0f * SHOVELER_PI * 50.0f / 360.0f, 1.0f, 1, 100);
-	ShovelerLight *light = shovelerLightCreate(lightCamera, 512, 512, 1, 80.0f);
+	ShovelerLight *light = shovelerLightCreate(lightCamera, 1024, 1024, 1, 80.0f);
 	shovelerSceneAddLight(scene, light);
 
-	shovelerUniformMapInsert(scene->uniforms, "lightExponentialShadowFactor", shovelerUniformCreateFloat(80.0f));
+	shovelerUniformMapInsert(scene->uniforms, "isExponentialLiftedShadowMap", shovelerUniformCreateInt(1));
+	shovelerUniformMapInsert(scene->uniforms, "lightExponentialShadowFactor", shovelerUniformCreateFloat(light->exponentialFactor));
 	shovelerUniformMapInsert(scene->uniforms, "lightPosition", shovelerUniformCreateVector3Pointer(&lightCamera->position));
 	shovelerUniformMapInsert(scene->uniforms, "lightCamera", shovelerUniformCreateMatrixPointer(&lightCamera->transformation));
-	shovelerMaterialAttachTexture(textureMaterial, "shadowMap", light->depthFramebuffer->depthTarget, sampler);
-	shovelerMaterialAttachTexture(colorMaterial, "shadowMap", light->depthFramebuffer->depthTarget, sampler);
+	shovelerMaterialAttachTexture(textureMaterial, "shadowMap", light->filterYFramebuffer->renderTarget, interpolatingSampler);
+	shovelerMaterialAttachTexture(colorMaterial, "shadowMap", light->filterYFramebuffer->renderTarget, interpolatingSampler);
 
-	screenspaceTextureMaterial = shovelerMaterialScreenspaceTextureCreate(light->depthFramebuffer->depthTarget, false, true, sampler, false);
+	screenspaceTextureMaterial = shovelerMaterialScreenspaceTextureCreate(light->depthFramebuffer->depthTarget, false, true, nearestNeighborSampler, false);
 	ShovelerModel *screenQuadModel = shovelerModelCreate(quad, screenspaceTextureMaterial);
 	screenQuadModel->castsShadow = false;
 	screenQuadModel->translation.values[0] = -1.0;
@@ -98,7 +103,6 @@ void shovelerSampleInit(GLFWwindow *sampleWindow, int width, int height, int sam
 	screenQuadModel->scale.values[0] = 0.5;
 	screenQuadModel->scale.values[1] = 0.5;
 	shovelerModelUpdateTransformation(screenQuadModel);
-
 	shovelerSceneAddModel(scene, screenQuadModel);
 
 	shovelerOpenGLCheckSuccess();
@@ -132,6 +136,8 @@ void shovelerSampleTerminate()
 	shovelerMaterialFree(colorMaterial);
 	shovelerMaterialFree(screenspaceTextureMaterial);
 	shovelerMaterialFree(textureMaterial);
+	shovelerSamplerFree(interpolatingSampler);
+	shovelerSamplerFree(nearestNeighborSampler);
 }
 
 static void handleMovement(float dt)
