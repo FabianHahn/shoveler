@@ -3,7 +3,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include "cameras/perspective.h"
+#include "camera/perspective.h"
 #include "drawable/cube.h"
 #include "drawable/quad.h"
 #include "material/color.h"
@@ -78,9 +78,9 @@ void shovelerSampleInit(GLFWwindow *sampleWindow, int width, int height, int sam
 
 	framebuffer = shovelerFramebufferCreate(width, height, samples, 4, 8);
 
-	camera = shovelerCamerasPerspectiveCreate((ShovelerVector3){0, 0, -5}, (ShovelerVector3){0, 0, 1}, (ShovelerVector3){0, 1, 0}, 2.0f * SHOVELER_PI * 50.0f / 360.0f, (float) width / height, 0.01, 1000);
+	camera = shovelerCameraPerspectiveCreate((ShovelerVector3){0, 0, -5}, (ShovelerVector3){0, 0, 1}, (ShovelerVector3){0, 1, 0}, 2.0f * SHOVELER_PI * 50.0f / 360.0f, (float) width / height, 0.01, 1000);
 
-	ShovelerCamera *lightCamera = shovelerCamerasPerspectiveCreate((ShovelerVector3){0, 5, -5}, (ShovelerVector3){0, -5, 5}, (ShovelerVector3){0, 1, 0}, 2.0f * SHOVELER_PI * 50.0f / 360.0f, 1.0f, 1, 100);
+	ShovelerCamera *lightCamera = shovelerCameraPerspectiveCreate((ShovelerVector3){0, 5, -5}, (ShovelerVector3){0, -5, 5}, (ShovelerVector3){0, 1, 0}, 2.0f * SHOVELER_PI * 50.0f / 360.0f, 1.0f, 1, 100);
 	ShovelerLight *light = shovelerLightCreate(lightCamera, 512, 512, 1);
 	shovelerSceneAddLight(scene, light);
 
@@ -153,54 +153,54 @@ static void handleMovement(float dt)
 	float tiltAmountY = tiltFactor * cursorDiffY;
 
 	if(fabs(cursorDiffX) > eps) {
-		shovelerCamerasPerspectiveTiltRight(camera, tiltAmountX);
+		shovelerCameraPerspectiveTiltRight(camera, tiltAmountX);
 		moved = true;
 	}
 
 	if(fabs(cursorDiffY) > eps) {
-		shovelerCamerasPerspectiveTiltUp(camera, tiltAmountY);
+		shovelerCameraPerspectiveTiltUp(camera, tiltAmountY);
 		moved = true;
 	}
 
 	state = glfwGetKey(window, GLFW_KEY_W);
 	if(state == GLFW_PRESS) {
-		shovelerCamerasPerspectiveMoveForward(camera, moveAmount);
+		shovelerCameraPerspectiveMoveForward(camera, moveAmount);
 		moved = true;
 	}
 
 	state = glfwGetKey(window, GLFW_KEY_S);
 	if(state == GLFW_PRESS) {
-		shovelerCamerasPerspectiveMoveForward(camera, -moveAmount);
+		shovelerCameraPerspectiveMoveForward(camera, -moveAmount);
 		moved = true;
 	}
 
 	state = glfwGetKey(window, GLFW_KEY_A);
 	if(state == GLFW_PRESS) {
-		shovelerCamerasPerspectiveMoveRight(camera, -moveAmount);
+		shovelerCameraPerspectiveMoveRight(camera, -moveAmount);
 		moved = true;
 	}
 
 	state = glfwGetKey(window, GLFW_KEY_D);
 	if(state == GLFW_PRESS) {
-		shovelerCamerasPerspectiveMoveRight(camera, moveAmount);
+		shovelerCameraPerspectiveMoveRight(camera, moveAmount);
 		moved = true;
 	}
 
 	state = glfwGetKey(window, GLFW_KEY_SPACE);
 	if(state == GLFW_PRESS) {
-		shovelerCamerasPerspectiveMoveUp(camera, moveAmount);
+		shovelerCameraPerspectiveMoveUp(camera, moveAmount);
 		moved = true;
 	}
 
 	state = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL);
 	if(state == GLFW_PRESS) {
-		shovelerCamerasPerspectiveMoveUp(camera, -moveAmount);
+		shovelerCameraPerspectiveMoveUp(camera, -moveAmount);
 		moved = true;
 	}
 
 	if(moved) {
 		shovelerLogTrace("Camera at position (%f, %f, %f)", camera->position.values[0], camera->position.values[1], camera->position.values[2]);
-		shovelerCamerasPerspectiveUpdateTransformation(camera);
+		shovelerCameraPerspectiveUpdateTransformation(camera);
 	}
 
 	previousCursorX = newCursorX;
