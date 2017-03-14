@@ -18,6 +18,5 @@ void shovelerCamerasPerspectiveMoveRight(ShovelerCamera *camera, float amount);
 void shovelerCamerasPerspectiveMoveUp(ShovelerCamera *camera, float amount);
 void shovelerCamerasPerspectiveTiltUp(ShovelerCamera *camera, float amount);
 void shovelerCamerasPerspectiveTiltRight(ShovelerCamera *camera, float amount);
-void shovelerCamerasPerspectiveFree(ShovelerCamera *camera);
 
 #endif
