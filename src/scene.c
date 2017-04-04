@@ -154,12 +154,16 @@ static MaterialShaderCache *createMaterialShaderCache()
 
 static void freeModelShaderCache(void *cachePointer)
 {
-	free(cachePointer);
+	ModelShaderCache *modelShaderCache = (ModelShaderCache *) cachePointer;
+	g_hash_table_destroy(modelShaderCache->materialShaderCache);
+	free(modelShaderCache);
 }
 
 static void freeMaterialShaderCache(void *cachePointer)
 {
-	free(cachePointer);
+	MaterialShaderCache *materialShaderCache = (MaterialShaderCache *) cachePointer;
+	g_hash_table_destroy(materialShaderCache->shaders);
+	free(materialShaderCache);
 }
 
 static void freeShader(void *shaderPointer)
