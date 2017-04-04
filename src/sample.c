@@ -77,9 +77,6 @@ void shovelerSampleInit(GLFWwindow *sampleWindow, int width, int height, int sam
 	shovelerSceneAddModel(scene, groundModel);
 	shovelerSceneAddModel(scene, cubeModel);
 
-	shovelerUniformMapInsert(scene->uniforms, "lightDirection", shovelerUniformCreateVector3(shovelerVector3Normalize((ShovelerVector3){0, 0, 1})));
-	shovelerUniformMapInsert(scene->uniforms, "lightColor", shovelerUniformCreateVector4((ShovelerVector4){1, 1, 1, 1}));
-
 	framebuffer = shovelerFramebufferCreate(width, height, samples, 4, 8);
 
 	camera = shovelerCameraPerspectiveCreate((ShovelerVector3){0, 0, -5}, (ShovelerVector3){0, 0, 1}, (ShovelerVector3){0, 1, 0}, 2.0f * SHOVELER_PI * 50.0f / 360.0f, (float) width / height, 0.01, 1000);
@@ -87,11 +84,6 @@ void shovelerSampleInit(GLFWwindow *sampleWindow, int width, int height, int sam
 	ShovelerCamera *lightCamera = shovelerCameraPerspectiveCreate((ShovelerVector3){0, 5, -5}, (ShovelerVector3){0, -5, 5}, (ShovelerVector3){0, 1, 0}, 2.0f * SHOVELER_PI * 50.0f / 360.0f, 1.0f, 1, 100);
 	ShovelerLight *light = shovelerLightCreate(lightCamera, 1024, 1024, 1, 80.0f);
 	shovelerSceneAddLight(scene, light);
-
-	shovelerUniformMapInsert(scene->uniforms, "isExponentialLiftedShadowMap", shovelerUniformCreateInt(1));
-	shovelerUniformMapInsert(scene->uniforms, "lightExponentialShadowFactor", shovelerUniformCreateFloat(light->exponentialFactor));
-	shovelerUniformMapInsert(scene->uniforms, "lightPosition", shovelerUniformCreateVector3Pointer(&lightCamera->position));
-	shovelerUniformMapInsert(scene->uniforms, "lightCamera", shovelerUniformCreateMatrixPointer(&lightCamera->transformation));
 	shovelerMaterialAttachTexture(textureMaterial, "shadowMap", light->filterYFramebuffer->renderTarget, interpolatingSampler);
 	shovelerMaterialAttachTexture(colorMaterial, "shadowMap", light->filterYFramebuffer->renderTarget, interpolatingSampler);
 

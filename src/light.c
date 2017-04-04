@@ -34,6 +34,7 @@ ShovelerLight *shovelerLightCreate(ShovelerCamera *camera, int width, int height
 	shovelerSceneAddModel(light->filterScene, light->filterModel);
 
 	light->exponentialFactor = exponentialFactor;
+	light->color = (ShovelerVector4){1.0, 1.0, 1.0, 1.0};
 
 	return light;
 }

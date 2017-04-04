@@ -34,6 +34,11 @@ void shovelerSceneAddLight(ShovelerScene *scene, ShovelerLight *light)
 {
 	shovelerLightFree(scene->light);
 	scene->light = light;
+	shovelerUniformMapInsert(scene->uniforms, "isExponentialLiftedShadowMap", shovelerUniformCreateInt(1));
+	shovelerUniformMapInsert(scene->uniforms, "lightExponentialShadowFactor", shovelerUniformCreateFloat(light->exponentialFactor));
+	shovelerUniformMapInsert(scene->uniforms, "lightColor", shovelerUniformCreateVector4Pointer(&light->color));
+	shovelerUniformMapInsert(scene->uniforms, "lightPosition", shovelerUniformCreateVector3Pointer(&light->camera->position));
+	shovelerUniformMapInsert(scene->uniforms, "lightCamera", shovelerUniformCreateMatrixPointer(&light->camera->transformation));
 }
 
 void shovelerSceneAddModel(ShovelerScene *scene, ShovelerModel *model)

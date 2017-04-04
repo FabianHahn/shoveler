@@ -23,6 +23,7 @@ typedef struct {
 	ShovelerModel *filterModel;
 	struct ShovelerSceneStruct *filterScene;
 	float exponentialFactor;
+	ShovelerVector4 color;
 } ShovelerLight;
 
 ShovelerLight *shovelerLightCreate(ShovelerCamera *camera, int width, int height, GLsizei samples, float exponentialFactor);
