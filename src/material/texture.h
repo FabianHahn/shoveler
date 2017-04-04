@@ -5,6 +5,6 @@
 #include "sampler.h"
 #include "texture.h"
 
-ShovelerMaterial *shovelerMaterialTextureCreate(ShovelerTexture *texture, ShovelerSampler *sampler);
+ShovelerMaterial *shovelerMaterialTextureCreate(ShovelerTexture *texture, bool manageTexture, ShovelerSampler *sampler, bool manageSampler);
 
 #endif

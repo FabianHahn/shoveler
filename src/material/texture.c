@@ -5,7 +5,9 @@
 
 typedef struct {
 	ShovelerTexture *texture;
+	bool manageTexture;
 	ShovelerSampler *sampler;
+	bool manageSampler;
 } ShovelerMaterialTextureData;
 
 static void freeMaterialTextureData(ShovelerMaterial *material);
@@ -92,7 +94,7 @@ static const char *fragmentShaderSource =
 		"	fragmentColor = clamp(ambientFactor * color + exponentialShadowFactor * diffuseFactor * color + exponentialShadowFactor * specularFactor * lightColor, 0.0, 1.0);\n"
 		"}\n";
 
-ShovelerMaterial *shovelerMaterialTextureCreate(ShovelerTexture *texture, ShovelerSampler *sampler)
+ShovelerMaterial *shovelerMaterialTextureCreate(ShovelerTexture *texture, bool manageTexture, ShovelerSampler *sampler, bool manageSampler)
 {
 	GLuint vertexShaderObject = shovelerShaderProgramCompileFromString(vertexShaderSource, GL_VERTEX_SHADER);
 	GLuint fragmentShaderObject = shovelerShaderProgramCompileFromString(fragmentShaderSource, GL_FRAGMENT_SHADER);
@@ -102,7 +104,9 @@ ShovelerMaterial *shovelerMaterialTextureCreate(ShovelerTexture *texture, Shovel
 
 	ShovelerMaterialTextureData *materialTextureData = malloc(sizeof(ShovelerMaterialTextureData));
 	materialTextureData->texture = texture;
+	materialTextureData->manageTexture = manageTexture;
 	materialTextureData->sampler = sampler;
+	materialTextureData->manageSampler = manageSampler;
 
 	material->freeData = freeMaterialTextureData;
 	material->data = materialTextureData;
@@ -115,7 +119,11 @@ ShovelerMaterial *shovelerMaterialTextureCreate(ShovelerTexture *texture, Shovel
 static void freeMaterialTextureData(ShovelerMaterial *material)
 {
 	ShovelerMaterialTextureData *materialTextureData = material->data;
-	shovelerSamplerFree(materialTextureData->sampler);
-	shovelerTextureFree(materialTextureData->texture);
+	if(materialTextureData->manageSampler) {
+		shovelerSamplerFree(materialTextureData->sampler);
+	}
+	if(materialTextureData->manageTexture) {
+		shovelerTextureFree(materialTextureData->texture);
+	}
 	free(materialTextureData);
 }
