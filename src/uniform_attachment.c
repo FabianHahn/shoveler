@@ -11,9 +11,9 @@ ShovelerUniformAttachment *shovelerUniformAttachmentCreate(ShovelerUniform *unif
 	return uniformAttachment;
 }
 
-bool shovelerUniformAttachmentUse(ShovelerUniformAttachment *uniformAttachment)
+bool shovelerUniformAttachmentUse(ShovelerUniformAttachment *uniformAttachment, GLint *textureUnitIndexCounter)
 {
-	return shovelerUniformUse(uniformAttachment->uniform, uniformAttachment->location);
+	return shovelerUniformUse(uniformAttachment->uniform, uniformAttachment->location, textureUnitIndexCounter);
 }
 
 void shovelerUniformAttachmentFree(ShovelerUniformAttachment *uniformAttachment)

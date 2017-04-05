@@ -53,30 +53,13 @@ bool shovelerShaderUse(ShovelerShader *shader)
 {
 	glUseProgram(shader->material->program);
 
-	GLint unitIndex = 0;
-	GList *samplerIter = shader->material->samplers->head;
-	for(GList *iter = shader->material->textures->head; iter != NULL; iter = iter->next, samplerIter = samplerIter->next, unitIndex++) {
-		assert(samplerIter != NULL);
-
-		ShovelerTexture *texture = iter->data;
-		if(!shovelerTextureUse(texture, unitIndex)) {
-			shovelerLogError("Failed to bind texture %p when trying to use shader", texture);
-			return false;
-		}
-
-		ShovelerSampler *sampler = samplerIter->data;
-		if(!shovelerSamplerUse(sampler, unitIndex)) {
-			shovelerLogError("Failed to bind sampler %p when trying to use shader", sampler);
-			return false;
-		}
-	}
-
+	GLint textureUnitIndexCounter = 0;
 	GHashTableIter iter;
 	char *name;
 	ShovelerUniformAttachment *uniformAttachment;
 	g_hash_table_iter_init(&iter, shader->attachments);
 	while(g_hash_table_iter_next(&iter, (gpointer *) &name, (gpointer *) &uniformAttachment)) {
-		if(!shovelerUniformAttachmentUse(uniformAttachment)) {
+		if(!shovelerUniformAttachmentUse(uniformAttachment, &textureUnitIndexCounter)) {
 			shovelerLogError("Failed to use uniform attachment '%s' when trying to use shader", name);
 			return false;
 		}

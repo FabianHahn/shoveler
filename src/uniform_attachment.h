@@ -9,7 +9,7 @@ typedef struct {
 } ShovelerUniformAttachment;
 
 ShovelerUniformAttachment *shovelerUniformAttachmentCreate(ShovelerUniform *uniform, GLint location);
-bool shovelerUniformAttachmentUse(ShovelerUniformAttachment *uniformAttachment);
+bool shovelerUniformAttachmentUse(ShovelerUniformAttachment *uniformAttachment, GLint *textureUnitIndexCounter);
 void shovelerUniformAttachmentFree(ShovelerUniformAttachment *uniformAttachment);
 
 #endif

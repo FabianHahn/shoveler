@@ -84,8 +84,6 @@ void shovelerSampleInit(GLFWwindow *sampleWindow, int width, int height, int sam
 	ShovelerCamera *lightCamera = shovelerCameraPerspectiveCreate((ShovelerVector3){0, 5, -5}, (ShovelerVector3){0, -5, 5}, (ShovelerVector3){0, 1, 0}, 2.0f * SHOVELER_PI * 50.0f / 360.0f, 1.0f, 1, 100);
 	ShovelerLight *light = shovelerLightCreate(lightCamera, 1024, 1024, 1, 80.0f);
 	shovelerSceneAddLight(scene, light);
-	shovelerMaterialAttachTexture(textureMaterial, "shadowMap", light->filterYFramebuffer->renderTarget, interpolatingSampler);
-	shovelerMaterialAttachTexture(colorMaterial, "shadowMap", light->filterYFramebuffer->renderTarget, interpolatingSampler);
 
 	screenspaceTextureMaterial = shovelerMaterialScreenspaceTextureCreate(light->depthFramebuffer->depthTarget, false, true, nearestNeighborSampler, false);
 	ShovelerModel *screenQuadModel = shovelerModelCreate(quad, screenspaceTextureMaterial);

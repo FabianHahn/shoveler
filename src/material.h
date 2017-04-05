@@ -14,14 +14,11 @@ typedef void (ShovelerMaterialFreeDataFunction)(struct ShovelerMaterialStruct *m
 typedef struct ShovelerMaterialStruct {
 	GLuint program;
 	ShovelerUniformMap *uniforms;
-	GQueue *textures;
-	GQueue *samplers;
 	ShovelerMaterialFreeDataFunction *freeData;
 	void *data;
 } ShovelerMaterial;
 
 ShovelerMaterial *shovelerMaterialCreate(GLuint program);
-bool shovelerMaterialAttachTexture(ShovelerMaterial *material, const char *name, ShovelerTexture *texture, ShovelerSampler *sampler);
 void shovelerMaterialFree(ShovelerMaterial *material);
 
 #endif

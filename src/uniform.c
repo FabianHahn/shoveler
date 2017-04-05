@@ -100,11 +100,12 @@ ShovelerUniform *shovelerUniformCreateMatrixPointer(ShovelerMatrix *value)
 	return uniform;
 }
 
-ShovelerUniform *shovelerUniformCreateTextureUnitIndex(GLint value)
+ShovelerUniform *shovelerUniformCreateTexture(ShovelerTexture *texture, ShovelerSampler *sampler)
 {
 	ShovelerUniform *uniform = malloc(sizeof(ShovelerUniform));
-	uniform->type = SHOVELER_UNIFORM_TYPE_TEXTURE_UNIT_INDEX;
-	uniform->value.textureUnitIndexValue = value;
+	uniform->type = SHOVELER_UNIFORM_TYPE_TEXTURE;
+	uniform->value.textureValue.texture = texture;
+	uniform->value.textureValue.sampler = sampler;
 	return uniform;
 }
 
@@ -116,7 +117,7 @@ ShovelerUniform *shovelerUniformCopy(const ShovelerUniform *uniform)
 	return newUniform;
 }
 
-bool shovelerUniformUse(ShovelerUniform *uniform, GLint location)
+bool shovelerUniformUse(ShovelerUniform *uniform, GLint location, GLint *textureUnitIndexCounter)
 {
 	switch(uniform->type) {
 		case SHOVELER_UNIFORM_TYPE_INT:
@@ -155,9 +156,21 @@ bool shovelerUniformUse(ShovelerUniform *uniform, GLint location)
 		case SHOVELER_UNIFORM_TYPE_MATRIX_POINTER:
 			glUniformMatrix4fv(location, 1, GL_TRUE, uniform->value.matrixPointerValue->values);
 		break;
-		case SHOVELER_UNIFORM_TYPE_TEXTURE_UNIT_INDEX:
-			glUniform1i(location, uniform->value.textureUnitIndexValue);
-		break;
+		case SHOVELER_UNIFORM_TYPE_TEXTURE: {
+			int textureUnitIndex = (*textureUnitIndexCounter)++;
+
+			if(!shovelerTextureUse(uniform->value.textureValue.texture, textureUnitIndex)) {
+				shovelerLogError("Failed to use texture %p at unit index %d when trying to use texture uniform %d at location %d.", uniform->value.textureValue.texture, textureUnitIndex, uniform, location);
+				return false;
+			}
+
+			if(!shovelerSamplerUse(uniform->value.textureValue.sampler, textureUnitIndex)) {
+				shovelerLogError("Failed to use sampler %p at unit index %d when trying to use texture uniform %d at location %d.", uniform->value.textureValue.sampler, textureUnitIndex, uniform, location);
+				return false;
+			}
+
+			glUniform1i(location, textureUnitIndex);
+		} break;
 	}
 
 	return shovelerOpenGLCheckSuccess();

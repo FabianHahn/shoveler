@@ -24,6 +24,7 @@ ShovelerScene *shovelerSceneCreate()
 {
 	ShovelerScene *scene = malloc(sizeof(ShovelerScene));
 	scene->light = NULL;
+	scene->shadowMapSampler = shovelerSamplerCreate(true, true);
 	scene->uniforms = shovelerUniformMapCreate();
 	scene->models = g_queue_new();
 	scene->modelShaderCache = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, freeModelShaderCache);
@@ -39,6 +40,7 @@ void shovelerSceneAddLight(ShovelerScene *scene, ShovelerLight *light)
 	shovelerUniformMapInsert(scene->uniforms, "lightColor", shovelerUniformCreateVector4Pointer(&light->color));
 	shovelerUniformMapInsert(scene->uniforms, "lightPosition", shovelerUniformCreateVector3Pointer(&light->camera->position));
 	shovelerUniformMapInsert(scene->uniforms, "lightCamera", shovelerUniformCreateMatrixPointer(&light->camera->transformation));
+	shovelerUniformMapInsert(scene->uniforms, "shadowMap", shovelerUniformCreateTexture(light->filterYFramebuffer->renderTarget, scene->shadowMapSampler));
 }
 
 void shovelerSceneAddModel(ShovelerScene *scene, ShovelerModel *model)
@@ -97,6 +99,7 @@ int shovelerSceneRenderFrame(ShovelerScene *scene, ShovelerCamera *camera, Shove
 
 void shovelerSceneFree(ShovelerScene *scene)
 {
+	shovelerSamplerFree(scene->shadowMapSampler);
 	shovelerLightFree(scene->light);
 	g_hash_table_destroy(scene->modelShaderCache);
 	for(GList *iter = scene->models->head; iter != NULL; iter = iter->next) {

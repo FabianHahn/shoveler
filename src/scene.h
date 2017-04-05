@@ -10,10 +10,12 @@
 #include "light.h"
 #include "material.h"
 #include "model.h"
+#include "sampler.h"
 #include "uniform_map.h"
 
 typedef struct ShovelerSceneStruct {
 	ShovelerLight *light;
+	ShovelerSampler *shadowMapSampler;
 	ShovelerUniformMap *uniforms;
 	GQueue *models;
 	GHashTable *modelShaderCache;

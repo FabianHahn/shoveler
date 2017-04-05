@@ -93,7 +93,7 @@ ShovelerMaterial *shovelerMaterialDepthTextureGaussianFilterGaussianFilterCreate
 	shovelerUniformMapInsert(material->uniforms, "liftExponentialFactor", shovelerUniformCreateFloatPointer(&materialDepthTextureGaussianFilterData->liftExponentialFactor));
 	shovelerUniformMapInsert(material->uniforms, "filterDirection", shovelerUniformCreateVector2Pointer(&materialDepthTextureGaussianFilterData->filterDirection));
 	shovelerUniformMapInsert(material->uniforms, "inverseTextureSize", shovelerUniformCreateVector2(shovelerVector2(1.0 / width, 1.0 / height)));
-	shovelerMaterialAttachTexture(material, "textureImage", texture, materialDepthTextureGaussianFilterData->sampler);
+	shovelerUniformMapInsert(material->uniforms, "textureImage", shovelerUniformCreateTexture(texture, materialDepthTextureGaussianFilterData->sampler));
 
 	return material;
 }

@@ -5,6 +5,7 @@
 
 #include <glad/glad.h>
 
+#include "sampler.h"
 #include "texture.h"
 #include "types.h"
 
@@ -21,8 +22,13 @@ typedef enum {
 	SHOVELER_UNIFORM_TYPE_VECTOR4_POINTER,
 	SHOVELER_UNIFORM_TYPE_MATRIX,
 	SHOVELER_UNIFORM_TYPE_MATRIX_POINTER,
-	SHOVELER_UNIFORM_TYPE_TEXTURE_UNIT_INDEX
+	SHOVELER_UNIFORM_TYPE_TEXTURE
 } ShovelerUniformType;
+
+typedef struct {
+	ShovelerTexture *texture;
+	ShovelerSampler *sampler;
+} ShovelerUniformTexture;
 
 typedef union {
 	int intValue;
@@ -37,7 +43,7 @@ typedef union {
 	ShovelerVector4 *vector4PointerValue;
 	ShovelerMatrix matrixValue;
 	ShovelerMatrix *matrixPointerValue;
-	GLint textureUnitIndexValue;
+	ShovelerUniformTexture textureValue;
 } ShovelerUniformValue;
 
 typedef struct {
@@ -57,9 +63,9 @@ ShovelerUniform *shovelerUniformCreateVector4(ShovelerVector4 value);
 ShovelerUniform *shovelerUniformCreateVector4Pointer(ShovelerVector4 *value);
 ShovelerUniform *shovelerUniformCreateMatrix(ShovelerMatrix value);
 ShovelerUniform *shovelerUniformCreateMatrixPointer(ShovelerMatrix *value);
-ShovelerUniform *shovelerUniformCreateTextureUnitIndex(GLint value);
+ShovelerUniform *shovelerUniformCreateTexture(ShovelerTexture *texture, ShovelerSampler *sampler);
 ShovelerUniform *shovelerUniformCopy(const ShovelerUniform *uniform);
-bool shovelerUniformUse(ShovelerUniform *uniform, GLint location);
+bool shovelerUniformUse(ShovelerUniform *uniform, GLint location, GLint *textureUnitIndexCounter);
 void shovelerUniformFree(ShovelerUniform *uniform);
 
 #endif

@@ -73,7 +73,7 @@ ShovelerMaterial *shovelerMaterialScreenspaceTextureCreate(ShovelerTexture *text
 	material->data = materialScreenspaceTextureData;
 
 	shovelerUniformMapInsert(material->uniforms, "depthTexture", shovelerUniformCreateInt(depthTexture ? 1 : 0));
-	shovelerMaterialAttachTexture(material, "textureImage", texture, sampler);
+	shovelerUniformMapInsert(material->uniforms, "textureImage", shovelerUniformCreateTexture(texture, sampler));
 
 	return material;
 }

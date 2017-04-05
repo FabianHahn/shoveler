@@ -111,7 +111,7 @@ ShovelerMaterial *shovelerMaterialTextureCreate(ShovelerTexture *texture, bool m
 	material->freeData = freeMaterialTextureData;
 	material->data = materialTextureData;
 
-	shovelerMaterialAttachTexture(material, "textureImage", texture, sampler);
+	shovelerUniformMapInsert(material->uniforms, "textureImage", shovelerUniformCreateTexture(texture, sampler));
 
 	return material;
 }
