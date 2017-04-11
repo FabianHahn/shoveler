@@ -10,6 +10,8 @@
 ShovelerLight *shovelerLightCreate(ShovelerCamera *camera, int width, int height, GLsizei samples, float exponentialFactor)
 {
 	ShovelerLight *light = malloc(sizeof(ShovelerLight));
+	light->shadowMapSampler = shovelerSamplerCreate(true, true);
+	light->uniforms = shovelerUniformMapCreate();
 	light->camera = camera;
 	light->filterCamera = shovelerCameraIdentityCreate();
 
@@ -35,6 +37,13 @@ ShovelerLight *shovelerLightCreate(ShovelerCamera *camera, int width, int height
 
 	light->exponentialFactor = exponentialFactor;
 	light->color = (ShovelerVector4){1.0, 1.0, 1.0, 1.0};
+
+	shovelerUniformMapInsert(light->uniforms, "isExponentialLiftedShadowMap", shovelerUniformCreateInt(1));
+	shovelerUniformMapInsert(light->uniforms, "lightExponentialShadowFactor", shovelerUniformCreateFloat(light->exponentialFactor));
+	shovelerUniformMapInsert(light->uniforms, "lightColor", shovelerUniformCreateVector4Pointer(&light->color));
+	shovelerUniformMapInsert(light->uniforms, "lightPosition", shovelerUniformCreateVector3Pointer(&light->camera->position));
+	shovelerUniformMapInsert(light->uniforms, "lightCamera", shovelerUniformCreateMatrixPointer(&light->camera->transformation));
+	shovelerUniformMapInsert(light->uniforms, "shadowMap", shovelerUniformCreateTexture(light->filterYFramebuffer->renderTarget, light->shadowMapSampler));
 
 	return light;
 }
@@ -78,5 +87,7 @@ void shovelerLightFree(ShovelerLight *light)
 	shovelerFramebufferFree(light->depthFramebuffer);
 	shovelerCameraFree(light->filterCamera);
 	shovelerCameraFree(light->camera);
+	shovelerUniformMapFree(light->uniforms);
+	shovelerSamplerFree(light->shadowMapSampler);
 	free(light);
 }
