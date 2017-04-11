@@ -56,17 +56,17 @@ int shovelerLightRender(ShovelerLight *light, ShovelerScene *scene)
 	shovelerFramebufferUse(light->depthFramebuffer);
 	glClear(GL_DEPTH_BUFFER_BIT);
 
-	rendered += shovelerSceneRenderPass(scene, light->camera, light->depthMaterial, true);
+	rendered += shovelerSceneRenderPass(scene, light->camera, NULL, light->depthMaterial, true);
 
 	// filter depth map in X direction and lift exponentially
 	shovelerFramebufferUse(light->filterXFramebuffer);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	rendered += shovelerSceneRenderPass(light->filterScene, light->filterCamera, light->filterXMaterial, true);
+	rendered += shovelerSceneRenderPass(light->filterScene, light->filterCamera, NULL, light->filterXMaterial, true);
 
 	// filter depth map in Y direction
 	shovelerFramebufferUse(light->filterYFramebuffer);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	rendered += shovelerSceneRenderPass(light->filterScene, light->filterCamera, light->filterYMaterial, true);
+	rendered += shovelerSceneRenderPass(light->filterScene, light->filterCamera, NULL, light->filterYMaterial, true);
 
 	return rendered;
 }

@@ -15,16 +15,16 @@
 
 typedef struct ShovelerSceneStruct {
 	ShovelerLight *light;
-	ShovelerSampler *shadowMapSampler;
 	ShovelerUniformMap *uniforms;
 	GQueue *models;
-	GHashTable *modelShaderCache;
+	GHashTable *cameraShaderCache;
 } ShovelerScene;
 
 ShovelerScene *shovelerSceneCreate();
 void shovelerSceneAddLight(ShovelerScene *scene, ShovelerLight *light);
 void shovelerSceneAddModel(ShovelerScene *scene, ShovelerModel *model);
-int shovelerSceneRenderPass(ShovelerScene *scene, ShovelerCamera *camera, ShovelerMaterial *overrideMaterial, bool onlyShadowCasters);
+int shovelerSceneRenderPass(ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerMaterial *overrideMaterial, bool onlyShadowCasters);
+int shovelerSceneRenderLight(ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerFramebuffer *framebuffer);
 int shovelerSceneRenderFrame(ShovelerScene *scene, ShovelerCamera *camera, ShovelerFramebuffer *framebuffer);
 void shovelerSceneFree(ShovelerScene *scene);
 
