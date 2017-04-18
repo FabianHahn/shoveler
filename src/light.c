@@ -27,6 +27,7 @@ ShovelerLight *shovelerLightCreate(ShovelerCamera *camera, int width, int height
 
 	light->filterQuad = shovelerDrawableQuadCreate();
 	light->filterModel = shovelerModelCreate(light->filterQuad, NULL);
+	light->filterModel->screenspace = true;
 	light->filterModel->translation.values[0] = -1.0;
 	light->filterModel->translation.values[1] = -1.0;
 	light->filterModel->scale.values[0] = 2.0;
@@ -56,17 +57,17 @@ int shovelerLightRender(ShovelerLight *light, ShovelerScene *scene)
 	shovelerFramebufferUse(light->depthFramebuffer);
 	glClear(GL_DEPTH_BUFFER_BIT);
 
-	rendered += shovelerSceneRenderModels(scene, light->camera, NULL, light->depthMaterial, true);
+	rendered += shovelerSceneRenderModels(scene, light->camera, NULL, light->depthMaterial, false, true);
 
 	// filter depth map in X direction and lift exponentially
 	shovelerFramebufferUse(light->filterXFramebuffer);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	rendered += shovelerSceneRenderModels(light->filterScene, light->filterCamera, NULL, light->filterXMaterial, true);
+	rendered += shovelerSceneRenderModels(light->filterScene, light->filterCamera, NULL, light->filterXMaterial, true, true);
 
 	// filter depth map in Y direction
 	shovelerFramebufferUse(light->filterYFramebuffer);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	rendered += shovelerSceneRenderModels(light->filterScene, light->filterCamera, NULL, light->filterYMaterial, true);
+	rendered += shovelerSceneRenderModels(light->filterScene, light->filterCamera, NULL, light->filterYMaterial, true, true);
 
 	return rendered;
 }

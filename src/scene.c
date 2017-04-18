@@ -30,7 +30,7 @@ void shovelerSceneAddModel(ShovelerScene *scene, ShovelerModel *model)
 	g_queue_push_tail(scene->models, model);
 }
 
-int shovelerSceneRenderPass(ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerMaterial *overrideMaterial, bool onlyShadowCasters)
+int shovelerSceneRenderModels(ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerMaterial *overrideMaterial, bool screenspace, bool onlyShadowCasters)
 {
 	int rendered = 0;
 	for(GList *iter = scene->models->head; iter != NULL; iter = iter->next) {
@@ -40,7 +40,11 @@ int shovelerSceneRenderPass(ShovelerScene *scene, ShovelerCamera *camera, Shovel
 			continue;
 		}
 
-		if(onlyShadowCasters && !model->castsShadow) {
+		if(model->screenspace != screenspace) {
+			continue;
+		}
+
+		if(onlyShadowCasters && !model->screenspace && !model->castsShadow) {
 			continue;
 		}
 
@@ -62,7 +66,7 @@ int shovelerSceneRenderPass(ShovelerScene *scene, ShovelerCamera *camera, Shovel
 	return rendered;
 }
 
-int shovelerSceneRenderPass(ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerFramebuffer *framebuffer, bool firstLight)
+int shovelerSceneRenderPass(ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerFramebuffer *framebuffer, ShovelerSceneRenderMode renderMode)
 {
 	int rendered = 0;
 
@@ -74,14 +78,23 @@ int shovelerSceneRenderPass(ShovelerScene *scene, ShovelerCamera *camera, Shovel
 
 	glEnable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
-	if(firstLight) {
-		glBlendFunc(GL_ONE, GL_ZERO);
-		glDepthFunc(GL_LESS);
-	} else {
-		glBlendFunc(GL_ONE, GL_ONE);
-		glDepthFunc(GL_EQUAL);
+	bool screenspace = false;
+	switch(renderMode) {
+		case SHOVELER_SCENE_RENDER_MODE_OCCLUDED:
+			glBlendFunc(GL_ONE, GL_ZERO);
+			glDepthFunc(GL_LESS);
+		break;
+		case SHOVELER_SCENE_RENDER_MODE_SCREENSPACE:
+			glBlendFunc(GL_ONE, GL_ZERO);
+			glDepthFunc(GL_ALWAYS);
+			screenspace = true;
+		break;
+		case SHOVELER_SCENE_RENDER_MODE_ADDITIVE_LIGHT:
+			glBlendFunc(GL_ONE, GL_ONE);
+			glDepthFunc(GL_EQUAL);
+		break;
 	}
-	rendered += shovelerSceneRenderModels(scene, camera, light, NULL, false);
+	rendered += shovelerSceneRenderModels(scene, camera, light, NULL, screenspace, false);
 
 	return rendered;
 }
@@ -94,7 +107,8 @@ int shovelerSceneRenderFrame(ShovelerScene *scene, ShovelerCamera *camera, Shove
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	rendered += shovelerSceneRenderPass(scene, camera, scene->light, framebuffer, true);
+	rendered += shovelerSceneRenderPass(scene, camera, scene->light, framebuffer, SHOVELER_SCENE_RENDER_MODE_OCCLUDED);
+	rendered += shovelerSceneRenderPass(scene, camera, NULL, framebuffer, SHOVELER_SCENE_RENDER_MODE_SCREENSPACE);
 
 	return rendered;
 }
