@@ -62,7 +62,7 @@ int shovelerSceneRenderPass(ShovelerScene *scene, ShovelerCamera *camera, Shovel
 	return rendered;
 }
 
-int shovelerSceneRenderLight(ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerFramebuffer *framebuffer)
+int shovelerSceneRenderPass(ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerFramebuffer *framebuffer)
 {
 	int rendered = 0;
 
@@ -74,14 +74,14 @@ int shovelerSceneRenderLight(ShovelerScene *scene, ShovelerCamera *camera, Shove
 
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	rendered += shovelerSceneRenderPass(scene, camera, light, NULL, false);
+	rendered += shovelerSceneRenderModels(scene, camera, light, NULL, false);
 
 	return rendered;
 }
 
 int shovelerSceneRenderFrame(ShovelerScene *scene, ShovelerCamera *camera, ShovelerFramebuffer *framebuffer)
 {
-	return shovelerSceneRenderLight(scene, camera, scene->light, framebuffer);
+	return shovelerSceneRenderPass(scene, camera, scene->light, framebuffer);
 }
 
 void shovelerSceneFree(ShovelerScene *scene)
