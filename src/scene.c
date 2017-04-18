@@ -62,7 +62,7 @@ int shovelerSceneRenderPass(ShovelerScene *scene, ShovelerCamera *camera, Shovel
 	return rendered;
 }
 
-int shovelerSceneRenderPass(ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerFramebuffer *framebuffer)
+int shovelerSceneRenderPass(ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerFramebuffer *framebuffer, bool firstLight)
 {
 	int rendered = 0;
 
@@ -72,8 +72,15 @@ int shovelerSceneRenderPass(ShovelerScene *scene, ShovelerCamera *camera, Shovel
 
 	shovelerFramebufferUse(framebuffer);
 
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_BLEND);
+	glEnable(GL_DEPTH_TEST);
+	if(firstLight) {
+		glBlendFunc(GL_ONE, GL_ZERO);
+		glDepthFunc(GL_LESS);
+	} else {
+		glBlendFunc(GL_ONE, GL_ONE);
+		glDepthFunc(GL_EQUAL);
+	}
 	rendered += shovelerSceneRenderModels(scene, camera, light, NULL, false);
 
 	return rendered;
@@ -81,7 +88,15 @@ int shovelerSceneRenderPass(ShovelerScene *scene, ShovelerCamera *camera, Shovel
 
 int shovelerSceneRenderFrame(ShovelerScene *scene, ShovelerCamera *camera, ShovelerFramebuffer *framebuffer)
 {
-	return shovelerSceneRenderPass(scene, camera, scene->light, framebuffer);
+	int rendered = 0;
+
+	shovelerFramebufferUse(framebuffer);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	rendered += shovelerSceneRenderPass(scene, camera, scene->light, framebuffer, true);
+
+	return rendered;
 }
 
 void shovelerSceneFree(ShovelerScene *scene)

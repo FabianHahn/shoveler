@@ -24,7 +24,7 @@ ShovelerScene *shovelerSceneCreate();
 void shovelerSceneAddLight(ShovelerScene *scene, ShovelerLight *light);
 void shovelerSceneAddModel(ShovelerScene *scene, ShovelerModel *model);
 int shovelerSceneRenderModels(ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerMaterial *overrideMaterial, bool onlyShadowCasters);
-int shovelerSceneRenderPass(ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerFramebuffer *framebuffer);
+int shovelerSceneRenderPass(ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerFramebuffer *framebuffer, bool firstLight);
 int shovelerSceneRenderFrame(ShovelerScene *scene, ShovelerCamera *camera, ShovelerFramebuffer *framebuffer);
 void shovelerSceneFree(ShovelerScene *scene);
 

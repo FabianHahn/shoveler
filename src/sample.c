@@ -54,6 +54,9 @@ void shovelerSampleInit(GLFWwindow *sampleWindow, int width, int height, int sam
 	shovelerImageGet(image, 0, 0, 0) = 255;
 	shovelerImageGet(image, 0, 1, 1) = 255;
 	shovelerImageGet(image, 1, 0, 2) = 255;
+	shovelerImageGet(image, 1, 1, 0) = 255;
+	shovelerImageGet(image, 1, 1, 1) = 255;
+	shovelerImageGet(image, 1, 1, 2) = 255;
 	ShovelerTexture *texture = shovelerTextureCreate2d(image);
 	shovelerTextureUpdate(texture);
 	textureMaterial = shovelerMaterialTextureCreate(texture, true, nearestNeighborSampler, false);
