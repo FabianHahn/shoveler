@@ -14,8 +14,8 @@
 #include "uniform_map.h"
 
 typedef struct ShovelerSceneStruct {
-	ShovelerLight *light;
 	ShovelerUniformMap *uniforms;
+	GQueue *lights;
 	GQueue *models;
 	GHashTable *cameraShaderCache;
 } ShovelerScene;

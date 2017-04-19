@@ -12,8 +12,8 @@ static void freeShader(void *shaderPointer);
 ShovelerScene *shovelerSceneCreate()
 {
 	ShovelerScene *scene = malloc(sizeof(ShovelerScene));
-	scene->light = NULL;
 	scene->uniforms = shovelerUniformMapCreate();
+	scene->lights = g_queue_new();
 	scene->models = g_queue_new();
 	scene->cameraShaderCache = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, freeHashTable);
 	return scene;
@@ -21,8 +21,7 @@ ShovelerScene *shovelerSceneCreate()
 
 void shovelerSceneAddLight(ShovelerScene *scene, ShovelerLight *light)
 {
-	shovelerLightFree(scene->light);
-	scene->light = light;
+	g_queue_push_tail(scene->lights, light);
 }
 
 void shovelerSceneAddModel(ShovelerScene *scene, ShovelerModel *model)
@@ -107,7 +106,15 @@ int shovelerSceneRenderFrame(ShovelerScene *scene, ShovelerCamera *camera, Shove
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	rendered += shovelerSceneRenderPass(scene, camera, scene->light, framebuffer, SHOVELER_SCENE_RENDER_MODE_OCCLUDED);
+	if(scene->lights->length == 0) {
+		rendered += shovelerSceneRenderPass(scene, camera, NULL, framebuffer, SHOVELER_SCENE_RENDER_MODE_OCCLUDED);
+	} else {
+		for(GList *iter = scene->lights->head; iter != NULL; iter = iter->next) {
+			ShovelerLight *light = iter->data;
+			ShovelerSceneRenderMode renderMode = iter == scene->lights->head ? SHOVELER_SCENE_RENDER_MODE_OCCLUDED : SHOVELER_SCENE_RENDER_MODE_ADDITIVE_LIGHT;
+			rendered += shovelerSceneRenderPass(scene, camera, light, framebuffer, renderMode);
+		}
+	}
 	rendered += shovelerSceneRenderPass(scene, camera, NULL, framebuffer, SHOVELER_SCENE_RENDER_MODE_SCREENSPACE);
 
 	return rendered;
@@ -115,12 +122,18 @@ int shovelerSceneRenderFrame(ShovelerScene *scene, ShovelerCamera *camera, Shove
 
 void shovelerSceneFree(ShovelerScene *scene)
 {
-	shovelerLightFree(scene->light);
 	g_hash_table_destroy(scene->cameraShaderCache);
+
 	for(GList *iter = scene->models->head; iter != NULL; iter = iter->next) {
 		shovelerModelFree(iter->data);
 	}
 	g_queue_free(scene->models);
+
+	for(GList *iter = scene->lights->head; iter != NULL; iter = iter->next) {
+		shovelerLightFree(iter->data);
+	}
+	g_queue_free(scene->lights);
+
 	shovelerUniformMapFree(scene->uniforms);
 	free(scene);
 }
