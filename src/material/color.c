@@ -37,6 +37,7 @@ static const char *fragmentShaderSource =
 		"uniform vec3 cameraPosition;\n"
 		""
 		"uniform vec4 lightColor;\n"
+		"uniform float lightAmbientFactor;\n"
 		"uniform float lightExponentialShadowFactor;\n"
 		"uniform vec3 lightPosition;\n"
 		"uniform mat4 lightCamera;\n"
@@ -72,14 +73,13 @@ static const char *fragmentShaderSource =
 		"	vec3 lightDirection = normalize(worldPosition - lightPosition);\n"
 		"	vec3 normal = normalize(worldNormal);\n"
 		""
-		"	float ambientFactor = 0.2;\n"
 		"	float diffuseFactor = clamp(dot(-lightDirection, normal), 0.0, 1.0);\n"
 		""
 		"	vec3 cameraDirection = normalize(cameraPosition - worldPosition);\n"
 		"	vec3 reflectedLight = -reflect(-lightDirection, normal);\n"
 		"	float specularFactor = pow(clamp(dot(reflectedLight, cameraDirection), 0.0, 1.0), 250.0);\n"
 		""
-		"	fragmentColor = clamp(ambientFactor * color + exponentialShadowFactor * diffuseFactor * color + exponentialShadowFactor * specularFactor * lightColor, 0.0, 1.0);\n"
+		"	fragmentColor = clamp(lightAmbientFactor * color + exponentialShadowFactor * diffuseFactor * color * lightColor + exponentialShadowFactor * specularFactor * lightColor, 0.0, 1.0);\n"
 		"}\n";
 
 ShovelerMaterial *shovelerMaterialColorCreate(ShovelerVector4 color)

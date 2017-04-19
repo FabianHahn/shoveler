@@ -25,11 +25,12 @@ typedef struct {
 	ShovelerDrawable *filterQuad;
 	ShovelerModel *filterModel;
 	struct ShovelerSceneStruct *filterScene;
+	float ambientFactor;
 	float exponentialFactor;
 	ShovelerVector4 color;
 } ShovelerLight;
 
-ShovelerLight *shovelerLightCreate(ShovelerCamera *camera, int width, int height, GLsizei samples, float exponentialFactor);
+ShovelerLight *shovelerLightCreate(ShovelerCamera *camera, int width, int height, GLsizei samples, float ambientFactor, float exponentialFactor);
 int shovelerLightRender(ShovelerLight *light, struct ShovelerSceneStruct *scene);
 void shovelerLightFree(ShovelerLight *light);
 
