@@ -65,7 +65,7 @@ ShovelerUniform *shovelerUniformCreateMatrix(ShovelerMatrix value);
 ShovelerUniform *shovelerUniformCreateMatrixPointer(ShovelerMatrix *value);
 ShovelerUniform *shovelerUniformCreateTexture(ShovelerTexture *texture, ShovelerSampler *sampler);
 ShovelerUniform *shovelerUniformCopy(const ShovelerUniform *uniform);
-bool shovelerUniformUse(ShovelerUniform *uniform, GLint location, GLint *textureUnitIndexCounter);
+bool shovelerUniformUse(ShovelerUniform *uniform, GLint location, GLuint *textureUnitIndexCounter);
 void shovelerUniformFree(ShovelerUniform *uniform);
 
 #endif

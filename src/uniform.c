@@ -117,7 +117,7 @@ ShovelerUniform *shovelerUniformCopy(const ShovelerUniform *uniform)
 	return newUniform;
 }
 
-bool shovelerUniformUse(ShovelerUniform *uniform, GLint location, GLint *textureUnitIndexCounter)
+bool shovelerUniformUse(ShovelerUniform *uniform, GLint location, GLuint *textureUnitIndexCounter)
 {
 	switch(uniform->type) {
 		case SHOVELER_UNIFORM_TYPE_INT:
@@ -157,7 +157,7 @@ bool shovelerUniformUse(ShovelerUniform *uniform, GLint location, GLint *texture
 			glUniformMatrix4fv(location, 1, GL_TRUE, uniform->value.matrixPointerValue->values);
 		break;
 		case SHOVELER_UNIFORM_TYPE_TEXTURE: {
-			int textureUnitIndex = (*textureUnitIndexCounter)++;
+			GLuint textureUnitIndex = (*textureUnitIndexCounter)++;
 
 			if(!shovelerTextureUse(uniform->value.textureValue.texture, textureUnitIndex)) {
 				shovelerLogError("Failed to use texture %p at unit index %d when trying to use texture uniform %d at location %d.", uniform->value.textureValue.texture, textureUnitIndex, uniform, location);

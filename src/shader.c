@@ -53,7 +53,7 @@ bool shovelerShaderUse(ShovelerShader *shader)
 {
 	glUseProgram(shader->material->program);
 
-	GLint textureUnitIndexCounter = 0;
+	GLuint textureUnitIndexCounter = 0;
 	GHashTableIter iter;
 	char *name;
 	ShovelerUniformAttachment *uniformAttachment;
