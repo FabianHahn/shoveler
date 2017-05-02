@@ -109,6 +109,15 @@ ShovelerUniform *shovelerUniformCreateTexture(ShovelerTexture *texture, Shoveler
 	return uniform;
 }
 
+ShovelerUniform *shovelerUniformCreateTexturePointer(ShovelerTexture **texturePointer, ShovelerSampler **samplerPointer)
+{
+	ShovelerUniform *uniform = malloc(sizeof(ShovelerUniform));
+	uniform->type = SHOVELER_UNIFORM_TYPE_TEXTURE_POINTER;
+	uniform->value.texturePointerValue.texturePointer = texturePointer;
+	uniform->value.texturePointerValue.samplerPointer = samplerPointer;
+	return uniform;
+}
+
 ShovelerUniform *shovelerUniformCopy(const ShovelerUniform *uniform)
 {
 	ShovelerUniform *newUniform = malloc(sizeof(ShovelerUniform));
@@ -166,6 +175,21 @@ bool shovelerUniformUse(ShovelerUniform *uniform, GLint location, GLuint *textur
 
 			if(!shovelerSamplerUse(uniform->value.textureValue.sampler, textureUnitIndex)) {
 				shovelerLogError("Failed to use sampler %p at unit index %d when trying to use texture uniform %d at location %d.", uniform->value.textureValue.sampler, textureUnitIndex, uniform, location);
+				return false;
+			}
+
+			glUniform1i(location, textureUnitIndex);
+		} break;
+		case SHOVELER_UNIFORM_TYPE_TEXTURE_POINTER: {
+			GLuint textureUnitIndex = (*textureUnitIndexCounter)++;
+
+			if(!shovelerTextureUse(*uniform->value.texturePointerValue.texturePointer, textureUnitIndex)) {
+				shovelerLogError("Failed to use texture pointer %p at unit index %d when trying to use texture pointer uniform %d at location %d.", uniform->value.texturePointerValue.texturePointer, textureUnitIndex, uniform, location);
+				return false;
+			}
+
+			if(!shovelerSamplerUse(*uniform->value.texturePointerValue.samplerPointer, textureUnitIndex)) {
+				shovelerLogError("Failed to use sampler pointer %p at unit index %d when trying to use texture pointer uniform %d at location %d.", uniform->value.texturePointerValue.samplerPointer, textureUnitIndex, uniform, location);
 				return false;
 			}
 
