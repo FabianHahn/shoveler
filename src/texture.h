@@ -1,6 +1,8 @@
 #ifndef SHOVELER_TEXTURE_H
 #define SHOVELER_TEXTURE_H
 
+#include <stdbool.h> // bool
+
 #include "image.h"
 
 #include <glad/glad.h>
