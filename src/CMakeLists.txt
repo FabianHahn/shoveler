@@ -5,6 +5,7 @@ set(SHOVELER_SRC
 	camera/perspective.c
 	drawable/cube.c
 	drawable/quad.c
+	filter/depth_texture_gaussian.c
 	image/png.c
 	image/ppm.c
 	material/color.c
