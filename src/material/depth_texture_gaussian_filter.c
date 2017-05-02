@@ -4,9 +4,6 @@
 #include "shader_program.h"
 
 typedef struct {
-	ShovelerTexture *texture;
-	bool manageTexture;
-	ShovelerSampler *sampler;
 	int liftExponential;
 	float liftExponentialFactor;
 	ShovelerVector2 filterDirection;
@@ -71,7 +68,7 @@ static const char *fragmentShaderSource =
 		"	}\n"
 		"}\n";
 
-ShovelerMaterial *shovelerMaterialDepthTextureGaussianFilterGaussianFilterCreate(ShovelerTexture *texture, bool manageTexture, int width, int height)
+ShovelerMaterial *shovelerMaterialDepthTextureGaussianFilterGaussianFilterCreate(ShovelerTexture **texturePointer, ShovelerSampler **samplerPointer, int width, int height)
 {
 	GLuint vertexShaderObject = shovelerShaderProgramCompileFromString(vertexShaderSource, GL_VERTEX_SHADER);
 	GLuint fragmentShaderObject = shovelerShaderProgramCompileFromString(fragmentShaderSource, GL_FRAGMENT_SHADER);
@@ -80,10 +77,6 @@ ShovelerMaterial *shovelerMaterialDepthTextureGaussianFilterGaussianFilterCreate
 	ShovelerMaterial *material = shovelerMaterialCreate(program);
 
 	ShovelerMaterialDepthTextureGaussianFilterData *materialDepthTextureGaussianFilterData = malloc(sizeof(ShovelerMaterialDepthTextureGaussianFilterData));
-	materialDepthTextureGaussianFilterData->texture = texture;
-	materialDepthTextureGaussianFilterData->manageTexture = manageTexture;
-	materialDepthTextureGaussianFilterData->sampler = shovelerSamplerCreate(false, true);
-
 	material->freeData = freeMaterialDepthTextureGaussianFilterData;
 	material->data = materialDepthTextureGaussianFilterData;
 	shovelerMaterialDepthTextureGaussianFilterDisableExponentialLifting(material);
@@ -92,8 +85,8 @@ ShovelerMaterial *shovelerMaterialDepthTextureGaussianFilterGaussianFilterCreate
 	shovelerUniformMapInsert(material->uniforms, "liftExponential", shovelerUniformCreateIntPointer(&materialDepthTextureGaussianFilterData->liftExponential));
 	shovelerUniformMapInsert(material->uniforms, "liftExponentialFactor", shovelerUniformCreateFloatPointer(&materialDepthTextureGaussianFilterData->liftExponentialFactor));
 	shovelerUniformMapInsert(material->uniforms, "filterDirection", shovelerUniformCreateVector2Pointer(&materialDepthTextureGaussianFilterData->filterDirection));
-	shovelerUniformMapInsert(material->uniforms, "inverseTextureSize", shovelerUniformCreateVector2(shovelerVector2(1.0 / width, 1.0 / height)));
-	shovelerUniformMapInsert(material->uniforms, "textureImage", shovelerUniformCreateTexture(texture, materialDepthTextureGaussianFilterData->sampler));
+	shovelerUniformMapInsert(material->uniforms, "inverseTextureSize", shovelerUniformCreateVector2(shovelerVector2(1.0f / width, 1.0f / height)));
+	shovelerUniformMapInsert(material->uniforms, "textureImage", shovelerUniformCreateTexturePointer(texturePointer, samplerPointer));
 
 	return material;
 }
@@ -122,11 +115,5 @@ void shovelerMaterialDepthTextureGaussianFilterSetDirection(ShovelerMaterial *ma
 static void freeMaterialDepthTextureGaussianFilterData(ShovelerMaterial *material)
 {
 	ShovelerMaterialDepthTextureGaussianFilterData *materialDepthTextureGaussianFilterData = material->data;
-	shovelerSamplerFree(materialDepthTextureGaussianFilterData->sampler);
-
-	if(materialDepthTextureGaussianFilterData->manageTexture) {
-		shovelerTextureFree(materialDepthTextureGaussianFilterData->texture);
-	}
-
 	free(materialDepthTextureGaussianFilterData);
 }
