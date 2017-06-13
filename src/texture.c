@@ -44,7 +44,7 @@ ShovelerTexture *shovelerTextureCreate2d(ShovelerImage *image)
 	return texture;
 }
 
-ShovelerTexture *shovelerTextureCreateRenderTarget(GLsizei width, GLsizei height, GLuint samples, int channels, int bitsPerChannel)
+ShovelerTexture *shovelerTextureCreateRenderTarget(GLsizei width, GLsizei height, GLsizei samples, int channels, int bitsPerChannel)
 {
 	assert(samples >= 1);
 	assert(channels >= 1);

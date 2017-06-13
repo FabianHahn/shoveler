@@ -16,7 +16,7 @@ typedef struct {
 } ShovelerTexture;
 
 ShovelerTexture *shovelerTextureCreate2d(ShovelerImage *image);
-ShovelerTexture *shovelerTextureCreateRenderTarget(GLsizei width, GLsizei height, GLuint samples, int channels, int bitsPerChannel);
+ShovelerTexture *shovelerTextureCreateRenderTarget(GLsizei width, GLsizei height, GLsizei samples, int channels, int bitsPerChannel);
 ShovelerTexture *shovelerTextureCreateDepthTarget(GLsizei width, GLsizei height, GLsizei samples);
 bool shovelerTextureUpdate(ShovelerTexture *texture);
 bool shovelerTextureUse(ShovelerTexture *texture, GLuint unitIndex);
