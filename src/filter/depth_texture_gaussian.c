@@ -39,8 +39,8 @@ ShovelerFilter *shovelerFilterDepthTextureGaussianCreate(int width, int height, 
 	depthTextureGaussianFilter->filterSampler = shovelerSamplerCreate(false, true);
 	depthTextureGaussianFilter->filterCamera = shovelerCameraIdentityCreate();
 
-	depthTextureGaussianFilter->filterXFramebuffer = shovelerFramebufferCreate(width, height, samples, 1, 32);
-	depthTextureGaussianFilter->filterYFramebuffer = shovelerFramebufferCreate(width, height, samples, 1, 32);
+	depthTextureGaussianFilter->filterXFramebuffer = shovelerFramebufferCreateColorOnly(width, height, samples, 1, 32);
+	depthTextureGaussianFilter->filterYFramebuffer = shovelerFramebufferCreateColorOnly(width, height, samples, 1, 32);
 
 	depthTextureGaussianFilter->filterXMaterial = shovelerMaterialDepthTextureGaussianFilterGaussianFilterCreate(&depthTextureGaussianFilter->filter.inputTexture, &depthTextureGaussianFilter->filterSampler, width, height);
 	shovelerMaterialDepthTextureGaussianFilterEnableExponentialLifting(depthTextureGaussianFilter->filterXMaterial, exponentialFactor);
