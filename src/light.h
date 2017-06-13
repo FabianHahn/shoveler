@@ -23,7 +23,7 @@ typedef struct {
 } ShovelerLight;
 
 ShovelerLight *shovelerLightCreate(ShovelerCamera *camera, int width, int height, GLsizei samples, float ambientFactor, float exponentialFactor);
-int shovelerLightRender(ShovelerLight *light, struct ShovelerSceneStruct *scene);
+int shovelerLightRender(ShovelerLight *light, struct ShovelerSceneStruct *scene, ShovelerCamera *camera, ShovelerFramebuffer *framebuffer);
 void shovelerLightFree(ShovelerLight *light);
 
 #endif

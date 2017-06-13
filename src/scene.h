@@ -15,6 +15,7 @@
 
 typedef struct ShovelerSceneStruct {
 	ShovelerUniformMap *uniforms;
+	ShovelerMaterial *depthMaterial;
 	GQueue *lights;
 	GQueue *models;
 	GHashTable *cameraShaderCache;

@@ -33,17 +33,24 @@ ShovelerLight *shovelerLightCreate(ShovelerCamera *camera, int width, int height
 	return light;
 }
 
-int shovelerLightRender(ShovelerLight *light, ShovelerScene *scene)
+int shovelerLightRender(ShovelerLight *light, ShovelerScene *scene, ShovelerCamera *camera, ShovelerFramebuffer *framebuffer)
 {
 	int rendered = 0;
 
 	// render depth map
 	shovelerFramebufferUse(light->depthFramebuffer);
 	glClear(GL_DEPTH_BUFFER_BIT);
+
+	glDisable(GL_BLEND);
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
 	rendered += shovelerSceneRenderModels(scene, light->camera, NULL, light->depthMaterial, false, true);
 
 	// filter depth map
 	rendered += shovelerFilterRender(light->depthFilter, light->depthFramebuffer->depthTarget);
+
+	// render additive light to scene
+	rendered += shovelerSceneRenderPass(scene, camera, light, framebuffer, SHOVELER_SCENE_RENDER_MODE_ADDITIVE_LIGHT);
 
 	return rendered;
 }
