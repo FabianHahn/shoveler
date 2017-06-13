@@ -10,20 +10,24 @@
 
 struct ShovelerSceneStruct; // forward declaration: scene.h
 
+typedef int (ShovelerLightRenderFunction)(void *data, struct ShovelerSceneStruct *scene, ShovelerCamera *camera, ShovelerFramebuffer *framebuffer);
+typedef void (ShovelerLightFreeDataFunction)(void *data);
+
 typedef struct {
-	ShovelerSampler *shadowMapSampler;
+	void *data;
 	ShovelerUniformMap *uniforms;
-	ShovelerCamera *camera;
-	ShovelerFramebuffer *depthFramebuffer;
-	ShovelerMaterial *depthMaterial;
-	ShovelerFilter *depthFilter;
-	float ambientFactor;
-	float exponentialFactor;
-	ShovelerVector4 color;
+	ShovelerLightRenderFunction *render;
+	ShovelerLightFreeDataFunction *freeData;
 } ShovelerLight;
 
-ShovelerLight *shovelerLightCreate(ShovelerCamera *camera, int width, int height, GLsizei samples, float ambientFactor, float exponentialFactor);
-int shovelerLightRender(ShovelerLight *light, struct ShovelerSceneStruct *scene, ShovelerCamera *camera, ShovelerFramebuffer *framebuffer);
-void shovelerLightFree(ShovelerLight *light);
+static inline int shovelerLightRender(ShovelerLight *light, struct ShovelerSceneStruct *scene, ShovelerCamera *camera, ShovelerFramebuffer *framebuffer)
+{
+	return light->render(light->data, scene, camera, framebuffer);
+}
+
+static inline void shovelerLightFree(ShovelerLight *light)
+{
+	light->freeData(light->data);
+}
 
 #endif

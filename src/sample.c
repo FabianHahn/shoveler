@@ -2,10 +2,12 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <light/spot.h>
 
 #include "camera/perspective.h"
 #include "drawable/cube.h"
 #include "drawable/quad.h"
+#include "light/spot.h"
 #include "material/color.h"
 #include "material/screenspace_texture.h"
 #include "material/texture.h"
@@ -85,15 +87,15 @@ void shovelerSampleInit(GLFWwindow *sampleWindow, int width, int height, int sam
 	camera = shovelerCameraPerspectiveCreate((ShovelerVector3){0, 0, -5}, (ShovelerVector3){0, 0, 1}, (ShovelerVector3){0, 1, 0}, 2.0f * SHOVELER_PI * 50.0f / 360.0f, (float) width / height, 0.01, 1000);
 
 	ShovelerCamera *lightCamera = shovelerCameraPerspectiveCreate((ShovelerVector3){0, 5, -5}, (ShovelerVector3){0, -5, 5}, (ShovelerVector3){0, 1, 0}, 2.0f * SHOVELER_PI * 50.0f / 360.0f, 1.0f, 1, 100);
-	ShovelerLight *light = shovelerLightCreate(lightCamera, 1024, 1024, 1, 0.0f, 80.0f);
-	shovelerSceneAddLight(scene, light);
+	ShovelerLightSpot *spotlight = shovelerLightSpotCreate(lightCamera, 1024, 1024, 1, 0.0f, 80.0f);
+	shovelerSceneAddLight(scene, &spotlight->light);
 
 	ShovelerCamera *lightCamera2 = shovelerCameraPerspectiveCreate((ShovelerVector3){0, 10, 0}, (ShovelerVector3){0, -1, 0}, (ShovelerVector3){0, 0, 1}, 2.0f * SHOVELER_PI * 50.0f / 360.0f, 1.0f, 1, 100);
-	ShovelerLight *light2 = shovelerLightCreate(lightCamera2, 512, 512, 1, 0.1f, 80.0f);
-	light2->color = (ShovelerVector4){0.0f, 0.0f, 0.3f, 1.0f};
-	shovelerSceneAddLight(scene, light2);
+	ShovelerLightSpot *spotlight2 = shovelerLightSpotCreate(lightCamera2, 512, 512, 1, 0.1f, 80.0f);
+	spotlight2->color = (ShovelerVector4){0.0f, 0.0f, 0.3f, 1.0f};
+	shovelerSceneAddLight(scene, &spotlight2->light);
 
-	screenspaceTextureMaterial = shovelerMaterialScreenspaceTextureCreate(light->depthFramebuffer->depthTarget, false, true, nearestNeighborSampler, false);
+	screenspaceTextureMaterial = shovelerMaterialScreenspaceTextureCreate(spotlight->depthFramebuffer->depthTarget, false, true, nearestNeighborSampler, false);
 	ShovelerModel *screenQuadModel = shovelerModelCreate(quad, screenspaceTextureMaterial);
 	screenQuadModel->screenspace = true;
 	screenQuadModel->translation.values[0] = -1.0;
