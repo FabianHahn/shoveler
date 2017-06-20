@@ -65,19 +65,58 @@ void shovelerSampleInit(GLFWwindow *sampleWindow, int width, int height, int sam
 
 	shovelerOpenGLCheckSuccess();
 
+	scene = shovelerSceneCreate();
 	quad = shovelerDrawableQuadCreate();
+
 	ShovelerModel *groundModel = shovelerModelCreate(quad, colorMaterial);
-	groundModel->translation.values[1] = -2.0f;
+	groundModel->translation.values[1] = -10.0f;
 	groundModel->rotation.values[0] = SHOVELER_PI / 2.0f;
 	groundModel->scale.values[0] = 10.0f;
 	groundModel->scale.values[1] = 10.0f;
 	shovelerModelUpdateTransformation(groundModel);
+	shovelerSceneAddModel(scene, groundModel);
+
+	ShovelerModel *ceilingModel = shovelerModelCreate(quad, colorMaterial);
+	ceilingModel->translation.values[1] = 10.0f;
+	ceilingModel->rotation.values[0] = -SHOVELER_PI / 2.0f;
+	ceilingModel->scale.values[0] = 10.0f;
+	ceilingModel->scale.values[1] = 10.0f;
+	shovelerModelUpdateTransformation(ceilingModel);
+	shovelerSceneAddModel(scene, ceilingModel);
+
+	ShovelerModel *frontWallModel = shovelerModelCreate(quad, colorMaterial);
+	frontWallModel->translation.values[2] = 10.0f;
+	frontWallModel->rotation.values[0] = SHOVELER_PI;
+	frontWallModel->scale.values[0] = 10.0f;
+	frontWallModel->scale.values[1] = 10.0f;
+	shovelerModelUpdateTransformation(frontWallModel);
+	shovelerSceneAddModel(scene, frontWallModel);
+
+	ShovelerModel *backWallModel = shovelerModelCreate(quad, colorMaterial);
+	backWallModel->translation.values[2] = -10.0f;
+	backWallModel->scale.values[0] = 10.0f;
+	backWallModel->scale.values[1] = 10.0f;
+	shovelerModelUpdateTransformation(backWallModel);
+	shovelerSceneAddModel(scene, backWallModel);
+
+	ShovelerModel *leftWallModel = shovelerModelCreate(quad, colorMaterial);
+	leftWallModel->translation.values[0] = 10.0f;
+	leftWallModel->rotation.values[1] = SHOVELER_PI / 2.0f;
+	leftWallModel->scale.values[0] = 10.0f;
+	leftWallModel->scale.values[1] = 10.0f;
+	shovelerModelUpdateTransformation(leftWallModel);
+	shovelerSceneAddModel(scene, leftWallModel);
+
+	ShovelerModel *rightWallModel = shovelerModelCreate(quad, colorMaterial);
+	rightWallModel->translation.values[0] = -10.0f;
+	rightWallModel->rotation.values[1] = -SHOVELER_PI / 2.0f;
+	rightWallModel->scale.values[0] = 10.0f;
+	rightWallModel->scale.values[1] = 10.0f;
+	shovelerModelUpdateTransformation(rightWallModel);
+	shovelerSceneAddModel(scene, rightWallModel);
 
 	cube = shovelerDrawableCubeCreate();
 	cubeModel = shovelerModelCreate(cube, textureMaterial);
-
-	scene = shovelerSceneCreate();
-	shovelerSceneAddModel(scene, groundModel);
 	shovelerSceneAddModel(scene, cubeModel);
 
 	framebuffer = shovelerFramebufferCreate(width, height, samples, 4, 8);
