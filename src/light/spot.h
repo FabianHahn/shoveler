@@ -10,17 +10,30 @@
 #include "types.h"
 
 typedef struct {
-	ShovelerLight light;
 	ShovelerSampler *shadowMapSampler;
-	ShovelerCamera *camera;
 	ShovelerFramebuffer *depthFramebuffer;
 	ShovelerMaterial *depthMaterial;
 	ShovelerFilter *depthFilter;
 	float ambientFactor;
 	float exponentialFactor;
 	ShovelerVector4 color;
+} ShovelerLightSpotShared;
+
+typedef struct {
+	ShovelerLight light;
+	ShovelerCamera *camera;
+	ShovelerLightSpotShared *shared;
+	bool manageShared;
 } ShovelerLightSpot;
 
-ShovelerLightSpot *shovelerLightSpotCreate(ShovelerCamera *camera, int width, int height, GLsizei samples, float ambientFactor, float exponentialFactor, ShovelerVector4 color);
+ShovelerLightSpotShared *shovelerLightSpotSharedCreate(int width, int height, GLsizei samples, float ambientFactor, float exponentialFactor, ShovelerVector4 color);
+ShovelerLightSpot *shovelerLightSpotCreateWithShared(ShovelerCamera *camera, ShovelerLightSpotShared *shared, bool managedShared);
+void shovelerLightSpotSharedFree(ShovelerLightSpotShared *shared);
+
+static inline ShovelerLightSpot *shovelerLightSpotCreate(ShovelerCamera *camera, int width, int height, GLsizei samples, float ambientFactor, float exponentialFactor, ShovelerVector4 color)
+{
+	ShovelerLightSpotShared *shared = shovelerLightSpotSharedCreate(width, height, samples, ambientFactor, exponentialFactor, color);
+	return shovelerLightSpotCreateWithShared(camera, shared, true);
+}
 
 #endif
