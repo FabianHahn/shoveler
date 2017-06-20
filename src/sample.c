@@ -2,7 +2,6 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <light/spot.h>
 
 #include "camera/perspective.h"
 #include "drawable/cube.h"
