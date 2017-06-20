@@ -21,6 +21,6 @@ typedef struct {
 	ShovelerVector4 color;
 } ShovelerLightSpot;
 
-ShovelerLightSpot *shovelerLightSpotCreate(ShovelerCamera *camera, int width, int height, GLsizei samples, float ambientFactor, float exponentialFactor);
+ShovelerLightSpot *shovelerLightSpotCreate(ShovelerCamera *camera, int width, int height, GLsizei samples, float ambientFactor, float exponentialFactor, ShovelerVector4 color);
 
 #endif

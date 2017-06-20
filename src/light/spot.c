@@ -10,7 +10,7 @@
 static int renderSpotLight(void *spotlightPointer, ShovelerScene *scene, ShovelerCamera *camera, ShovelerFramebuffer *framebuffer);
 static void freeSpotLight(void *spotlightPointer);
 
-ShovelerLightSpot *shovelerLightSpotCreate(ShovelerCamera *camera, int width, int height, GLsizei samples, float ambientFactor, float exponentialFactor)
+ShovelerLightSpot *shovelerLightSpotCreate(ShovelerCamera *camera, int width, int height, GLsizei samples, float ambientFactor, float exponentialFactor, ShovelerVector4 color)
 {
 	ShovelerLightSpot *spotlight = malloc(sizeof(ShovelerLightSpot));
 	spotlight->light.data = spotlight;
@@ -27,7 +27,7 @@ ShovelerLightSpot *shovelerLightSpotCreate(ShovelerCamera *camera, int width, in
 
 	spotlight->ambientFactor = ambientFactor;
 	spotlight->exponentialFactor = exponentialFactor;
-	spotlight->color = (ShovelerVector4){1.0, 1.0, 1.0, 1.0};
+	spotlight->color = color;
 
 	shovelerUniformMapInsert(spotlight->light.uniforms, "isExponentialLiftedShadowMap", shovelerUniformCreateInt(1));
 	shovelerUniformMapInsert(spotlight->light.uniforms, "lightAmbientFactor", shovelerUniformCreateFloat(spotlight->ambientFactor));
