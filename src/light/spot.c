@@ -1,5 +1,4 @@
 #include <stdlib.h> // malloc, free
-#include <light.h>
 
 #include "camera/identity.h"
 #include "filter/depth_texture_gaussian.h"
