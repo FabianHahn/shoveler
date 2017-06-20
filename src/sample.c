@@ -2,11 +2,11 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <light/spot.h>
 
 #include "camera/perspective.h"
 #include "drawable/cube.h"
 #include "drawable/quad.h"
+#include "light/point.h"
 #include "light/spot.h"
 #include "material/color.h"
 #include "material/screenspace_texture.h"
@@ -130,6 +130,9 @@ void shovelerSampleInit(GLFWwindow *sampleWindow, int width, int height, int sam
 	ShovelerCamera *lightCamera2 = shovelerCameraPerspectiveCreate((ShovelerVector3){0, 10, 0}, (ShovelerVector3){0, -1, 0}, (ShovelerVector3){0, 0, 1}, 2.0f * SHOVELER_PI * 50.0f / 360.0f, 1.0f, 1, 100);
 	ShovelerLightSpot *spotlight2 = shovelerLightSpotCreate(lightCamera2, 512, 512, 1, 0.1f, 80.0f, (ShovelerVector4){0.0f, 0.0f, 0.3f, 1.0f});
 	shovelerSceneAddLight(scene, &spotlight2->light);
+
+	ShovelerLightPoint *pointlight = shovelerLightPointCreate((ShovelerVector3){0, 0, 0}, 512, 512, 1, 0.0f, 80.0f, (ShovelerVector4){0.0f, 0.4f, 0.0f, 1.0f});
+	//shovelerSceneAddLight(scene, &pointlight->light);
 
 	screenspaceTextureMaterial = shovelerMaterialScreenspaceTextureCreate(spotlight->shared->depthFramebuffer->depthTarget, false, true, nearestNeighborSampler, false);
 	ShovelerModel *screenQuadModel = shovelerModelCreate(quad, screenspaceTextureMaterial);
