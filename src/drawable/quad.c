@@ -28,9 +28,9 @@ static bool drawQuad(ShovelerDrawable *quad);
 static void freeQuad(ShovelerDrawable *quad);
 
 static QuadVertex quadVertices[] = {
-	{{0, 0, 0}, {0, 0, 1}, {0, 0}},
-	{{1, 0, 0}, {0, 0, 1}, {1, 0}},
-	{{0, 1, 0}, {0, 0, 1}, {0, 1}},
+	{{-1, -1, 0}, {0, 0, 1}, {0, 0}},
+	{{1, -1, 0}, {0, 0, 1}, {1, 0}},
+	{{-1, 1, 0}, {0, 0, 1}, {0, 1}},
 	{{1, 1, 0}, {0, 0, 1}, {1, 1}}};
 
 static QuadTriangle quadTriangles[] = {

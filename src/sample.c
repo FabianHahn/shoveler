@@ -67,12 +67,10 @@ void shovelerSampleInit(GLFWwindow *sampleWindow, int width, int height, int sam
 
 	quad = shovelerDrawableQuadCreate();
 	ShovelerModel *groundModel = shovelerModelCreate(quad, colorMaterial);
-	groundModel->translation.values[0] = -10.0;
-	groundModel->translation.values[1] = -2.0;
-	groundModel->translation.values[2] = 10.0;
+	groundModel->translation.values[1] = -2.0f;
 	groundModel->rotation.values[0] = SHOVELER_PI / 2.0f;
-	groundModel->scale.values[0] = 20.0;
-	groundModel->scale.values[1] = 20.0;
+	groundModel->scale.values[0] = 10.0f;
+	groundModel->scale.values[1] = 10.0f;
 	shovelerModelUpdateTransformation(groundModel);
 
 	cube = shovelerDrawableCubeCreate();
