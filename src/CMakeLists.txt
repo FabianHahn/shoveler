@@ -8,6 +8,7 @@ set(SHOVELER_SRC
 	filter/depth_texture_gaussian.c
 	image/png.c
 	image/ppm.c
+	light/point.c
 	light/spot.c
 	material/color.c
 	material/depth.c
