@@ -32,7 +32,10 @@ static ShovelerMaterial *screenspaceTextureMaterial;
 static ShovelerMaterial *textureMaterial;
 static ShovelerDrawable *quad;
 static ShovelerDrawable *cube;
-static ShovelerModel *cubeModel;
+static ShovelerModel *downCubeModel;
+static ShovelerModel *frontCubeModel;
+static ShovelerModel *leftCubeModel;
+static ShovelerModel *rightCubeModel;
 static ShovelerScene *scene;
 static ShovelerFramebuffer *framebuffer;
 static ShovelerCamera *camera;
@@ -115,8 +118,25 @@ void shovelerSampleInit(GLFWwindow *sampleWindow, int width, int height, int sam
 	shovelerSceneAddModel(scene, rightWallModel);
 
 	cube = shovelerDrawableCubeCreate();
-	cubeModel = shovelerModelCreate(cube, textureMaterial);
-	shovelerSceneAddModel(scene, cubeModel);
+	downCubeModel = shovelerModelCreate(cube, textureMaterial);
+	downCubeModel->translation.values[1] = -5;
+	shovelerModelUpdateTransformation(downCubeModel);
+	shovelerSceneAddModel(scene, downCubeModel);
+
+	frontCubeModel = shovelerModelCreate(cube, textureMaterial);
+	frontCubeModel->translation.values[2] = 5;
+	shovelerModelUpdateTransformation(frontCubeModel);
+	shovelerSceneAddModel(scene, frontCubeModel);
+
+	leftCubeModel = shovelerModelCreate(cube, textureMaterial);
+	leftCubeModel->translation.values[0] = 5;
+	shovelerModelUpdateTransformation(leftCubeModel);
+	shovelerSceneAddModel(scene, leftCubeModel);
+
+	rightCubeModel = shovelerModelCreate(cube, textureMaterial);
+	rightCubeModel->translation.values[0] = -5;
+	shovelerModelUpdateTransformation(rightCubeModel);
+	shovelerSceneAddModel(scene, rightCubeModel);
 
 	framebuffer = shovelerFramebufferCreate(width, height, samples, 4, 8);
 
@@ -153,10 +173,25 @@ void shovelerSampleRender(float dt)
 {
 	handleMovement(dt);
 
-	cubeModel->rotation.values[0] += 0.1f * dt;
-	cubeModel->rotation.values[1] += 0.2f * dt;
-	cubeModel->rotation.values[2] += 0.5f * dt;
-	shovelerModelUpdateTransformation(cubeModel);
+	downCubeModel->rotation.values[0] += 0.1f * dt;
+	downCubeModel->rotation.values[1] += 0.2f * dt;
+	downCubeModel->rotation.values[2] += 0.5f * dt;
+	shovelerModelUpdateTransformation(downCubeModel);
+
+	frontCubeModel->rotation.values[0] += 0.1f * dt;
+	frontCubeModel->rotation.values[1] += 0.2f * dt;
+	frontCubeModel->rotation.values[2] += 0.3f * dt;
+	shovelerModelUpdateTransformation(frontCubeModel);
+
+	leftCubeModel->rotation.values[0] += 0.4f * dt;
+	leftCubeModel->rotation.values[1] += 0.2f * dt;
+	leftCubeModel->rotation.values[2] += 0.1f * dt;
+	shovelerModelUpdateTransformation(leftCubeModel);
+
+	rightCubeModel->rotation.values[0] += 0.5f * dt;
+	rightCubeModel->rotation.values[1] += 0.2f * dt;
+	rightCubeModel->rotation.values[2] += 0.3f * dt;
+	shovelerModelUpdateTransformation(rightCubeModel);
 
 	shovelerSceneRenderFrame(scene, camera, framebuffer);
 	shovelerFramebufferBlitToDefault(framebuffer);
