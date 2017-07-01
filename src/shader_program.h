@@ -13,6 +13,6 @@ typedef enum {
 
 GLuint shovelerShaderProgramCompileFromString(const char *source, GLenum type);
 GLuint shovelerShaderProgramCompileFromFile(const char *filename, GLenum type);
-GLuint shovelerShaderProgramLink(GLuint vertexShader, GLuint fragmentShader, bool deleteShaders);
+GLuint shovelerShaderProgramLink(GLuint vertexShader, GLuint geometryShader, GLuint fragmentShader, bool deleteShaders);
 
 #endif

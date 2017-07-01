@@ -106,7 +106,7 @@ ShovelerMaterial *shovelerMaterialTextureCreate(ShovelerTexture *texture, bool m
 {
 	GLuint vertexShaderObject = shovelerShaderProgramCompileFromString(vertexShaderSource, GL_VERTEX_SHADER);
 	GLuint fragmentShaderObject = shovelerShaderProgramCompileFromString(fragmentShaderSource, GL_FRAGMENT_SHADER);
-	GLuint program = shovelerShaderProgramLink(vertexShaderObject, fragmentShaderObject, true);
+	GLuint program = shovelerShaderProgramLink(vertexShaderObject, 0, fragmentShaderObject, true);
 
 	ShovelerMaterial *material = shovelerMaterialCreate(program);
 

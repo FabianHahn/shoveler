@@ -46,12 +46,19 @@ GLuint shovelerShaderProgramCompileFromFile(const char *filename, GLenum type)
 	return shader;
 }
 
-GLuint shovelerShaderProgramLink(GLuint vertexShader, GLuint fragmentShader, bool deleteShaders)
+GLuint shovelerShaderProgramLink(GLuint vertexShader, GLuint geometryShader, GLuint fragmentShader, bool deleteShaders)
 {
 	GLuint program = glCreateProgram();
 
-	glAttachShader(program, vertexShader);
-	glAttachShader(program, fragmentShader);
+	if(vertexShader > 0) {
+		glAttachShader(program, vertexShader);
+	}
+	if(geometryShader > 0) {
+		glAttachShader(program, geometryShader);
+	}
+	if(fragmentShader > 0) {
+		glAttachShader(program, fragmentShader);
+	}
 
 	glBindAttribLocation(program, SHOVELER_SHADER_PROGRAM_ATTRIBUTE_POSITION, "position");
 	glBindAttribLocation(program, SHOVELER_SHADER_PROGRAM_ATTRIBUTE_NORMAL, "normal");
