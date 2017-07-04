@@ -10,7 +10,8 @@ typedef void (ShovelerCameraFreeDataFunction)(void *data);
 
 typedef struct ShovelerCameraStruct {
 	ShovelerVector3 position;
-	ShovelerMatrix transformation;
+	ShovelerMatrix view;
+	ShovelerMatrix projection;
 	ShovelerUniformMap *uniforms;
 	void *data;
 	ShovelerCameraFreeDataFunction *freeData;

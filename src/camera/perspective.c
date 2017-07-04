@@ -6,7 +6,6 @@
 
 static void freePerspectiveCamera(void *perspectiveCameraPointer);
 static ShovelerCameraPerspective *getPerspectiveCamera(ShovelerCamera *camera);
-static void updateTransformation(ShovelerCameraPerspective *perspectiveCamera);
 static ShovelerMatrix computePerspectiveTransformation(float fovy, float ar, float znear, float zfar);
 static ShovelerMatrix computeLookIntoDirectionTransformation(ShovelerVector3 position, ShovelerVector3 direction, ShovelerVector3 up);
 
@@ -16,17 +15,16 @@ ShovelerCamera *shovelerCameraPerspectiveCreate(ShovelerVector3 position, Shovel
 	shovelerCameraInit(&perspectiveCamera->camera, position, perspectiveCamera, freePerspectiveCamera);
 	perspectiveCamera->up = shovelerVector3Normalize(up);
 	perspectiveCamera->direction = shovelerVector3Normalize(direction);
-	perspectiveCamera->perspective = computePerspectiveTransformation(fieldOfViewY, aspectRatio, nearClippingPlane, farClippingPlane);
-	shovelerCameraPerspectiveUpdateTransformation(&perspectiveCamera->camera);
+	shovelerCameraPerspectiveUpdateView(&perspectiveCamera->camera);
+	perspectiveCamera->camera.projection = computePerspectiveTransformation(fieldOfViewY, aspectRatio, nearClippingPlane, farClippingPlane);
 
 	return &perspectiveCamera->camera;
 }
 
-void shovelerCameraPerspectiveUpdateTransformation(ShovelerCamera *camera)
+void shovelerCameraPerspectiveUpdateView(ShovelerCamera *camera)
 {
 	ShovelerCameraPerspective *perspectiveCamera = getPerspectiveCamera(camera);
-	ShovelerMatrix lookIntoDirection = computeLookIntoDirectionTransformation(perspectiveCamera->camera.position, perspectiveCamera->direction, perspectiveCamera->up);
-	perspectiveCamera->camera.transformation = shovelerMatrixMultiply(perspectiveCamera->perspective, lookIntoDirection);
+	perspectiveCamera->camera.view = computeLookIntoDirectionTransformation(perspectiveCamera->camera.position, perspectiveCamera->direction, perspectiveCamera->up);
 }
 
 void shovelerCameraPerspectiveMoveForward(ShovelerCamera *camera, float amount)

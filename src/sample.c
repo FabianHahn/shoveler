@@ -274,7 +274,7 @@ static void handleMovement(float dt)
 
 	if(moved) {
 		shovelerLogTrace("Camera at position (%f, %f, %f)", camera->position.values[0], camera->position.values[1], camera->position.values[2]);
-		shovelerCameraPerspectiveUpdateTransformation(camera);
+		shovelerCameraPerspectiveUpdateView(camera);
 	}
 
 	previousCursorX = newCursorX;

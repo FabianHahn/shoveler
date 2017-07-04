@@ -38,7 +38,8 @@ ShovelerLightSpot *shovelerLightSpotCreateWithShared(ShovelerCamera *camera, Sho
 	shovelerUniformMapInsert(spotlight->light.uniforms, "lightExponentialShadowFactor", shovelerUniformCreateFloat(spotlight->shared->exponentialFactor));
 	shovelerUniformMapInsert(spotlight->light.uniforms, "lightColor", shovelerUniformCreateVector4Pointer(&spotlight->shared->color));
 	shovelerUniformMapInsert(spotlight->light.uniforms, "lightPosition", shovelerUniformCreateVector3Pointer(&spotlight->camera->position));
-	shovelerUniformMapInsert(spotlight->light.uniforms, "lightCamera", shovelerUniformCreateMatrixPointer(&spotlight->camera->transformation));
+	shovelerUniformMapInsert(spotlight->light.uniforms, "lightView", shovelerUniformCreateMatrixPointer(&spotlight->camera->view));
+	shovelerUniformMapInsert(spotlight->light.uniforms, "lightProjection", shovelerUniformCreateMatrixPointer(&spotlight->camera->projection));
 	shovelerUniformMapInsert(spotlight->light.uniforms, "shadowMap", shovelerUniformCreateTexture(spotlight->shared->depthFilter->outputTexture, spotlight->shared->shadowMapSampler));
 
 	return spotlight;

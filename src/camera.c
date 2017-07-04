@@ -5,13 +5,16 @@
 void shovelerCameraInit(ShovelerCamera *camera, ShovelerVector3 position, void *data, ShovelerCameraFreeDataFunction *freeData)
 {
 	camera->position = position;
-	camera->transformation = shovelerMatrixIdentity;
+	camera->view = shovelerMatrixIdentity;
+	camera->projection = shovelerMatrixIdentity;
 	camera->uniforms = shovelerUniformMapCreate();
 	camera->data = data;
 	camera->freeData = freeData;
 
-	ShovelerUniform *cameraUniform = shovelerUniformCreateMatrixPointer(&camera->transformation);
-	shovelerUniformMapInsert(camera->uniforms, "camera", cameraUniform);
+	ShovelerUniform *viewUniform = shovelerUniformCreateMatrixPointer(&camera->view);
+	shovelerUniformMapInsert(camera->uniforms, "view", viewUniform);
+	ShovelerUniform *projectionUniform = shovelerUniformCreateMatrixPointer(&camera->projection);
+	shovelerUniformMapInsert(camera->uniforms, "projection", projectionUniform);
 	ShovelerUniform *cameraPositionUniform = shovelerUniformCreateVector3Pointer(&camera->position);
 	shovelerUniformMapInsert(camera->uniforms, "cameraPosition", cameraPositionUniform);
 }

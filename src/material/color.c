@@ -6,8 +6,10 @@ static const char *vertexShaderSource =
 		""
 		"uniform mat4 model;\n"
 		"uniform mat4 modelNormal;\n"
-		"uniform mat4 camera;\n"
-		"uniform mat4 lightCamera;\n"
+		"uniform mat4 view;\n"
+		"uniform mat4 projection;\n"
+		"uniform mat4 lightView;\n"
+		"uniform mat4 lightProjection;\n"
 		""
 		"in vec3 position;\n"
 		"in vec3 normal;\n"
@@ -26,9 +28,9 @@ static const char *vertexShaderSource =
 		"	worldNormal = worldNormal4.xyz / worldNormal4.w;\n"
 		"	worldUv = uv;\n"
 		""
-		"	lightFrustumPosition4 = lightCamera * worldPosition4;\n"
+		"	lightFrustumPosition4 = lightProjection * lightView * worldPosition4;\n"
 		""
-		"	gl_Position = camera * worldPosition4;\n"
+		"	gl_Position = projection * view * worldPosition4;\n"
 		"}\n";
 
 static const char *fragmentShaderSource =
@@ -40,7 +42,6 @@ static const char *fragmentShaderSource =
 		"uniform float lightAmbientFactor;\n"
 		"uniform float lightExponentialShadowFactor;\n"
 		"uniform vec3 lightPosition;\n"
-		"uniform mat4 lightCamera;\n"
 		"uniform bool isExponentialLiftedShadowMap;\n"
 		"uniform sampler2D shadowMap;\n"
 		""
