@@ -14,6 +14,7 @@ set(SHOVELER_SRC
 	material/color.c
 	material/depth.c
 	material/depth_texture_gaussian_filter.c
+	material/particle.c
 	material/screenspace_texture.c
 	material/texture.c
 	camera.c
