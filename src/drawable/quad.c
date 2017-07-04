@@ -88,6 +88,7 @@ static bool drawQuad(ShovelerDrawable *quad)
 static void freeQuad(ShovelerDrawable *quad)
 {
 	QuadData *quadData = quad->data;
+	glDeleteVertexArrays(1, &quadData->vertexArrayObject);
 	glDeleteBuffers(1, &quadData->vertexBuffer);
 	glDeleteBuffers(1, &quadData->indexBuffer);
 

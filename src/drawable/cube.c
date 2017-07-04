@@ -128,6 +128,7 @@ static bool drawCube(ShovelerDrawable *cube)
 static void freeCube(ShovelerDrawable *cube)
 {
 	CubeData *cubeData = cube->data;
+	glDeleteVertexArrays(1, &cubeData->vertexArrayObject);
 	glDeleteBuffers(1, &cubeData->vertexBuffer);
 	glDeleteBuffers(1, &cubeData->indexBuffer);
 
