@@ -31,13 +31,17 @@ void shovelerSceneAddModel(ShovelerScene *scene, ShovelerModel *model)
 	g_queue_push_tail(scene->models, model);
 }
 
-int shovelerSceneRenderModels(ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerMaterial *overrideMaterial, bool screenspace, bool onlyShadowCasters)
+int shovelerSceneRenderModels(ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerMaterial *overrideMaterial, bool emitters, bool screenspace, bool onlyShadowCasters)
 {
 	int rendered = 0;
 	for(GList *iter = scene->models->head; iter != NULL; iter = iter->next) {
 		ShovelerModel *model = iter->data;
 
 		if(!model->visible) {
+			continue;
+		}
+
+		if(model->emitter != emitters) {
 			continue;
 		}
 
@@ -75,20 +79,30 @@ int shovelerSceneRenderPass(ShovelerScene *scene, ShovelerCamera *camera, Shovel
 
 	glEnable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
+	bool emitters = false;
 	bool screenspace = false;
 	switch(renderMode) {
 		case SHOVELER_SCENE_RENDER_MODE_OCCLUDED:
 			glBlendFunc(GL_ONE, GL_ZERO);
 			glDepthFunc(GL_LESS);
+			glDepthMask(GL_TRUE);
+		break;
+		case SHOVELER_SCENE_RENDER_MODE_EMITTERS:
+			glBlendFunc(GL_ONE, GL_ONE);
+			glDepthFunc(GL_LESS);
+			glDepthMask(GL_FALSE);
+			emitters = true;
 		break;
 		case SHOVELER_SCENE_RENDER_MODE_SCREENSPACE:
 			glBlendFunc(GL_ONE, GL_ZERO);
 			glDepthFunc(GL_ALWAYS);
+			glDepthMask(GL_TRUE);
 			screenspace = true;
 		break;
 		case SHOVELER_SCENE_RENDER_MODE_ADDITIVE_LIGHT:
 			glBlendFunc(GL_ONE, GL_ONE);
 			glDepthFunc(GL_EQUAL);
+			glDepthMask(GL_TRUE);
 		break;
 	}
 
@@ -96,7 +110,7 @@ int shovelerSceneRenderPass(ShovelerScene *scene, ShovelerCamera *camera, Shovel
 	if (light == NULL && renderMode == SHOVELER_SCENE_RENDER_MODE_OCCLUDED) {
 		overrideMaterial = scene->depthMaterial;
 	}
-	rendered += shovelerSceneRenderModels(scene, camera, light, overrideMaterial, screenspace, false);
+	rendered += shovelerSceneRenderModels(scene, camera, light, overrideMaterial, emitters, screenspace, false);
 
 	return rendered;
 }
@@ -118,6 +132,7 @@ int shovelerSceneRenderFrame(ShovelerScene *scene, ShovelerCamera *camera, Shove
 		rendered += shovelerLightRender(light, scene, camera, framebuffer);
 	}
 
+	rendered += shovelerSceneRenderPass(scene, camera, NULL, framebuffer, SHOVELER_SCENE_RENDER_MODE_EMITTERS);
 	rendered += shovelerSceneRenderPass(scene, camera, NULL, framebuffer, SHOVELER_SCENE_RENDER_MODE_SCREENSPACE);
 
 	return rendered;

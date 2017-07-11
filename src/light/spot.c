@@ -70,7 +70,7 @@ static int renderSpotLight(void *spotlightPointer, ShovelerScene *scene, Shovele
 	glDisable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
-	rendered += shovelerSceneRenderModels(scene, spotlight->camera, NULL, spotlight->shared->depthMaterial, false, true);
+	rendered += shovelerSceneRenderModels(scene, spotlight->camera, NULL, spotlight->shared->depthMaterial, false, false, true);
 
 	// filter depth map
 	rendered += shovelerFilterRender(spotlight->shared->depthFilter, spotlight->shared->depthFramebuffer->depthTarget);
