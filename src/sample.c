@@ -51,7 +51,7 @@ void shovelerSampleInit(GLFWwindow *sampleWindow, int width, int height, int sam
 	nearestNeighborSampler = shovelerSamplerCreate(false, true);
 	interpolatingSampler = shovelerSamplerCreate(true, true);
 
-	colorMaterial = shovelerMaterialColorCreate((ShovelerVector4){0.7, 0.7, 0.7, 1.0});
+	colorMaterial = shovelerMaterialColorCreate((ShovelerVector3){0.7, 0.7, 0.7});
 
 	ShovelerImage *image = shovelerImageCreate(2, 2, 3);
 	shovelerImageClear(image);
@@ -142,10 +142,10 @@ void shovelerSampleInit(GLFWwindow *sampleWindow, int width, int height, int sam
 
 	camera = shovelerCameraPerspectiveCreate((ShovelerVector3){0, 0, -5}, (ShovelerVector3){0, 0, 1}, (ShovelerVector3){0, 1, 0}, 2.0f * SHOVELER_PI * 50.0f / 360.0f, (float) width / height, 0.01, 1000);
 
-	ShovelerLightPoint *pointlight = shovelerLightPointCreate((ShovelerVector3){0, 0, 0}, 1024, 1024, 1, 0.0f, 80.0f, (ShovelerVector4){1.0f, 1.0f, 1.0f, 1.0f});
+	ShovelerLightPoint *pointlight = shovelerLightPointCreate((ShovelerVector3){0, 0, 0}, 1024, 1024, 1, 0.0f, 80.0f, (ShovelerVector3){1.0f, 1.0f, 1.0f});
 	shovelerSceneAddLight(scene, &pointlight->light);
 
-	ShovelerLightPoint *pointlight2 = shovelerLightPointCreate((ShovelerVector3){-8, -8, -8}, 1024, 1024, 1, 0.0f, 80.0f, (ShovelerVector4){0.1f, 0.1f, 0.1f, 1.0f});
+	ShovelerLightPoint *pointlight2 = shovelerLightPointCreate((ShovelerVector3){-8, -8, -8}, 1024, 1024, 1, 0.0f, 80.0f, (ShovelerVector3){0.1f, 0.1f, 0.1f});
 	shovelerSceneAddLight(scene, &pointlight2->light);
 
 	screenspaceTextureMaterial = shovelerMaterialScreenspaceTextureCreate(pointlight->shared->depthFramebuffer->depthTarget, false, true, nearestNeighborSampler, false);

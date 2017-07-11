@@ -10,7 +10,7 @@
 static int renderSpotLight(void *spotlightPointer, ShovelerScene *scene, ShovelerCamera *camera, ShovelerFramebuffer *framebuffer);
 static void freeSpotLight(void *spotlightPointer);
 
-ShovelerLightSpotShared *shovelerLightSpotSharedCreate(int width, int height, GLsizei samples, float ambientFactor, float exponentialFactor, ShovelerVector4 color) {
+ShovelerLightSpotShared *shovelerLightSpotSharedCreate(int width, int height, GLsizei samples, float ambientFactor, float exponentialFactor, ShovelerVector3 color) {
 	ShovelerLightSpotShared *shared = malloc(sizeof(ShovelerLightSpotShared));
 	shared->shadowMapSampler = shovelerSamplerCreate(true, true);
 	shared->depthFramebuffer = shovelerFramebufferCreateDepthOnly(width, height, samples);
@@ -36,7 +36,7 @@ ShovelerLightSpot *shovelerLightSpotCreateWithShared(ShovelerCamera *camera, Sho
 	shovelerUniformMapInsert(spotlight->light.uniforms, "isExponentialLiftedShadowMap", shovelerUniformCreateInt(1));
 	shovelerUniformMapInsert(spotlight->light.uniforms, "lightAmbientFactor", shovelerUniformCreateFloat(spotlight->shared->ambientFactor));
 	shovelerUniformMapInsert(spotlight->light.uniforms, "lightExponentialShadowFactor", shovelerUniformCreateFloat(spotlight->shared->exponentialFactor));
-	shovelerUniformMapInsert(spotlight->light.uniforms, "lightColor", shovelerUniformCreateVector4Pointer(&spotlight->shared->color));
+	shovelerUniformMapInsert(spotlight->light.uniforms, "lightColor", shovelerUniformCreateVector3Pointer(&spotlight->shared->color));
 	shovelerUniformMapInsert(spotlight->light.uniforms, "lightPosition", shovelerUniformCreateVector3Pointer(&spotlight->camera->position));
 	shovelerUniformMapInsert(spotlight->light.uniforms, "lightView", shovelerUniformCreateMatrixPointer(&spotlight->camera->view));
 	shovelerUniformMapInsert(spotlight->light.uniforms, "lightProjection", shovelerUniformCreateMatrixPointer(&spotlight->camera->projection));

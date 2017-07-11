@@ -38,14 +38,14 @@ static const char *fragmentShaderSource =
 		""
 		"uniform vec3 cameraPosition;\n"
 		""
-		"uniform vec4 lightColor;\n"
+		"uniform vec3 lightColor;\n"
 		"uniform float lightAmbientFactor;\n"
 		"uniform float lightExponentialShadowFactor;\n"
 		"uniform vec3 lightPosition;\n"
 		"uniform bool isExponentialLiftedShadowMap;\n"
 		"uniform sampler2D shadowMap;\n"
 		""
-		"uniform vec4 color;\n"
+		"uniform vec3 color;\n"
 		""
 		"in vec3 worldPosition;\n"
 		"in vec3 worldNormal;\n"
@@ -88,10 +88,10 @@ static const char *fragmentShaderSource =
 		"	vec3 reflectedLight = -reflect(-lightDirection, normal);\n"
 		"	float specularFactor = pow(clamp(dot(reflectedLight, cameraDirection), 0.0, 1.0), 250.0);\n"
 		""
-		"	fragmentColor = clamp(lightAmbientFactor * color + exponentialShadowFactor * diffuseFactor * color * lightColor + exponentialShadowFactor * specularFactor * lightColor, 0.0, 1.0);\n"
+		"	fragmentColor = vec4(clamp(lightAmbientFactor * color + exponentialShadowFactor * diffuseFactor * color * lightColor + exponentialShadowFactor * specularFactor * lightColor, 0.0, 1.0), 1.0);\n"
 		"}\n";
 
-ShovelerMaterial *shovelerMaterialColorCreate(ShovelerVector4 color)
+ShovelerMaterial *shovelerMaterialColorCreate(ShovelerVector3 color)
 {
 	GLuint vertexShaderObject = shovelerShaderProgramCompileFromString(vertexShaderSource, GL_VERTEX_SHADER);
 	GLuint fragmentShaderObject = shovelerShaderProgramCompileFromString(fragmentShaderSource, GL_FRAGMENT_SHADER);
@@ -99,7 +99,7 @@ ShovelerMaterial *shovelerMaterialColorCreate(ShovelerVector4 color)
 
 	ShovelerMaterial *material = shovelerMaterialCreate(program);
 
-	shovelerUniformMapInsert(material->uniforms, "color", shovelerUniformCreateVector4(color));
+	shovelerUniformMapInsert(material->uniforms, "color", shovelerUniformCreateVector3(color));
 
 	return material;
 }

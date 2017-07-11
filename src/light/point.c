@@ -11,7 +11,7 @@
 static int renderPointLight(void *pointlightPointer, ShovelerScene *scene, ShovelerCamera *camera, ShovelerFramebuffer *framebuffer);
 static void freePointLight(void *pointlightPointer);
 
-ShovelerLightPoint *shovelerLightPointCreate(ShovelerVector3 position, int width, int height, GLsizei samples, float ambientFactor, float exponentialFactor, ShovelerVector4 color)
+ShovelerLightPoint *shovelerLightPointCreate(ShovelerVector3 position, int width, int height, GLsizei samples, float ambientFactor, float exponentialFactor, ShovelerVector3 color)
 {
 	ShovelerLightPoint *pointlight = malloc(sizeof(ShovelerLightPoint));
 	pointlight->light.data = pointlight;

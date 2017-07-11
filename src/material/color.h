@@ -4,6 +4,6 @@
 #include "material.h"
 #include "types.h"
 
-ShovelerMaterial *shovelerMaterialColorCreate(ShovelerVector4 color);
+ShovelerMaterial *shovelerMaterialColorCreate(ShovelerVector3 color);
 
 #endif

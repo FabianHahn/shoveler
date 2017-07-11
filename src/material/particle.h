@@ -3,6 +3,6 @@
 
 #include "material.h"
 
-ShovelerMaterial *shovelerMaterialParticleCreate(float size, ShovelerVector4 color);
+ShovelerMaterial *shovelerMaterialParticleCreate(float size, ShovelerVector3 color);
 
 #endif

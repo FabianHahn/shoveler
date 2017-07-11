@@ -10,6 +10,6 @@ typedef struct {
 	ShovelerLightSpot *spotlights[6];
 } ShovelerLightPoint;
 
-ShovelerLightPoint *shovelerLightPointCreate(ShovelerVector3 position, int width, int height, GLsizei samples, float ambientFactor, float exponentialFactor, ShovelerVector4 color);
+ShovelerLightPoint *shovelerLightPointCreate(ShovelerVector3 position, int width, int height, GLsizei samples, float ambientFactor, float exponentialFactor, ShovelerVector3 color);
 
 #endif
