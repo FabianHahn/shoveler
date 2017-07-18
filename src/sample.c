@@ -24,9 +24,10 @@
 #include "shader_program.h"
 #include "texture.h"
 
+static void shovelerSampleUpdate(ShovelerGame *game, double dt);
 static void handleMovement(float dt);
 
-static GLFWwindow *window;
+static ShovelerGame *game;
 static ShovelerSampler *nearestNeighborSampler;
 static ShovelerSampler *interpolatingSampler;
 static ShovelerMaterial *colorMaterial;
@@ -40,17 +41,14 @@ static ShovelerModel *downCubeModel;
 static ShovelerModel *frontCubeModel;
 static ShovelerModel *leftCubeModel;
 static ShovelerModel *rightCubeModel;
-static ShovelerScene *scene;
-static ShovelerFramebuffer *framebuffer;
-static ShovelerCamera *camera;
 static float previousCursorX;
 static float previousCursorY;
 
 static float eps = 1e-9;
 
-void shovelerSampleInit(GLFWwindow *sampleWindow, int width, int height, int samples)
+void shovelerSampleInit(ShovelerGame *sampleGame, int width, int height, int samples)
 {
-	window = sampleWindow;
+	game = sampleGame;
 
 	nearestNeighborSampler = shovelerSamplerCreate(false, true);
 	interpolatingSampler = shovelerSamplerCreate(true, true);
@@ -71,7 +69,7 @@ void shovelerSampleInit(GLFWwindow *sampleWindow, int width, int height, int sam
 
 	shovelerOpenGLCheckSuccess();
 
-	scene = shovelerSceneCreate();
+	game->scene = shovelerSceneCreate();
 	quad = shovelerDrawableQuadCreate();
 
 	ShovelerModel *groundModel = shovelerModelCreate(quad, colorMaterial);
@@ -80,7 +78,7 @@ void shovelerSampleInit(GLFWwindow *sampleWindow, int width, int height, int sam
 	groundModel->scale.values[0] = 10.0f;
 	groundModel->scale.values[1] = 10.0f;
 	shovelerModelUpdateTransformation(groundModel);
-	shovelerSceneAddModel(scene, groundModel);
+	shovelerSceneAddModel(game->scene, groundModel);
 
 	ShovelerModel *ceilingModel = shovelerModelCreate(quad, colorMaterial);
 	ceilingModel->translation.values[1] = 10.0f;
@@ -88,7 +86,7 @@ void shovelerSampleInit(GLFWwindow *sampleWindow, int width, int height, int sam
 	ceilingModel->scale.values[0] = 10.0f;
 	ceilingModel->scale.values[1] = 10.0f;
 	shovelerModelUpdateTransformation(ceilingModel);
-	shovelerSceneAddModel(scene, ceilingModel);
+	shovelerSceneAddModel(game->scene, ceilingModel);
 
 	ShovelerModel *frontWallModel = shovelerModelCreate(quad, colorMaterial);
 	frontWallModel->translation.values[2] = 10.0f;
@@ -96,14 +94,14 @@ void shovelerSampleInit(GLFWwindow *sampleWindow, int width, int height, int sam
 	frontWallModel->scale.values[0] = 10.0f;
 	frontWallModel->scale.values[1] = 10.0f;
 	shovelerModelUpdateTransformation(frontWallModel);
-	shovelerSceneAddModel(scene, frontWallModel);
+	shovelerSceneAddModel(game->scene, frontWallModel);
 
 	ShovelerModel *backWallModel = shovelerModelCreate(quad, colorMaterial);
 	backWallModel->translation.values[2] = -10.0f;
 	backWallModel->scale.values[0] = 10.0f;
 	backWallModel->scale.values[1] = 10.0f;
 	shovelerModelUpdateTransformation(backWallModel);
-	shovelerSceneAddModel(scene, backWallModel);
+	shovelerSceneAddModel(game->scene, backWallModel);
 
 	ShovelerModel *leftWallModel = shovelerModelCreate(quad, colorMaterial);
 	leftWallModel->translation.values[0] = 10.0f;
@@ -111,7 +109,7 @@ void shovelerSampleInit(GLFWwindow *sampleWindow, int width, int height, int sam
 	leftWallModel->scale.values[0] = 10.0f;
 	leftWallModel->scale.values[1] = 10.0f;
 	shovelerModelUpdateTransformation(leftWallModel);
-	shovelerSceneAddModel(scene, leftWallModel);
+	shovelerSceneAddModel(game->scene, leftWallModel);
 
 	ShovelerModel *rightWallModel = shovelerModelCreate(quad, colorMaterial);
 	rightWallModel->translation.values[0] = -10.0f;
@@ -119,38 +117,36 @@ void shovelerSampleInit(GLFWwindow *sampleWindow, int width, int height, int sam
 	rightWallModel->scale.values[0] = 10.0f;
 	rightWallModel->scale.values[1] = 10.0f;
 	shovelerModelUpdateTransformation(rightWallModel);
-	shovelerSceneAddModel(scene, rightWallModel);
+	shovelerSceneAddModel(game->scene, rightWallModel);
 
 	cube = shovelerDrawableCubeCreate();
 	downCubeModel = shovelerModelCreate(cube, textureMaterial);
 	downCubeModel->translation.values[1] = -5;
 	shovelerModelUpdateTransformation(downCubeModel);
-	shovelerSceneAddModel(scene, downCubeModel);
+	shovelerSceneAddModel(game->scene, downCubeModel);
 
 	frontCubeModel = shovelerModelCreate(cube, textureMaterial);
 	frontCubeModel->translation.values[2] = 5;
 	shovelerModelUpdateTransformation(frontCubeModel);
-	shovelerSceneAddModel(scene, frontCubeModel);
+	shovelerSceneAddModel(game->scene, frontCubeModel);
 
 	leftCubeModel = shovelerModelCreate(cube, textureMaterial);
 	leftCubeModel->translation.values[0] = 5;
 	shovelerModelUpdateTransformation(leftCubeModel);
-	shovelerSceneAddModel(scene, leftCubeModel);
+	shovelerSceneAddModel(game->scene, leftCubeModel);
 
 	rightCubeModel = shovelerModelCreate(cube, textureMaterial);
 	rightCubeModel->translation.values[0] = -5;
 	shovelerModelUpdateTransformation(rightCubeModel);
-	shovelerSceneAddModel(scene, rightCubeModel);
+	shovelerSceneAddModel(game->scene, rightCubeModel);
 
-	framebuffer = shovelerFramebufferCreate(width, height, samples, 4, 8);
-
-	camera = shovelerCameraPerspectiveCreate((ShovelerVector3){0, 0, -5}, (ShovelerVector3){0, 0, 1}, (ShovelerVector3){0, 1, 0}, 2.0f * SHOVELER_PI * 50.0f / 360.0f, (float) width / height, 0.01, 1000);
+	game->camera = shovelerCameraPerspectiveCreate((ShovelerVector3){0, 0, -5}, (ShovelerVector3){0, 0, 1}, (ShovelerVector3){0, 1, 0}, 2.0f * SHOVELER_PI * 50.0f / 360.0f, (float) width / height, 0.01, 1000);
 
 	ShovelerLightPoint *pointlight = shovelerLightPointCreate((ShovelerVector3){0, 0, 0}, 1024, 1024, 1, 0.0f, 80.0f, (ShovelerVector3){1.0f, 1.0f, 1.0f});
-	shovelerSceneAddLight(scene, &pointlight->light);
+	shovelerSceneAddLight(game->scene, &pointlight->light);
 
 	ShovelerLightPoint *pointlight2 = shovelerLightPointCreate((ShovelerVector3){-8, -8, -8}, 1024, 1024, 1, 0.0f, 80.0f, (ShovelerVector3){0.1f, 0.1f, 0.1f});
-	shovelerSceneAddLight(scene, &pointlight2->light);
+	shovelerSceneAddLight(game->scene, &pointlight2->light);
 
 	point = shovelerDrawablePointCreate();
 	particleMaterial = shovelerMaterialParticleCreate((ShovelerVector3){1.0f, 1.0f, 1.0f});
@@ -159,7 +155,7 @@ void shovelerSampleInit(GLFWwindow *sampleWindow, int width, int height, int sam
 	pointlightModel->castsShadow = false;
 	pointlightModel->emitter = true;
 	shovelerModelUpdateTransformation(pointlightModel);
-	shovelerSceneAddModel(scene, pointlightModel);
+	shovelerSceneAddModel(game->scene, pointlightModel);
 
 	ShovelerModel *pointlightModel2 = shovelerModelCreate(point, particleMaterial);
 	pointlightModel2->translation = pointlight2->position;
@@ -167,7 +163,7 @@ void shovelerSampleInit(GLFWwindow *sampleWindow, int width, int height, int sam
 	pointlightModel2->castsShadow = false;
 	pointlightModel2->emitter = true;
 	shovelerModelUpdateTransformation(pointlightModel2);
-	shovelerSceneAddModel(scene, pointlightModel2);
+	shovelerSceneAddModel(game->scene, pointlightModel2);
 
 	screenspaceTextureMaterial = shovelerMaterialScreenspaceTextureCreate(pointlight->shared->depthFramebuffer->depthTarget, false, true, nearestNeighborSampler, false);
 	ShovelerModel *screenQuadModel = shovelerModelCreate(quad, screenspaceTextureMaterial);
@@ -177,18 +173,35 @@ void shovelerSampleInit(GLFWwindow *sampleWindow, int width, int height, int sam
 	screenQuadModel->scale.values[0] = 0.5;
 	screenQuadModel->scale.values[1] = 0.5;
 	shovelerModelUpdateTransformation(screenQuadModel);
-	shovelerSceneAddModel(scene, screenQuadModel);
+	shovelerSceneAddModel(game->scene, screenQuadModel);
 
 	shovelerOpenGLCheckSuccess();
 
 	double newCursorX;
 	double newCursorY;
-	glfwGetCursorPos(window, &newCursorX, &newCursorY);
+	glfwGetCursorPos(game->window, &newCursorX, &newCursorY);
 	previousCursorX = newCursorX;
 	previousCursorY = newCursorY;
+
+	game->update = shovelerSampleUpdate;
 }
 
-void shovelerSampleRender(float dt)
+void shovelerSampleTerminate()
+{
+	shovelerSceneFree(game->scene);
+	shovelerCameraFree(game->camera);
+	shovelerDrawableFree(cube);
+	shovelerDrawableFree(quad);
+	shovelerDrawableFree(point);
+	shovelerMaterialFree(colorMaterial);
+	shovelerMaterialFree(particleMaterial);
+	shovelerMaterialFree(screenspaceTextureMaterial);
+	shovelerMaterialFree(textureMaterial);
+	shovelerSamplerFree(interpolatingSampler);
+	shovelerSamplerFree(nearestNeighborSampler);
+}
+
+static void shovelerSampleUpdate(ShovelerGame *game, double dt)
 {
 	handleMovement(dt);
 
@@ -211,25 +224,6 @@ void shovelerSampleRender(float dt)
 	rightCubeModel->rotation.values[1] += 0.2f * dt;
 	rightCubeModel->rotation.values[2] += 0.3f * dt;
 	shovelerModelUpdateTransformation(rightCubeModel);
-
-	shovelerSceneRenderFrame(scene, camera, framebuffer);
-	shovelerFramebufferBlitToDefault(framebuffer);
-}
-
-void shovelerSampleTerminate()
-{
-	shovelerFramebufferFree(framebuffer);
-	shovelerSceneFree(scene);
-	shovelerCameraFree(camera);
-	shovelerDrawableFree(cube);
-	shovelerDrawableFree(quad);
-	shovelerDrawableFree(point);
-	shovelerMaterialFree(colorMaterial);
-	shovelerMaterialFree(particleMaterial);
-	shovelerMaterialFree(screenspaceTextureMaterial);
-	shovelerMaterialFree(textureMaterial);
-	shovelerSamplerFree(interpolatingSampler);
-	shovelerSamplerFree(nearestNeighborSampler);
 }
 
 static void handleMovement(float dt)
@@ -241,7 +235,7 @@ static void handleMovement(float dt)
 
 	double newCursorX;
 	double newCursorY;
-	glfwGetCursorPos(window, &newCursorX, &newCursorY);
+	glfwGetCursorPos(game->window, &newCursorX, &newCursorY);
 
 	float cursorDiffX = newCursorX - previousCursorX;
 	float cursorDiffY = newCursorY - previousCursorY;
@@ -251,54 +245,54 @@ static void handleMovement(float dt)
 	float tiltAmountY = tiltFactor * cursorDiffY;
 
 	if(fabs(cursorDiffX) > eps) {
-		shovelerCameraPerspectiveTiltRight(camera, tiltAmountX);
+		shovelerCameraPerspectiveTiltRight(game->camera, tiltAmountX);
 		moved = true;
 	}
 
 	if(fabs(cursorDiffY) > eps) {
-		shovelerCameraPerspectiveTiltUp(camera, tiltAmountY);
+		shovelerCameraPerspectiveTiltUp(game->camera, tiltAmountY);
 		moved = true;
 	}
 
-	state = glfwGetKey(window, GLFW_KEY_W);
+	state = glfwGetKey(game->window, GLFW_KEY_W);
 	if(state == GLFW_PRESS) {
-		shovelerCameraPerspectiveMoveForward(camera, moveAmount);
+		shovelerCameraPerspectiveMoveForward(game->camera, moveAmount);
 		moved = true;
 	}
 
-	state = glfwGetKey(window, GLFW_KEY_S);
+	state = glfwGetKey(game->window, GLFW_KEY_S);
 	if(state == GLFW_PRESS) {
-		shovelerCameraPerspectiveMoveForward(camera, -moveAmount);
+		shovelerCameraPerspectiveMoveForward(game->camera, -moveAmount);
 		moved = true;
 	}
 
-	state = glfwGetKey(window, GLFW_KEY_A);
+	state = glfwGetKey(game->window, GLFW_KEY_A);
 	if(state == GLFW_PRESS) {
-		shovelerCameraPerspectiveMoveRight(camera, -moveAmount);
+		shovelerCameraPerspectiveMoveRight(game->camera, -moveAmount);
 		moved = true;
 	}
 
-	state = glfwGetKey(window, GLFW_KEY_D);
+	state = glfwGetKey(game->window, GLFW_KEY_D);
 	if(state == GLFW_PRESS) {
-		shovelerCameraPerspectiveMoveRight(camera, moveAmount);
+		shovelerCameraPerspectiveMoveRight(game->camera, moveAmount);
 		moved = true;
 	}
 
-	state = glfwGetKey(window, GLFW_KEY_SPACE);
+	state = glfwGetKey(game->window, GLFW_KEY_SPACE);
 	if(state == GLFW_PRESS) {
-		shovelerCameraPerspectiveMoveUp(camera, moveAmount);
+		shovelerCameraPerspectiveMoveUp(game->camera, moveAmount);
 		moved = true;
 	}
 
-	state = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL);
+	state = glfwGetKey(game->window, GLFW_KEY_LEFT_CONTROL);
 	if(state == GLFW_PRESS) {
-		shovelerCameraPerspectiveMoveUp(camera, -moveAmount);
+		shovelerCameraPerspectiveMoveUp(game->camera, -moveAmount);
 		moved = true;
 	}
 
 	if(moved) {
-		shovelerLogTrace("Camera at position (%f, %f, %f)", camera->position.values[0], camera->position.values[1], camera->position.values[2]);
-		shovelerCameraPerspectiveUpdateView(camera);
+		shovelerLogTrace("Camera at position (%f, %f, %f)", game->camera->position.values[0], game->camera->position.values[1], game->camera->position.values[2]);
+		shovelerCameraPerspectiveUpdateView(game->camera);
 	}
 
 	previousCursorX = newCursorX;
