@@ -55,6 +55,8 @@ void shovelerLightSpotSharedFree(ShovelerLightSpotShared *shared)
 	shovelerMaterialFree(shared->depthMaterial);
 	shovelerFramebufferFree(shared->depthFramebuffer);
 	shovelerSamplerFree(shared->shadowMapSampler);
+
+	free(shared);
 }
 
 static int renderSpotLight(void *spotlightPointer, ShovelerScene *scene, ShovelerCamera *camera, ShovelerFramebuffer *framebuffer)
