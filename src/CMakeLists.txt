@@ -20,6 +20,7 @@ set(SHOVELER_SRC
 	camera.c
 	file.c
 	framebuffer.c
+	global.c
 	image.c
 	input.c
 	log.c
