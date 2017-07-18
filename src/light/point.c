@@ -64,6 +64,7 @@ static void freePointLight(void *pointlightPointer)
 	}
 
 	shovelerLightSpotSharedFree(pointlight->shared);
+	shovelerUniformMapFree(pointlight->light.uniforms);
 
 	free(pointlight);
 }
