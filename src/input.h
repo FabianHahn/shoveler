@@ -3,22 +3,25 @@
 
 #include <stdbool.h> // bool
 
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-typedef void (ShovelerInputKeyCallback)(int key, int scancode, int action, int mods);
-typedef void (ShovelerInputMouseButtonCallback)(int button, int action, int mods);
-typedef void (ShovelerInputCursorPosCallback)(double xpos, double ypos);
-typedef void (ShovelerInputScrollCallback)(double xoffset, double yoffset);
+#include "game.h"
 
-void shovelerInputInit(GLFWwindow *window);
-void shovelerInputTerminate();
-void shovelerInputAddKeyCallback(ShovelerInputKeyCallback *keyCallback);
-bool shovelerInputRemoveKeyCallback(ShovelerInputKeyCallback *keyCallback);
-void shovelerInputAddMouseButtonCallback(ShovelerInputMouseButtonCallback *mouseButtonCallback);
-bool shovelerInputRemoveMouseButtonCallback(ShovelerInputMouseButtonCallback *mouseButtonCallback);
-void shovelerInputAddCursorPosCallback(ShovelerInputCursorPosCallback *cursorPosCallback);
-bool shovelerInputRemoveCursorPosCallback(ShovelerInputCursorPosCallback *cursorPosCallback);
-void shovelerInputAddScrollCallback(ShovelerInputScrollCallback *scrollCallback);
-bool shovelerInputRemoveScrollCallback(ShovelerInputScrollCallback *scrollCallback);
+typedef void (ShovelerInputKeyCallback)(ShovelerGame *game, int key, int scancode, int action, int mods);
+typedef void (ShovelerInputMouseButtonCallback)(ShovelerGame *game, int button, int action, int mods);
+typedef void (ShovelerInputCursorPosCallback)(ShovelerGame *game, double xpos, double ypos);
+typedef void (ShovelerInputScrollCallback)(ShovelerGame *game, double xoffset, double yoffset);
+
+void shovelerInputInit(ShovelerGame *game);
+void shovelerInputTerminate(ShovelerGame *game);
+void shovelerInputAddKeyCallback(ShovelerGame *game, ShovelerInputKeyCallback *keyCallback);
+bool shovelerInputRemoveKeyCallback(ShovelerGame *game, ShovelerInputKeyCallback *keyCallback);
+void shovelerInputAddMouseButtonCallback(ShovelerGame *game, ShovelerInputMouseButtonCallback *mouseButtonCallback);
+bool shovelerInputRemoveMouseButtonCallback(ShovelerGame *game, ShovelerInputMouseButtonCallback *mouseButtonCallback);
+void shovelerInputAddCursorPosCallback(ShovelerGame *game, ShovelerInputCursorPosCallback *cursorPosCallback);
+bool shovelerInputRemoveCursorPosCallback(ShovelerGame *game, ShovelerInputCursorPosCallback *cursorPosCallback);
+void shovelerInputAddScrollCallback(ShovelerGame *game, ShovelerInputScrollCallback *scrollCallback);
+bool shovelerInputRemoveScrollCallback(ShovelerGame *game, ShovelerInputScrollCallback *scrollCallback);
 
 #endif

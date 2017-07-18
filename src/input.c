@@ -7,99 +7,104 @@ static void mouseButtonHandler(GLFWwindow *window, int button, int action, int m
 static void cursorPosHandler(GLFWwindow *window, double xpos, double ypos);
 static void scrollHandler(GLFWwindow *window, double xoffset, double yoffset);
 
-static GQueue *keyCallbacks;
-static GQueue *mouseButtonCallbacks;
-static GQueue *cursorPosCallbacks;
-static GQueue *scrollCallbacks;
-
-void shovelerInputInit(GLFWwindow *window)
+void shovelerInputInit(ShovelerGame *game)
 {
-	keyCallbacks = g_queue_new();
-	mouseButtonCallbacks = g_queue_new();
-	cursorPosCallbacks = g_queue_new();
-	scrollCallbacks = g_queue_new();
+	game->keyCallbacks = g_queue_new();
+	game->mouseButtonCallbacks = g_queue_new();
+	game->cursorPosCallbacks = g_queue_new();
+	game->scrollCallbacks = g_queue_new();
 
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-	glfwSetKeyCallback(window, keyHandler);
-	glfwSetMouseButtonCallback(window, mouseButtonHandler);
-	glfwSetCursorPosCallback(window, cursorPosHandler);
-	glfwSetScrollCallback(window, scrollHandler);
+	glfwSetInputMode(game->window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetKeyCallback(game->window, keyHandler);
+	glfwSetMouseButtonCallback(game->window, mouseButtonHandler);
+	glfwSetCursorPosCallback(game->window, cursorPosHandler);
+	glfwSetScrollCallback(game->window, scrollHandler);
 }
 
-void shovelerInputTerminate()
+void shovelerInputTerminate(ShovelerGame *game)
 {
-	g_queue_free(keyCallbacks);
-	g_queue_free(mouseButtonCallbacks);
+	g_queue_free(game->keyCallbacks);
+	g_queue_free(game->mouseButtonCallbacks);
+	g_queue_free(game->cursorPosCallbacks);
+	g_queue_free(game->scrollCallbacks);
 }
 
-void shovelerInputAddKeyCallback(ShovelerInputKeyCallback *keyCallback)
+void shovelerInputAddKeyCallback(ShovelerGame *game, ShovelerInputKeyCallback *keyCallback)
 {
-	g_queue_push_tail(keyCallbacks, keyCallback);
+	g_queue_push_tail(game->keyCallbacks, keyCallback);
 }
 
-bool shovelerInputRemoveKeyCallback(ShovelerInputKeyCallback *keyCallback)
+bool shovelerInputRemoveKeyCallback(ShovelerGame *game, ShovelerInputKeyCallback *keyCallback)
 {
-	return g_queue_remove(keyCallbacks, keyCallback);
+	return g_queue_remove(game->keyCallbacks, keyCallback);
 }
 
-void shovelerInputAddMouseButtonCallback(ShovelerInputMouseButtonCallback *mouseButtonCallback)
+void shovelerInputAddMouseButtonCallback(ShovelerGame *game, ShovelerInputMouseButtonCallback *mouseButtonCallback)
 {
-	g_queue_push_tail(mouseButtonCallbacks, mouseButtonCallback);
+	g_queue_push_tail(game->mouseButtonCallbacks, mouseButtonCallback);
 }
 
-bool shovelerInputRemoveMouseButtonCallback(ShovelerInputMouseButtonCallback *mouseButtonCallback)
+bool shovelerInputRemoveMouseButtonCallback(ShovelerGame *game, ShovelerInputMouseButtonCallback *mouseButtonCallback)
 {
-	return g_queue_remove(mouseButtonCallbacks, mouseButtonCallback);
+	return g_queue_remove(game->mouseButtonCallbacks, mouseButtonCallback);
 }
 
-void shovelerInputAddCursorPosCallback(ShovelerInputCursorPosCallback *cursorPosCallback)
+void shovelerInputAddCursorPosCallback(ShovelerGame *game, ShovelerInputCursorPosCallback *cursorPosCallback)
 {
-	g_queue_push_tail(cursorPosCallbacks, cursorPosCallback);
+	g_queue_push_tail(game->cursorPosCallbacks, cursorPosCallback);
 }
 
-bool shovelerInputRemoveCursorPosCallback(ShovelerInputCursorPosCallback *cursorPosCallback)
+bool shovelerInputRemoveCursorPosCallback(ShovelerGame *game, ShovelerInputCursorPosCallback *cursorPosCallback)
 {
-	return g_queue_remove(cursorPosCallbacks, cursorPosCallback);
+	return g_queue_remove(game->cursorPosCallbacks, cursorPosCallback);
 }
 
-void shovelerInputAddScrollCallback(ShovelerInputScrollCallback *scrollCallback)
+void shovelerInputAddScrollCallback(ShovelerGame *game, ShovelerInputScrollCallback *scrollCallback)
 {
-	g_queue_push_tail(scrollCallbacks, scrollCallback);
+	g_queue_push_tail(game->scrollCallbacks, scrollCallback);
 }
 
-bool shovelerInputRemoveScrollCallback(ShovelerInputScrollCallback *scrollCallback)
+bool shovelerInputRemoveScrollCallback(ShovelerGame *game, ShovelerInputScrollCallback *scrollCallback)
 {
-	return g_queue_remove(scrollCallbacks, scrollCallback);
+	return g_queue_remove(game->scrollCallbacks, scrollCallback);
 }
 
 static void keyHandler(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
-	for(GList *iter = keyCallbacks->head; iter != NULL; iter = iter->next) {
+	ShovelerGame *game = shovelerGameGetForWindow(window);
+
+	for(GList *iter = game->keyCallbacks->head; iter != NULL; iter = iter->next) {
 		ShovelerInputKeyCallback *keyCallback = iter->data;
-		keyCallback(key, scancode, action, mods);
+		keyCallback(game, key, scancode, action, mods);
 	}
 }
 
 static void mouseButtonHandler(GLFWwindow *window, int button, int action, int mods)
 {
-	for(GList *iter = mouseButtonCallbacks->head; iter != NULL; iter = iter->next) {
+	ShovelerGame *game = shovelerGameGetForWindow(window);
+
+	for(GList *iter = game->mouseButtonCallbacks->head; iter != NULL; iter = iter->next) {
 		ShovelerInputMouseButtonCallback *mouseButtonCallback = iter->data;
-		mouseButtonCallback(button, action, mods);
+		mouseButtonCallback(game, button, action, mods);
 	}
 }
 
 static void cursorPosHandler(GLFWwindow *window, double xpos, double ypos)
 {
-	for(GList *iter = cursorPosCallbacks->head; iter != NULL; iter = iter->next) {
+	ShovelerGame *game = shovelerGameGetForWindow(window);
+
+	for(GList *iter = game->cursorPosCallbacks->head; iter != NULL; iter = iter->next) {
 		ShovelerInputCursorPosCallback *cursorPosCallback = iter->data;
-		cursorPosCallback(xpos, ypos);
+		cursorPosCallback(game, xpos, ypos);
 	}
 }
 
 static void scrollHandler(GLFWwindow *window, double xoffset, double yoffset)
 {
-	for(GList *iter = scrollCallbacks->head; iter != NULL; iter = iter->next) {
+	ShovelerGame *game = shovelerGameGetForWindow(window);
+
+	for(GList *iter = game->scrollCallbacks->head; iter != NULL; iter = iter->next) {
 		ShovelerInputScrollCallback *scrollCallback = iter->data;
-		scrollCallback(xoffset, yoffset);
+		scrollCallback(game, xoffset, yoffset);
 	}
 }

@@ -5,12 +5,14 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include "game.h"
+#include "global.h"
 #include "input.h"
 #include "log.h"
 #include "opengl.h"
 #include "sample.h"
 
-static void exitKeyHandler(int key, int scancode, int action, int mods);
+static void exitKeyHandler(ShovelerGame *game, int key, int scancode, int action, int mods);
 
 static GLFWwindow *window;
 
@@ -25,11 +27,7 @@ int main(int argc, char *argv[])
 	int width = 640;
 	int height = 480;
 
-	shovelerLogInit(logLevel, logChannel);
-
-	if(!glfwInit()) {
-		shovelerLogError("Failed to initialize glfw.");
-		shovelerLogTerminate();
+	if(!shovelerGlobalInit(logLevel, logChannel)) {
 		return EXIT_FAILURE;
 	}
 
@@ -89,9 +87,13 @@ int main(int argc, char *argv[])
 		shovelerLogTerminate();
 		return EXIT_FAILURE;
 	}
-	
-	shovelerInputInit(window);
-	shovelerInputAddKeyCallback(exitKeyHandler);
+
+	ShovelerGame game;
+	game.window = window;
+	g_hash_table_insert(shovelerGlobalGetContext()->games, window, &game);
+
+	shovelerInputInit(&game);
+	shovelerInputAddKeyCallback(&game, exitKeyHandler);
 
 	shovelerSampleInit(window, width, height, samples);
 
@@ -110,17 +112,16 @@ int main(int argc, char *argv[])
 
 	shovelerSampleTerminate();
 
-	shovelerInputTerminate();
-	glfwTerminate();
-	shovelerLogTerminate();
+	shovelerInputTerminate(&game);
+
+	shovelerGlobalUninit();
 	return EXIT_SUCCESS;
 }
 
-static void exitKeyHandler(int key, int scancode, int action, int mods)
+static void exitKeyHandler(ShovelerGame *game, int key, int scancode, int action, int mods)
 {
 	if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
 		shovelerLogInfo("Escape key pressed, terminating.");
 		glfwSetWindowShouldClose(window, GLFW_TRUE);
 	}
-
 }
