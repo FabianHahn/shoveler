@@ -66,5 +66,6 @@ static void freePoint(ShovelerDrawable *point)
 	glDeleteVertexArrays(1, &pointData->vertexArrayObject);
 	glDeleteBuffers(1, &pointData->vertexBuffer);
 
+	free(point->data);
 	free(point);
 }
