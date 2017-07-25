@@ -4,6 +4,7 @@
 #include <stdbool.h>
 
 #include <glib.h>
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 #include "camera.h"
