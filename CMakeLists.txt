@@ -3,10 +3,10 @@ project(shoveler)
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 
-option(shoveler_build_sample "Build sample binary using shoveler." ON)
-option(shoveler_use_glib "Link against system glib instead of bundled fakeglib." OFF)
+option(SHOVELER_BUILD_SAMPLE "Build sample binary using shoveler." ON)
+option(SHOVELER_USE_GLIB "Link against system glib instead of bundled fakeglib." OFF)
 
-if(shoveler_use_glib)
+if(SHOVELER_USE_GLIB)
 	find_package(glib 2.48 REQUIRED)
 	add_library(glib UNKNOWN IMPORTED)
 	set_property(TARGET glib PROPERTY IMPORTED_LOCATION ${GLIB_LIBRARIES})

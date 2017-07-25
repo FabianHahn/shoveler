@@ -5,7 +5,7 @@ set(SHOVELER_SAMPLE_SRC
 	shoveler.c
 )
 
-if(shoveler_build_sample)
+if(SHOVELER_BUILD_SAMPLE)
 	add_executable(sample ${SHOVELER_SAMPLE_SRC})
 	set_property(TARGET sample PROPERTY C_STANDARD 99)
 	target_link_libraries(sample shoveler)
