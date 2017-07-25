@@ -3,6 +3,7 @@ project(shoveler)
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR})
 
+option(shoveler_build_sample "Build sample binary using shoveler." ON)
 option(shoveler_use_glib "Link against system glib instead of bundled fakeglib." OFF)
 
 if(shoveler_use_glib)
@@ -24,5 +25,6 @@ set(PNG_TESTS OFF CACHE BOOL "Disable building libpng tests")
 set(SKIP_INSTALL_ALL ON CACHE BOOL "Skip libpng installation steps")
 set(ZLIB_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/thirdparty/zlib)
 
-add_subdirectory(src)
+add_subdirectory(lib)
+add_subdirectory(sample)
 add_subdirectory(thirdparty)

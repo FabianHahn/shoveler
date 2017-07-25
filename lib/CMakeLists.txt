@@ -1,6 +1,6 @@
 include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${GLIB_INCLUDE_DIRS} ${GLAD_INCLUDE_DIRS})
 
-set(SHOVELER_SRC
+set(SHOVELER_LIB_SRC
 	camera/identity.c
 	camera/perspective.c
 	drawable/cube.c
@@ -28,21 +28,20 @@ set(SHOVELER_SRC
 	material.c
 	model.c
 	opengl.c
-	sample.c
 	sampler.c
 	scene.c
 	shader.c
 	shader_program.c
-	shoveler.c
 	texture.c
 	uniform.c
 	uniform_attachment.c
 	uniform_map.c
 )
 
-add_executable(shoveler ${SHOVELER_SRC})
+add_library(shoveler ${SHOVELER_LIB_SRC})
 set_property(TARGET shoveler PROPERTY C_STANDARD 99)
 target_link_libraries(shoveler glad glfw png_static zlibstatic)
+target_include_directories(shoveler PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 if(shoveler_use_glib)
 	target_link_libraries(shoveler glib)
