@@ -1,5 +1,3 @@
-include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${GLIB_INCLUDE_DIRS} ${GLAD_INCLUDE_DIRS})
-
 set(SHOVELER_LIB_SRC
 	camera/identity.c
 	camera/perspective.c
@@ -41,7 +39,7 @@ set(SHOVELER_LIB_SRC
 add_library(shoveler ${SHOVELER_LIB_SRC})
 set_property(TARGET shoveler PROPERTY C_STANDARD 99)
 target_link_libraries(shoveler glad glfw png_static zlibstatic)
-target_include_directories(shoveler PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(shoveler PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${GLIB_INCLUDE_DIRS} ${GLAD_INCLUDE_DIRS})
 
 if(shoveler_use_glib)
 	target_link_libraries(shoveler glib)
