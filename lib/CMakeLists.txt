@@ -45,7 +45,6 @@ target_include_directories(shoveler
     PRIVATE src)
 
 target_link_libraries(shoveler glad glfw png_static zlibstatic)
-target_include_directories(shoveler PUBLIC ${GLIB_INCLUDE_DIRS} ${GLAD_INCLUDE_DIRS})
 
 if(shoveler_use_glib)
 	target_link_libraries(shoveler glib)

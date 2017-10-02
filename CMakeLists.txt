@@ -8,12 +8,10 @@ option(SHOVELER_USE_GLIB "Link against system glib instead of bundled fakeglib."
 
 if(SHOVELER_USE_GLIB)
 	find_package(glib 2.48 REQUIRED)
-	add_library(glib UNKNOWN IMPORTED)
+	add_library(glib SHARED IMPORTED)
 	set_property(TARGET glib PROPERTY IMPORTED_LOCATION ${GLIB_LIBRARIES})
 	set_property(TARGET glib PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${GLIB_INCLUDE_DIRS})
 endif()
-
-set(GLAD_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glad/include)
 
 set(FAKEGLIB_BUILD_TESTS OFF CACHE BOOL "Disable building fakeglib tests")
 set(FAKEGLIB_BUILD_SHARED OFF CACHE BOOL "Disable building shared fakeglib")
