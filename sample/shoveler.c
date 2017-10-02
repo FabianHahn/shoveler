@@ -3,10 +3,10 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <shoveler/game.h>
+#include <shoveler/global.h>
+#include <shoveler/log.h>
 
-#include "game.h"
-#include "global.h"
-#include "log.h"
 #include "sample.h"
 
 int main(int argc, char *argv[])

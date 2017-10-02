@@ -1,45 +1,51 @@
 set(SHOVELER_LIB_SRC
-	camera/identity.c
-	camera/perspective.c
-	drawable/cube.c
-	drawable/quad.c
-	drawable/point.c
-	filter/depth_texture_gaussian.c
-	image/png.c
-	image/ppm.c
-	light/point.c
-	light/spot.c
-	material/color.c
-	material/depth.c
-	material/depth_texture_gaussian_filter.c
-	material/particle.c
-	material/screenspace_texture.c
-	material/texture.c
-	camera.c
-	file.c
-	framebuffer.c
-	game.c
-	global.c
-	image.c
-	input.c
-	log.c
-	material.c
-	model.c
-	opengl.c
-	sampler.c
-	scene.c
-	shader.c
-	shader_program.c
-	texture.c
-	uniform.c
-	uniform_attachment.c
-	uniform_map.c
+	src/camera/identity.c
+	src/camera/perspective.c
+	src/drawable/cube.c
+	src/drawable/quad.c
+	src/drawable/point.c
+	src/filter/depth_texture_gaussian.c
+	src/image/png.c
+	src/image/ppm.c
+	src/light/point.c
+	src/light/spot.c
+	src/material/color.c
+	src/material/depth.c
+	src/material/depth_texture_gaussian_filter.c
+	src/material/particle.c
+	src/material/screenspace_texture.c
+	src/material/texture.c
+	src/camera.c
+	src/file.c
+	src/framebuffer.c
+	src/game.c
+	src/global.c
+	src/image.c
+	src/input.c
+	src/log.c
+	src/material.c
+	src/model.c
+	src/opengl.c
+	src/sampler.c
+	src/scene.c
+	src/shader.c
+	src/shader_program.c
+	src/texture.c
+	src/uniform.c
+	src/uniform_attachment.c
+	src/uniform_map.c
 )
 
 add_library(shoveler ${SHOVELER_LIB_SRC})
 set_property(TARGET shoveler PROPERTY C_STANDARD 99)
+
+target_include_directories(shoveler
+	PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    PUBLIC $<INSTALL_INTERFACE:include>
+    PRIVATE src)
+
 target_link_libraries(shoveler glad glfw png_static zlibstatic)
-target_include_directories(shoveler PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${GLIB_INCLUDE_DIRS} ${GLAD_INCLUDE_DIRS})
+target_include_directories(shoveler PUBLIC ${GLIB_INCLUDE_DIRS} ${GLAD_INCLUDE_DIRS})
 
 if(shoveler_use_glib)
 	target_link_libraries(shoveler glib)

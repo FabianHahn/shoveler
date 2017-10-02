@@ -1,28 +1,27 @@
 #include <glib.h>
-
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <shoveler/camera/perspective.h>
+#include <shoveler/drawable/cube.h>
+#include <shoveler/drawable/quad.h>
+#include <shoveler/drawable/point.h>
+#include <shoveler/light/point.h>
+#include <shoveler/material/color.h>
+#include <shoveler/material/particle.h>
+#include <shoveler/material/screenspace_texture.h>
+#include <shoveler/material/texture.h>
+#include <shoveler/constants.h>
+#include <shoveler/framebuffer.h>
+#include <shoveler/image.h>
+#include <shoveler/input.h>
+#include <shoveler/model.h>
+#include <shoveler/opengl.h>
+#include <shoveler/sampler.h>
+#include <shoveler/scene.h>
+#include <shoveler/shader_program.h>
+#include <shoveler/texture.h>
 
-#include "camera/perspective.h"
-#include "drawable/cube.h"
-#include "drawable/quad.h"
-#include "drawable/point.h"
-#include "light/point.h"
-#include "material/color.h"
-#include "material/particle.h"
-#include "material/screenspace_texture.h"
-#include "material/texture.h"
-#include "constants.h"
-#include "framebuffer.h"
-#include "image.h"
-#include "input.h"
-#include "model.h"
-#include "opengl.h"
 #include "sample.h"
-#include "sampler.h"
-#include "scene.h"
-#include "shader_program.h"
-#include "texture.h"
 
 static void shovelerSampleUpdate(ShovelerGame *game, double dt);
 static void handleMovement(float dt);
