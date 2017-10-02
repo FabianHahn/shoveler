@@ -415,8 +415,12 @@ FAKEGLIB_API gboolean g_hash_table_iter_next(GHashTableIter *iter, gpointer *key
 	privateIter->state = GHashTableIterPrivate::kIterating;
 
 	if(privateIter->iter != privateIter->hashTable->map.end()) {
-		*key = privateIter->iter->first.value;
-		*value = privateIter->iter->second.value;
+		if(key != NULL) {
+			*key = privateIter->iter->first.value;
+		}
+		if(value != NULL) {
+			*value = privateIter->iter->second.value;
+		}
 		return true;
 	} else {
 		placementDelete(&privateIter->iter);
