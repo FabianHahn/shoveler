@@ -106,11 +106,13 @@ int shovelerGameRenderFrame(ShovelerGame *game)
 
 	game->update(game, dt);
 
-	shovelerSceneRenderFrame(game->scene, game->camera, game->framebuffer);
+	int rendered = shovelerSceneRenderFrame(game->scene, game->camera, game->framebuffer);
 	shovelerFramebufferBlitToDefault(game->framebuffer);
 
 	glfwSwapBuffers(game->window);
 	glfwPollEvents();
+
+	return rendered;
 }
 
 void shovelerGameFree(ShovelerGame *game)
