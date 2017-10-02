@@ -16,8 +16,8 @@
 typedef struct ShovelerSceneStruct {
 	ShovelerUniformMap *uniforms;
 	ShovelerMaterial *depthMaterial;
-	GQueue *lights;
-	GQueue *models;
+	GHashTable *lights;
+	GHashTable *models;
 	GHashTable *cameraShaderCache;
 } ShovelerScene;
 
@@ -29,8 +29,10 @@ typedef enum {
 } ShovelerSceneRenderMode;
 
 ShovelerScene *shovelerSceneCreate();
-void shovelerSceneAddLight(ShovelerScene *scene, ShovelerLight *light);
-void shovelerSceneAddModel(ShovelerScene *scene, ShovelerModel *model);
+bool shovelerSceneAddLight(ShovelerScene *scene, ShovelerLight *light);
+bool shovelerSceneRemoveLight(ShovelerScene *scene, ShovelerLight *light);
+bool shovelerSceneAddModel(ShovelerScene *scene, ShovelerModel *model);
+bool shovelerSceneRemoveModel(ShovelerScene *scene, ShovelerModel *model);
 int shovelerSceneRenderModels(ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerMaterial *overrideMaterial, bool emitters, bool screenspace, bool onlyShadowCasters);
 int shovelerSceneRenderPass(ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerFramebuffer *framebuffer, ShovelerSceneRenderMode renderMode);
 int shovelerSceneRenderFrame(ShovelerScene *scene, ShovelerCamera *camera, ShovelerFramebuffer *framebuffer);

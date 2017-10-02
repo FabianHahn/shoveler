@@ -7,6 +7,8 @@
 
 static ShovelerShader *generateShader(ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerMaterial *material);
 static ShovelerShader *getCachedShader(ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerMaterial *material);
+static void freeLight(void *lightPointer);
+static void freeModel(void *modelPointer);
 static void freeHashTable(void *hashTablePointer);
 static void freeShader(void *shaderPointer);
 
@@ -15,28 +17,41 @@ ShovelerScene *shovelerSceneCreate()
 	ShovelerScene *scene = malloc(sizeof(ShovelerScene));
 	scene->uniforms = shovelerUniformMapCreate();
 	scene->depthMaterial = shovelerMaterialDepthCreate();
-	scene->lights = g_queue_new();
-	scene->models = g_queue_new();
+	scene->lights = g_hash_table_new_full(g_direct_hash, g_direct_equal, freeLight, NULL);
+	scene->models = g_hash_table_new_full(g_direct_hash, g_direct_equal, freeModel, NULL);
 	scene->cameraShaderCache = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, freeHashTable);
 	return scene;
 }
 
-void shovelerSceneAddLight(ShovelerScene *scene, ShovelerLight *light)
+bool shovelerSceneAddLight(ShovelerScene *scene, ShovelerLight *light)
 {
-	g_queue_push_tail(scene->lights, light);
+	return g_hash_table_add(scene->lights, light);
 }
 
-void shovelerSceneAddModel(ShovelerScene *scene, ShovelerModel *model)
+bool shovelerSceneRemoveLight(ShovelerScene *scene, ShovelerLight *light)
 {
-	g_queue_push_tail(scene->models, model);
+	// TODO: cleanup shader cache entries
+	return g_hash_table_remove(scene->lights, light);
+}
+
+bool shovelerSceneAddModel(ShovelerScene *scene, ShovelerModel *model)
+{
+	return g_hash_table_add(scene->models, model);
+}
+
+bool shovelerSceneRemoveModel(ShovelerScene *scene, ShovelerModel *model)
+{
+	// TODO: cleanup shader cache entries
+	return g_hash_table_remove(scene->models, model);
 }
 
 int shovelerSceneRenderModels(ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerMaterial *overrideMaterial, bool emitters, bool screenspace, bool onlyShadowCasters)
 {
 	int rendered = 0;
-	for(GList *iter = scene->models->head; iter != NULL; iter = iter->next) {
-		ShovelerModel *model = iter->data;
-
+	GHashTableIter iter;
+	ShovelerModel *model;
+	g_hash_table_iter_init(&iter, scene->models);
+	while(g_hash_table_iter_next(&iter, (gpointer *) &model, NULL)) {
 		if(!model->visible) {
 			continue;
 		}
@@ -127,8 +142,11 @@ int shovelerSceneRenderFrame(ShovelerScene *scene, ShovelerCamera *camera, Shove
 
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
-	for(GList *iter = scene->lights->head; iter != NULL; iter = iter->next) {
-		ShovelerLight *light = iter->data;
+
+	GHashTableIter iter;
+	ShovelerLight *light;
+	g_hash_table_iter_init(&iter, scene->lights);
+	while(g_hash_table_iter_next(&iter, (gpointer *) &light, NULL)) {
 		rendered += shovelerLightRender(light, scene, camera, framebuffer);
 	}
 
@@ -141,17 +159,8 @@ int shovelerSceneRenderFrame(ShovelerScene *scene, ShovelerCamera *camera, Shove
 void shovelerSceneFree(ShovelerScene *scene)
 {
 	g_hash_table_destroy(scene->cameraShaderCache);
-
-	for(GList *iter = scene->models->head; iter != NULL; iter = iter->next) {
-		shovelerModelFree(iter->data);
-	}
-	g_queue_free(scene->models);
-
-	for(GList *iter = scene->lights->head; iter != NULL; iter = iter->next) {
-		shovelerLightFree(iter->data);
-	}
-	g_queue_free(scene->lights);
-
+	g_hash_table_destroy(scene->models);
+	g_hash_table_destroy(scene->lights);
 	shovelerMaterialFree(scene->depthMaterial);
 	shovelerUniformMapFree(scene->uniforms);
 	free(scene);
@@ -217,6 +226,18 @@ static ShovelerShader *getCachedShader(ShovelerScene *scene, ShovelerCamera *cam
 	}
 
 	return shader;
+}
+
+static void freeLight(void *lightPointer)
+{
+	ShovelerLight *light = lightPointer;
+	shovelerLightFree(light);
+}
+
+static void freeModel(void *modelPointer)
+{
+	ShovelerModel *model = modelPointer;
+	shovelerModelFree(model);
 }
 
 static void freeHashTable(void *hashTablePointer)
