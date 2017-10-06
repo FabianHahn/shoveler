@@ -16,6 +16,7 @@ set(SHOVELER_LIB_SRC
 	src/material/screenspace_texture.c
 	src/material/texture.c
 	src/camera.c
+	src/controller.c
 	src/file.c
 	src/framebuffer.c
 	src/game.c
