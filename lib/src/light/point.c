@@ -10,7 +10,7 @@
 typedef struct {
 	ShovelerLight light;
 	ShovelerLightSpotShared *shared;
-	ShovelerLightSpot *spotlights[6];
+	ShovelerLight *spotlights[6];
 } ShovelerLightPoint;
 
 static void updatePosition(void *pointlightPointer, ShovelerVector3 position);
@@ -57,14 +57,14 @@ static void updatePosition(void *pointlightPointer, ShovelerVector3 position)
 	ShovelerLightPoint *pointlight = pointlightPointer;
 
 	for(int i = 0; i < 6; i++) {
-		shovelerLightUpdatePosition(&pointlight->spotlights[i]->light, position);
+		shovelerLightUpdatePosition(pointlight->spotlights[i], position);
 	}
 }
 
 static ShovelerVector3 getPosition(void *pointlightPointer)
 {
 	ShovelerLightPoint *pointlight = pointlightPointer;
-	return pointlight->spotlights[0]->camera->position;
+	return shovelerLightGetPosition(pointlight->spotlights[0]);
 }
 
 static int renderPointLight(void *pointlightPointer, ShovelerScene *scene, ShovelerCamera *camera, ShovelerFramebuffer *framebuffer)
@@ -74,7 +74,7 @@ static int renderPointLight(void *pointlightPointer, ShovelerScene *scene, Shove
 	int rendered = 0;
 
 	for(int i = 0; i < 6; i++) {
-		rendered += shovelerLightRender(&pointlight->spotlights[i]->light, scene, camera, framebuffer);
+		rendered += shovelerLightRender(pointlight->spotlights[i], scene, camera, framebuffer);
 	}
 
 	return rendered;
@@ -89,7 +89,7 @@ static void freePointLight(void *pointlightPointer)
 	}
 
 	for(int i = 0; i < 6; i++) {
-		shovelerLightFree(&pointlight->spotlights[i]->light);
+		shovelerLightFree(pointlight->spotlights[i]);
 	}
 
 	shovelerLightSpotSharedFree(pointlight->shared);

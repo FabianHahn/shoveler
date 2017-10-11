@@ -6,6 +6,13 @@
 #include "shoveler/material/depth.h"
 #include "shoveler/scene.h"
 
+typedef struct {
+	ShovelerLight light;
+	ShovelerCamera *camera;
+	ShovelerLightSpotShared *shared;
+	bool manageShared;
+} ShovelerLightSpot;
+
 static void updatePosition(void *spotlightPointer, ShovelerVector3 position);
 static ShovelerVector3 getPosition(void *spotlightPointer);
 static int renderSpotLight(void *spotlightPointer, ShovelerScene *scene, ShovelerCamera *camera, ShovelerFramebuffer *framebuffer);
@@ -23,7 +30,7 @@ ShovelerLightSpotShared *shovelerLightSpotSharedCreate(int width, int height, GL
 	return shared;
 }
 
-ShovelerLightSpot *shovelerLightSpotCreateWithShared(ShovelerCamera *camera, ShovelerLightSpotShared *shared, bool managedShared)
+ShovelerLight *shovelerLightSpotCreateWithShared(ShovelerCamera *camera, ShovelerLightSpotShared *shared, bool managedShared)
 {
 	ShovelerLightSpot *spotlight = malloc(sizeof(ShovelerLightSpot));
 	spotlight->light.data = spotlight;
@@ -45,7 +52,7 @@ ShovelerLightSpot *shovelerLightSpotCreateWithShared(ShovelerCamera *camera, Sho
 	shovelerUniformMapInsert(spotlight->light.uniforms, "lightProjection", shovelerUniformCreateMatrixPointer(&spotlight->camera->projection));
 	shovelerUniformMapInsert(spotlight->light.uniforms, "shadowMap", shovelerUniformCreateTexture(spotlight->shared->depthFilter->outputTexture, spotlight->shared->shadowMapSampler));
 
-	return spotlight;
+	return &spotlight->light;
 }
 
 void shovelerLightSpotSharedFree(ShovelerLightSpotShared *shared)
