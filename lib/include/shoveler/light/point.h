@@ -3,12 +3,7 @@
 
 #include <shoveler/light/spot.h>
 
-typedef struct {
-	ShovelerLight light;
-	ShovelerLightSpotShared *shared;
-	ShovelerLightSpot *spotlights[6];
-} ShovelerLightPoint;
-
-ShovelerLightPoint *shovelerLightPointCreate(ShovelerVector3 position, int width, int height, GLsizei samples, float ambientFactor, float exponentialFactor, ShovelerVector3 color);
+ShovelerLight *shovelerLightPointCreate(ShovelerVector3 position, int width, int height, GLsizei samples, float ambientFactor, float exponentialFactor, ShovelerVector3 color);
+ShovelerLightSpotShared *shovelerLightPointGetShared(ShovelerLight *light);
 
 #endif

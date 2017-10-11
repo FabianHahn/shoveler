@@ -145,11 +145,11 @@ void shovelerSampleInit(ShovelerGame *sampleGame, int width, int height, int sam
 	game->camera = shovelerCameraPerspectiveCreate((ShovelerVector3){0, 0, -5}, (ShovelerVector3){0, 0, 1}, (ShovelerVector3){0, 1, 0}, 2.0f * SHOVELER_PI * 50.0f / 360.0f, (float) width / height, 0.01, 1000);
 	shovelerCameraPerspectiveAttachController(game->camera, controller);
 
-	ShovelerLightPoint *pointlight = shovelerLightPointCreate((ShovelerVector3){0, 0, 0}, 1024, 1024, 1, 0.0f, 80.0f, (ShovelerVector3){1.0f, 1.0f, 1.0f});
-	shovelerSceneAddLight(game->scene, &pointlight->light);
+	ShovelerLight *pointlight = shovelerLightPointCreate((ShovelerVector3){0, 0, 0}, 1024, 1024, 1, 0.0f, 80.0f, (ShovelerVector3){1.0f, 1.0f, 1.0f});
+	shovelerSceneAddLight(game->scene, pointlight);
 
-	ShovelerLightPoint *pointlight2 = shovelerLightPointCreate((ShovelerVector3){-8, -8, -8}, 1024, 1024, 1, 0.0f, 80.0f, (ShovelerVector3){0.1f, 0.1f, 0.1f});
-	shovelerSceneAddLight(game->scene, &pointlight2->light);
+	ShovelerLight *pointlight2 = shovelerLightPointCreate((ShovelerVector3){-8, -8, -8}, 1024, 1024, 1, 0.0f, 80.0f, (ShovelerVector3){0.1f, 0.1f, 0.1f});
+	shovelerSceneAddLight(game->scene, pointlight2);
 
 	point = shovelerDrawablePointCreate();
 	particleMaterial = shovelerMaterialParticleCreate((ShovelerVector3){1.0f, 1.0f, 1.0f});
@@ -161,14 +161,14 @@ void shovelerSampleInit(ShovelerGame *sampleGame, int width, int height, int sam
 	shovelerSceneAddModel(game->scene, pointlightModel);
 
 	ShovelerModel *pointlightModel2 = shovelerModelCreate(point, particleMaterial);
-	pointlightModel2->translation = shovelerLightGetPosition(&pointlight2->light);
+	pointlightModel2->translation = shovelerLightGetPosition(pointlight2);
 	pointlightModel2->scale = (ShovelerVector3){0.1f, 0.1f, 0};
 	pointlightModel2->castsShadow = false;
 	pointlightModel2->emitter = true;
 	shovelerModelUpdateTransformation(pointlightModel2);
 	shovelerSceneAddModel(game->scene, pointlightModel2);
 
-	screenspaceTextureMaterial = shovelerMaterialScreenspaceTextureCreate(pointlight->shared->depthFramebuffer->depthTarget, false, true, nearestNeighborSampler, false);
+	screenspaceTextureMaterial = shovelerMaterialScreenspaceTextureCreate(shovelerLightPointGetShared(pointlight)->depthFramebuffer->depthTarget, false, true, nearestNeighborSampler, false);
 	ShovelerModel *screenQuadModel = shovelerModelCreate(quad, screenspaceTextureMaterial);
 	screenQuadModel->screenspace = true;
 	screenQuadModel->translation.values[0] = -1.0;
