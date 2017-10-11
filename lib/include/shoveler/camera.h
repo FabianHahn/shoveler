@@ -6,6 +6,7 @@
 
 struct ShovelerCameraStruct;
 
+typedef void (ShovelerCameraUpdateViewFunction)(void *data);
 typedef void (ShovelerCameraFreeDataFunction)(void *data);
 
 typedef struct ShovelerCameraStruct {
@@ -14,10 +15,17 @@ typedef struct ShovelerCameraStruct {
 	ShovelerMatrix projection;
 	ShovelerUniformMap *uniforms;
 	void *data;
+	ShovelerCameraUpdateViewFunction *updateView;
 	ShovelerCameraFreeDataFunction *freeData;
 } ShovelerCamera;
 
-void shovelerCameraInit(ShovelerCamera *camera, ShovelerVector3 position, void *data, ShovelerCameraFreeDataFunction *freeData);
+void shovelerCameraInit(ShovelerCamera *camera, ShovelerVector3 position, void *data, ShovelerCameraUpdateViewFunction *updateView, ShovelerCameraFreeDataFunction *freeData);
 void shovelerCameraFree(ShovelerCamera *camera);
+
+static inline void shovelerCameraUpdateView(ShovelerCamera *camera)
+{
+	camera->updateView(camera->data);
+}
+
 
 #endif

@@ -5,6 +5,7 @@
 #include "shoveler/camera/perspective.h"
 #include "shoveler/types.h"
 
+static void updateView(void *perspectiveCameraPointer);
 static void freePerspectiveCamera(void *perspectiveCameraPointer);
 static ShovelerCameraPerspective *getPerspectiveCamera(ShovelerCamera *camera);
 static ShovelerMatrix computePerspectiveTransformation(float fovy, float ar, float znear, float zfar);
@@ -15,20 +16,14 @@ static void controllerMoveCallback(ShovelerController *controller, ShovelerVecto
 ShovelerCamera *shovelerCameraPerspectiveCreate(ShovelerVector3 position, ShovelerVector3 direction, ShovelerVector3 up, float fieldOfViewY, float aspectRatio, float nearClippingPlane, float farClippingPlane)
 {
 	ShovelerCameraPerspective *perspectiveCamera = malloc(sizeof(ShovelerCameraPerspective));
-	shovelerCameraInit(&perspectiveCamera->camera, position, perspectiveCamera, freePerspectiveCamera);
+	shovelerCameraInit(&perspectiveCamera->camera, position, perspectiveCamera, updateView, freePerspectiveCamera);
 	perspectiveCamera->up = shovelerVector3Normalize(up);
 	perspectiveCamera->direction = shovelerVector3Normalize(direction);
-	shovelerCameraPerspectiveUpdateView(&perspectiveCamera->camera);
+	updateView(perspectiveCamera);
 	perspectiveCamera->camera.projection = computePerspectiveTransformation(fieldOfViewY, aspectRatio, nearClippingPlane, farClippingPlane);
 	perspectiveCamera->controller = NULL;
 
 	return &perspectiveCamera->camera;
-}
-
-void shovelerCameraPerspectiveUpdateView(ShovelerCamera *camera)
-{
-	ShovelerCameraPerspective *perspectiveCamera = getPerspectiveCamera(camera);
-	perspectiveCamera->camera.view = computeLookIntoDirectionTransformation(perspectiveCamera->camera.position, perspectiveCamera->direction, perspectiveCamera->up);
 }
 
 void shovelerCameraPerspectiveAttachController(ShovelerCamera *camera, ShovelerController *controller)
@@ -57,6 +52,12 @@ void shovelerCameraPerspectiveDetachController(ShovelerCamera *camera, ShovelerC
 	controller->move = NULL;
 	controller->moveUserData = NULL;
 	perspectiveCamera->controller = NULL;
+}
+
+static void updateView(void *perspectiveCameraPointer)
+{
+	ShovelerCameraPerspective *perspectiveCamera = perspectiveCameraPointer;
+	perspectiveCamera->camera.view = computeLookIntoDirectionTransformation(perspectiveCamera->camera.position, perspectiveCamera->direction, perspectiveCamera->up);
 }
 
 static void freePerspectiveCamera(void *perspectiveCameraPointer)

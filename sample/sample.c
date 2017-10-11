@@ -208,7 +208,7 @@ void shovelerSampleTerminate()
 static void shovelerSampleUpdate(ShovelerGame *game, double dt)
 {
 	shovelerControllerUpdate(controller, dt);
-	shovelerCameraPerspectiveUpdateView(game->camera);
+	shovelerCameraUpdateView(game->camera);
 
 	downCubeModel->rotation.values[0] += 0.1f * dt;
 	downCubeModel->rotation.values[1] += 0.2f * dt;

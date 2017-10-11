@@ -2,13 +2,14 @@
 
 #include "shoveler/camera.h"
 
-void shovelerCameraInit(ShovelerCamera *camera, ShovelerVector3 position, void *data, ShovelerCameraFreeDataFunction *freeData)
+void shovelerCameraInit(ShovelerCamera *camera, ShovelerVector3 position, void *data, ShovelerCameraUpdateViewFunction *updateView, ShovelerCameraFreeDataFunction *freeData)
 {
 	camera->position = position;
 	camera->view = shovelerMatrixIdentity;
 	camera->projection = shovelerMatrixIdentity;
 	camera->uniforms = shovelerUniformMapCreate();
 	camera->data = data;
+	camera->updateView = updateView;
 	camera->freeData = freeData;
 
 	ShovelerUniform *viewUniform = shovelerUniformCreateMatrixPointer(&camera->view);
