@@ -5,7 +5,6 @@
 
 typedef struct {
 	ShovelerLight light;
-	ShovelerVector3 position;
 	ShovelerLightSpotShared *shared;
 	ShovelerLightSpot *spotlights[6];
 } ShovelerLightPoint;

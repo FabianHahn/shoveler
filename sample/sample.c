@@ -161,7 +161,7 @@ void shovelerSampleInit(ShovelerGame *sampleGame, int width, int height, int sam
 	shovelerSceneAddModel(game->scene, pointlightModel);
 
 	ShovelerModel *pointlightModel2 = shovelerModelCreate(point, particleMaterial);
-	pointlightModel2->translation = pointlight2->position;
+	pointlightModel2->translation = shovelerLightGetPosition(&pointlight2->light);
 	pointlightModel2->scale = (ShovelerVector3){0.1f, 0.1f, 0};
 	pointlightModel2->castsShadow = false;
 	pointlightModel2->emitter = true;

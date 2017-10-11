@@ -10,15 +10,29 @@
 
 struct ShovelerSceneStruct; // forward declaration: scene.h
 
+typedef void (ShovelerLightUpdatePositionFunction)(void *data, ShovelerVector3 position);
+typedef ShovelerVector3 (ShovelerLightGetPositionFunction)(void *data);
 typedef int (ShovelerLightRenderFunction)(void *data, struct ShovelerSceneStruct *scene, ShovelerCamera *camera, ShovelerFramebuffer *framebuffer);
 typedef void (ShovelerLightFreeDataFunction)(void *data);
 
 typedef struct {
-	void *data;
 	ShovelerUniformMap *uniforms;
+	void *data;
+	ShovelerLightUpdatePositionFunction *updatePosition;
+	ShovelerLightGetPositionFunction *getPosition;
 	ShovelerLightRenderFunction *render;
 	ShovelerLightFreeDataFunction *freeData;
 } ShovelerLight;
+
+static inline void shovelerLightUpdatePosition(ShovelerLight *light, ShovelerVector3 position)
+{
+	light->updatePosition(light->data, position);
+}
+
+static inline ShovelerVector3 shovelerLightGetPosition(ShovelerLight *light)
+{
+	return light->getPosition(light->data);
+}
 
 static inline int shovelerLightRender(ShovelerLight *light, struct ShovelerSceneStruct *scene, ShovelerCamera *camera, ShovelerFramebuffer *framebuffer)
 {

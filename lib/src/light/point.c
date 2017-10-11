@@ -7,6 +7,8 @@
 #include "shoveler/light.h"
 #include "shoveler/scene.h"
 
+static void updatePosition(void *pointlightPointer, ShovelerVector3 position);
+static ShovelerVector3 getPosition(void *pointlightPointer);
 static int renderPointLight(void *pointlightPointer, ShovelerScene *scene, ShovelerCamera *camera, ShovelerFramebuffer *framebuffer);
 static void freePointLight(void *pointlightPointer);
 
@@ -14,10 +16,11 @@ ShovelerLightPoint *shovelerLightPointCreate(ShovelerVector3 position, int width
 {
 	ShovelerLightPoint *pointlight = malloc(sizeof(ShovelerLightPoint));
 	pointlight->light.data = pointlight;
+	pointlight->light.updatePosition = updatePosition;
+	pointlight->light.getPosition = getPosition;
 	pointlight->light.render = renderPointLight;
 	pointlight->light.freeData = freePointLight;
 	pointlight->light.uniforms = shovelerUniformMapCreate();
-	pointlight->position = position;
 	pointlight->shared = shovelerLightSpotSharedCreate(width, height, samples, ambientFactor, exponentialFactor, color);
 
 	ShovelerCamera *forwardCamera = shovelerCameraPerspectiveCreate(position, (ShovelerVector3){0.0f, 0.0f, 1.0f}, (ShovelerVector3){0.0f, 1.0f, 0.0f}, SHOVELER_PI / 2.0f, 1.0f, 1, 100);
@@ -35,6 +38,21 @@ ShovelerLightPoint *shovelerLightPointCreate(ShovelerVector3 position, int width
 	pointlight->spotlights[5] = shovelerLightSpotCreateWithShared(downCamera, pointlight->shared, false);
 
 	return pointlight;
+}
+
+static void updatePosition(void *pointlightPointer, ShovelerVector3 position)
+{
+	ShovelerLightPoint *pointlight = pointlightPointer;
+
+	for(int i = 0; i < 6; i++) {
+		shovelerLightUpdatePosition(&pointlight->spotlights[i]->light, position);
+	}
+}
+
+static ShovelerVector3 getPosition(void *pointlightPointer)
+{
+	ShovelerLightPoint *pointlight = pointlightPointer;
+	return pointlight->spotlights[0]->camera->position;
 }
 
 static int renderPointLight(void *pointlightPointer, ShovelerScene *scene, ShovelerCamera *camera, ShovelerFramebuffer *framebuffer)
