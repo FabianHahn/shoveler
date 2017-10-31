@@ -8,6 +8,7 @@
 typedef struct {
 	ShovelerCamera camera;
 	ShovelerVector3 up;
+	ShovelerVector3 upwards;
 	ShovelerVector3 direction;
 	ShovelerMatrix perspective;
 	ShovelerController *controller;

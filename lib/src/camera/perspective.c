@@ -19,6 +19,10 @@ ShovelerCamera *shovelerCameraPerspectiveCreate(ShovelerVector3 position, Shovel
 	shovelerCameraInit(&perspectiveCamera->camera, position, perspectiveCamera, updateView, freePerspectiveCamera);
 	perspectiveCamera->up = shovelerVector3Normalize(up);
 	perspectiveCamera->direction = shovelerVector3Normalize(direction);
+
+	ShovelerVector3 right = shovelerVector3Normalize(shovelerVector3Cross(perspectiveCamera->direction, perspectiveCamera->up));
+	perspectiveCamera->upwards = shovelerVector3Cross(right, perspectiveCamera->direction);
+
 	updateView(perspectiveCamera);
 	perspectiveCamera->camera.projection = computePerspectiveTransformation(fieldOfViewY, aspectRatio, nearClippingPlane, farClippingPlane);
 	perspectiveCamera->controller = NULL;
@@ -57,7 +61,7 @@ void shovelerCameraPerspectiveDetachController(ShovelerCamera *camera, ShovelerC
 static void updateView(void *perspectiveCameraPointer)
 {
 	ShovelerCameraPerspective *perspectiveCamera = perspectiveCameraPointer;
-	perspectiveCamera->camera.view = computeLookIntoDirectionTransformation(perspectiveCamera->camera.position, perspectiveCamera->direction, perspectiveCamera->up);
+	perspectiveCamera->camera.view = computeLookIntoDirectionTransformation(perspectiveCamera->camera.position, perspectiveCamera->direction, perspectiveCamera->upwards);
 }
 
 static void freePerspectiveCamera(void *perspectiveCameraPointer)
@@ -90,11 +94,10 @@ static ShovelerMatrix computePerspectiveTransformation(float fieldOfViewY, float
 	return perspective;
 }
 
-static ShovelerMatrix computeLookIntoDirectionTransformation(ShovelerVector3 position, ShovelerVector3 direction, ShovelerVector3 up)
+static ShovelerMatrix computeLookIntoDirectionTransformation(ShovelerVector3 position, ShovelerVector3 direction, ShovelerVector3 upwards)
 {
 	// Construct camera coordinate system basis
-	ShovelerVector3 side = shovelerVector3Cross(direction, up);
-	ShovelerVector3 upwards = shovelerVector3Cross(side, direction);
+	ShovelerVector3 side = shovelerVector3Cross(direction, upwards);
 
 	// Construct basis transform to camera coordinates
 	ShovelerMatrix basis = shovelerMatrixIdentity;
@@ -127,21 +130,20 @@ static void controllerTiltCallback(ShovelerController *controller, ShovelerVecto
 	ShovelerMatrix normalRotationX = shovelerMatrixTranspose(rotationX);
 
 	perspectiveCamera->direction = shovelerVector3Normalize(shovelerMatrixMultiplyVector3(normalRotationX, perspectiveCamera->direction));
-	ShovelerVector3 right = shovelerVector3Cross(perspectiveCamera->direction, perspectiveCamera->up);
-	right.values[1] = 0.0f;
 
-	perspectiveCamera->up = shovelerVector3Normalize(shovelerVector3Cross(right, perspectiveCamera->direction));
-	
+	ShovelerVector3 right = shovelerVector3Normalize(shovelerVector3Cross(perspectiveCamera->direction, perspectiveCamera->up));
+	perspectiveCamera->upwards = shovelerVector3Cross(right, perspectiveCamera->direction);
+
 	// Rotate camera in y direction
 	ShovelerMatrix rotationY = shovelerMatrixCreateRotation(right, amount.values[1]);
 	ShovelerMatrix normalRotationY = shovelerMatrixTranspose(rotationY);
 
 	ShovelerVector3 newDirection = shovelerVector3Normalize(shovelerMatrixMultiplyVector3(normalRotationY, perspectiveCamera->direction));
-	ShovelerVector3 newUp = shovelerVector3Cross(right, newDirection);
+	ShovelerVector3 newUpwards = shovelerVector3Cross(right, newDirection);
 
-	if(newUp.values[1] >= 0.0f) { // only update if we're not flipping upside down
+	if(shovelerVector3Dot(perspectiveCamera->up, newUpwards) > 0.0f) { // only update if we're not flipping upside down
 		perspectiveCamera->direction = newDirection;
-		perspectiveCamera->up = newUp;
+		perspectiveCamera->upwards = newUpwards;
 	}
 }
 
@@ -149,10 +151,9 @@ static void controllerMoveCallback(ShovelerController *controller, ShovelerVecto
 {
 	ShovelerCameraPerspective *perspectiveCamera = userData;
 
-	ShovelerVector3 right = shovelerVector3Cross(perspectiveCamera->direction, perspectiveCamera->up);
-	ShovelerVector3 upwards = shovelerVector3Cross(right, perspectiveCamera->direction);
+	ShovelerVector3 right = shovelerVector3Cross(perspectiveCamera->direction, perspectiveCamera->upwards);
 
 	perspectiveCamera->camera.position = shovelerVector3LinearCombination(1.0, perspectiveCamera->camera.position, amount.values[2], perspectiveCamera->direction);
 	perspectiveCamera->camera.position = shovelerVector3LinearCombination(1.0, perspectiveCamera->camera.position, amount.values[0], right);
-	perspectiveCamera->camera.position = shovelerVector3LinearCombination(1.0, perspectiveCamera->camera.position, amount.values[1], upwards);
+	perspectiveCamera->camera.position = shovelerVector3LinearCombination(1.0, perspectiveCamera->camera.position, amount.values[1], perspectiveCamera->upwards);
 }
