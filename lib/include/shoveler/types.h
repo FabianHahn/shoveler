@@ -204,6 +204,11 @@ static inline ShovelerVector3 shovelerVector3Cross(ShovelerVector3 a, ShovelerVe
 	return c;
 }
 
+static inline float shovelerVector3Dot(ShovelerVector3 a, ShovelerVector3 b)
+{
+	return a.values[0] * b.values[0] + a.values[1] * b.values[1] + a.values[2] * b.values[2];
+}
+
 static inline ShovelerVector3 shovelerVector3Normalize(ShovelerVector3 a)
 {
 	float length = sqrtf(a.values[0] * a.values[0] + a.values[1] * a.values[1] + a.values[2] * a.values[2]);
