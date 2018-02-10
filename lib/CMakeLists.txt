@@ -35,6 +35,47 @@ set(SHOVELER_LIB_SRC
 	src/uniform.c
 	src/uniform_attachment.c
 	src/uniform_map.c
+        include/shoveler/camera/identity.h
+        include/shoveler/camera/perspective.h
+        include/shoveler/drawable/cube.h
+        include/shoveler/drawable/point.h
+        include/shoveler/drawable/quad.h
+        include/shoveler/filter/depth_texture_gaussian.h
+        include/shoveler/material/color.h
+        include/shoveler/material/depth.h
+        include/shoveler/material/depth_texture_gaussian_filter.h
+        include/shoveler/light/point.h
+        include/shoveler/light/spot.h
+        include/shoveler/material/particle.h
+        include/shoveler/material/screenspace_texture.h
+        include/shoveler/material/texture.h
+        include/shoveler/camera.h
+        include/shoveler/constants.h
+        include/shoveler/controller.h
+        include/shoveler/drawable.h
+        include/shoveler/file.h
+        include/shoveler/filter.h
+        include/shoveler/framebuffer.h
+        include/shoveler/game.h
+        include/shoveler/global.h
+        include/shoveler/image.h
+        include/shoveler/image/png.h
+        include/shoveler/image/ppm.h
+        include/shoveler/input.h
+        include/shoveler/light.h
+        include/shoveler/log.h
+        include/shoveler/material.h
+        include/shoveler/model.h
+        include/shoveler/opengl.h
+        include/shoveler/sampler.h
+        include/shoveler/scene.h
+        include/shoveler/shader.h
+        include/shoveler/shader_program.h
+        include/shoveler/texture.h
+        include/shoveler/types.h
+        include/shoveler/uniform_attachment.h
+        include/shoveler/uniform.h
+        include/shoveler/uniform_map.h
 )
 
 add_library(shoveler ${SHOVELER_LIB_SRC})
