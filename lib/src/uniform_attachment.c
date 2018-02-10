@@ -5,7 +5,7 @@
 
 ShovelerUniformAttachment *shovelerUniformAttachmentCreate(ShovelerUniform *uniform, GLint location)
 {
-	ShovelerUniformAttachment *uniformAttachment = malloc(sizeof(ShovelerUniform));
+	ShovelerUniformAttachment *uniformAttachment = malloc(sizeof(ShovelerUniformAttachment));
 	uniformAttachment->uniform = uniform;
 	uniformAttachment->location = location;
 	return uniformAttachment;
