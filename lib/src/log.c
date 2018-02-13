@@ -18,17 +18,28 @@ static const char *getStaticLogLevelName(ShovelerLogLevel level);
 static char *logLocationPrefix = NULL;
 static ShovelerLogLevel logLevel;
 static FILE *logChannel;
+static ShovelerLogMessageCallbackFunction *logCallbackFunction = &logHandler;
 
 void shovelerLogInitWithLocation(const char *location, ShovelerLogLevel level, FILE *channel)
 {
 	logLocationPrefix = strdup(location);
 	char *lastSeparator = strrchr(logLocationPrefix, '/');
 	if(lastSeparator != NULL) {
-		*lastSeparator = '\0';
+		*(++lastSeparator) = '\0';
 	}
 
 	logLevel = level;
 	logChannel = channel;
+
+	glfwSetErrorCallback(handleGlfwErrorMessage);
+}
+
+void shovelerLogInitWithCallback(ShovelerLogLevel level, ShovelerLogMessageCallbackFunction *callbackFunction)
+{
+	logLevel = level;
+	logChannel = NULL;
+	logCallbackFunction = callbackFunction;
+
 	glfwSetErrorCallback(handleGlfwErrorMessage);
 }
 
@@ -39,12 +50,14 @@ void shovelerLogTerminate()
 
 void shovelerLogMessage(const char *file, int line, ShovelerLogLevel level, const char *message, ...)
 {
-	va_list va;
-	va_start(va, message);
-	GString *assembled = g_string_new("");
-	g_string_append_vprintf(assembled, message, va);
-	logHandler(file, line, level, assembled->str);
-	g_string_free(assembled, true);
+	if(shouldLog(level)) {
+		va_list va;
+		va_start(va, message);
+		GString *assembled = g_string_new("");
+		g_string_append_vprintf(assembled, message, va);
+		logCallbackFunction(file, line, level, assembled->str);
+		g_string_free(assembled, true);
+	}
 }
 
 static void handleGlfwErrorMessage(int errorCode, const char *message)
@@ -54,12 +67,12 @@ static void handleGlfwErrorMessage(int errorCode, const char *message)
 
 static void logHandler(const char *file, int line, ShovelerLogLevel level, const char *message)
 {
-	if(shouldLog(level)) {
+	if(logChannel != NULL) {
 		char *formatted = formatLogMessage(file, line, level, message);
 		fprintf(logChannel, "%s\n", formatted);
 		g_free(formatted);
+		fflush(logChannel);
 	}
-	fflush(logChannel);
 }
 
 static bool shouldLog(ShovelerLogLevel level)

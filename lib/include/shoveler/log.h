@@ -28,7 +28,10 @@ typedef enum
 	SHOVELER_LOG_LEVEL_ALL = 15
 } ShovelerLogLevel;
 
+typedef void (ShovelerLogMessageCallbackFunction)(const char *file, int line, ShovelerLogLevel level, const char *message);
+
 void shovelerLogInitWithLocation(const char *file, ShovelerLogLevel level, FILE *channel);
+void shovelerLogInitWithCallback(ShovelerLogLevel level, ShovelerLogMessageCallbackFunction *callbackFunction);
 
 #define shovelerLogInit(LEVEL, CHANNEL) shovelerLogInitWithLocation(__FILE__, LEVEL, CHANNEL);
 
