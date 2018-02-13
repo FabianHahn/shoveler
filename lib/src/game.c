@@ -1,4 +1,3 @@
-#include <stdio.h> // FILE, stdout
 #include <stdlib.h> // malloc, free
 
 #include <glad/glad.h>
@@ -12,13 +11,6 @@ static void exitKeyHandler(ShovelerGame *game, int key, int scancode, int action
 
 ShovelerGame *shovelerGameCreate(const char *windowTitle, int width, int height, int samples, bool fullscreen, bool vsync)
 {
-	ShovelerLogLevel defaultLogLevel = SHOVELER_LOG_LEVEL_INFO_UP;
-	FILE *defaultLogChannel = stdout;
-
-	if(!shovelerGlobalInit(defaultLogLevel, defaultLogChannel)) {
-		return NULL;
-	}
-
 	ShovelerGame *game = malloc(sizeof(ShovelerGame));
 
 	// request OpenGL4
@@ -125,7 +117,6 @@ void shovelerGameFree(ShovelerGame *game)
 	shovelerInputTerminate(game);
 	glfwDestroyWindow(game->window);
 	free(game);
-	shovelerGlobalUninit();
 }
 
 static void exitKeyHandler(ShovelerGame *game, int key, int scancode, int action, int mods)

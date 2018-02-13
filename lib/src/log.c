@@ -2,7 +2,7 @@
 #include <stdio.h> // FILE, fprintf, fflush
 #include <stdlib.h> // free
 #include <stddef.h> // NULL
-#include <string.h> // strdup, strrchr
+#include <string.h> // strdup, strstr
 
 #include <glib.h>
 #include <GLFW/glfw3.h>
@@ -20,14 +20,9 @@ static ShovelerLogLevel logLevel;
 static FILE *logChannel;
 static ShovelerLogMessageCallbackFunction *logCallbackFunction = &logHandler;
 
-void shovelerLogInitWithLocation(const char *location, ShovelerLogLevel level, FILE *channel)
+void shovelerLogInit(const char *locationPrefix, ShovelerLogLevel level, FILE *channel)
 {
-	logLocationPrefix = strdup(location);
-	char *lastSeparator = strrchr(logLocationPrefix, '/');
-	if(lastSeparator != NULL) {
-		*(++lastSeparator) = '\0';
-	}
-
+	logLocationPrefix = strdup(locationPrefix);
 	logLevel = level;
 	logChannel = channel;
 
@@ -82,9 +77,11 @@ static bool shouldLog(ShovelerLogLevel level)
 
 static char *formatLogMessage(const char *file, int line, ShovelerLogLevel level, const char *message)
 {
-	const char *strippedLocation = file;
-	if(strncmp(logLocationPrefix, file, strlen(logLocationPrefix)) == 0) {
+	const char *strippedLocation = strstr(file, logLocationPrefix);
+	if(strippedLocation != NULL) {
 		strippedLocation += strlen(logLocationPrefix);
+	} else {
+		strippedLocation = file;
 	}
 
 	GDateTime *now = g_date_time_new_now_local();

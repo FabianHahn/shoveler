@@ -12,7 +12,7 @@ typedef struct {
 	GHashTable *games;
 } ShovelerGlobalContext;
 
-bool shovelerGlobalInit(ShovelerLogLevel logLevel, FILE *logChannel);
+bool shovelerGlobalInit();
 ShovelerGlobalContext *shovelerGlobalGetContext();
 void shovelerGlobalUninit();
 

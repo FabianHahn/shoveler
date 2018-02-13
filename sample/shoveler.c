@@ -1,5 +1,6 @@
 #include <stdlib.h> // EXIT_FAILURE, EXIT_SUCCESS
 #include <stdbool.h> // bool
+#include <stdio.h> // stdout
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -18,6 +19,9 @@ int main(int argc, char *argv[])
 	int width = 640;
 	int height = 480;
 
+	shovelerLogInit("shoveler/", SHOVELER_LOG_LEVEL_INFO_UP, stdout);
+	shovelerGlobalInit();
+
 	ShovelerGame *game = shovelerGameCreate(windowTitle, width, height, samples, fullscreen, vsync);
 	if(game == NULL) {
 		return EXIT_FAILURE;
@@ -32,5 +36,8 @@ int main(int argc, char *argv[])
 
 	shovelerSampleTerminate();
 	shovelerGameFree(game);
+	shovelerGlobalUninit();
+	shovelerLogTerminate();
+
 	return EXIT_SUCCESS;
 }
