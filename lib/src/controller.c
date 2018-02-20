@@ -5,6 +5,11 @@
 
 #include "shoveler/controller.h"
 
+static void triggerTilt(ShovelerController *controller, ShovelerVector2 tiltAmount);
+static void triggerMove(ShovelerController *controller, ShovelerVector3 moveAmount);
+static void freeTiltCallback(void *tiltCallbackPointer);
+static void freeMoveCallback(void *moveCallbackPointer);
+
 ShovelerController *shovelerControllerCreate(ShovelerGame *game, float moveFactor, float tiltFactor)
 {
 	ShovelerController *controller = malloc(sizeof(ShovelerController));
@@ -14,12 +19,40 @@ ShovelerController *shovelerControllerCreate(ShovelerGame *game, float moveFacto
 
 	glfwGetCursorPos(game->window, &controller->previousCursorX, &controller->previousCursorY);
 
-	controller->tilt = NULL;
-	controller->tiltUserData = NULL;
-	controller->move = NULL;
-	controller->moveUserData = NULL;
+	controller->tiltCallbacks = g_hash_table_new_full(g_direct_hash, g_direct_equal, freeTiltCallback, NULL);
+	controller->moveCallbacks = g_hash_table_new_full(g_direct_hash, g_direct_equal, freeMoveCallback, NULL);
 
 	return controller;
+}
+
+ShovelerControllerTiltCallback *shovelerControllerAddTiltCallback(ShovelerController *controller, ShovelerControllerTiltCallbackFunction *callbackFunction, void *userData)
+{
+	ShovelerControllerTiltCallback *callback = malloc(sizeof(ShovelerControllerTiltCallback));
+	callback->function = callbackFunction;
+	callback->userData = userData;
+
+	g_hash_table_add(controller->tiltCallbacks, callback);
+	return callback;
+}
+
+bool shovelerControllerRemoveTiltCallback(ShovelerController *controller, ShovelerControllerTiltCallback *tiltCallback)
+{
+	return g_hash_table_remove(controller->tiltCallbacks, tiltCallback);
+}
+
+ShovelerControllerMoveCallback *shovelerControllerAddMoveCallback(ShovelerController *controller, ShovelerControllerMoveCallbackFunction *callbackFunction, void *userData)
+{
+	ShovelerControllerMoveCallback *callback = malloc(sizeof(ShovelerControllerMoveCallback));
+	callback->function = callbackFunction;
+	callback->userData = userData;
+
+	g_hash_table_add(controller->moveCallbacks, callback);
+	return callback;
+}
+
+bool shovelerControllerRemoveMoveCallback(ShovelerController *controller, ShovelerControllerMoveCallback *moveCallback)
+{
+	return g_hash_table_remove(controller->moveCallbacks, moveCallback);
 }
 
 void shovelerControllerUpdate(ShovelerController *controller, float dt)
@@ -36,9 +69,7 @@ void shovelerControllerUpdate(ShovelerController *controller, float dt)
 	float tiltAmountX = controller->tiltFactor * (float) cursorDiffX;
 	float tiltAmountY = controller->tiltFactor * (float) cursorDiffY;
 	ShovelerVector2 tiltAmount = {tiltAmountX, tiltAmountY};
-	if(controller->tilt != NULL) {
-		controller->tilt(controller, tiltAmount, controller->tiltUserData);
-	}
+	triggerTilt(controller, tiltAmount);
 
 	ShovelerVector3 moveAmount = {0.0f, 0.0f, 0.0f};
 	int state;
@@ -72,12 +103,42 @@ void shovelerControllerUpdate(ShovelerController *controller, float dt)
 		moveAmount.values[1] -= controller->moveFactor * dt;
 	}
 
-	if(controller->move != NULL) {
-		controller->move(controller, moveAmount, controller->moveUserData);
-	}
+	triggerMove(controller, moveAmount);
 }
 
 void shovelerControllerFree(ShovelerController *controller)
 {
+	g_hash_table_destroy(controller->tiltCallbacks);
+	g_hash_table_destroy(controller->moveCallbacks);
 	free(controller);
+}
+
+static void triggerTilt(ShovelerController *controller, ShovelerVector2 tiltAmount)
+{
+	GHashTableIter iter;
+	ShovelerControllerTiltCallback *callback;
+	g_hash_table_iter_init(&iter, controller->tiltCallbacks);
+	while(g_hash_table_iter_next(&iter, (gpointer *) &callback, NULL)) {
+		callback->function(controller, tiltAmount, callback->userData);
+	}
+}
+
+static void triggerMove(ShovelerController *controller, ShovelerVector3 moveAmount)
+{
+	GHashTableIter iter;
+	ShovelerControllerMoveCallback *callback;
+	g_hash_table_iter_init(&iter, controller->moveCallbacks);
+	while(g_hash_table_iter_next(&iter, (gpointer *) &callback, NULL)) {
+		callback->function(controller, moveAmount, callback->userData);
+	}
+}
+
+static void freeTiltCallback(void *tiltCallbackPointer)
+{
+	free(tiltCallbackPointer);
+}
+
+static void freeMoveCallback(void *moveCallbackPointer)
+{
+	free(moveCallbackPointer);
 }

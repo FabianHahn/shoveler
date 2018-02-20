@@ -10,8 +10,8 @@ static void freePerspectiveCamera(void *perspectiveCameraPointer);
 static ShovelerCameraPerspective *getPerspectiveCamera(ShovelerCamera *camera);
 static ShovelerMatrix computePerspectiveTransformation(float fovy, float ar, float znear, float zfar);
 static ShovelerMatrix computeLookIntoDirectionTransformation(ShovelerVector3 position, ShovelerVector3 direction, ShovelerVector3 up);
-static void controllerTiltCallback(ShovelerController *controller, ShovelerVector2 amount, void *userData);
-static void controllerMoveCallback(ShovelerController *controller, ShovelerVector3 amount, void *userData);
+static void tiltController(ShovelerController *controller, ShovelerVector2 amount, void *userData);
+static void moveController(ShovelerController *controller, ShovelerVector3 amount, void *userData);
 
 ShovelerCamera *shovelerCameraPerspectiveCreate(ShovelerVector3 position, ShovelerVector3 direction, ShovelerVector3 up, float fieldOfViewY, float aspectRatio, float nearClippingPlane, float farClippingPlane)
 {
@@ -25,7 +25,10 @@ ShovelerCamera *shovelerCameraPerspectiveCreate(ShovelerVector3 position, Shovel
 
 	updateView(perspectiveCamera);
 	perspectiveCamera->camera.projection = computePerspectiveTransformation(fieldOfViewY, aspectRatio, nearClippingPlane, farClippingPlane);
+
 	perspectiveCamera->controller = NULL;
+	perspectiveCamera->controllerTiltCallback = NULL;
+	perspectiveCamera->controllerMoveCallback = NULL;
 
 	return &perspectiveCamera->camera;
 }
@@ -33,29 +36,24 @@ ShovelerCamera *shovelerCameraPerspectiveCreate(ShovelerVector3 position, Shovel
 void shovelerCameraPerspectiveAttachController(ShovelerCamera *camera, ShovelerController *controller)
 {
 	ShovelerCameraPerspective *perspectiveCamera = getPerspectiveCamera(camera);
+	assert(perspectiveCamera->controller == NULL);
 
-	controller->tilt = controllerTiltCallback;
-	controller->tiltUserData = perspectiveCamera;
-	controller->move = controllerMoveCallback;
-	controller->moveUserData = perspectiveCamera;
 	perspectiveCamera->controller = controller;
+	perspectiveCamera->controllerTiltCallback = shovelerControllerAddTiltCallback(controller, tiltController, perspectiveCamera);
+	perspectiveCamera->controllerMoveCallback = shovelerControllerAddMoveCallback(controller, moveController, perspectiveCamera);
 }
 
-void shovelerCameraPerspectiveDetachController(ShovelerCamera *camera, ShovelerController *controller)
+void shovelerCameraPerspectiveDetachController(ShovelerCamera *camera)
 {
 	ShovelerCameraPerspective *perspectiveCamera = getPerspectiveCamera(camera);
+	assert(perspectiveCamera->controller != NULL);
 
-	assert(controller->tilt == controllerTiltCallback);
-	assert(controller->tiltUserData == perspectiveCamera);
-	assert(controller->move == controllerMoveCallback);
-	assert(controller->moveUserData == perspectiveCamera);
-	assert(perspectiveCamera->controller == controller);
+	shovelerControllerRemoveTiltCallback(perspectiveCamera->controller, perspectiveCamera->controllerTiltCallback);
+	shovelerControllerRemoveMoveCallback(perspectiveCamera->controller, perspectiveCamera->controllerMoveCallback);
 
-	controller->tilt = NULL;
-	controller->tiltUserData = NULL;
-	controller->move = NULL;
-	controller->moveUserData = NULL;
 	perspectiveCamera->controller = NULL;
+	perspectiveCamera->controllerTiltCallback = NULL;
+	perspectiveCamera->controllerMoveCallback = NULL;
 }
 
 static void updateView(void *perspectiveCameraPointer)
@@ -69,7 +67,7 @@ static void freePerspectiveCamera(void *perspectiveCameraPointer)
 	ShovelerCameraPerspective *perspectiveCamera = perspectiveCameraPointer;
 	
 	if(perspectiveCamera->controller != NULL) {
-		shovelerCameraPerspectiveDetachController(&perspectiveCamera->camera, perspectiveCamera->controller);
+		shovelerCameraPerspectiveDetachController(&perspectiveCamera->camera);
 	}
 
 	free(perspectiveCamera);
@@ -121,7 +119,7 @@ static ShovelerMatrix computeLookIntoDirectionTransformation(ShovelerVector3 pos
 	return shovelerMatrixMultiply(basis, shift);
 }
 
-static void controllerTiltCallback(ShovelerController *controller, ShovelerVector2 amount, void *userData)
+static void tiltController(ShovelerController *controller, ShovelerVector2 amount, void *userData)
 {
 	ShovelerCameraPerspective *perspectiveCamera = userData;
 
@@ -147,7 +145,7 @@ static void controllerTiltCallback(ShovelerController *controller, ShovelerVecto
 	}
 }
 
-static void controllerMoveCallback(ShovelerController *controller, ShovelerVector3 amount, void *userData)
+static void moveController(ShovelerController *controller, ShovelerVector3 amount, void *userData)
 {
 	ShovelerCameraPerspective *perspectiveCamera = userData;
 

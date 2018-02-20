@@ -12,10 +12,12 @@ typedef struct {
 	ShovelerVector3 direction;
 	ShovelerMatrix perspective;
 	ShovelerController *controller;
+	ShovelerControllerTiltCallback *controllerTiltCallback;
+	ShovelerControllerMoveCallback *controllerMoveCallback;
 } ShovelerCameraPerspective;
 
 ShovelerCamera *shovelerCameraPerspectiveCreate(ShovelerVector3 position, ShovelerVector3 direction, ShovelerVector3 up, float fieldOfViewY, float aspectRatio, float nearClippingPlane, float farClippingPlane);
 void shovelerCameraPerspectiveAttachController(ShovelerCamera *camera, ShovelerController *controller);
-void shovelerCameraPerspectiveDetachController(ShovelerCamera *camera, ShovelerController *controller);
+void shovelerCameraPerspectiveDetachController(ShovelerCamera *camera);
 
 #endif
