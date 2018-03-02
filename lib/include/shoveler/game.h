@@ -16,6 +16,10 @@ struct ShovelerGameStruct;
 typedef void (ShovelerGameUpdateCallback)(struct ShovelerGameStruct *game, double dt);
 
 typedef struct ShovelerGameStruct {
+	int windowedWidth;
+	int windowedHeight;
+	int samples;
+	bool fullscreen;
 	GLFWwindow *window;
 	GQueue *keyCallbacks;
 	GQueue *mouseButtonCallbacks;
@@ -28,8 +32,9 @@ typedef struct ShovelerGameStruct {
 	double lastFrameTime;
 } ShovelerGame;
 
-ShovelerGame *shovelerGameCreate(const char *windowTitle, int width, int height, int samples, bool fullscreen, bool vsync);
+ShovelerGame *shovelerGameCreate(const char *windowTitle, int windowedWidth, int windowedHeight, int samples, bool fullscreen, bool vsync);
 ShovelerGame *shovelerGameGetForWindow(GLFWwindow *window);
+void shovelerGameToggleFullscreen(ShovelerGame *game);
 int shovelerGameRenderFrame(ShovelerGame *game);
 void shovelerGameFree(ShovelerGame *game);
 
