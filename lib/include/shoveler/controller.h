@@ -20,6 +20,13 @@ typedef struct {
 	void *userData;
 } ShovelerControllerMoveCallback;
 
+typedef void (ShovelerControllerAspectRatioChangeCallbackFunction)(struct ShovelerControllerStruct *controller, float aspectRatio, void *userData);
+
+typedef struct {
+	ShovelerControllerAspectRatioChangeCallbackFunction *function;
+	void *userData;
+} ShovelerControllerAspectRatioChangeCallback;
+
 typedef struct ShovelerControllerStruct {
 	ShovelerGame *game;
 	float moveFactor;
@@ -30,6 +37,8 @@ typedef struct ShovelerControllerStruct {
 	GHashTable *tiltCallbacks;
 	/** set of (ShovelerControllerMoveCallback *) */
 	GHashTable *moveCallbacks;
+	/** set of (ShovelerControllerAspectRatioChangeCallback *) */
+	GHashTable *aspectRatioChangeCallbacks;
 } ShovelerController;
 
 ShovelerController *shovelerControllerCreate(ShovelerGame *game, float moveFactor, float tiltFactor);
@@ -37,6 +46,8 @@ ShovelerControllerTiltCallback *shovelerControllerAddTiltCallback(ShovelerContro
 bool shovelerControllerRemoveTiltCallback(ShovelerController *controller, ShovelerControllerTiltCallback *tiltCallback);
 ShovelerControllerMoveCallback *shovelerControllerAddMoveCallback(ShovelerController *controller, ShovelerControllerMoveCallbackFunction *callbackFunction, void *userData);
 bool shovelerControllerRemoveMoveCallback(ShovelerController *controller, ShovelerControllerMoveCallback *moveCallback);
+ShovelerControllerAspectRatioChangeCallback *shovelerControllerAddAspectRatioChangeCallback(ShovelerController *controller, ShovelerControllerAspectRatioChangeCallbackFunction *callbackFunction, void *userData);
+bool shovelerControllerRemoveAspectRatioChangeCallback(ShovelerController *controller, ShovelerControllerAspectRatioChangeCallback *aspectRatioChangeCallback);
 void shovelerControllerUpdate(ShovelerController *controller, float dt);
 void shovelerControllerFree(ShovelerController *controller);
 
