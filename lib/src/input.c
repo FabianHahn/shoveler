@@ -16,6 +16,7 @@ void shovelerInputInit(ShovelerGame *game)
 	game->scrollCallbacks = g_queue_new();
 
 	glfwSetInputMode(game->window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetInputMode(game->window, GLFW_STICKY_KEYS, 1);
 	glfwSetKeyCallback(game->window, keyHandler);
 	glfwSetMouseButtonCallback(game->window, mouseButtonHandler);
 	glfwSetCursorPosCallback(game->window, cursorPosHandler);
@@ -78,6 +79,10 @@ static void keyHandler(GLFWwindow *window, int key, int scancode, int action, in
 	for(GList *iter = game->keyCallbacks->head; iter != NULL; iter = iter->next) {
 		ShovelerInputKeyCallback *keyCallback = iter->data;
 		keyCallback(game, key, scancode, action, mods);
+	}
+
+	if (key == GLFW_KEY_F11 && action == GLFW_PRESS) {
+		shovelerGameToggleFullscreen(game);
 	}
 }
 
