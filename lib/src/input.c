@@ -6,6 +6,7 @@ static void keyHandler(GLFWwindow *window, int key, int scancode, int action, in
 static void mouseButtonHandler(GLFWwindow *window, int button, int action, int mods);
 static void cursorPosHandler(GLFWwindow *window, double xpos, double ypos);
 static void scrollHandler(GLFWwindow *window, double xoffset, double yoffset);
+static void windowSizeHandler(GLFWwindow *window, int width, int height);
 static void windowFocusHandler(GLFWwindow *window, int focused);
 
 void shovelerInputInit(ShovelerGame *game)
@@ -14,13 +15,16 @@ void shovelerInputInit(ShovelerGame *game)
 	game->mouseButtonCallbacks = g_queue_new();
 	game->cursorPosCallbacks = g_queue_new();
 	game->scrollCallbacks = g_queue_new();
+	game->windowSizeCallbacks = g_queue_new();
 
 	glfwSetInputMode(game->window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetInputMode(game->window, GLFW_STICKY_KEYS, 1);
+
 	glfwSetKeyCallback(game->window, keyHandler);
 	glfwSetMouseButtonCallback(game->window, mouseButtonHandler);
 	glfwSetCursorPosCallback(game->window, cursorPosHandler);
 	glfwSetScrollCallback(game->window, scrollHandler);
+	glfwSetWindowSizeCallback(game->window, windowSizeHandler);
 	glfwSetWindowFocusCallback(game->window, windowFocusHandler);
 }
 
@@ -72,6 +76,16 @@ bool shovelerInputRemoveScrollCallback(ShovelerGame *game, ShovelerInputScrollCa
 	return g_queue_remove(game->scrollCallbacks, scrollCallback);
 }
 
+void shovelerInputAddWindowSizeCallback(ShovelerGame *game, ShovelerInputWindowSizeCallback *windowSizeCallback)
+{
+	g_queue_push_tail(game->windowSizeCallbacks, windowSizeCallback);
+}
+
+bool shovelerInputRemoveWindowSizeCallback(ShovelerGame *game, ShovelerInputWindowSizeCallback *windowSizeCallback)
+{
+	return g_queue_remove(game->windowSizeCallbacks, windowSizeCallback);
+}
+
 static void keyHandler(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
 	ShovelerGame *game = shovelerGameGetForWindow(window);
@@ -113,6 +127,16 @@ static void scrollHandler(GLFWwindow *window, double xoffset, double yoffset)
 	for(GList *iter = game->scrollCallbacks->head; iter != NULL; iter = iter->next) {
 		ShovelerInputScrollCallback *scrollCallback = iter->data;
 		scrollCallback(game, xoffset, yoffset);
+	}
+}
+
+static void windowSizeHandler(GLFWwindow *window, int width, int height)
+{
+	ShovelerGame *game = shovelerGameGetForWindow(window);
+
+	for(GList *iter = game->windowSizeCallbacks->head; iter != NULL; iter = iter->next) {
+		ShovelerInputWindowSizeCallback *windowSizeCallback = iter->data;
+		windowSizeCallback(game, width, height);
 	}
 }
 

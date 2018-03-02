@@ -25,6 +25,7 @@ typedef struct ShovelerGameStruct {
 	GQueue *mouseButtonCallbacks;
 	GQueue *cursorPosCallbacks;
 	GQueue *scrollCallbacks;
+	GQueue *windowSizeCallbacks;
 	ShovelerFramebuffer *framebuffer;
 	ShovelerScene *scene;
 	ShovelerCamera *camera;

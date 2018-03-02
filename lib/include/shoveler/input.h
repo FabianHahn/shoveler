@@ -12,6 +12,7 @@ typedef void (ShovelerInputKeyCallback)(ShovelerGame *game, int key, int scancod
 typedef void (ShovelerInputMouseButtonCallback)(ShovelerGame *game, int button, int action, int mods);
 typedef void (ShovelerInputCursorPosCallback)(ShovelerGame *game, double xpos, double ypos);
 typedef void (ShovelerInputScrollCallback)(ShovelerGame *game, double xoffset, double yoffset);
+typedef void (ShovelerInputWindowSizeCallback)(ShovelerGame *game, int width, int height);
 
 void shovelerInputInit(ShovelerGame *game);
 void shovelerInputTerminate(ShovelerGame *game);
@@ -23,5 +24,7 @@ void shovelerInputAddCursorPosCallback(ShovelerGame *game, ShovelerInputCursorPo
 bool shovelerInputRemoveCursorPosCallback(ShovelerGame *game, ShovelerInputCursorPosCallback *cursorPosCallback);
 void shovelerInputAddScrollCallback(ShovelerGame *game, ShovelerInputScrollCallback *scrollCallback);
 bool shovelerInputRemoveScrollCallback(ShovelerGame *game, ShovelerInputScrollCallback *scrollCallback);
+void shovelerInputAddWindowSizeCallback(ShovelerGame *game, ShovelerInputWindowSizeCallback *windowSizeCallback);
+bool shovelerInputRemoveWindowSizeCallback(ShovelerGame *game, ShovelerInputWindowSizeCallback *windowSizeCallback);
 
 #endif
