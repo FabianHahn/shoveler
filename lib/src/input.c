@@ -6,6 +6,7 @@ static void keyHandler(GLFWwindow *window, int key, int scancode, int action, in
 static void mouseButtonHandler(GLFWwindow *window, int button, int action, int mods);
 static void cursorPosHandler(GLFWwindow *window, double xpos, double ypos);
 static void scrollHandler(GLFWwindow *window, double xoffset, double yoffset);
+static void windowFocusHandler(GLFWwindow *window, int focused);
 
 void shovelerInputInit(ShovelerGame *game)
 {
@@ -19,6 +20,7 @@ void shovelerInputInit(ShovelerGame *game)
 	glfwSetMouseButtonCallback(game->window, mouseButtonHandler);
 	glfwSetCursorPosCallback(game->window, cursorPosHandler);
 	glfwSetScrollCallback(game->window, scrollHandler);
+	glfwSetWindowFocusCallback(game->window, windowFocusHandler);
 }
 
 void shovelerInputTerminate(ShovelerGame *game)
@@ -106,5 +108,14 @@ static void scrollHandler(GLFWwindow *window, double xoffset, double yoffset)
 	for(GList *iter = game->scrollCallbacks->head; iter != NULL; iter = iter->next) {
 		ShovelerInputScrollCallback *scrollCallback = iter->data;
 		scrollCallback(game, xoffset, yoffset);
+	}
+}
+
+static void windowFocusHandler(GLFWwindow *window, int focused)
+{
+	if(focused) {
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	} else {
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	}
 }
