@@ -2,6 +2,7 @@
 #define SHOVELER_CONTROLLER_H
 
 #include <shoveler/game.h>
+#include <shoveler/input.h>
 #include <shoveler/types.h>
 
 struct ShovelerControllerStruct; // forward declaration
@@ -39,6 +40,7 @@ typedef struct ShovelerControllerStruct {
 	GHashTable *moveCallbacks;
 	/** set of (ShovelerControllerAspectRatioChangeCallback *) */
 	GHashTable *aspectRatioChangeCallbacks;
+	ShovelerInputWindowSizeCallback *windowSizeCallback;
 } ShovelerController;
 
 ShovelerController *shovelerControllerCreate(ShovelerGame *game, float moveFactor, float tiltFactor);

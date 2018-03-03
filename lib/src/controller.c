@@ -6,7 +6,7 @@
 #include "shoveler/controller.h"
 #include "shoveler/input.h"
 
-static void windowSizeHandler(ShovelerGame *game, int width, int height, void *controllerPointer);
+static void windowSizeHandler(ShovelerInput *input, int width, int height, void *controllerPointer);
 static void triggerTilt(ShovelerController *controller, ShovelerVector2 tiltAmount);
 static void triggerMove(ShovelerController *controller, ShovelerVector3 moveAmount);
 static void triggerAspectRatioChange(ShovelerController *controller, float aspectRatio);
@@ -27,7 +27,7 @@ ShovelerController *shovelerControllerCreate(ShovelerGame *game, float moveFacto
 	controller->moveCallbacks = g_hash_table_new_full(g_direct_hash, g_direct_equal, freeMoveCallback, NULL);
 	controller->aspectRatioChangeCallbacks = g_hash_table_new_full(g_direct_hash, g_direct_equal, freeAspectRatioChangeCallback, NULL);
 
-	// TODO: controller->windowSizeCallback = shovelerInputAddWindowSizeCallback(game, windowSizeHandler, controller);
+	controller->windowSizeCallback = shovelerInputAddWindowSizeCallback(game->input, windowSizeHandler, controller);
 
 	return controller;
 }
@@ -130,7 +130,7 @@ void shovelerControllerUpdate(ShovelerController *controller, float dt)
 
 void shovelerControllerFree(ShovelerController *controller)
 {
-	// TODO: shovelerInputRemoveWindowSizeCallback(controller->game, controller->windowSizeCallback);
+	shovelerInputRemoveWindowSizeCallback(controller->game->input, controller->windowSizeCallback);
 
 	g_hash_table_destroy(controller->tiltCallbacks);
 	g_hash_table_destroy(controller->moveCallbacks);
@@ -138,7 +138,7 @@ void shovelerControllerFree(ShovelerController *controller)
 	free(controller);
 }
 
-static void windowSizeHandler(ShovelerGame *game, int width, int height, void *controllerPointer)
+static void windowSizeHandler(ShovelerInput *input, int width, int height, void *controllerPointer)
 {
 	ShovelerController *controller = controllerPointer;
 	triggerAspectRatioChange(controller, (float) width / height);
