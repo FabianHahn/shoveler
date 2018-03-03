@@ -4,6 +4,7 @@
 
 #include "shoveler/game.h"
 #include "shoveler/input.h"
+#include "shoveler/log.h"
 
 static void keyHandler(GLFWwindow *window, int key, int scancode, int action, int mods);
 static void mouseButtonHandler(GLFWwindow *window, int button, int action, int mods);
@@ -28,7 +29,8 @@ ShovelerInput *shovelerInputCreate(ShovelerGame *game)
 	input->windowSizeCallbacks = g_hash_table_new_full(g_direct_hash, g_direct_equal, freeWindowSizeCallback, NULL);
 
 	glfwSetInputMode(game->window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-	glfwSetInputMode(game->window, GLFW_STICKY_KEYS, 1);
+	glfwSetInputMode(game->window, GLFW_STICKY_KEYS, GL_TRUE);
+	glfwSetInputMode(game->window, GLFW_STICKY_MOUSE_BUTTONS, GL_TRUE);
 
 	glfwSetKeyCallback(game->window, keyHandler);
 	glfwSetMouseButtonCallback(game->window, mouseButtonHandler);
@@ -119,6 +121,7 @@ void shovelerInputFree(ShovelerInput *input)
 {
 	glfwSetInputMode(input->game->window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	glfwSetInputMode(input->game->window, GLFW_STICKY_KEYS, GL_FALSE);
+	glfwSetInputMode(input->game->window, GLFW_STICKY_MOUSE_BUTTONS, GL_FALSE);
 
 	glfwSetKeyCallback(input->game->window, NULL);
 	glfwSetMouseButtonCallback(input->game->window, NULL);
@@ -161,6 +164,11 @@ static void mouseButtonHandler(GLFWwindow *window, int button, int action, int m
 	while(g_hash_table_iter_next(&iter, (gpointer *) &callback, NULL)) {
 		callback->function(game->input, button, action, mods, callback->userData);
 	}
+
+	if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_NORMAL) {
+		shovelerLogInfo("Regaining focus on game %p window, enabling cursor capture.", game);
+		glfwSetInputMode(game->window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	}
 }
 
 static void cursorPosHandler(GLFWwindow *window, double xpos, double ypos)
@@ -201,9 +209,10 @@ static void windowSizeHandler(GLFWwindow *window, int width, int height)
 
 static void windowFocusHandler(GLFWwindow *window, int focused)
 {
-	if(focused) {
-		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-	} else {
+	ShovelerGame *game = shovelerGameGetForWindow(window);
+
+	if(!focused) {
+		shovelerLogInfo("Losing focus on game %p window, disabling cursor capture.", game);
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	}
 }
