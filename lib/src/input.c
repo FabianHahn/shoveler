@@ -1,5 +1,8 @@
+#include <stdlib.h> // malloc, free
+
 #include <glib.h>
 
+#include "shoveler/game.h"
 #include "shoveler/input.h"
 
 static void keyHandler(GLFWwindow *window, int key, int scancode, int action, int mods);
@@ -8,14 +11,21 @@ static void cursorPosHandler(GLFWwindow *window, double xpos, double ypos);
 static void scrollHandler(GLFWwindow *window, double xoffset, double yoffset);
 static void windowSizeHandler(GLFWwindow *window, int width, int height);
 static void windowFocusHandler(GLFWwindow *window, int focused);
+static void freeKeyCallback(void *keyCallbackPointer);
+static void freeMouseButtonCallback(void *mouseButtonCallbackPointer);
+static void freeCursorPositionCallback(void *cursorPositionCallbackPointer);
+static void freeScrollCallback(void *scrollCallbackPointer);
+static void freeWindowSizeCallback(void *windowSizeCallbackPointer);
 
-void shovelerInputInit(ShovelerGame *game)
+ShovelerInput *shovelerInputCreate(ShovelerGame *game)
 {
-	game->keyCallbacks = g_queue_new();
-	game->mouseButtonCallbacks = g_queue_new();
-	game->cursorPosCallbacks = g_queue_new();
-	game->scrollCallbacks = g_queue_new();
-	game->windowSizeCallbacks = g_queue_new();
+	ShovelerInput *input = malloc(sizeof(ShovelerInput));
+	input->game = game;
+	input->keyCallbacks = g_hash_table_new_full(g_direct_hash, g_direct_equal, freeKeyCallback, NULL);
+	input->mouseButtonCallbacks = g_hash_table_new_full(g_direct_hash, g_direct_equal, freeMouseButtonCallback, NULL);
+	input->cursorPositionCallbacks = g_hash_table_new_full(g_direct_hash, g_direct_equal, freeCursorPositionCallback, NULL);
+	input->scrollCallbacks = g_hash_table_new_full(g_direct_hash, g_direct_equal, freeScrollCallback, NULL);
+	input->windowSizeCallbacks = g_hash_table_new_full(g_direct_hash, g_direct_equal, freeWindowSizeCallback, NULL);
 
 	glfwSetInputMode(game->window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetInputMode(game->window, GLFW_STICKY_KEYS, 1);
@@ -26,73 +36,114 @@ void shovelerInputInit(ShovelerGame *game)
 	glfwSetScrollCallback(game->window, scrollHandler);
 	glfwSetWindowSizeCallback(game->window, windowSizeHandler);
 	glfwSetWindowFocusCallback(game->window, windowFocusHandler);
+
+	return input;
 }
 
-void shovelerInputTerminate(ShovelerGame *game)
+ShovelerInputKeyCallback *shovelerInputAddKeyCallback(ShovelerInput *input, ShovelerInputKeyCallbackFunction *callbackFunction, void *userData)
 {
-	g_queue_free(game->keyCallbacks);
-	g_queue_free(game->mouseButtonCallbacks);
-	g_queue_free(game->cursorPosCallbacks);
-	g_queue_free(game->scrollCallbacks);
+	ShovelerInputKeyCallback *callback = malloc(sizeof(ShovelerInputKeyCallback));
+	callback->function = callbackFunction;
+	callback->userData = userData;
+
+	g_hash_table_add(input->keyCallbacks, callback);
+	return callback;
 }
 
-void shovelerInputAddKeyCallback(ShovelerGame *game, ShovelerInputKeyCallback *keyCallback)
+ShovelerInputMouseButtonCallback *shovelerInputAddMouseButtonCallback(ShovelerInput *input, ShovelerInputMouseButtonCallbackFunction *callbackFunction, void *userData)
 {
-	g_queue_push_tail(game->keyCallbacks, keyCallback);
+	ShovelerInputMouseButtonCallback *callback = malloc(sizeof(ShovelerInputMouseButtonCallback));
+	callback->function = callbackFunction;
+	callback->userData = userData;
+
+	g_hash_table_add(input->mouseButtonCallbacks, callback);
+	return callback;
 }
 
-bool shovelerInputRemoveKeyCallback(ShovelerGame *game, ShovelerInputKeyCallback *keyCallback)
+ShovelerInputCursorPositionCallback *shovelerInputAddCursorPosCallback(ShovelerInput *input, ShovelerInputCursorPositionCallbackFunction *callbackFunction, void *userData)
 {
-	return g_queue_remove(game->keyCallbacks, keyCallback);
+	ShovelerInputCursorPositionCallback *callback = malloc(sizeof(ShovelerInputCursorPositionCallback));
+	callback->function = callbackFunction;
+	callback->userData = userData;
+
+	g_hash_table_add(input->cursorPositionCallbacks, callback);
+	return callback;
 }
 
-void shovelerInputAddMouseButtonCallback(ShovelerGame *game, ShovelerInputMouseButtonCallback *mouseButtonCallback)
+ShovelerInputScrollCallback *shovelerInputAddScrollCallback(ShovelerInput *input, ShovelerInputScrollCallbackFunction *callbackFunction, void *userData)
 {
-	g_queue_push_tail(game->mouseButtonCallbacks, mouseButtonCallback);
+	ShovelerInputScrollCallback *callback = malloc(sizeof(ShovelerInputScrollCallback));
+	callback->function = callbackFunction;
+	callback->userData = userData;
+
+	g_hash_table_add(input->scrollCallbacks, callback);
+	return callback;
 }
 
-bool shovelerInputRemoveMouseButtonCallback(ShovelerGame *game, ShovelerInputMouseButtonCallback *mouseButtonCallback)
+ShovelerInputWindowSizeCallback *shovelerInputAddWindowSizeCallback(ShovelerInput *input, ShovelerInputWindowSizeCallbackFunction *callbackFunction, void *userData)
 {
-	return g_queue_remove(game->mouseButtonCallbacks, mouseButtonCallback);
+	ShovelerInputWindowSizeCallback *callback = malloc(sizeof(ShovelerInputWindowSizeCallback));
+	callback->function = callbackFunction;
+	callback->userData = userData;
+
+	g_hash_table_add(input->windowSizeCallbacks, callback);
+	return callback;
 }
 
-void shovelerInputAddCursorPosCallback(ShovelerGame *game, ShovelerInputCursorPosCallback *cursorPosCallback)
+bool shovelerInputRemoveKeyCallback(ShovelerInput *input, ShovelerInputKeyCallback *callback)
 {
-	g_queue_push_tail(game->cursorPosCallbacks, cursorPosCallback);
+	return g_hash_table_remove(input->keyCallbacks, callback);
 }
 
-bool shovelerInputRemoveCursorPosCallback(ShovelerGame *game, ShovelerInputCursorPosCallback *cursorPosCallback)
+bool shovelerInputRemoveMouseButtonCallback(ShovelerInput *input, ShovelerInputMouseButtonCallback *callback)
 {
-	return g_queue_remove(game->cursorPosCallbacks, cursorPosCallback);
+	return g_hash_table_remove(input->mouseButtonCallbacks, callback);
 }
 
-void shovelerInputAddScrollCallback(ShovelerGame *game, ShovelerInputScrollCallback *scrollCallback)
+bool shovelerInputRemoveCursorPositionCallback(ShovelerInput *input, ShovelerInputCursorPositionCallback *callback)
 {
-	g_queue_push_tail(game->scrollCallbacks, scrollCallback);
+	return g_hash_table_remove(input->cursorPositionCallbacks, callback);
 }
 
-bool shovelerInputRemoveScrollCallback(ShovelerGame *game, ShovelerInputScrollCallback *scrollCallback)
+bool shovelerInputRemoveScrollCallback(ShovelerInput *input, ShovelerInputScrollCallback *callback)
 {
-	return g_queue_remove(game->scrollCallbacks, scrollCallback);
+	return g_hash_table_remove(input->scrollCallbacks, callback);
 }
 
-void shovelerInputAddWindowSizeCallback(ShovelerGame *game, ShovelerInputWindowSizeCallback *windowSizeCallback)
+bool shovelerInputRemoveWindowSizeCallback(ShovelerInput *input, ShovelerInputWindowSizeCallback *callback)
 {
-	g_queue_push_tail(game->windowSizeCallbacks, windowSizeCallback);
+	return g_hash_table_remove(input->windowSizeCallbacks, callback);
 }
 
-bool shovelerInputRemoveWindowSizeCallback(ShovelerGame *game, ShovelerInputWindowSizeCallback *windowSizeCallback)
+void shovelerInputFree(ShovelerInput *input)
 {
-	return g_queue_remove(game->windowSizeCallbacks, windowSizeCallback);
+	glfwSetInputMode(input->game->window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+	glfwSetInputMode(input->game->window, GLFW_STICKY_KEYS, GL_FALSE);
+
+	glfwSetKeyCallback(input->game->window, NULL);
+	glfwSetMouseButtonCallback(input->game->window, NULL);
+	glfwSetCursorPosCallback(input->game->window, NULL);
+	glfwSetScrollCallback(input->game->window, NULL);
+	glfwSetWindowSizeCallback(input->game->window, NULL);
+	glfwSetWindowFocusCallback(input->game->window, NULL);
+
+	g_hash_table_destroy(input->keyCallbacks);
+	g_hash_table_destroy(input->mouseButtonCallbacks);
+	g_hash_table_destroy(input->cursorPositionCallbacks);
+	g_hash_table_destroy(input->scrollCallbacks);
+	g_hash_table_destroy(input->windowSizeCallbacks);
+	free(input);
 }
 
 static void keyHandler(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
 	ShovelerGame *game = shovelerGameGetForWindow(window);
 
-	for(GList *iter = game->keyCallbacks->head; iter != NULL; iter = iter->next) {
-		ShovelerInputKeyCallback *keyCallback = iter->data;
-		keyCallback(game, key, scancode, action, mods);
+	GHashTableIter iter;
+	ShovelerInputKeyCallback *callback;
+	g_hash_table_iter_init(&iter, game->input->keyCallbacks);
+	while(g_hash_table_iter_next(&iter, (gpointer *) &callback, NULL)) {
+		callback->function(game->input, key, scancode, action, mods, callback->userData);
 	}
 
 	if (key == GLFW_KEY_F11 && action == GLFW_PRESS) {
@@ -104,9 +155,11 @@ static void mouseButtonHandler(GLFWwindow *window, int button, int action, int m
 {
 	ShovelerGame *game = shovelerGameGetForWindow(window);
 
-	for(GList *iter = game->mouseButtonCallbacks->head; iter != NULL; iter = iter->next) {
-		ShovelerInputMouseButtonCallback *mouseButtonCallback = iter->data;
-		mouseButtonCallback(game, button, action, mods);
+	GHashTableIter iter;
+	ShovelerInputMouseButtonCallback *callback;
+	g_hash_table_iter_init(&iter, game->input->mouseButtonCallbacks);
+	while(g_hash_table_iter_next(&iter, (gpointer *) &callback, NULL)) {
+		callback->function(game->input, button, action, mods, callback->userData);
 	}
 }
 
@@ -114,9 +167,11 @@ static void cursorPosHandler(GLFWwindow *window, double xpos, double ypos)
 {
 	ShovelerGame *game = shovelerGameGetForWindow(window);
 
-	for(GList *iter = game->cursorPosCallbacks->head; iter != NULL; iter = iter->next) {
-		ShovelerInputCursorPosCallback *cursorPosCallback = iter->data;
-		cursorPosCallback(game, xpos, ypos);
+	GHashTableIter iter;
+	ShovelerInputCursorPositionCallback *callback;
+	g_hash_table_iter_init(&iter, game->input->cursorPositionCallbacks);
+	while(g_hash_table_iter_next(&iter, (gpointer *) &callback, NULL)) {
+		callback->function(game->input, xpos, ypos, callback->userData);
 	}
 }
 
@@ -124,9 +179,11 @@ static void scrollHandler(GLFWwindow *window, double xoffset, double yoffset)
 {
 	ShovelerGame *game = shovelerGameGetForWindow(window);
 
-	for(GList *iter = game->scrollCallbacks->head; iter != NULL; iter = iter->next) {
-		ShovelerInputScrollCallback *scrollCallback = iter->data;
-		scrollCallback(game, xoffset, yoffset);
+	GHashTableIter iter;
+	ShovelerInputScrollCallback *callback;
+	g_hash_table_iter_init(&iter, game->input->scrollCallbacks);
+	while(g_hash_table_iter_next(&iter, (gpointer *) &callback, NULL)) {
+		callback->function(game->input, xoffset, yoffset, callback->userData);
 	}
 }
 
@@ -134,9 +191,11 @@ static void windowSizeHandler(GLFWwindow *window, int width, int height)
 {
 	ShovelerGame *game = shovelerGameGetForWindow(window);
 
-	for(GList *iter = game->windowSizeCallbacks->head; iter != NULL; iter = iter->next) {
-		ShovelerInputWindowSizeCallback *windowSizeCallback = iter->data;
-		windowSizeCallback(game, width, height);
+	GHashTableIter iter;
+	ShovelerInputWindowSizeCallback *callback;
+	g_hash_table_iter_init(&iter, game->input->windowSizeCallbacks);
+	while(g_hash_table_iter_next(&iter, (gpointer *) &callback, NULL)) {
+		callback->function(game->input, width, height, callback->userData);
 	}
 }
 
@@ -147,4 +206,29 @@ static void windowFocusHandler(GLFWwindow *window, int focused)
 	} else {
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	}
+}
+
+static void freeKeyCallback(void *keyCallbackPointer)
+{
+	free(keyCallbackPointer);
+}
+
+static void freeMouseButtonCallback(void *mouseButtonCallbackPointer)
+{
+	free(mouseButtonCallbackPointer);
+}
+
+static void freeCursorPositionCallback(void *cursorPositionCallbackPointer)
+{
+	free(cursorPositionCallbackPointer);
+}
+
+static void freeScrollCallback(void *scrollCallbackPointer)
+{
+	free(scrollCallbackPointer);
+}
+
+static void freeWindowSizeCallback(void *windowSizeCallbackPointer)
+{
+	free(windowSizeCallbackPointer);
 }

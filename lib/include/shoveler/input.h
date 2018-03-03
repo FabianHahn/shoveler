@@ -6,25 +6,65 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include <shoveler/game.h>
+struct ShovelerGameStruct; // forward delcaration
+struct ShovelerInputStruct; // forward declaration
 
-typedef void (ShovelerInputKeyCallback)(ShovelerGame *game, int key, int scancode, int action, int mods);
-typedef void (ShovelerInputMouseButtonCallback)(ShovelerGame *game, int button, int action, int mods);
-typedef void (ShovelerInputCursorPosCallback)(ShovelerGame *game, double xpos, double ypos);
-typedef void (ShovelerInputScrollCallback)(ShovelerGame *game, double xoffset, double yoffset);
-typedef void (ShovelerInputWindowSizeCallback)(ShovelerGame *game, int width, int height);
+typedef void (ShovelerInputKeyCallbackFunction)(struct ShovelerInputStruct *input, int key, int scancode, int action, int mods, void *userData);
+typedef void (ShovelerInputMouseButtonCallbackFunction)(struct ShovelerInputStruct *input, int button, int action, int mods, void *userData);
+typedef void (ShovelerInputCursorPositionCallbackFunction)(struct ShovelerInputStruct *input, double xpos, double ypos, void *userData);
+typedef void (ShovelerInputScrollCallbackFunction)(struct ShovelerInputStruct *input, double xoffset, double yoffset, void *userData);
+typedef void (ShovelerInputWindowSizeCallbackFunction)(struct ShovelerInputStruct *input, int width, int height, void *userData);
 
-void shovelerInputInit(ShovelerGame *game);
-void shovelerInputTerminate(ShovelerGame *game);
-void shovelerInputAddKeyCallback(ShovelerGame *game, ShovelerInputKeyCallback *keyCallback);
-bool shovelerInputRemoveKeyCallback(ShovelerGame *game, ShovelerInputKeyCallback *keyCallback);
-void shovelerInputAddMouseButtonCallback(ShovelerGame *game, ShovelerInputMouseButtonCallback *mouseButtonCallback);
-bool shovelerInputRemoveMouseButtonCallback(ShovelerGame *game, ShovelerInputMouseButtonCallback *mouseButtonCallback);
-void shovelerInputAddCursorPosCallback(ShovelerGame *game, ShovelerInputCursorPosCallback *cursorPosCallback);
-bool shovelerInputRemoveCursorPosCallback(ShovelerGame *game, ShovelerInputCursorPosCallback *cursorPosCallback);
-void shovelerInputAddScrollCallback(ShovelerGame *game, ShovelerInputScrollCallback *scrollCallback);
-bool shovelerInputRemoveScrollCallback(ShovelerGame *game, ShovelerInputScrollCallback *scrollCallback);
-void shovelerInputAddWindowSizeCallback(ShovelerGame *game, ShovelerInputWindowSizeCallback *windowSizeCallback);
-bool shovelerInputRemoveWindowSizeCallback(ShovelerGame *game, ShovelerInputWindowSizeCallback *windowSizeCallback);
+typedef struct {
+	ShovelerInputKeyCallbackFunction *function;
+	void *userData;
+} ShovelerInputKeyCallback;
+
+typedef struct {
+	ShovelerInputMouseButtonCallbackFunction *function;
+	void *userData;
+} ShovelerInputMouseButtonCallback;
+
+typedef struct {
+	ShovelerInputCursorPositionCallbackFunction *function;
+	void *userData;
+} ShovelerInputCursorPositionCallback;
+
+typedef struct {
+	ShovelerInputScrollCallbackFunction *function;
+	void *userData;
+} ShovelerInputScrollCallback;
+
+typedef struct {
+	ShovelerInputWindowSizeCallbackFunction *function;
+	void *userData;
+} ShovelerInputWindowSizeCallback;
+
+typedef struct ShovelerInputStruct {
+	struct ShovelerGameStruct *game;
+	/** set of (ShovelerInputKeyCallback *) */
+	GHashTable *keyCallbacks;
+	/** set of (ShovelerInputMouseButtonCallback *) */
+	GHashTable *mouseButtonCallbacks;
+	/** set of (ShovelerInputCursorPositionCallback *) */
+	GHashTable *cursorPositionCallbacks;
+	/** set of (ShovelerInputScrollCallback *) */
+	GHashTable *scrollCallbacks;
+	/** set of (ShovelerInputWindowSizeCallback *) */
+	GHashTable *windowSizeCallbacks;
+} ShovelerInput;
+
+ShovelerInput *shovelerInputCreate(struct ShovelerGameStruct *game);
+ShovelerInputKeyCallback *shovelerInputAddKeyCallback(ShovelerInput *input, ShovelerInputKeyCallbackFunction *callbackFunction, void *userData);
+ShovelerInputMouseButtonCallback *shovelerInputAddMouseButtonCallback(ShovelerInput *input, ShovelerInputMouseButtonCallbackFunction *callbackFunction, void *userData);
+ShovelerInputCursorPositionCallback *shovelerInputAddCursorPosCallback(ShovelerInput *input, ShovelerInputCursorPositionCallbackFunction *callbackFunction, void *userData);
+ShovelerInputScrollCallback *shovelerInputAddScrollCallback(ShovelerInput *input, ShovelerInputScrollCallbackFunction *callbackFunction, void *userData);
+ShovelerInputWindowSizeCallback *shovelerInputAddWindowSizeCallback(ShovelerInput *input, ShovelerInputWindowSizeCallbackFunction *callbackFunction, void *userData);
+bool shovelerInputRemoveKeyCallback(ShovelerInput *input, ShovelerInputKeyCallback *callback);
+bool shovelerInputRemoveMouseButtonCallback(ShovelerInput *input, ShovelerInputMouseButtonCallback *callback);
+bool shovelerInputRemoveCursorPositionCallback(ShovelerInput *input, ShovelerInputCursorPositionCallback *callback);
+bool shovelerInputRemoveScrollCallback(ShovelerInput *input, ShovelerInputScrollCallback *callback);
+bool shovelerInputRemoveWindowSizeCallback(ShovelerInput *input, ShovelerInputWindowSizeCallback *callback);
+void shovelerInputFree(ShovelerInput *input);
 
 #endif

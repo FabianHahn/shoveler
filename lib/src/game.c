@@ -7,7 +7,7 @@
 #include "shoveler/input.h"
 #include "shoveler/opengl.h"
 
-static void exitKeyHandler(ShovelerGame *game, int key, int scancode, int action, int mods);
+static void exitKeyHandler(ShovelerInput *input, int key, int scancode, int action, int mods, void *unused);
 
 ShovelerGame *shovelerGameCreate(const char *windowTitle, int windowedWidth, int windowedHeight, int samples, bool fullscreen, bool vsync)
 {
@@ -76,8 +76,8 @@ ShovelerGame *shovelerGameCreate(const char *windowTitle, int windowedWidth, int
 		return NULL;
 	}
 
-	shovelerInputInit(game);
-	shovelerInputAddKeyCallback(game, exitKeyHandler);
+	game->input = shovelerInputCreate(game);
+	shovelerInputAddKeyCallback(game->input, exitKeyHandler, NULL);
 
 	game->framebuffer = shovelerFramebufferCreate(width, height, samples, 4, 8);
 	game->lastFrameTime = glfwGetTime();
@@ -142,15 +142,15 @@ void shovelerGameFree(ShovelerGame *game)
 
 	shovelerFramebufferFree(game->framebuffer);
 
-	shovelerInputTerminate(game);
+	shovelerInputFree(game->input);
 	glfwDestroyWindow(game->window);
 	free(game);
 }
 
-static void exitKeyHandler(ShovelerGame *game, int key, int scancode, int action, int mods)
+static void exitKeyHandler(ShovelerInput *input, int key, int scancode, int action, int mods, void *unused)
 {
 	if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
 		shovelerLogInfo("Escape key pressed, terminating.");
-		glfwSetWindowShouldClose(game->window, GLFW_TRUE);
+		glfwSetWindowShouldClose(input->game->window, GLFW_TRUE);
 	}
 }

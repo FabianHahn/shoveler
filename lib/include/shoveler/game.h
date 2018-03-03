@@ -9,6 +9,7 @@
 
 #include <shoveler/camera.h>
 #include <shoveler/framebuffer.h>
+#include <shoveler/input.h>
 #include <shoveler/scene.h>
 
 struct ShovelerGameStruct;
@@ -21,11 +22,7 @@ typedef struct ShovelerGameStruct {
 	int samples;
 	bool fullscreen;
 	GLFWwindow *window;
-	GQueue *keyCallbacks;
-	GQueue *mouseButtonCallbacks;
-	GQueue *cursorPosCallbacks;
-	GQueue *scrollCallbacks;
-	GQueue *windowSizeCallbacks;
+	ShovelerInput *input;
 	ShovelerFramebuffer *framebuffer;
 	ShovelerScene *scene;
 	ShovelerCamera *camera;
