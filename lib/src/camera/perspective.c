@@ -12,6 +12,7 @@ static ShovelerMatrix computePerspectiveTransformation(float fovy, float ar, flo
 static ShovelerMatrix computeLookIntoDirectionTransformation(ShovelerVector3 position, ShovelerVector3 direction, ShovelerVector3 up);
 static void tiltController(ShovelerController *controller, ShovelerVector2 amount, void *userData);
 static void moveController(ShovelerController *controller, ShovelerVector3 amount, void *userData);
+static void aspectRatioChangeController(ShovelerController *controller, float aspectRatio, void *userData);
 
 ShovelerCamera *shovelerCameraPerspectiveCreate(ShovelerVector3 position, ShovelerVector3 direction, ShovelerVector3 up, float fieldOfViewY, float aspectRatio, float nearClippingPlane, float farClippingPlane)
 {
@@ -24,11 +25,17 @@ ShovelerCamera *shovelerCameraPerspectiveCreate(ShovelerVector3 position, Shovel
 	perspectiveCamera->upwards = shovelerVector3Cross(right, perspectiveCamera->direction);
 
 	updateView(perspectiveCamera);
-	perspectiveCamera->camera.projection = computePerspectiveTransformation(fieldOfViewY, aspectRatio, nearClippingPlane, farClippingPlane);
+
+	perspectiveCamera->fieldOfViewY = fieldOfViewY;
+	perspectiveCamera->aspectRatio = aspectRatio;
+	perspectiveCamera->nearClippingPlane = nearClippingPlane;
+	perspectiveCamera->farClippingPlane = farClippingPlane;
+	perspectiveCamera->camera.projection = computePerspectiveTransformation(perspectiveCamera->fieldOfViewY, perspectiveCamera->aspectRatio, perspectiveCamera->nearClippingPlane, perspectiveCamera->farClippingPlane);
 
 	perspectiveCamera->controller = NULL;
 	perspectiveCamera->controllerTiltCallback = NULL;
 	perspectiveCamera->controllerMoveCallback = NULL;
+	perspectiveCamera->controllerAspectRatioChangeCallback = NULL;
 
 	return &perspectiveCamera->camera;
 }
@@ -41,6 +48,7 @@ void shovelerCameraPerspectiveAttachController(ShovelerCamera *camera, ShovelerC
 	perspectiveCamera->controller = controller;
 	perspectiveCamera->controllerTiltCallback = shovelerControllerAddTiltCallback(controller, tiltController, perspectiveCamera);
 	perspectiveCamera->controllerMoveCallback = shovelerControllerAddMoveCallback(controller, moveController, perspectiveCamera);
+	perspectiveCamera->controllerAspectRatioChangeCallback = shovelerControllerAddAspectRatioChangeCallback(controller, aspectRatioChangeController, perspectiveCamera);
 }
 
 void shovelerCameraPerspectiveDetachController(ShovelerCamera *camera)
@@ -50,6 +58,7 @@ void shovelerCameraPerspectiveDetachController(ShovelerCamera *camera)
 
 	shovelerControllerRemoveTiltCallback(perspectiveCamera->controller, perspectiveCamera->controllerTiltCallback);
 	shovelerControllerRemoveMoveCallback(perspectiveCamera->controller, perspectiveCamera->controllerMoveCallback);
+	shovelerControllerRemoveAspectRatioChangeCallback(perspectiveCamera->controller, perspectiveCamera->controllerAspectRatioChangeCallback);
 
 	perspectiveCamera->controller = NULL;
 	perspectiveCamera->controllerTiltCallback = NULL;
@@ -154,4 +163,14 @@ static void moveController(ShovelerController *controller, ShovelerVector3 amoun
 	perspectiveCamera->camera.position = shovelerVector3LinearCombination(1.0, perspectiveCamera->camera.position, amount.values[2], perspectiveCamera->direction);
 	perspectiveCamera->camera.position = shovelerVector3LinearCombination(1.0, perspectiveCamera->camera.position, amount.values[0], right);
 	perspectiveCamera->camera.position = shovelerVector3LinearCombination(1.0, perspectiveCamera->camera.position, amount.values[1], perspectiveCamera->upwards);
+}
+
+static void aspectRatioChangeController(ShovelerController *controller, float aspectRatio, void *userData)
+{
+	ShovelerCameraPerspective *perspectiveCamera = userData;
+
+	if (aspectRatio != perspectiveCamera->aspectRatio) {
+		perspectiveCamera->aspectRatio = aspectRatio;
+		perspectiveCamera->camera.projection = computePerspectiveTransformation(perspectiveCamera->fieldOfViewY, perspectiveCamera->aspectRatio, perspectiveCamera->nearClippingPlane, perspectiveCamera->farClippingPlane);
+	}
 }
