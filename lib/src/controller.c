@@ -79,6 +79,10 @@ return g_hash_table_remove(controller->aspectRatioChangeCallbacks, aspectRatioCh
 
 void shovelerControllerUpdate(ShovelerController *controller, float dt)
 {
+	if(glfwGetInputMode(controller->game->window, GLFW_CURSOR) != GLFW_CURSOR_DISABLED) {
+		return;
+	}
+
 	double newCursorX;
 	double newCursorY;
 	glfwGetCursorPos(controller->game->window, &newCursorX, &newCursorY);
