@@ -7,9 +7,8 @@
 
 typedef struct {
 	ShovelerCamera camera;
-	ShovelerVector3 up;
-	ShovelerVector3 upwards;
 	ShovelerVector3 direction;
+	ShovelerVector3 upwards;
 	float fieldOfViewY;
 	float aspectRatio;
 	float nearClippingPlane;
@@ -20,7 +19,7 @@ typedef struct {
 	ShovelerControllerAspectRatioChangeCallback *controllerAspectRatioChangeCallback;
 } ShovelerCameraPerspective;
 
-ShovelerCamera *shovelerCameraPerspectiveCreate(ShovelerVector3 position, ShovelerVector3 direction, ShovelerVector3 up, float fieldOfViewY, float aspectRatio, float nearClippingPlane, float farClippingPlane);
+ShovelerCamera *shovelerCameraPerspectiveCreate(ShovelerVector3 position, ShovelerVector3 direction, ShovelerVector3 upwards, float fieldOfViewY, float aspectRatio, float nearClippingPlane, float farClippingPlane);
 void shovelerCameraPerspectiveAttachController(ShovelerCamera *camera, ShovelerController *controller);
 void shovelerCameraPerspectiveDetachController(ShovelerCamera *camera);
 

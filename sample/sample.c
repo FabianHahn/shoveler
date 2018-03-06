@@ -50,7 +50,7 @@ void shovelerSampleInit(ShovelerGame *sampleGame, int width, int height, int sam
 {
 	game = sampleGame;
 
-	controller = shovelerControllerCreate(game, 2.0f, 0.0005f);
+	controller = shovelerControllerCreate(game, (ShovelerVector3){0, 0, -5}, (ShovelerVector3){0, 0, 1}, (ShovelerVector3){0, 1, 0}, 2.0f, 0.0005f);
 
 	nearestNeighborSampler = shovelerSamplerCreate(false, true);
 	interpolatingSampler = shovelerSamplerCreate(true, true);

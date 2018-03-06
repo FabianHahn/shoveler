@@ -7,14 +7,14 @@
 
 struct ShovelerControllerStruct; // forward declaration
 
-typedef void (ShovelerControllerTiltCallbackFunction)(struct ShovelerControllerStruct *controller, ShovelerVector2 amount, void *userData);
+typedef void (ShovelerControllerTiltCallbackFunction)(struct ShovelerControllerStruct *controller, ShovelerVector3 direction, ShovelerVector3 upwards, void *userData);
 
 typedef struct {
 	ShovelerControllerTiltCallbackFunction *function;
 	void *userData;
 } ShovelerControllerTiltCallback;
 
-typedef void (ShovelerControllerMoveCallbackFunction)(struct ShovelerControllerStruct *controller, ShovelerVector3 amount, void *userData);
+typedef void (ShovelerControllerMoveCallbackFunction)(struct ShovelerControllerStruct *controller, ShovelerVector3 position, void *userData);
 
 typedef struct {
 	ShovelerControllerMoveCallbackFunction *function;
@@ -30,6 +30,10 @@ typedef struct {
 
 typedef struct ShovelerControllerStruct {
 	ShovelerGame *game;
+	ShovelerVector3 position;
+	ShovelerVector3 direction;
+	ShovelerVector3 upwards;
+	ShovelerVector3 up;
 	float moveFactor;
 	float tiltFactor;
 	double previousCursorX;
@@ -43,7 +47,7 @@ typedef struct ShovelerControllerStruct {
 	ShovelerInputWindowSizeCallback *windowSizeCallback;
 } ShovelerController;
 
-ShovelerController *shovelerControllerCreate(ShovelerGame *game, float moveFactor, float tiltFactor);
+ShovelerController *shovelerControllerCreate(ShovelerGame *game, ShovelerVector3 position, ShovelerVector3 direction, ShovelerVector3 up, float moveFactor, float tiltFactor);
 ShovelerControllerTiltCallback *shovelerControllerAddTiltCallback(ShovelerController *controller, ShovelerControllerTiltCallbackFunction *callbackFunction, void *userData);
 bool shovelerControllerRemoveTiltCallback(ShovelerController *controller, ShovelerControllerTiltCallback *tiltCallback);
 ShovelerControllerMoveCallback *shovelerControllerAddMoveCallback(ShovelerController *controller, ShovelerControllerMoveCallbackFunction *callbackFunction, void *userData);
