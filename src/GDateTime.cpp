@@ -136,3 +136,8 @@ FAKEGLIB_API gint g_date_time_get_second(GDateTime *dateTime)
 		return tm->tm_sec;
 	}
 }
+
+FAKEGLIB_API gint64 g_date_time_to_unix(GDateTime *datetime)
+{
+	return std::chrono::seconds(datetime->time).count();
+}
