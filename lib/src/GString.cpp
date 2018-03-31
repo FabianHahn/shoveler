@@ -6,7 +6,7 @@
 #include <cstdlib> // malloc, free
 #include <cstring> // strdup, strlen, memcpy, memmove
 
-#include "GString.h"
+#include "fakeglib/GString.h"
 
 static void expandStringTo(GString *string, gsize len)
 {

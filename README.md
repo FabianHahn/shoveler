@@ -16,10 +16,11 @@ The requirements for *fakeglib* are:
 
 ## What?
 *fakeglib* currently implements the following parts of [glib](https://github.com/GNOME/glib)'s [C API](https://developer.gnome.org/glib/2.48/):
-* [Basic Types](https://developer.gnome.org/glib/2.48/glib-Basic-Types.html) ([minimal](src/GTypes.h))
-* [Memory Allocation](https://developer.gnome.org/glib/2.48/glib-Memory-Allocation.html) ([minimal](src/GMemory.h))
-* [GDateTime](https://developer.gnome.org/glib/2.48/glib-GDateTime.html) ([minimal](src/GDateTime.h))
-* [Doubly-Linked Lists](https://developer.gnome.org/glib/2.48/glib-Doubly-Linked-Lists.html) ([full](src/GList.h))
-* [Double-Ended Queues](https://developer.gnome.org/glib/2.48/glib-Double-ended-Queues.html) ([full](src/GQueue.h))
-* [Hash Tables](https://developer.gnome.org/glib/2.48/glib-Hash-Tables.html) ([full](src/GHashTable.h))
-* [Strings](https://developer.gnome.org/glib/2.48/glib-Strings.html) ([partial](src/GString.h))
+* [Basic Types](https://developer.gnome.org/glib/2.48/glib-Basic-Types.html) ([minimal](lib/include/fakeglib/GTypes.h))
+* [Memory Allocation](https://developer.gnome.org/glib/2.48/glib-Memory-Allocation.html) ([minimal](lib/include/fakeglib/GMemory.h))
+* [GDateTime](https://developer.gnome.org/glib/2.48/glib-GDateTime.html) ([minimal](lib/include/fakeglib//GDateTime.h))
+* [Date and Time Functions](https://developer.gnome.org/glib/2.48/glib-Date-and-Time-Functions.html) ([minimal](lib/include/fakeglib/GTime.h))
+* [Doubly-Linked Lists](https://developer.gnome.org/glib/2.48/glib-Doubly-Linked-Lists.html) ([full](lib/include/fakeglib//GList.h))
+* [Double-Ended Queues](https://developer.gnome.org/glib/2.48/glib-Double-ended-Queues.html) ([full](lib/include/fakeglib/GQueue.h))
+* [Hash Tables](https://developer.gnome.org/glib/2.48/glib-Hash-Tables.html) ([full](lib/include/fakeglib/GHashTable.h))
+* [Strings](https://developer.gnome.org/glib/2.48/glib-Strings.html) ([partial](lib/include/fakeglib/GString.h))

@@ -5,9 +5,9 @@
 extern "C" {
 #endif
 
-#include "api.h"
-#include "GTypes.h"
-#include "GList.h"
+#include <fakeglib/api.h>
+#include <fakeglib/GList.h>
+#include <fakeglib/GTypes.h>
 
 struct GQueueStruct {
 	GList *head;

@@ -2,7 +2,7 @@
 #include <climits> // UINT_MAX
 #include <cstddef> // NULL
 
-#include "GQueue.h"
+#include "fakeglib/GQueue.h"
 
 FAKEGLIB_API GQueue *g_queue_new(void)
 {
