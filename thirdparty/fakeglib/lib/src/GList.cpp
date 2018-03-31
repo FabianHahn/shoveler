@@ -2,7 +2,7 @@
 #include <climits> // UINT_MAX
 #include <cstddef> // NULL
 
-#include "GList.h"
+#include "fakeglib/GList.h"
 
 static GList *splitList(GList *list, guint firstHalfSize);
 static GList *sortSizedList(GList *list, GCompareDataFunc compareFunc, gpointer userData, guint length);

@@ -5,7 +5,7 @@
 #include <string>
 #include <mutex>
 
-#include "GHashTable.h"
+#include "fakeglib/GHashTable.h"
 
 static std::mutex refMutex;
 

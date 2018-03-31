@@ -5,8 +5,8 @@
 extern "C" {
 #endif
 
-#include "api.h"
-#include "GTypes.h"
+#include <fakeglib/api.h>
+#include <fakeglib/GTypes.h>
 
 struct GDateTimeStruct;
 typedef struct GDateTimeStruct GDateTime;

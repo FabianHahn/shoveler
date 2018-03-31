@@ -5,8 +5,8 @@
 extern "C" {
 #endif
 
-#include "api.h"
-#include "GTypes.h"
+#include <fakeglib/api.h>
+#include <fakeglib/GTypes.h>
 
 FAKEGLIB_API void g_free(gpointer mem);
 
