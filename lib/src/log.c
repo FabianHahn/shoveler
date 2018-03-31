@@ -5,11 +5,9 @@
 #include <string.h> // strdup, strstr
 
 #include <glib.h>
-#include <GLFW/glfw3.h>
 
 #include "shoveler/log.h"
 
-static void handleGlfwErrorMessage(int errorCode, const char *message);
 static void logHandler(const char *file, int line, ShovelerLogLevel level, const char *message);
 static bool shouldLog(ShovelerLogLevel level);
 static char *formatLogMessage(const char *file, int line, ShovelerLogLevel level, const char *message);
@@ -25,8 +23,6 @@ void shovelerLogInit(const char *locationPrefix, ShovelerLogLevel level, FILE *c
 	logLocationPrefix = strdup(locationPrefix);
 	logLevel = level;
 	logChannel = channel;
-
-	glfwSetErrorCallback(handleGlfwErrorMessage);
 }
 
 void shovelerLogInitWithCallback(ShovelerLogLevel level, ShovelerLogMessageCallbackFunction *callbackFunction)
@@ -34,8 +30,6 @@ void shovelerLogInitWithCallback(ShovelerLogLevel level, ShovelerLogMessageCallb
 	logLevel = level;
 	logChannel = NULL;
 	logCallbackFunction = callbackFunction;
-
-	glfwSetErrorCallback(handleGlfwErrorMessage);
 }
 
 void shovelerLogTerminate()
@@ -53,11 +47,6 @@ void shovelerLogMessage(const char *file, int line, ShovelerLogLevel level, cons
 		logCallbackFunction(file, line, level, assembled->str);
 		g_string_free(assembled, true);
 	}
-}
-
-static void handleGlfwErrorMessage(int errorCode, const char *message)
-{
-	shovelerLogMessage("glfw", 0, SHOVELER_LOG_LEVEL_ERROR, "error code %d: %s", errorCode, message);
 }
 
 static void logHandler(const char *file, int line, ShovelerLogLevel level, const char *message)
