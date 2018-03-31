@@ -1,5 +1,6 @@
 add_subdirectory(fakeglib)
 add_subdirectory(glad)
 add_subdirectory(glfw)
+add_subdirectory(googletest)
 add_subdirectory(zlib)
 add_subdirectory(libpng)

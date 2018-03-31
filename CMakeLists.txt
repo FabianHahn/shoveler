@@ -1,8 +1,11 @@
 cmake_minimum_required(VERSION 3.1)
 project(shoveler)
 
+enable_testing()
+
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 
+option(SHOVELER_BUILD_TESTS "Build the shoveler tests" ON)
 option(SHOVELER_BUILD_SAMPLE "Build sample binary using shoveler." ON)
 option(SHOVELER_USE_GLIB "Link against system glib instead of bundled fakeglib." OFF)
 
