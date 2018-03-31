@@ -1,4 +1,4 @@
-set(SHOVELER_LIB_SRC
+set(SHOVELER_OPENGL_SRC
 	src/camera/identity.c
 	src/camera/perspective.c
 	src/drawable/cube.c
@@ -17,13 +17,11 @@ set(SHOVELER_LIB_SRC
 	src/material/texture.c
 	src/camera.c
 	src/controller.c
-	src/file.c
 	src/framebuffer.c
 	src/game.c
 	src/global.c
 	src/image.c
 	src/input.c
-	src/log.c
 	src/material.c
 	src/model.c
 	src/opengl.c
@@ -50,10 +48,8 @@ set(SHOVELER_LIB_SRC
 	include/shoveler/material/screenspace_texture.h
 	include/shoveler/material/texture.h
 	include/shoveler/camera.h
-	include/shoveler/constants.h
 	include/shoveler/controller.h
 	include/shoveler/drawable.h
-	include/shoveler/file.h
 	include/shoveler/filter.h
 	include/shoveler/framebuffer.h
 	include/shoveler/game.h
@@ -63,7 +59,6 @@ set(SHOVELER_LIB_SRC
 	include/shoveler/image/ppm.h
 	include/shoveler/input.h
 	include/shoveler/light.h
-	include/shoveler/log.h
 	include/shoveler/material.h
 	include/shoveler/model.h
 	include/shoveler/opengl.h
@@ -72,28 +67,17 @@ set(SHOVELER_LIB_SRC
 	include/shoveler/shader.h
 	include/shoveler/shader_program.h
 	include/shoveler/texture.h
-	include/shoveler/types.h
 	include/shoveler/uniform_attachment.h
 	include/shoveler/uniform.h
 	include/shoveler/uniform_map.h
 )
 
-add_library(shoveler ${SHOVELER_LIB_SRC})
-set_property(TARGET shoveler PROPERTY C_STANDARD 99)
+add_library(shoveler_opengl ${SHOVELER_OPENGL_SRC})
+set_property(TARGET shoveler_opengl PROPERTY C_STANDARD 99)
 
-target_include_directories(shoveler
+target_include_directories(shoveler_opengl
 	PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     PUBLIC $<INSTALL_INTERFACE:include>
     PRIVATE src)
 
-target_link_libraries(shoveler glad glfw png_static zlibstatic)
-
-if(shoveler_use_glib)
-	target_link_libraries(shoveler glib)
-else()
-	target_link_libraries(shoveler fakeglibstatic)
-endif()
-
-if(UNIX)
-	target_link_libraries(shoveler m)
-endif()
+target_link_libraries(shoveler_opengl shoveler_base glad glfw png_static zlibstatic)

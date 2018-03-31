@@ -8,6 +8,6 @@ set(SHOVELER_SAMPLE_SRC
 if(SHOVELER_BUILD_SAMPLE)
 	add_executable(sample ${SHOVELER_SAMPLE_SRC})
 	set_property(TARGET sample PROPERTY C_STANDARD 99)
-	target_link_libraries(sample shoveler)
+	target_link_libraries(sample shoveler_opengl)
 endif()
 

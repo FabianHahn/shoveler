@@ -23,6 +23,7 @@ set(PNG_TESTS OFF CACHE BOOL "Disable building libpng tests")
 set(SKIP_INSTALL_ALL ON CACHE BOOL "Skip libpng installation steps")
 set(ZLIB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/zlib)
 
-add_subdirectory(lib)
+add_subdirectory(base)
+add_subdirectory(opengl)
 add_subdirectory(sample)
 add_subdirectory(thirdparty)
