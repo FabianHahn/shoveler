@@ -9,6 +9,7 @@ set(SHOVELER_BASE_SRC
 
 set(SHOVELER_BASE_TEST_SRC
 	src/test.cpp
+	src/types_test.cpp
 )
 
 add_library(shoveler_base ${SHOVELER_BASE_SRC})

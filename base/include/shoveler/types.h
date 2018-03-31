@@ -191,7 +191,7 @@ static inline ShovelerVector4 shovelerMatrixMultiplyVector4(ShovelerMatrix A, Sh
 	c.values[0] = ShovelerMatrixGet(A, 0, 0) * b.values[0] + ShovelerMatrixGet(A, 0, 1) * b.values[1] + ShovelerMatrixGet(A, 0, 2) * b.values[2] + ShovelerMatrixGet(A, 0, 3) * b.values[3];
 	c.values[1] = ShovelerMatrixGet(A, 1, 0) * b.values[0] + ShovelerMatrixGet(A, 1, 1) * b.values[1] + ShovelerMatrixGet(A, 1, 2) * b.values[2] + ShovelerMatrixGet(A, 1, 3) * b.values[3];
 	c.values[2] = ShovelerMatrixGet(A, 2, 0) * b.values[0] + ShovelerMatrixGet(A, 2, 1) * b.values[1] + ShovelerMatrixGet(A, 2, 2) * b.values[2] + ShovelerMatrixGet(A, 2, 3) * b.values[3];
-	c.values[2] = ShovelerMatrixGet(A, 3, 0) * b.values[0] + ShovelerMatrixGet(A, 3, 1) * b.values[1] + ShovelerMatrixGet(A, 3, 2) * b.values[2] + ShovelerMatrixGet(A, 3, 3) * b.values[3];
+	c.values[3] = ShovelerMatrixGet(A, 3, 0) * b.values[0] + ShovelerMatrixGet(A, 3, 1) * b.values[1] + ShovelerMatrixGet(A, 3, 2) * b.values[2] + ShovelerMatrixGet(A, 3, 3) * b.values[3];
 	return c;
 }
 
