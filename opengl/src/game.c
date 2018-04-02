@@ -8,6 +8,8 @@
 #include "shoveler/opengl.h"
 
 static void exitKeyHandler(ShovelerInput *input, int key, int scancode, int action, int mods, void *unused);
+static gint64 elapsedNs(double dt);
+static void printFps(void *gamePointer);
 
 ShovelerGame *shovelerGameCreate(const char *windowTitle, int windowedWidth, int windowedHeight, int samples, bool fullscreen, bool vsync)
 {
@@ -16,6 +18,7 @@ ShovelerGame *shovelerGameCreate(const char *windowTitle, int windowedWidth, int
 	game->windowedHeight = windowedHeight;
 	game->samples = samples;
 	game->fullscreen = fullscreen;
+	game->updateExecutor = shovelerExecutorCreateDirect();
 
 	// request OpenGL4
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
@@ -81,6 +84,9 @@ ShovelerGame *shovelerGameCreate(const char *windowTitle, int windowedWidth, int
 
 	game->framebuffer = shovelerFramebufferCreate(width, height, samples, 4, 8);
 	game->lastFrameTime = glfwGetTime();
+	game->lastFpsPrintTime = game->lastFrameTime;
+	game->framesSinceLastFpsPrint = 0;
+	shovelerExecutorSchedulePeriodic(game->updateExecutor, 1000, 1000, printFps, game);
 
 	ShovelerGlobalContext *global = shovelerGlobalGetContext();
 	g_hash_table_insert(global->games, game->window, game);
@@ -123,7 +129,9 @@ int shovelerGameRenderFrame(ShovelerGame *game)
 	double now = glfwGetTime();
 	double dt = now - game->lastFrameTime;
 	game->lastFrameTime = now;
+	game->framesSinceLastFpsPrint++;
 
+	shovelerExecutorUpdate(game->updateExecutor, elapsedNs(dt));
 	game->update(game, dt);
 
 	int rendered = shovelerSceneRenderFrame(game->scene, game->camera, game->framebuffer);
@@ -144,6 +152,8 @@ void shovelerGameFree(ShovelerGame *game)
 
 	shovelerInputFree(game->input);
 	glfwDestroyWindow(game->window);
+
+	shovelerExecutorFree(game->updateExecutor);
 	free(game);
 }
 
@@ -153,4 +163,27 @@ static void exitKeyHandler(ShovelerInput *input, int key, int scancode, int acti
 		shovelerLogInfo("Escape key pressed, terminating.");
 		glfwSetWindowShouldClose(input->game->window, GLFW_TRUE);
 	}
+}
+
+static gint64 elapsedNs(double dt)
+{
+	gint64 elapsed = dt * G_USEC_PER_SEC;
+	if(elapsed > 0) {
+		return elapsed;
+	} else {
+		return 0;
+	}
+}
+
+static void printFps(void *gamePointer)
+{
+	ShovelerGame *game = gamePointer;
+	double now = glfwGetTime();
+	double secondsSinceLastFpsPrint = now - game->lastFpsPrintTime;
+
+	double fps = game->framesSinceLastFpsPrint / secondsSinceLastFpsPrint;
+	shovelerLogInfo("Current FPS: %.1f", fps);
+
+	game->lastFpsPrintTime = now;
+	game->framesSinceLastFpsPrint = 0;
 }

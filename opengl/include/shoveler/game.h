@@ -8,6 +8,7 @@
 #include <GLFW/glfw3.h>
 
 #include <shoveler/camera.h>
+#include <shoveler/executor.h>
 #include <shoveler/framebuffer.h>
 #include <shoveler/input.h>
 #include <shoveler/scene.h>
@@ -21,6 +22,7 @@ typedef struct ShovelerGameStruct {
 	int windowedHeight;
 	int samples;
 	bool fullscreen;
+	ShovelerExecutor *updateExecutor;
 	GLFWwindow *window;
 	ShovelerInput *input;
 	ShovelerFramebuffer *framebuffer;
@@ -28,6 +30,8 @@ typedef struct ShovelerGameStruct {
 	ShovelerCamera *camera;
 	ShovelerGameUpdateCallback *update;
 	double lastFrameTime;
+	double lastFpsPrintTime;
+	int framesSinceLastFpsPrint;
 } ShovelerGame;
 
 ShovelerGame *shovelerGameCreate(const char *windowTitle, int windowedWidth, int windowedHeight, int samples, bool fullscreen, bool vsync);
