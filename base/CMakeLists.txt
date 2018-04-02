@@ -1,13 +1,16 @@
 set(SHOVELER_BASE_SRC
+	src/executor.c
 	src/file.c
 	src/log.c
 	include/shoveler/constants.h
+	include/shoveler/executor.h
 	include/shoveler/file.h
 	include/shoveler/log.h
 	include/shoveler/types.h
 )
 
 set(SHOVELER_BASE_TEST_SRC
+	src/executor_test.cpp
 	src/test.cpp
 	src/types_test.cpp
 )
