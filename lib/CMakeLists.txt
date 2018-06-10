@@ -7,6 +7,7 @@ set(FAKEGLIB_LIB_SRC
 	src/GMemory.cpp
 	src/GQueue.cpp
 	src/GString.cpp
+	src/GStringUtil.cpp
 	src/GTime.cpp
 	include/fakeglib/GDateTime.h
 	include/fakeglib/GHashTable.h
@@ -14,6 +15,7 @@ set(FAKEGLIB_LIB_SRC
 	include/fakeglib/GMemory.h
 	include/fakeglib/GQueue.h
 	include/fakeglib/GString.h
+	include/fakeglib/GStringUtil.h
 	include/fakeglib/GTime.h
 	include/glib.h
 )

@@ -24,3 +24,5 @@ The requirements for *fakeglib* are:
 * [Double-Ended Queues](https://developer.gnome.org/glib/2.48/glib-Double-ended-Queues.html) ([full](lib/include/fakeglib/GQueue.h))
 * [Hash Tables](https://developer.gnome.org/glib/2.48/glib-Hash-Tables.html) ([full](lib/include/fakeglib/GHashTable.h))
 * [Strings](https://developer.gnome.org/glib/2.48/glib-Strings.html) ([partial](lib/include/fakeglib/GString.h))
+* [String Utility Functions](https://developer.gnome.org/glib/2.48/glib-String-Utility-Functions.html) ([partial](lib/include/fakeglib/GStringUtil.h))
+

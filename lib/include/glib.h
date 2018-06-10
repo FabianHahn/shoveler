@@ -7,6 +7,7 @@
 #include <fakeglib/GMemory.h>
 #include <fakeglib/GQueue.h>
 #include <fakeglib/GString.h>
+#include <fakeglib/GStringUtil.h>
 #include <fakeglib/GTime.h>
 #include <fakeglib/GTypes.h>
 
