@@ -4,6 +4,7 @@ set(SHOVELER_OPENGL_SRC
 	src/drawable/cube.c
 	src/drawable/quad.c
 	src/drawable/point.c
+	src/drawable/tiles.c
 	src/filter/depth_texture_gaussian.c
 	src/image/png.c
 	src/image/ppm.c
@@ -38,6 +39,7 @@ set(SHOVELER_OPENGL_SRC
 	include/shoveler/drawable/cube.h
 	include/shoveler/drawable/point.h
 	include/shoveler/drawable/quad.h
+	include/shoveler/drawable/tiles.h
 	include/shoveler/filter/depth_texture_gaussian.h
 	include/shoveler/material/color.h
 	include/shoveler/material/depth.h
