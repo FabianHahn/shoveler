@@ -42,7 +42,7 @@ ShovelerDrawable *shovelerDrawableTilesCreate(unsigned char width, unsigned char
 
 	for(unsigned char x = 0; x < width; x++) {
 		for(unsigned char y = 0; y < height; y++) {
-			unsigned int index = x + y * width;
+			unsigned int index = x * height + y;
 
 			tiles->vertices[4 * index + 0].position[0] = x;
 			tiles->vertices[4 * index + 0].position[1] = y;
@@ -76,9 +76,9 @@ ShovelerDrawable *shovelerDrawableTilesCreate(unsigned char width, unsigned char
 	glGenBuffers(1, &tiles->indexBuffer);
 
 	glBindBuffer(GL_ARRAY_BUFFER, tiles->vertexBuffer);
-	glBufferData(GL_ARRAY_BUFFER, 4 * sizeof(TilesVertex), tiles->vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, 4 * width * height * sizeof(TilesVertex), tiles->vertices, GL_STATIC_DRAW);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, tiles->indexBuffer);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 2 * sizeof(TilesTriangle), tiles->triangles, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 2 * width * height * sizeof(TilesTriangle), tiles->triangles, GL_STATIC_DRAW);
 
 	if(!shovelerOpenGLCheckSuccess()) {
 		freeTiles(&tiles->drawable);
