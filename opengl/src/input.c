@@ -28,7 +28,6 @@ ShovelerInput *shovelerInputCreate(ShovelerGame *game)
 	input->scrollCallbacks = g_hash_table_new_full(g_direct_hash, g_direct_equal, freeScrollCallback, NULL);
 	input->windowSizeCallbacks = g_hash_table_new_full(g_direct_hash, g_direct_equal, freeWindowSizeCallback, NULL);
 
-	glfwSetInputMode(game->window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetInputMode(game->window, GLFW_STICKY_KEYS, GL_TRUE);
 	glfwSetInputMode(game->window, GLFW_STICKY_MOUSE_BUTTONS, GL_TRUE);
 
