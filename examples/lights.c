@@ -1,6 +1,9 @@
+#include <stdlib.h> // EXIT_FAILURE, EXIT_SUCCESS
+
 #include <glib.h>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
 #include <shoveler/camera/perspective.h>
 #include <shoveler/drawable/cube.h>
 #include <shoveler/drawable/quad.h>
@@ -13,6 +16,7 @@
 #include <shoveler/constants.h>
 #include <shoveler/controller.h>
 #include <shoveler/framebuffer.h>
+#include <shoveler/global.h>
 #include <shoveler/image.h>
 #include <shoveler/input.h>
 #include <shoveler/model.h>
@@ -21,10 +25,6 @@
 #include <shoveler/scene.h>
 #include <shoveler/shader_program.h>
 #include <shoveler/texture.h>
-
-#include "sample.h"
-
-static void shovelerSampleUpdate(ShovelerGame *game, double dt);
 
 static ShovelerGame *game;
 static ShovelerController *controller;
@@ -46,7 +46,43 @@ static float previousCursorY;
 
 static float eps = 1e-9;
 
-void shovelerSampleInit(ShovelerGame *sampleGame, int width, int height, int samples)
+static void shovelerSampleInit(ShovelerGame *sampleGame, int width, int height, int samples);
+static void shovelerSampleTerminate();
+static void shovelerSampleUpdate(ShovelerGame *game, double dt);
+
+int main(int argc, char *argv[])
+{
+	const char *windowTitle = "shoveler";
+	bool fullscreen = false;
+	bool vsync = true;
+	int samples = 4;
+	int width = 640;
+	int height = 480;
+
+	shovelerLogInit("shoveler/", SHOVELER_LOG_LEVEL_INFO_UP, stdout);
+	shovelerGlobalInit();
+
+	ShovelerGame *game = shovelerGameCreate(windowTitle, width, height, samples, fullscreen, vsync);
+	if(game == NULL) {
+		return EXIT_FAILURE;
+	}
+
+	shovelerSampleInit(game, width, height, samples);
+
+	while(shovelerGameIsRunning(game)) {
+		shovelerGameRenderFrame(game);
+	}
+	shovelerLogInfo("Exiting main loop, goodbye.");
+
+	shovelerSampleTerminate();
+	shovelerGameFree(game);
+	shovelerGlobalUninit();
+	shovelerLogTerminate();
+
+	return EXIT_SUCCESS;
+}
+
+static void shovelerSampleInit(ShovelerGame *sampleGame, int width, int height, int samples)
 {
 	game = sampleGame;
 
@@ -189,7 +225,7 @@ void shovelerSampleInit(ShovelerGame *sampleGame, int width, int height, int sam
 	game->update = shovelerSampleUpdate;
 }
 
-void shovelerSampleTerminate()
+static void shovelerSampleTerminate()
 {
 	shovelerSceneFree(game->scene);
 	shovelerCameraFree(game->camera);
