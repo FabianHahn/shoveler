@@ -48,6 +48,12 @@ void shovelerCameraPerspectiveAttachController(ShovelerCamera *camera, ShovelerC
 	perspectiveCamera->controllerAspectRatioChangeCallback = shovelerControllerAddAspectRatioChangeCallback(controller, aspectRatioChangeController, perspectiveCamera);
 }
 
+ShovelerController *shovelerCameraPerspectiveGetController(ShovelerCamera *camera)
+{
+	ShovelerCameraPerspective *perspectiveCamera = getPerspectiveCamera(camera);
+	return perspectiveCamera->controller;
+}
+
 void shovelerCameraPerspectiveDetachController(ShovelerCamera *camera)
 {
 	ShovelerCameraPerspective *perspectiveCamera = getPerspectiveCamera(camera);
