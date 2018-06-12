@@ -9,6 +9,7 @@
 
 typedef struct {
 	unsigned char position[2];
+	unsigned char uv[2];
 } TilesVertex;
 
 typedef struct {
@@ -46,15 +47,23 @@ ShovelerDrawable *shovelerDrawableTilesCreate(unsigned char width, unsigned char
 
 			tiles->vertices[4 * index + 0].position[0] = x;
 			tiles->vertices[4 * index + 0].position[1] = y;
+			tiles->vertices[4 * index + 0].uv[0] = 0;
+			tiles->vertices[4 * index + 0].uv[1] = 0;
 
 			tiles->vertices[4 * index + 1].position[0] = x + 1;
 			tiles->vertices[4 * index + 1].position[1] = y;
+			tiles->vertices[4 * index + 1].uv[0] = 1;
+			tiles->vertices[4 * index + 1].uv[1] = 0;
 
 			tiles->vertices[4 * index + 2].position[0] = x;
 			tiles->vertices[4 * index + 2].position[1] = y + 1;
+			tiles->vertices[4 * index + 2].uv[0] = 0;
+			tiles->vertices[4 * index + 2].uv[1] = 1;
 
 			tiles->vertices[4 * index + 3].position[0] = x + 1;
 			tiles->vertices[4 * index + 3].position[1] = y + 1;
+			tiles->vertices[4 * index + 3].uv[0] = 1;
+			tiles->vertices[4 * index + 3].uv[1] = 1;
 
 			tiles->triangles[2 * index + 0].indices[0] = 4 * index + 0;
 			tiles->triangles[2 * index + 0].indices[1] = 4 * index + 1;
@@ -69,8 +78,11 @@ ShovelerDrawable *shovelerDrawableTilesCreate(unsigned char width, unsigned char
 	glGenVertexArrays(1, &tiles->vertexArrayObject);
 	glBindVertexArray(tiles->vertexArrayObject);
 	glEnableVertexAttribArray(SHOVELER_SHADER_PROGRAM_ATTRIBUTE_POSITION);
+	glEnableVertexAttribArray(SHOVELER_SHADER_PROGRAM_ATTRIBUTE_UV);
 	glVertexAttribFormat(SHOVELER_SHADER_PROGRAM_ATTRIBUTE_POSITION, 2, GL_UNSIGNED_BYTE, GL_FALSE, offsetof(TilesVertex, position));
+	glVertexAttribFormat(SHOVELER_SHADER_PROGRAM_ATTRIBUTE_UV, 2, GL_UNSIGNED_BYTE, GL_FALSE, offsetof(TilesVertex, uv));
 	glVertexAttribBinding(SHOVELER_SHADER_PROGRAM_ATTRIBUTE_POSITION, 0);
+	glVertexAttribBinding(SHOVELER_SHADER_PROGRAM_ATTRIBUTE_UV, 0);
 
 	glGenBuffers(1, &tiles->vertexBuffer);
 	glGenBuffers(1, &tiles->indexBuffer);

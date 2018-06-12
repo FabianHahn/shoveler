@@ -64,28 +64,28 @@ int main(int argc, char *argv[])
 
 	ShovelerImage *tileset = shovelerImageCreate(2, 2, 3);
 	shovelerImageClear(tileset);
-	shovelerImageGet(tileset, 0, 0, 0) = 255;
-	shovelerImageGet(tileset, 0, 1, 1) = 255;
-	shovelerImageGet(tileset, 1, 0, 2) = 255;
+	shovelerImageGet(tileset, 0, 0, 0) = 255; // red
+	shovelerImageGet(tileset, 0, 1, 1) = 255; // green
+	shovelerImageGet(tileset, 1, 0, 2) = 255; // blue
 	shovelerImageGet(tileset, 1, 1, 0) = 255;
 	shovelerImageGet(tileset, 1, 1, 1) = 255;
-	shovelerImageGet(tileset, 1, 1, 2) = 255;
+	shovelerImageGet(tileset, 1, 1, 2) = 255; // white
 	ShovelerTexture *tilesetTexture = shovelerTextureCreate2d(tileset);
 	shovelerTextureUpdate(tilesetTexture);
 
 	ShovelerImage *tilemap = shovelerImageCreate(2, 2, 3);
 	shovelerImageGet(tilemap, 0, 0, 0) = 0;
 	shovelerImageGet(tilemap, 0, 0, 1) = 0;
-	shovelerImageGet(tilemap, 0, 0, 1) = 0;
+	shovelerImageGet(tilemap, 0, 0, 2) = 0; // red
 	shovelerImageGet(tilemap, 0, 1, 0) = 0;
 	shovelerImageGet(tilemap, 0, 1, 1) = 0;
-	shovelerImageGet(tilemap, 0, 1, 1) = 0;
+	shovelerImageGet(tilemap, 0, 1, 2) = 0; // red
 	shovelerImageGet(tilemap, 1, 0, 0) = 0;
 	shovelerImageGet(tilemap, 1, 0, 1) = 1;
-	shovelerImageGet(tilemap, 1, 0, 1) = 0;
+	shovelerImageGet(tilemap, 1, 0, 2) = 0; // green
 	shovelerImageGet(tilemap, 1, 1, 0) = 0;
 	shovelerImageGet(tilemap, 1, 1, 1) = 0;
-	shovelerImageGet(tilemap, 1, 1, 1) = 1;
+	shovelerImageGet(tilemap, 1, 1, 2) = 1; // n/a
 	ShovelerTexture *tilemapTexture = shovelerTextureCreate2d(tilemap);
 	shovelerTextureUpdate(tilemapTexture);
 
@@ -96,7 +96,6 @@ int main(int argc, char *argv[])
 
 	ShovelerModel *tilesModel = shovelerModelCreate(tiles, tilemapMaterial);
 	tilesModel->screenspace = true;
-	tilesModel->polygonMode = GL_LINE;
 	shovelerSceneAddModel(game->scene, tilesModel);
 
 	shovelerOpenGLCheckSuccess();
