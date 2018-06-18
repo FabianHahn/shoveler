@@ -82,6 +82,7 @@ ShovelerMaterial *shovelerMaterialTilemapCreate()
 	Tilemap *tilemap = malloc(sizeof(Tilemap));
 	tilemap->material = shovelerMaterialCreate(program);
 	tilemap->material->data = tilemap;
+	tilemap->material->freeData = freeTilemap;
 	tilemap->tilemapWidth = 0;
 	tilemap->tilemapHeight = 0;
 	tilemap->tilesetHeight = 0;
