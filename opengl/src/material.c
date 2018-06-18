@@ -11,6 +11,18 @@ static void freeMaterialData(ShovelerMaterial *material);
 ShovelerMaterial *shovelerMaterialCreate(GLuint program)
 {
 	ShovelerMaterial *material = malloc(sizeof(ShovelerMaterial));
+	material->manageProgram = true;
+	material->program = program;
+	material->uniforms = shovelerUniformMapCreate();
+	material->freeData = freeMaterialData;
+	material->data = NULL;
+	return material;
+}
+
+ShovelerMaterial *shovelerMaterialCreateUnmanaged(GLuint program)
+{
+	ShovelerMaterial *material = malloc(sizeof(ShovelerMaterial));
+	material->manageProgram = false;
 	material->program = program;
 	material->uniforms = shovelerUniformMapCreate();
 	material->freeData = freeMaterialData;
@@ -26,7 +38,11 @@ void shovelerMaterialFree(ShovelerMaterial *material)
 
 	material->freeData(material);
 	shovelerUniformMapFree(material->uniforms);
-	glDeleteProgram(material->program);
+
+	if(material->manageProgram) {
+		glDeleteProgram(material->program);
+	}
+
 	free(material);
 }
 
