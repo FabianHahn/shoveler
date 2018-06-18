@@ -2,6 +2,7 @@
 #include <stdlib.h> // malloc, free
 #include <string.h> // strdup
 
+#include "shoveler/shader.h"
 #include "shoveler/uniform_map.h"
 
 static void freeUniform(void *uniformPointer);
@@ -25,6 +26,23 @@ bool shovelerUniformMapInsert(ShovelerUniformMap *uniformMap, const char *name, 
 bool shovelerUniformMapRemove(ShovelerUniformMap *uniformMap, const char *name)
 {
 	return g_hash_table_remove(uniformMap->uniforms, name);
+}
+
+int shovelerUniformMapAttach(ShovelerUniformMap *uniformMap, ShovelerShader *shader)
+{
+	int attached = 0;
+
+	GHashTableIter iter;
+	char *name;
+	ShovelerUniform *uniform;
+	g_hash_table_iter_init(&iter, uniformMap->uniforms);
+	while(g_hash_table_iter_next(&iter, (gpointer *) &name, (gpointer *) &uniform)) {
+		if(shovelerShaderAttachUniform(shader, name, uniform)) {
+			attached++;
+		}
+	}
+
+	return attached;
 }
 
 void shovelerUniformMapFree(ShovelerUniformMap *uniformMap)

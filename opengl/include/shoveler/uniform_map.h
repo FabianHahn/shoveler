@@ -5,6 +5,8 @@
 
 #include <shoveler/uniform.h>
 
+struct ShovelerShaderStruct; // forward declaration: shader.h
+
 typedef struct {
 	GHashTable *uniforms;
 } ShovelerUniformMap;
@@ -12,6 +14,7 @@ typedef struct {
 ShovelerUniformMap *shovelerUniformMapCreate();
 bool shovelerUniformMapInsert(ShovelerUniformMap *uniformMap, const char *name, ShovelerUniform *uniform);
 bool shovelerUniformMapRemove(ShovelerUniformMap *uniformMap, const char *name);
+int shovelerUniformMapAttach(ShovelerUniformMap *uniformMap, struct ShovelerShaderStruct *shader);
 void shovelerUniformMapFree(ShovelerUniformMap *uniformMap);
 
 #endif

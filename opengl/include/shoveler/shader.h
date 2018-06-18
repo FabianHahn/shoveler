@@ -8,15 +8,15 @@
 
 #include <shoveler/material.h>
 #include <shoveler/uniform.h>
-#include <shoveler/uniform_map.h>
 
-typedef struct {
+typedef struct ShovelerShaderStruct {
 	ShovelerMaterial *material;
+	/** map from (char *) to (ShovelerUniformAttachment *) */
 	GHashTable *attachments;
 } ShovelerShader;
 
 ShovelerShader *shovelerShaderCreate(ShovelerMaterial *material);
-int shovelerShaderAttachUniforms(ShovelerShader *shader, ShovelerUniformMap *uniformMap);
+bool shovelerShaderAttachUniform(ShovelerShader *shader, const char *name, ShovelerUniform *uniform);
 bool shovelerShaderUse(ShovelerShader *shader);
 void shovelerShaderFree(ShovelerShader *shader);
 

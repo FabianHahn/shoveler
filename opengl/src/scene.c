@@ -203,27 +203,27 @@ static ShovelerShader *generateShader(ShovelerScene *scene, ShovelerCamera *came
 
 	int materialAttached = 0;
 	if(material != NULL) {
-		materialAttached = shovelerShaderAttachUniforms(shader, material->uniforms);
+		materialAttached = shovelerUniformMapAttach(material->uniforms, shader);
 	}
 
 	int modelAttached = 0;
 	if(model != NULL) {
-		modelAttached = shovelerShaderAttachUniforms(shader, model->uniforms);
+		modelAttached = shovelerUniformMapAttach(model->uniforms, shader);
 	}
 
 	int lightAttached = 0;
 	if(light != NULL) {
-		lightAttached = shovelerShaderAttachUniforms(shader, light->uniforms);
+		lightAttached = shovelerUniformMapAttach(light->uniforms, shader);
 	}
 
 	int cameraAttached = 0;
 	if(camera != NULL) {
-		cameraAttached = shovelerShaderAttachUniforms(shader, camera->uniforms);
+		cameraAttached = shovelerUniformMapAttach(camera->uniforms, shader);
 	}
 
 	int sceneAttached = 0;
 	if(scene != NULL) {
-		sceneAttached = shovelerShaderAttachUniforms(shader, scene->uniforms);
+		sceneAttached = shovelerUniformMapAttach(scene->uniforms, shader);
 	}
 
 	shovelerLogInfo("Generated shader for program %d with %d scene %p, %d camera %p, %d light %p, %d model %p, and %d material %p uniforms.", material->program, sceneAttached, scene, cameraAttached, camera, lightAttached, light, modelAttached, model, materialAttached, material);
