@@ -4,8 +4,10 @@
 
 #include "shoveler/log.h"
 #include "shoveler/material.h"
+#include "shoveler/shader.h"
 #include "shoveler/uniform.h"
 
+static int attachUniforms(ShovelerMaterial *material, ShovelerShader *shader);
 static void freeMaterialData(ShovelerMaterial *material);
 
 ShovelerMaterial *shovelerMaterialCreate(GLuint program)
@@ -14,6 +16,7 @@ ShovelerMaterial *shovelerMaterialCreate(GLuint program)
 	material->manageProgram = true;
 	material->program = program;
 	material->uniforms = shovelerUniformMapCreate();
+	material->attachUniforms = attachUniforms;
 	material->freeData = freeMaterialData;
 	material->data = NULL;
 	return material;
@@ -44,6 +47,12 @@ void shovelerMaterialFree(ShovelerMaterial *material)
 	}
 
 	free(material);
+}
+
+static int attachUniforms(ShovelerMaterial *material, ShovelerShader *shader)
+{
+	// simply attach uniform map by default
+	return shovelerUniformMapAttach(material->uniforms, shader);
 }
 
 static void freeMaterialData(ShovelerMaterial *material)

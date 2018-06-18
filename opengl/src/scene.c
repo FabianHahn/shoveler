@@ -203,7 +203,7 @@ static ShovelerShader *generateShader(ShovelerScene *scene, ShovelerCamera *came
 
 	int materialAttached = 0;
 	if(material != NULL) {
-		materialAttached = shovelerUniformMapAttach(material->uniforms, shader);
+		materialAttached = shovelerMaterialAttachUniforms(material, shader);
 	}
 
 	int modelAttached = 0;
