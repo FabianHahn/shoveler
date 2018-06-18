@@ -7,6 +7,7 @@
 #include <shoveler/light.h>
 #include <shoveler/material.h>
 #include <shoveler/uniform_map.h>
+#include <shoveler/scene.h>
 #include <shoveler/types.h>
 
 typedef struct {
@@ -14,6 +15,7 @@ typedef struct {
 	ShovelerFramebuffer *depthFramebuffer;
 	ShovelerMaterial *depthMaterial;
 	ShovelerFilter *depthFilter;
+	ShovelerSceneRenderPassOptions depthRenderPassOptions;
 	float ambientFactor;
 	float exponentialFactor;
 	ShovelerVector3 color;

@@ -7,11 +7,12 @@
 
 #include <shoveler/camera.h>
 #include <shoveler/framebuffer.h>
-#include <shoveler/light.h>
 #include <shoveler/material.h>
 #include <shoveler/model.h>
 #include <shoveler/sampler.h>
 #include <shoveler/uniform_map.h>
+
+struct ShovelerLightStruct; // forward declaration: light.h
 
 typedef struct ShovelerSceneStruct {
 	ShovelerUniformMap *uniforms;
@@ -21,20 +22,25 @@ typedef struct ShovelerSceneStruct {
 	GHashTable *cameraShaderCache;
 } ShovelerScene;
 
-typedef enum {
-	SHOVELER_SCENE_RENDER_MODE_OCCLUDED,
-	SHOVELER_SCENE_RENDER_MODE_EMITTERS,
-	SHOVELER_SCENE_RENDER_MODE_SCREENSPACE,
-	SHOVELER_SCENE_RENDER_MODE_ADDITIVE_LIGHT,
-} ShovelerSceneRenderMode;
+typedef struct {
+	ShovelerMaterial *overrideMaterial;
+	bool emitters;
+	bool screenspace;
+	bool onlyShadowCasters;
+	bool blend;
+	GLenum blendSourceFactor;
+	GLenum blendDestinationFactor;
+	bool depthTest;
+	GLenum depthFunction;
+	GLboolean depthMask;
+} ShovelerSceneRenderPassOptions;
 
 ShovelerScene *shovelerSceneCreate();
-bool shovelerSceneAddLight(ShovelerScene *scene, ShovelerLight *light);
-bool shovelerSceneRemoveLight(ShovelerScene *scene, ShovelerLight *light);
+bool shovelerSceneAddLight(ShovelerScene *scene, struct ShovelerLightStruct *light);
+bool shovelerSceneRemoveLight(ShovelerScene *scene, struct ShovelerLightStruct *light);
 bool shovelerSceneAddModel(ShovelerScene *scene, ShovelerModel *model);
 bool shovelerSceneRemoveModel(ShovelerScene *scene, ShovelerModel *model);
-int shovelerSceneRenderModels(ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerMaterial *overrideMaterial, bool emitters, bool screenspace, bool onlyShadowCasters);
-int shovelerSceneRenderPass(ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerFramebuffer *framebuffer, ShovelerSceneRenderMode renderMode);
+int shovelerSceneRenderPass(ShovelerScene *scene, ShovelerCamera *camera, struct ShovelerLightStruct *light, ShovelerSceneRenderPassOptions options);
 int shovelerSceneRenderFrame(ShovelerScene *scene, ShovelerCamera *camera, ShovelerFramebuffer *framebuffer);
 void shovelerSceneFree(ShovelerScene *scene);
 

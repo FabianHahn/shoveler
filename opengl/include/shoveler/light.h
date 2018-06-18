@@ -6,16 +6,15 @@
 #include <shoveler/framebuffer.h>
 #include <shoveler/material.h>
 #include <shoveler/uniform_map.h>
+#include <shoveler/scene.h>
 #include <shoveler/types.h>
-
-struct ShovelerSceneStruct; // forward declaration: scene.h
 
 typedef void (ShovelerLightUpdatePositionFunction)(void *data, ShovelerVector3 position);
 typedef ShovelerVector3 (ShovelerLightGetPositionFunction)(void *data);
-typedef int (ShovelerLightRenderFunction)(void *data, struct ShovelerSceneStruct *scene, ShovelerCamera *camera, ShovelerFramebuffer *framebuffer);
+typedef int (ShovelerLightRenderFunction)(void *data, ShovelerScene *scene, ShovelerCamera *camera, ShovelerFramebuffer *framebuffer, ShovelerSceneRenderPassOptions renderPassOptions);
 typedef void (ShovelerLightFreeDataFunction)(void *data);
 
-typedef struct {
+typedef struct ShovelerLightStruct {
 	ShovelerUniformMap *uniforms;
 	void *data;
 	ShovelerLightUpdatePositionFunction *updatePosition;
@@ -34,9 +33,9 @@ static inline ShovelerVector3 shovelerLightGetPosition(ShovelerLight *light)
 	return light->getPosition(light->data);
 }
 
-static inline int shovelerLightRender(ShovelerLight *light, struct ShovelerSceneStruct *scene, ShovelerCamera *camera, ShovelerFramebuffer *framebuffer)
+static inline int shovelerLightRender(ShovelerLight *light, ShovelerScene *scene, ShovelerCamera *camera, ShovelerFramebuffer *framebuffer, ShovelerSceneRenderPassOptions renderPassOptions)
 {
-	return light->render(light->data, scene, camera, framebuffer);
+	return light->render(light->data, scene, camera, framebuffer, renderPassOptions);
 }
 
 static inline void shovelerLightFree(ShovelerLight *light)
