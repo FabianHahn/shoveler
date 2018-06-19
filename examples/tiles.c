@@ -84,10 +84,20 @@ int main(int argc, char *argv[])
 
 	ShovelerDrawable *tiles = shovelerDrawableTilesCreate(2, 2);
 	ShovelerMaterial *tilemapMaterial = shovelerMaterialTilemapCreate();
-	shovelerMaterialTilemapSetSource(tilemapMaterial, tilemapTexture);
-	shovelerMaterialTilemapSetTileset(tilemapMaterial, 0, tilesetTexture, nearestNeighborSampler, 2, 2);
 
-	ShovelerModel *tilesModel = shovelerModelCreate(tiles, tilemapMaterial);
+	ShovelerMaterialTilemapLayerData layerData;
+	layerData.tilemapWidth = tilemapTexture->image->width;
+	layerData.tilemapHeight = tilemapTexture->image->height;
+	layerData.tilemapTexture = tilemapTexture;
+	layerData.tilesetHeight = 2;
+	layerData.tilesetWidth = 2;
+	layerData.tilesetId = 0;
+	layerData.tilesetTexture = tilesetTexture;
+	layerData.tilesetSampler = nearestNeighborSampler;
+
+	ShovelerMaterial *tilemapLayerMaterial = shovelerMaterialTilemapCreateLayer(tilemapMaterial, layerData);
+
+	ShovelerModel *tilesModel = shovelerModelCreate(tiles, tilemapLayerMaterial);
 	tilesModel->screenspace = true;
 	shovelerSceneAddModel(game->scene, tilesModel);
 
@@ -109,6 +119,7 @@ int main(int argc, char *argv[])
 	shovelerSceneFree(game->scene);
 	shovelerCameraFree(game->camera);
 	shovelerDrawableFree(tiles);
+	shovelerMaterialFree(tilemapLayerMaterial);
 	shovelerMaterialFree(tilemapMaterial);
 	shovelerSamplerFree(interpolatingSampler);
 	shovelerSamplerFree(nearestNeighborSampler);
