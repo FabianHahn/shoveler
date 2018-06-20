@@ -93,15 +93,8 @@ int shovelerSceneRenderPass(ShovelerScene *scene, ShovelerCamera *camera, Shovel
 			continue;
 		}
 
-		ShovelerShader *shader = shovelerSceneGenerateShader(scene, camera, light, model, options.overrideMaterial == NULL ? model->material : options.overrideMaterial, NULL);
-
-		if(!shovelerShaderUse(shader)) {
-			shovelerLogWarning("Failed to use shader for model %p and camera %p, hiding model.", model, camera);
-			model->visible = false;
-		}
-
-		if(!shovelerModelRender(model)) {
-			shovelerLogWarning("Failed to render model %p with camera %p, hiding model.", model, camera);
+		ShovelerMaterial *material = options.overrideMaterial == NULL ? model->material : options.overrideMaterial;
+		if(!shovelerMaterialRender(material, scene, camera, light, model)) {
 			model->visible = false;
 			continue;
 		}
@@ -147,7 +140,7 @@ ShovelerShader *shovelerSceneGenerateShader(ShovelerScene *scene, ShovelerCamera
 
 		int materialAttached = 0;
 		if(material != NULL) {
-			materialAttached = shovelerMaterialAttachUniforms(material, shader);
+			materialAttached = shovelerMaterialAttachUniforms(material, shader, userData);
 		}
 
 		int modelAttached = 0;

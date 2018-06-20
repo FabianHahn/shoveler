@@ -71,7 +71,7 @@ typedef struct {
 	ShovelerMaterialTilemapLayerData layerData;
 } TilemapLayer;
 
-static int attachTilemapLayerUniforms(ShovelerMaterial *tilemapLayerMaterial, ShovelerShader *shader);
+static int attachTilemapLayerUniforms(ShovelerMaterial *tilemapLayerMaterial, ShovelerShader *shader, void *userData);
 static void freeTilemap(ShovelerMaterial *tilemapMaterial);
 static void freeTilemapLayer(ShovelerMaterial *tilemapLayerMaterial);
 
@@ -117,11 +117,11 @@ ShovelerMaterial *shovelerMaterialTilemapCreateLayer(ShovelerMaterial *tilemapMa
 	return tilemapLayer->material;
 }
 
-static int attachTilemapLayerUniforms(ShovelerMaterial *tilemapLayerMaterial, ShovelerShader *shader)
+static int attachTilemapLayerUniforms(ShovelerMaterial *tilemapLayerMaterial, ShovelerShader *shader, void *userData)
 {
 	TilemapLayer *tilemapLayer = tilemapLayerMaterial->data;
 	tilemapLayer->tilemap->activeLayerData = tilemapLayer->layerData;
-	return shovelerMaterialAttachUniforms(tilemapLayer->tilemap->material, shader);
+	return shovelerMaterialAttachUniforms(tilemapLayer->tilemap->material, shader, userData);
 }
 
 static void freeTilemap(ShovelerMaterial *tilemapMaterial)
