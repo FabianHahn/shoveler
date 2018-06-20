@@ -63,9 +63,8 @@ ShovelerFilter *shovelerFilterDepthTextureGaussianCreate(int width, int height, 
 	depthTextureGaussianFilter->filterSceneRenderPassOptions.emitters = false;
 	depthTextureGaussianFilter->filterSceneRenderPassOptions.screenspace = true;
 	depthTextureGaussianFilter->filterSceneRenderPassOptions.onlyShadowCasters = true;
-	depthTextureGaussianFilter->filterSceneRenderPassOptions.blendSourceFactor = GL_ONE;
-	depthTextureGaussianFilter->filterSceneRenderPassOptions.blendDestinationFactor = GL_ZERO;
-	depthTextureGaussianFilter->filterSceneRenderPassOptions.depthFunction = GL_LESS;
+	depthTextureGaussianFilter->filterSceneRenderPassOptions.blend = false;
+	depthTextureGaussianFilter->filterSceneRenderPassOptions.depthTest = false;
 	depthTextureGaussianFilter->filterSceneRenderPassOptions.depthMask = GL_FALSE;
 	shovelerSceneAddModel(depthTextureGaussianFilter->filterScene, depthTextureGaussianFilter->filterModel);
 
