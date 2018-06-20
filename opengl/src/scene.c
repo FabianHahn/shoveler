@@ -14,11 +14,10 @@ typedef enum {
 } RenderMode;
 
 ShovelerSceneRenderPassOptions createRenderPassOptions(ShovelerScene *scene, RenderMode renderMode);
-static ShovelerShader *generateShader(ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerMaterial *material);
-static ShovelerShader *getCachedShader(ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerMaterial *material);
+static guint alreadyHashed(gconstpointer v);
+static gboolean guintEqual(gconstpointer v1, gconstpointer v2);
 static void freeLight(void *lightPointer);
 static void freeModel(void *modelPointer);
-static void freeHashTable(void *hashTablePointer);
 static void freeShader(void *shaderPointer);
 
 ShovelerScene *shovelerSceneCreate()
@@ -28,7 +27,7 @@ ShovelerScene *shovelerSceneCreate()
 	scene->depthMaterial = shovelerMaterialDepthCreate();
 	scene->lights = g_hash_table_new_full(g_direct_hash, g_direct_equal, freeLight, NULL);
 	scene->models = g_hash_table_new_full(g_direct_hash, g_direct_equal, freeModel, NULL);
-	scene->cameraShaderCache = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, freeHashTable);
+	scene->shaderCache = g_hash_table_new_full(alreadyHashed, guintEqual, NULL, freeShader);
 	return scene;
 }
 
@@ -94,7 +93,7 @@ int shovelerSceneRenderPass(ShovelerScene *scene, ShovelerCamera *camera, Shovel
 			continue;
 		}
 
-		ShovelerShader *shader = getCachedShader(scene, camera, light, model, options.overrideMaterial == NULL ? model->material : options.overrideMaterial);
+		ShovelerShader *shader = shovelerSceneGenerateShader(scene, camera, light, model, options.overrideMaterial == NULL ? model->material : options.overrideMaterial, NULL);
 
 		if(!shovelerShaderUse(shader)) {
 			shovelerLogWarning("Failed to use shader for model %p and camera %p, hiding model.", model, camera);
@@ -138,9 +137,50 @@ int shovelerSceneRenderFrame(ShovelerScene *scene, ShovelerCamera *camera, Shove
 	return rendered;
 }
 
+ShovelerShader *shovelerSceneGenerateShader(ShovelerScene *scene, ShovelerCamera *camera, struct ShovelerLightStruct *light, ShovelerModel *model, ShovelerMaterial *material, void *userData)
+{
+	guint hash = shovelerShaderComputeHash(scene, camera, light, model, material, userData);
+
+	ShovelerShader *shader = g_hash_table_lookup(scene->shaderCache, &hash);
+	if(shader == NULL) {
+		shader = shovelerShaderCreate(material, hash);
+
+		int materialAttached = 0;
+		if(material != NULL) {
+			materialAttached = shovelerMaterialAttachUniforms(material, shader);
+		}
+
+		int modelAttached = 0;
+		if(model != NULL) {
+			modelAttached = shovelerUniformMapAttach(model->uniforms, shader);
+		}
+
+		int lightAttached = 0;
+		if(light != NULL) {
+			lightAttached = shovelerUniformMapAttach(light->uniforms, shader);
+		}
+
+		int cameraAttached = 0;
+		if(camera != NULL) {
+			cameraAttached = shovelerUniformMapAttach(camera->uniforms, shader);
+		}
+
+		int sceneAttached = 0;
+		if(scene != NULL) {
+			sceneAttached = shovelerUniformMapAttach(scene->uniforms, shader);
+		}
+
+		shovelerLogInfo("Generated shader for program %d with %d scene %p, %d camera %p, %d light %p, %d model %p, and %d material %p uniforms.", material->program, sceneAttached, scene, cameraAttached, camera, lightAttached, light, modelAttached, model, materialAttached, material);
+
+		g_hash_table_insert(scene->shaderCache, &shader->hash, shader);
+	}
+
+	return shader;
+}
+
 void shovelerSceneFree(ShovelerScene *scene)
 {
-	g_hash_table_destroy(scene->cameraShaderCache);
+	g_hash_table_destroy(scene->shaderCache);
 	g_hash_table_destroy(scene->models);
 	g_hash_table_destroy(scene->lights);
 	shovelerMaterialFree(scene->depthMaterial);
@@ -197,66 +237,14 @@ ShovelerSceneRenderPassOptions createRenderPassOptions(ShovelerScene *scene, Ren
 	return options;
 }
 
-static ShovelerShader *generateShader(ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerMaterial *material)
+static guint alreadyHashed(gconstpointer v)
 {
-	ShovelerShader *shader = shovelerShaderCreate(material);
-
-	int materialAttached = 0;
-	if(material != NULL) {
-		materialAttached = shovelerMaterialAttachUniforms(material, shader);
-	}
-
-	int modelAttached = 0;
-	if(model != NULL) {
-		modelAttached = shovelerUniformMapAttach(model->uniforms, shader);
-	}
-
-	int lightAttached = 0;
-	if(light != NULL) {
-		lightAttached = shovelerUniformMapAttach(light->uniforms, shader);
-	}
-
-	int cameraAttached = 0;
-	if(camera != NULL) {
-		cameraAttached = shovelerUniformMapAttach(camera->uniforms, shader);
-	}
-
-	int sceneAttached = 0;
-	if(scene != NULL) {
-		sceneAttached = shovelerUniformMapAttach(scene->uniforms, shader);
-	}
-
-	shovelerLogInfo("Generated shader for program %d with %d scene %p, %d camera %p, %d light %p, %d model %p, and %d material %p uniforms.", material->program, sceneAttached, scene, cameraAttached, camera, lightAttached, light, modelAttached, model, materialAttached, material);
-	return shader;
+	return *((guint *) v);
 }
 
-static ShovelerShader *getCachedShader(ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerMaterial *material)
+static gboolean guintEqual(gconstpointer v1, gconstpointer v2)
 {
-	GHashTable *lightShaderCache = g_hash_table_lookup(scene->cameraShaderCache, camera);
-	if(lightShaderCache == NULL) {
-		lightShaderCache = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, freeHashTable);
-		g_hash_table_insert(scene->cameraShaderCache, camera, lightShaderCache);
-	}
-
-	GHashTable *modelShaderCache = g_hash_table_lookup(lightShaderCache, light);
-	if(modelShaderCache == NULL) {
-		modelShaderCache = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, freeHashTable);
-		g_hash_table_insert(lightShaderCache, light, modelShaderCache);
-	}
-
-	GHashTable *materialShaderCache = g_hash_table_lookup(modelShaderCache, model);
-	if(materialShaderCache == NULL) {
-		materialShaderCache = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, freeShader);
-		g_hash_table_insert(modelShaderCache, model, materialShaderCache);
-	}
-
-	ShovelerShader *shader = g_hash_table_lookup(materialShaderCache, material);
-	if(shader == NULL) {
-		shader = generateShader(scene, camera, light, model, material);
-		g_hash_table_insert(materialShaderCache, material, shader);
-	}
-
-	return shader;
+	return *((guint *) v1) == *((guint *) v2);
 }
 
 static void freeLight(void *lightPointer)

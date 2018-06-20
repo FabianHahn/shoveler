@@ -3,17 +3,35 @@
 #include <stdlib.h> // malloc, free
 #include <string.h> // strdup
 
+#include "shoveler/camera.h"
+#include "shoveler/light.h"
 #include "shoveler/log.h"
 #include "shoveler/opengl.h"
+#include "shoveler/scene.h"
 #include "shoveler/shader.h"
 #include "shoveler/uniform_attachment.h"
 
-void freeAttachment(void *attachmentPointer);
+static guint computeHash(ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerMaterial *material, void *userData);
+static guint combineHashes(guint a, guint b);
+static void freeAttachment(void *attachmentPointer);
 
-ShovelerShader *shovelerShaderCreate(ShovelerMaterial *material)
+guint shovelerShaderComputeHash(ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerMaterial *material, void *userData)
+{
+	guint sceneHash = g_direct_hash(scene);
+	guint cameraHash = g_direct_hash(camera);
+	guint lightHash = g_direct_hash(light);
+	guint modelHash = g_direct_hash(model);
+	guint materialHash = g_direct_hash(material);
+	guint userDataHash = g_direct_hash(userData);
+
+	return combineHashes(sceneHash, combineHashes(cameraHash, combineHashes(lightHash, combineHashes(modelHash, combineHashes(materialHash, userDataHash)))));
+}
+
+ShovelerShader *shovelerShaderCreate(ShovelerMaterial *material, guint hash)
 {
 	ShovelerShader *shader = malloc(sizeof(ShovelerShader));
 	shader->material = material;
+	shader->hash = hash;
 	shader->attachments = g_hash_table_new_full(g_str_hash, g_str_equal, free, freeAttachment);
 	return shader;
 }
@@ -62,7 +80,13 @@ void shovelerShaderFree(ShovelerShader *shader)
 	free(shader);
 }
 
-void freeAttachment(void *attachmentPointer)
+static guint combineHashes(guint a, guint b)
+{
+	// see https://stackoverflow.com/questions/5889238/why-is-xor-the-default-way-to-combine-hashes/27952689#27952689
+	return a ^ (b + 0x9e3779b9 + (a << 6) + (a >> 2));
+}
+
+static void freeAttachment(void *attachmentPointer)
 {
 	shovelerUniformAttachmentFree(attachmentPointer);
 }

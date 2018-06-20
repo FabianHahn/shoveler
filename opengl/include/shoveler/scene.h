@@ -10,6 +10,7 @@
 #include <shoveler/material.h>
 #include <shoveler/model.h>
 #include <shoveler/sampler.h>
+#include <shoveler/shader.h>
 #include <shoveler/uniform_map.h>
 
 struct ShovelerLightStruct; // forward declaration: light.h
@@ -19,7 +20,7 @@ typedef struct ShovelerSceneStruct {
 	ShovelerMaterial *depthMaterial;
 	GHashTable *lights;
 	GHashTable *models;
-	GHashTable *cameraShaderCache;
+	GHashTable *shaderCache;
 } ShovelerScene;
 
 typedef struct {
@@ -42,6 +43,8 @@ bool shovelerSceneAddModel(ShovelerScene *scene, ShovelerModel *model);
 bool shovelerSceneRemoveModel(ShovelerScene *scene, ShovelerModel *model);
 int shovelerSceneRenderPass(ShovelerScene *scene, ShovelerCamera *camera, struct ShovelerLightStruct *light, ShovelerSceneRenderPassOptions options);
 int shovelerSceneRenderFrame(ShovelerScene *scene, ShovelerCamera *camera, ShovelerFramebuffer *framebuffer);
+/** Generates a shader, where shaders for calls to this with the same arguments might be cached. */
+ShovelerShader *shovelerSceneGenerateShader(ShovelerScene *scene, ShovelerCamera *camera, struct ShovelerLightStruct *light, ShovelerModel *model, ShovelerMaterial *material, void *userData);
 void shovelerSceneFree(ShovelerScene *scene);
 
 #endif

@@ -10,7 +10,7 @@
 #include <shoveler/types.h>
 #include <shoveler/uniform_map.h>
 
-typedef struct {
+typedef struct ShovelerModelStruct {
 	ShovelerDrawable *drawable;
 	ShovelerMaterial *material;
 	ShovelerVector3 translation;
