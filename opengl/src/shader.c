@@ -1,7 +1,7 @@
 #include <assert.h> // assert
 #include <stdbool.h> // bool
 #include <stdlib.h> // malloc, free
-#include <string.h> // strdup
+#include <string.h> // strdup, memcmp
 
 #include "shoveler/camera.h"
 #include "shoveler/light.h"
@@ -11,27 +11,33 @@
 #include "shoveler/shader.h"
 #include "shoveler/uniform_attachment.h"
 
-static guint computeHash(ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerMaterial *material, void *userData);
 static guint combineHashes(guint a, guint b);
 static void freeAttachment(void *attachmentPointer);
 
-guint shovelerShaderComputeHash(ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerMaterial *material, void *userData)
+guint shovelerShaderKeyHash(gconstpointer shaderKeyPointer)
 {
-	guint sceneHash = g_direct_hash(scene);
-	guint cameraHash = g_direct_hash(camera);
-	guint lightHash = g_direct_hash(light);
-	guint modelHash = g_direct_hash(model);
-	guint materialHash = g_direct_hash(material);
-	guint userDataHash = g_direct_hash(userData);
+	ShovelerShaderKey *shaderKey = (ShovelerShaderKey *) shaderKeyPointer;
+
+	guint sceneHash = g_direct_hash(shaderKey->scene);
+	guint cameraHash = g_direct_hash(shaderKey->camera);
+	guint lightHash = g_direct_hash(shaderKey->light);
+	guint modelHash = g_direct_hash(shaderKey->model);
+	guint materialHash = g_direct_hash(shaderKey->material);
+	guint userDataHash = g_direct_hash(shaderKey->userData);
 
 	return combineHashes(sceneHash, combineHashes(cameraHash, combineHashes(lightHash, combineHashes(modelHash, combineHashes(materialHash, userDataHash)))));
 }
 
-ShovelerShader *shovelerShaderCreate(ShovelerMaterial *material, guint hash)
+gboolean shovelerShaderKeyEqual(gconstpointer firstShaderKeyPointer, gconstpointer secondShaderKeyPointer)
+{
+	return memcmp(firstShaderKeyPointer, secondShaderKeyPointer, sizeof(ShovelerShaderKey)) == 0;
+}
+
+ShovelerShader *shovelerShaderCreate(ShovelerShaderKey shaderKey, ShovelerMaterial *material)
 {
 	ShovelerShader *shader = malloc(sizeof(ShovelerShader));
+	shader->key = shaderKey;
 	shader->material = material;
-	shader->hash = hash;
 	shader->attachments = g_hash_table_new_full(g_str_hash, g_str_equal, free, freeAttachment);
 	return shader;
 }
