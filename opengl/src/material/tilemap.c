@@ -3,6 +3,7 @@
 #include <stdlib.h> // malloc, free
 #include <string.h> // memcpy
 #include <shoveler/material/tilemap.h>
+#include <shoveler/scene.h>
 
 #include "shoveler/material/tilemap.h"
 #include "shoveler/camera.h"
@@ -60,7 +61,7 @@ static const char *fragmentShaderSource =
 		"	int tileTilesetId = int(tile.z);\n"
 		""
 		"	if (tileTilesetId == tilesetId) {\n"
-		"		vec3 color = texture2D(tileset, tile.xy / vec2(tilesetWidth, tilesetHeight)).rgb;\n"
+		"		vec3 color = texture2D(tileset, (tile.xy + fragmentUv) / vec2(tilesetWidth, tilesetHeight)).rgb;\n"
 		"		fragmentColor = vec4(color, 0.0);\n"
 		"	} else {\n"
 		"		fragmentColor = vec4(0.0);\n"
@@ -131,6 +132,17 @@ static bool render(ShovelerMaterial *material, ShovelerScene *scene, ShovelerCam
 	for(GList *iter = tilemap->layers->head; iter != NULL; iter = iter->next) {
 		ShovelerMaterialTilemapLayer *layer = (ShovelerMaterialTilemapLayer *) iter->data;
 
+		if(iter == tilemap->layers->head->next) {
+			// starting from the second layer, change the blending mode to additive and switch to equal depth test
+			if(options.blend) {
+				glBlendFunc(GL_ONE, GL_ONE);
+			}
+
+			if(options.depthTest) {
+				glDepthFunc(GL_EQUAL);
+			}
+		}
+
 		// set uniform values by setting this layer as active
 		tilemap->activeLayer = *layer;
 
@@ -143,6 +155,15 @@ static bool render(ShovelerMaterial *material, ShovelerScene *scene, ShovelerCam
 			shovelerLogWarning("Failed to render model %p for layer %p of tilemap material %p in scene %p for camera %p and light %p.", layer, model, material, scene, camera, light);
 			return false;
 		}
+	}
+
+	// reset back to original blending and depth test mode
+	if(options.blend) {
+		glBlendFunc(options.blendSourceFactor, options.blendDestinationFactor);
+	}
+
+	if(options.depthTest) {
+		glDepthFunc(options.depthFunction);
 	}
 
 	return true;

@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
 	shovelerImageGet(tilemap, 1, 0, 2) = 0; // green
 	shovelerImageGet(tilemap, 1, 1, 0) = 0;
 	shovelerImageGet(tilemap, 1, 1, 1) = 0;
-	shovelerImageGet(tilemap, 1, 1, 2) = 1; // n/a
+	shovelerImageGet(tilemap, 1, 1, 2) = 1; // full tileset
 	ShovelerTexture *tilemapTexture = shovelerTextureCreate2d(tilemap);
 	shovelerTextureUpdate(tilemapTexture);
 
@@ -95,7 +95,18 @@ int main(int argc, char *argv[])
 	layer.tilesetTexture = tilesetTexture;
 	layer.tilesetSampler = nearestNeighborSampler;
 
+	ShovelerMaterialTilemapLayer layer2;
+	layer2.tilemapWidth = tilemapTexture->image->width;
+	layer2.tilemapHeight = tilemapTexture->image->height;
+	layer2.tilemapTexture = tilemapTexture;
+	layer2.tilesetHeight = 1;
+	layer2.tilesetWidth = 1;
+	layer2.tilesetId = 1;
+	layer2.tilesetTexture = tilesetTexture;
+	layer2.tilesetSampler = interpolatingSampler;
+
 	shovelerMaterialTilemapAddLayer(tilemapMaterial, layer);
+	shovelerMaterialTilemapAddLayer(tilemapMaterial, layer2);
 
 	ShovelerModel *tilesModel = shovelerModelCreate(tiles, tilemapMaterial);
 	tilesModel->screenspace = true;
