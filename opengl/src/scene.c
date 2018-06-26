@@ -3,6 +3,7 @@
 #include "shoveler/material/depth.h"
 #include "shoveler/light.h"
 #include "shoveler/log.h"
+#include "shoveler/model.h"
 #include "shoveler/scene.h"
 #include "shoveler/shader.h"
 
@@ -92,7 +93,7 @@ int shovelerSceneRenderPass(ShovelerScene *scene, ShovelerCamera *camera, Shovel
 		}
 
 		ShovelerMaterial *material = options.overrideMaterial == NULL ? model->material : options.overrideMaterial;
-		if(!shovelerMaterialRender(material, scene, camera, light, model)) {
+		if(!shovelerMaterialRender(material, scene, camera, light, model, options)) {
 			model->visible = false;
 			continue;
 		}

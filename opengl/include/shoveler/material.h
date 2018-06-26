@@ -6,6 +6,7 @@
 #include <glad/glad.h>
 
 #include <shoveler/sampler.h>
+#include <shoveler/scene.h>
 #include <shoveler/texture.h>
 #include <shoveler/uniform_map.h>
 
@@ -13,10 +14,9 @@ struct ShovelerCameraStruct; // forward declaration: camera.h
 struct ShovelerLightStruct; // forward declaration: light.h
 struct ShovelerMaterialStruct;
 struct ShovelerModelStruct; // forward declaration: model.h
-struct ShovelerSceneStruct; // forward declaration: scene.h
 struct ShovelerShaderStruct; // forward declaration: shader.h
 
-typedef bool (ShovelerMaterialRenderFunction)(struct ShovelerMaterialStruct *material, struct ShovelerSceneStruct *scene, struct ShovelerCameraStruct *camera, struct ShovelerLightStruct *light, struct ShovelerModelStruct *model);
+typedef bool (ShovelerMaterialRenderFunction)(struct ShovelerMaterialStruct *material, ShovelerScene *scene, struct ShovelerCameraStruct *camera, struct ShovelerLightStruct *light, struct ShovelerModelStruct *model, ShovelerSceneRenderPassOptions options);
 typedef int (ShovelerMaterialAttachUniformsFunction)(struct ShovelerMaterialStruct *material, struct ShovelerShaderStruct *shader, void *userData);
 typedef void (ShovelerMaterialFreeDataFunction)(struct ShovelerMaterialStruct *material);
 
@@ -39,9 +39,9 @@ ShovelerMaterial *shovelerMaterialCreate(GLuint program);
 ShovelerMaterial *shovelerMaterialCreateUnmanaged(GLuint program);
 void shovelerMaterialFree(ShovelerMaterial *material);
 
-static inline bool shovelerMaterialRender(ShovelerMaterial *material, struct ShovelerSceneStruct *scene, struct ShovelerCameraStruct *camera, struct ShovelerLightStruct *light, struct ShovelerModelStruct *model)
+static inline bool shovelerMaterialRender(ShovelerMaterial *material, ShovelerScene *scene, struct ShovelerCameraStruct *camera, struct ShovelerLightStruct *light, struct ShovelerModelStruct *model, ShovelerSceneRenderPassOptions options)
 {
-	return material->render(material, scene, camera, light, model);
+	return material->render(material, scene, camera, light, model, options);
 }
 
 static inline int shovelerMaterialAttachUniforms(ShovelerMaterial *material, struct ShovelerShaderStruct *shader, void *userData)

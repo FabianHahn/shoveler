@@ -9,6 +9,7 @@
 #include "shoveler/light.h"
 #include "shoveler/log.h"
 #include "shoveler/material.h"
+#include "shoveler/model.h"
 #include "shoveler/scene.h"
 #include "shoveler/shader.h"
 #include "shoveler/shader_program.h"
@@ -74,7 +75,7 @@ typedef struct {
 	GQueue *layers;
 } Tilemap;
 
-static bool render(ShovelerMaterial *material, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model);
+static bool render(ShovelerMaterial *material, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerSceneRenderPassOptions options);
 static void freeTilemap(ShovelerMaterial *material);
 
 ShovelerMaterial *shovelerMaterialTilemapCreate()
@@ -120,7 +121,7 @@ int shovelerMaterialTilemapAddLayer(ShovelerMaterial *material, ShovelerMaterial
 	return g_queue_get_length(tilemap->layers) - 1;
 }
 
-static bool render(ShovelerMaterial *material, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model)
+static bool render(ShovelerMaterial *material, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerSceneRenderPassOptions options)
 {
 	Tilemap *tilemap = material->data;
 

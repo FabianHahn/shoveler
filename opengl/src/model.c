@@ -2,6 +2,7 @@
 #include <stdlib.h> // malloc, free
 
 #include "shoveler/log.h"
+#include "shoveler/material.h"
 #include "shoveler/model.h"
 #include "shoveler/opengl.h"
 #include "shoveler/types.h"
