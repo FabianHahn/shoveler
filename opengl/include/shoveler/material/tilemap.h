@@ -14,9 +14,10 @@ typedef struct {
 	int tilesetId;
 	ShovelerTexture *tilesetTexture;
 	ShovelerSampler *tilesetSampler;
-} ShovelerMaterialTilemapLayerData;
+} ShovelerMaterialTilemapLayer;
 
 ShovelerMaterial *shovelerMaterialTilemapCreate();
-ShovelerMaterial *shovelerMaterialTilemapCreateLayer(ShovelerMaterial *tilemapMaterial, ShovelerMaterialTilemapLayerData layerData);
+/** adds a layer to a tilemap material, returning the index of the new layer */
+int shovelerMaterialTilemapAddLayer(ShovelerMaterial *tilemapMaterial, ShovelerMaterialTilemapLayer layer);
 
 #endif

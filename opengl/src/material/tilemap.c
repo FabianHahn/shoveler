@@ -1,8 +1,15 @@
 #include <assert.h> // assert
 #include <limits.h> // UCHAR_MAX
 #include <stdlib.h> // malloc, free
+#include <string.h> // memcpy
+#include <shoveler/material/tilemap.h>
 
 #include "shoveler/material/tilemap.h"
+#include "shoveler/camera.h"
+#include "shoveler/light.h"
+#include "shoveler/log.h"
+#include "shoveler/material.h"
+#include "shoveler/scene.h"
 #include "shoveler/shader.h"
 #include "shoveler/shader_program.h"
 
@@ -62,18 +69,13 @@ static const char *fragmentShaderSource =
 typedef struct {
 	ShovelerMaterial *material;
 	ShovelerSampler *tilemapSampler;
-	ShovelerMaterialTilemapLayerData activeLayerData;
+	ShovelerMaterialTilemapLayer activeLayer;
+	/** list of (ShovelerMaterialTilemapLayer *) */
+	GQueue *layers;
 } Tilemap;
 
-typedef struct {
-	ShovelerMaterial *material;
-	Tilemap *tilemap;
-	ShovelerMaterialTilemapLayerData layerData;
-} TilemapLayer;
-
-static int attachTilemapLayerUniforms(ShovelerMaterial *tilemapLayerMaterial, ShovelerShader *shader, void *userData);
-static void freeTilemap(ShovelerMaterial *tilemapMaterial);
-static void freeTilemapLayer(ShovelerMaterial *tilemapLayerMaterial);
+static bool render(ShovelerMaterial *material, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model);
+static void freeTilemap(ShovelerMaterial *material);
 
 ShovelerMaterial *shovelerMaterialTilemapCreate()
 {
@@ -84,56 +86,76 @@ ShovelerMaterial *shovelerMaterialTilemapCreate()
 	Tilemap *tilemap = malloc(sizeof(Tilemap));
 	tilemap->material = shovelerMaterialCreate(program);
 	tilemap->material->data = tilemap;
+	tilemap->material->render = render;
 	tilemap->material->freeData = freeTilemap;
 	tilemap->tilemapSampler = shovelerSamplerCreate(false, true);
+	tilemap->activeLayer = (ShovelerMaterialTilemapLayer){0, 0, NULL, 0, 0, 0, NULL, NULL};
+	tilemap->layers = g_queue_new();
 
-	shovelerUniformMapInsert(tilemap->material->uniforms, "tilemapWidth", shovelerUniformCreateIntPointer(&tilemap->activeLayerData.tilemapWidth));
-	shovelerUniformMapInsert(tilemap->material->uniforms, "tilemapHeight", shovelerUniformCreateIntPointer(&tilemap->activeLayerData.tilemapHeight));
-	shovelerUniformMapInsert(tilemap->material->uniforms, "tilesetHeight", shovelerUniformCreateIntPointer(&tilemap->activeLayerData.tilesetHeight));
-	shovelerUniformMapInsert(tilemap->material->uniforms, "tilesetWidth", shovelerUniformCreateIntPointer(&tilemap->activeLayerData.tilesetWidth));
-	shovelerUniformMapInsert(tilemap->material->uniforms, "tilesetId", shovelerUniformCreateIntPointer(&tilemap->activeLayerData.tilesetId));
-	shovelerUniformMapInsert(tilemap->material->uniforms, "tilemap", shovelerUniformCreateTexturePointer(&tilemap->activeLayerData.tilemapTexture, &tilemap->tilemapSampler));
-	shovelerUniformMapInsert(tilemap->material->uniforms, "tileset", shovelerUniformCreateTexturePointer(&tilemap->activeLayerData.tilesetTexture, &tilemap->activeLayerData.tilesetSampler));
+	shovelerUniformMapInsert(tilemap->material->uniforms, "tilemapWidth", shovelerUniformCreateIntPointer(&tilemap->activeLayer.tilemapWidth));
+	shovelerUniformMapInsert(tilemap->material->uniforms, "tilemapHeight", shovelerUniformCreateIntPointer(&tilemap->activeLayer.tilemapHeight));
+	shovelerUniformMapInsert(tilemap->material->uniforms, "tilesetHeight", shovelerUniformCreateIntPointer(&tilemap->activeLayer.tilesetHeight));
+	shovelerUniformMapInsert(tilemap->material->uniforms, "tilesetWidth", shovelerUniformCreateIntPointer(&tilemap->activeLayer.tilesetWidth));
+	shovelerUniformMapInsert(tilemap->material->uniforms, "tilesetId", shovelerUniformCreateIntPointer(&tilemap->activeLayer.tilesetId));
+	shovelerUniformMapInsert(tilemap->material->uniforms, "tilemap", shovelerUniformCreateTexturePointer(&tilemap->activeLayer.tilemapTexture, &tilemap->tilemapSampler));
+	shovelerUniformMapInsert(tilemap->material->uniforms, "tileset", shovelerUniformCreateTexturePointer(&tilemap->activeLayer.tilesetTexture, &tilemap->activeLayer.tilesetSampler));
 
 	return tilemap->material;
 }
 
-ShovelerMaterial *shovelerMaterialTilemapCreateLayer(ShovelerMaterial *tilemapMaterial, ShovelerMaterialTilemapLayerData layerData)
+int shovelerMaterialTilemapAddLayer(ShovelerMaterial *material, ShovelerMaterialTilemapLayer layer)
 {
-	assert(layerData.tilemapWidth <= UCHAR_MAX);
-	assert(layerData.tilemapHeight <= UCHAR_MAX);
-	assert(layerData.tilesetId <= UCHAR_MAX);
-	assert(layerData.tilesetWidth <= UCHAR_MAX);
-	assert(layerData.tilesetHeight <= UCHAR_MAX);
+	Tilemap *tilemap = material->data;
 
-	TilemapLayer *tilemapLayer = malloc(sizeof(TilemapLayer));
-	tilemapLayer->material = shovelerMaterialCreateUnmanaged(tilemapMaterial->program);
-	tilemapLayer->material->data = tilemapLayer;
-	tilemapLayer->material->attachUniforms = attachTilemapLayerUniforms;
-	tilemapLayer->material->freeData = freeTilemapLayer;
-	tilemapLayer->tilemap = tilemapMaterial->data;
-	tilemapLayer->layerData = layerData;
+	assert(layer.tilemapWidth <= UCHAR_MAX);
+	assert(layer.tilemapHeight <= UCHAR_MAX);
+	assert(layer.tilesetId <= UCHAR_MAX);
+	assert(layer.tilesetWidth <= UCHAR_MAX);
+	assert(layer.tilesetHeight <= UCHAR_MAX);
 
-	return tilemapLayer->material;
+	ShovelerMaterialTilemapLayer *layerCopy = malloc(sizeof(ShovelerMaterialTilemapLayer));
+	memcpy(layerCopy, &layer, sizeof(ShovelerMaterialTilemapLayer));
+
+	g_queue_push_tail(tilemap->layers, layerCopy);
+	return g_queue_get_length(tilemap->layers) - 1;
 }
 
-static int attachTilemapLayerUniforms(ShovelerMaterial *tilemapLayerMaterial, ShovelerShader *shader, void *userData)
+static bool render(ShovelerMaterial *material, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model)
 {
-	TilemapLayer *tilemapLayer = tilemapLayerMaterial->data;
-	tilemapLayer->tilemap->activeLayerData = tilemapLayer->layerData;
-	return shovelerMaterialAttachUniforms(tilemapLayer->tilemap->material, shader, userData);
+	Tilemap *tilemap = material->data;
+
+	// since we are only changing uniform pointer values per layer, we can reuse the same shader for all of them
+	ShovelerShader *shader = shovelerSceneGenerateShader(scene, camera, light, model, material, NULL);
+
+	for(GList *iter = tilemap->layers->head; iter != NULL; iter = iter->next) {
+		ShovelerMaterialTilemapLayer *layer = (ShovelerMaterialTilemapLayer *) iter->data;
+
+		// set uniform values by setting this layer as active
+		tilemap->activeLayer = *layer;
+
+		if(!shovelerShaderUse(shader)) {
+			shovelerLogWarning("Failed to use shader for layer %p of tilemap material %p, scene %p, camera %p, light %p and model %p.", layer, material, scene, camera, light, model);
+			return false;
+		}
+
+		if(!shovelerModelRender(model)) {
+			shovelerLogWarning("Failed to render model %p for layer %p of tilemap material %p in scene %p for camera %p and light %p.", layer, model, material, scene, camera, light);
+			return false;
+		}
+	}
+
+	return true;
 }
 
-static void freeTilemap(ShovelerMaterial *tilemapMaterial)
+static void freeTilemap(ShovelerMaterial *material)
 {
-	Tilemap *tilemap = tilemapMaterial->data;
+	Tilemap *tilemap = material->data;
+
+	for(GList *iter = tilemap->layers->head; iter != NULL; iter = iter->next) {
+		free(iter->data);
+	}
+	g_queue_free(tilemap->layers);
 
 	free(tilemap->tilemapSampler);
 	free(tilemap);
-}
-
-static void freeTilemapLayer(ShovelerMaterial *tilemapLayerMaterial)
-{
-	TilemapLayer *tilemapLayer = tilemapLayerMaterial->data;
-	free(tilemapLayer);
 }
