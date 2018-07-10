@@ -19,6 +19,7 @@ set(SHOVELER_OPENGL_SRC
 	src/material/tilemap.c
 	src/material/variation.c
 	src/view/drawables.c
+	src/view/model.c
 	src/camera.c
 	src/controller.c
 	src/framebuffer.c
@@ -55,6 +56,7 @@ set(SHOVELER_OPENGL_SRC
 	include/shoveler/material/tilemap.h
 	include/shoveler/material/variation.h
 	include/shoveler/view/drawables.h
+	include/shoveler/view/model.h
 	include/shoveler/view/scene.h
 	include/shoveler/camera.h
 	include/shoveler/controller.h
