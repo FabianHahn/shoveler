@@ -56,6 +56,7 @@ set(SHOVELER_OPENGL_SRC
 	include/shoveler/material/texture.h
 	include/shoveler/material/tilemap.h
 	include/shoveler/material/variation.h
+	include/shoveler/view/controller.h
 	include/shoveler/view/drawables.h
 	include/shoveler/view/light.h
 	include/shoveler/view/model.h
