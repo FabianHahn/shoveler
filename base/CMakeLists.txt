@@ -1,8 +1,10 @@
 set(SHOVELER_BASE_SRC
+	src/view/position.c
 	src/executor.c
 	src/file.c
 	src/log.c
 	src/view.c
+	include/shoveler/view/position.h
 	include/shoveler/constants.h
 	include/shoveler/executor.h
 	include/shoveler/file.h
