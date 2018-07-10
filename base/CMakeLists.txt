@@ -2,11 +2,13 @@ set(SHOVELER_BASE_SRC
 	src/executor.c
 	src/file.c
 	src/log.c
+	src/view.c
 	include/shoveler/constants.h
 	include/shoveler/executor.h
 	include/shoveler/file.h
 	include/shoveler/log.h
 	include/shoveler/types.h
+	include/shoveler/view.h
 )
 
 set(SHOVELER_BASE_TEST_SRC
