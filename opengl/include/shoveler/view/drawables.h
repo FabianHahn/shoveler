@@ -1,7 +1,7 @@
 #ifndef SHOVELER_VIEW_DRAWABLES_H
 #define SHOVELER_VIEW_DRAWABLES_H
 
-#include <shoveler/scene.h>
+#include <shoveler/drawable.h>
 #include <shoveler/view.h>
 
 typedef struct {
