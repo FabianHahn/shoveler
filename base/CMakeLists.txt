@@ -1,13 +1,19 @@
 set(SHOVELER_BASE_SRC
+	src/image/png.c
+	src/image/ppm.c
 	src/view/position.c
 	src/executor.c
 	src/file.c
+	src/image.c
 	src/log.c
 	src/view.c
+	include/shoveler/image/png.h
+	include/shoveler/image/ppm.h
 	include/shoveler/view/position.h
 	include/shoveler/constants.h
 	include/shoveler/executor.h
 	include/shoveler/file.h
+	include/shoveler/image.h
 	include/shoveler/log.h
 	include/shoveler/types.h
 	include/shoveler/view.h
@@ -27,7 +33,7 @@ target_include_directories(shoveler_base
     PUBLIC $<INSTALL_INTERFACE:include>
     PRIVATE src)
 
-target_link_libraries(shoveler_base)
+target_link_libraries(shoveler_base png_static zlibstatic)
 
 if(SHOVELER_USE_GLIB)
 	target_link_libraries(shoveler_base glib)

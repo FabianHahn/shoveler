@@ -6,8 +6,6 @@ set(SHOVELER_OPENGL_SRC
 	src/drawable/point.c
 	src/drawable/tiles.c
 	src/filter/depth_texture_gaussian.c
-	src/image/png.c
-	src/image/ppm.c
 	src/light/point.c
 	src/light/spot.c
 	src/material/color.c
@@ -27,7 +25,6 @@ set(SHOVELER_OPENGL_SRC
 	src/framebuffer.c
 	src/game.c
 	src/global.c
-	src/image.c
 	src/input.c
 	src/material.c
 	src/model.c
@@ -70,9 +67,6 @@ set(SHOVELER_OPENGL_SRC
 	include/shoveler/framebuffer.h
 	include/shoveler/game.h
 	include/shoveler/global.h
-	include/shoveler/image.h
-	include/shoveler/image/png.h
-	include/shoveler/image/ppm.h
 	include/shoveler/input.h
 	include/shoveler/light.h
 	include/shoveler/material.h
@@ -96,4 +90,4 @@ target_include_directories(shoveler_opengl
     PUBLIC $<INSTALL_INTERFACE:include>
     PRIVATE src)
 
-target_link_libraries(shoveler_opengl shoveler_base glad glfw png_static zlibstatic)
+target_link_libraries(shoveler_opengl shoveler_base glad glfw)
