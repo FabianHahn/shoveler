@@ -1,144 +1,80 @@
+#include <glib.h>
 #include <png.h>
 
 #include <setjmp.h> // setjmp
 #include <stdio.h> // fread
 #include <stdlib.h> // malloc, free
+#include <string.h> // memcpy
 
 #include "shoveler/image/png.h"
 #include "shoveler/log.h"
 
-ShovelerImage *shovelerImagePngRead(const char *filename)
-{
-	png_byte header[8];
+typedef struct {
+	const unsigned char *buffer;
+	size_t size;
+	size_t index;
+} MemoryStream;
 
+typedef enum {
+	READ_INPUT_FILE,
+	READ_INPUT_MEMORY_STREAM,
+} ReadInputType;
+
+typedef union {
+	FILE *file;
+	MemoryStream memoryStream;
+} ReadInputValue;
+
+typedef struct {
+	ReadInputType type;
+	ReadInputValue value;
+	char *description;
+} ReadInput;
+
+static ShovelerImage *readPng(ReadInput input);
+static bool readPngData(png_structp png, png_infop info, png_infop endInfo, png_uint_32 *width, volatile png_uint_32 *height, png_uint_32 *channels, png_byte *bitDepth, png_bytep * volatile *rowPointers);
+static void readMemoryStream(png_structp png, png_bytep outBytes, png_size_t bytesToRead);
+static ShovelerImage *createImageFromRowPointers(png_uint_32 width, png_uint_32 height, png_uint_32 channels, png_bytep *rowPointers);
+static void handlePngReadError(png_structp png, png_const_charp error);
+static void handlePngReadWarning(png_structp png, png_const_charp warning);
+static void freeRowPointers(png_uint_32 height, png_bytep *rowPointers);
+
+ShovelerImage *shovelerImagePngReadFile(const char *filename)
+{
 	FILE *file = fopen(filename, "rb");
 	if(file == NULL) {
-		shovelerLogError("Failed to read PNG image from '%s': fopen failed.", filename);
+		shovelerLogError("Failed to read PNG image from file '%s': fopen failed.", filename);
 		return NULL;
 	}
 
-	if(fread(header, 1, 8, file) <= 0 || png_sig_cmp(header, 0, 8)) {
-		shovelerLogError("Failed to read PNG image from '%s': libpng header signature mismatch.", filename);
-		fclose(file);
-		return NULL;
-	}
+	GString *descriptionString = g_string_new("");
+	g_string_append_printf(descriptionString, "file '%s'", filename);
 
-	png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-	if(png_ptr == NULL) {
-		shovelerLogError("Failed to read PNG image from '%s': failed to create libpng read struct.", filename);
-		fclose(file);
-		return false;
-	}
+	ReadInput readInput = {READ_INPUT_FILE, {file}, descriptionString->str};
+	ShovelerImage *image = readPng(readInput);
 
-	png_infop info_ptr = png_create_info_struct(png_ptr);
-	if(png_ptr == NULL) {
-		shovelerLogError("Failed to read PNG image from '%s': failed to create libpng info struct.", filename);
-		fclose(file);
-		return false;
-	}
-
-	png_infop end_info_ptr = png_create_info_struct(png_ptr);
-	if(png_ptr == NULL) {
-		shovelerLogError("Failed to read PNG image from '%s': failed to create libpng end info struct.", filename);
-		fclose(file);
-		return false;
-	}
-
-	int height = 0;
-	png_bytep *row_pointers = NULL;
-
-	if(setjmp(png_jmpbuf(png_ptr))) {
-		shovelerLogError("Failed to read PNG image from '%s': libpng called longjmp.", filename);
-		png_destroy_read_struct(&png_ptr, &info_ptr, &end_info_ptr);
-		fclose(file);
-
-		// Cleanup memory if already allocated
-		if(row_pointers != NULL) {
-			for(int y = 0; y < height; y++) {
-				free(row_pointers[y]);
-			}
-			free(row_pointers);
-		}
-
-		return NULL;
-	}
-
-	png_init_io(png_ptr, file);
-	png_set_sig_bytes(png_ptr, 8);
-
-	png_read_info(png_ptr, info_ptr);
-	int width = png_get_image_width(png_ptr, info_ptr);
-	height = png_get_image_height(png_ptr, info_ptr);
-	png_byte color_type = png_get_color_type(png_ptr, info_ptr);
-	png_byte bit_depth = png_get_bit_depth(png_ptr, info_ptr);
-	png_uint_32 rowbytes = png_get_rowbytes(png_ptr, info_ptr);
-
-	if(bit_depth < 8) {
-		png_set_packing(png_ptr); // make sure bit depths below 8 bit are expanded to a char
-	} else if(bit_depth == 16) {
-		png_set_scale_16(png_ptr); // make sure 16 bit gets truncated to 8 bit
-	}
-
-	int channels = 0;
-
-	switch(color_type) {
-		case PNG_COLOR_TYPE_GRAY:
-			channels = 1;
-		break;
-		case PNG_COLOR_TYPE_GRAY_ALPHA:
-			channels = 2;
-		break;
-		case PNG_COLOR_TYPE_PALETTE:
-			channels = 3;
-			png_set_palette_to_rgb(png_ptr);
-		break;
-		case PNG_COLOR_TYPE_RGB:
-			channels = 3;
-		break;
-		case PNG_COLOR_TYPE_RGB_ALPHA:
-			channels = 4;
-		break;
-		default:
-			shovelerLogError("Failed to read PNG image from '%s': unsupported color type.", filename);
-			png_destroy_read_struct(&png_ptr, &info_ptr, &end_info_ptr);
-			fclose(file);
-			return NULL;
-		break;
-	}
-
-	row_pointers = malloc(height * sizeof(png_bytep));
-	for(int y = 0; y < height; y++) {
-		row_pointers[y] = malloc(rowbytes * sizeof(png_byte));
-	}
-
-	png_read_image(png_ptr, row_pointers);
-
-	png_destroy_read_struct(&png_ptr, &info_ptr, &end_info_ptr);
-
+	g_string_free(descriptionString, true);
 	fclose(file);
 
-	ShovelerImage *image = shovelerImageCreate(width, height, channels);
-	for(int y = 0; y < height; y++) {
-		png_byte *row = row_pointers[y];
-		for(int x = 0; x < width; x++) {
-			unsigned char *ptr = &(row[x * channels]);
-			for(int c = 0; c < channels; c++) {
-				shovelerImageGet(image, x, y, c) = ptr[c];
-			}
-		}
-	}
-
-	// cleanup
-	for(int y = 0; y < height; y++) {
-		free(row_pointers[y]);
-	}
-	free(row_pointers);
-
-	shovelerLogInfo("Successfully read %d-bit PNG image of size (%d, %d) with %d channels from '%s'.", bit_depth, width, height, channels, filename);
 	return image;
 }
 
-bool shovelerImagePngWrite(ShovelerImage *image, const char *filename)
+ShovelerImage *shovelerImagePngReadBuffer(const unsigned char *buffer, size_t size)
+{
+	GString *descriptionString = g_string_new("");
+	g_string_append_printf(descriptionString, "buffer (%u bytes)", size);
+
+	ReadInputValue readInputValue;
+	readInputValue.memoryStream = (MemoryStream){buffer, size, 0};
+	ReadInput readInput = {READ_INPUT_MEMORY_STREAM, readInputValue, descriptionString->str};
+	ShovelerImage *image = readPng(readInput);
+
+	g_string_free(descriptionString, true);
+
+	return image;
+}
+
+bool shovelerImagePngWriteFile(ShovelerImage *image, const char *filename)
 {
 	if(image->channels > 4) {
 		shovelerLogError("Failed to write PNG image to '%s': can only write image with up to 4 channels.", filename);
@@ -239,4 +175,191 @@ bool shovelerImagePngWrite(ShovelerImage *image, const char *filename)
 
 	shovelerLogInfo("Successfully wrote PNG image of size (%d, %d) with %d channels to '%s'.", image->width, image->height, image->channels, filename);
 	return true;
+}
+
+static ShovelerImage *readPng(ReadInput input)
+{
+	switch(input.type) {
+		case READ_INPUT_FILE: {
+			png_byte header[8];
+
+			if(fread(header, 1, 8, input.value.file) <= 0 || png_sig_cmp(header, 0, 8)) {
+				shovelerLogError("Failed to read PNG image from %s: libpng header signature mismatch.", input.description);
+				return NULL;
+			}
+		} break;
+		case READ_INPUT_MEMORY_STREAM:
+			if(png_sig_cmp(input.value.memoryStream.buffer, 0, 8)) {
+				shovelerLogError("Failed to read PNG image from %s: libpng header signature mismatch.", input.description);
+				return NULL;
+			}
+		break;
+		default:
+			shovelerLogError("Failed to read PNG image from %s: invalid input type %d.", input.description, input.type);
+		break;
+	}
+
+
+	png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+	if(png == NULL) {
+		shovelerLogError("Failed to read PNG image from %s: failed to create libpng read struct.", input.description);
+		return false;
+	}
+
+	png_infop info = png_create_info_struct(png);
+	if(info == NULL) {
+		shovelerLogError("Failed to read PNG image from %s: failed to create libpng info struct.", input.description);
+		return false;
+	}
+
+	png_infop endInfo = png_create_info_struct(png);
+	if(endInfo == NULL) {
+		shovelerLogError("Failed to read PNG image from %s: failed to create libpng end info struct.", input.description);
+		return false;
+	}
+
+	png_uint_32 width = 0;
+	png_uint_32 channels = 0;
+	png_byte bitDepth = 0;
+
+	// the following variables are volatile because they are modified after setjmp, and accessed within the setjmp
+	volatile png_uint_32 height = 0;
+	png_bytep * volatile rowPointers = NULL;
+
+	if(setjmp(png_jmpbuf(png))) {
+		png_destroy_read_struct(&png, &info, &endInfo);
+		freeRowPointers(height, rowPointers);
+		return NULL;
+	}
+
+	png_set_error_fn(png, &input, handlePngReadError, handlePngReadWarning);
+
+	switch(input.type) {
+		case READ_INPUT_FILE:
+			png_init_io(png, input.value.file);
+			png_set_sig_bytes(png, 8);
+		break;
+		case READ_INPUT_MEMORY_STREAM:
+			png_set_read_fn(png, &input.value.memoryStream, readMemoryStream);
+			png_set_sig_bytes(png, 0);
+		break;
+		default:
+			shovelerLogError("Failed to read PNG image from %s: invalid input type %d.", input.description, input.type);
+		break;
+	}
+
+	bool read = readPngData(png, info, endInfo, &width, &height, &channels, &bitDepth, &rowPointers);
+	png_destroy_read_struct(&png, &info, &endInfo);
+	if(!read) {
+		return NULL;
+	}
+
+	ShovelerImage *image = createImageFromRowPointers(width, height, channels, rowPointers);
+	freeRowPointers(height, rowPointers);
+
+	shovelerLogInfo("Successfully read %d-bit PNG image of size (%d, %d) with %d channels from %s.", bitDepth, width, height, channels, input.description);
+	return image;
+}
+
+static bool readPngData(png_structp png, png_infop info, png_infop endInfo, png_uint_32 *width, volatile png_uint_32 *height, png_uint_32 *channels, png_byte *bitDepth, png_bytep * volatile *rowPointersPointer)
+{
+	png_read_info(png, info);
+	*width = png_get_image_width(png, info);
+	*height = png_get_image_height(png, info);
+	*bitDepth = png_get_bit_depth(png, info);
+	png_byte colorType = png_get_color_type(png, info);
+	png_uint_32 rowbytes = png_get_rowbytes(png, info);
+
+	if(*bitDepth < 8) {
+		png_set_packing(png); // make sure bit depths below 8 bit are expanded to a char
+	} else if(*bitDepth == 16) {
+		png_set_scale_16(png); // make sure 16 bit gets truncated to 8 bit
+	}
+
+	*channels = 0;
+
+	switch(colorType) {
+		case PNG_COLOR_TYPE_GRAY:
+			*channels = 1;
+		break;
+		case PNG_COLOR_TYPE_GRAY_ALPHA:
+			*channels = 2;
+		break;
+		case PNG_COLOR_TYPE_PALETTE:
+			*channels = 3;
+			png_set_palette_to_rgb(png);
+		break;
+		case PNG_COLOR_TYPE_RGB:
+			*channels = 3;
+		break;
+		case PNG_COLOR_TYPE_RGB_ALPHA:
+			*channels = 4;
+		break;
+		default:
+			shovelerLogError("Failed to read PNG image: unsupported color type %d.", colorType);
+			png_destroy_read_struct(&png, &info, &endInfo);
+			return false;
+		break;
+	}
+
+	*rowPointersPointer = malloc(*height * sizeof(png_bytep));
+	for(png_uint_32 y = 0; y < *height; y++) {
+		(*rowPointersPointer)[y] = malloc(rowbytes * sizeof(png_byte));
+	}
+
+	png_read_image(png, *rowPointersPointer);
+	return true;
+}
+
+static void readMemoryStream(png_structp png, png_bytep outBytes, png_size_t bytesToRead)
+{
+	MemoryStream *memoryStream = (MemoryStream *) png_get_io_ptr(png);
+
+	size_t bytesLeft = memoryStream->size - memoryStream->index;
+	if(bytesToRead > bytesLeft) {
+		shovelerLogWarning("Tryed to read %u bytes from memory stream but only %u bytes are left - returning those.", bytesToRead, bytesLeft);
+		bytesToRead = bytesLeft;
+	}
+
+	memcpy(outBytes, memoryStream->buffer + memoryStream->index, bytesToRead);
+	memoryStream->index += bytesToRead;
+}
+
+static ShovelerImage *createImageFromRowPointers(png_uint_32 width, png_uint_32 height, png_uint_32 channels, png_bytep *rowPointers)
+{
+	ShovelerImage *image = shovelerImageCreate(width, height, channels);
+	for(int y = 0; y < height; y++) {
+		png_byte *row = rowPointers[y];
+		for(int x = 0; x < width; x++) {
+			unsigned char *ptr = &(row[x * channels]);
+			for(int c = 0; c < channels; c++) {
+				shovelerImageGet(image, x, y, c) = ptr[c];
+			}
+		}
+	}
+	return image;
+}
+
+static void handlePngReadError(png_structp png, png_const_charp error)
+{
+	ReadInput *readInput = (ReadInput *) png_get_error_ptr(png);
+	shovelerLogError("Failed to read PNG image from %s due to libpng error: %s", readInput->description, error);
+	png_longjmp(png, 1);
+}
+
+static void handlePngReadWarning(png_structp png, png_const_charp warning)
+{
+	ReadInput *readInput = (ReadInput *) png_get_error_ptr(png);
+	shovelerLogWarning("libpng warning while reading PNG image from %s: %s", readInput->description, warning);
+}
+
+static void freeRowPointers(png_uint_32 height, png_bytep *rowPointers)
+{
+	// Cleanup memory if already allocated
+	if(rowPointers != NULL) {
+		for(png_uint_32 y = 0; y < height; y++) {
+			free(rowPointers[y]);
+		}
+		free(rowPointers);
+	}
 }
