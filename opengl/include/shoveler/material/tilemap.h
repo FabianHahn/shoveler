@@ -6,18 +6,16 @@
 #include <shoveler/texture.h>
 
 typedef struct {
-	int tilemapWidth;
-	int tilemapHeight;
-	ShovelerTexture *tilemapTexture;
-	int tilesetHeight;
-	int tilesetWidth;
-	int tilesetId;
-	ShovelerTexture *tilesetTexture;
-	ShovelerSampler *tilesetSampler;
-} ShovelerMaterialTilemapLayer;
+	int height;
+	int width;
+	ShovelerTexture *texture;
+	ShovelerSampler *sampler;
+} ShovelerMaterialTilemapTileset;
 
-ShovelerMaterial *shovelerMaterialTilemapCreate();
+ShovelerMaterial *shovelerMaterialTilemapCreate(unsigned char width, unsigned char height);
 /** adds a layer to a tilemap material, returning the index of the new layer */
-int shovelerMaterialTilemapAddLayer(ShovelerMaterial *tilemapMaterial, ShovelerMaterialTilemapLayer layer);
+int shovelerMaterialTilemapAddLayer(ShovelerMaterial *tilemapMaterial, ShovelerTexture *layerTexture);
+/** adds a tileset to a tilemap material, returning the index of the new tileset */
+int shovelerMaterialTilemapAddTileset(ShovelerMaterial *tilemapMaterial, ShovelerMaterialTilemapTileset tileset);
 
 #endif

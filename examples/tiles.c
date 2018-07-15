@@ -54,60 +54,52 @@ int main(int argc, char *argv[])
 	ShovelerSampler *nearestNeighborSampler = shovelerSamplerCreate(false, true);
 	ShovelerSampler *interpolatingSampler = shovelerSamplerCreate(true, true);
 
-	ShovelerImage *tileset = shovelerImageCreate(2, 2, 3);
-	shovelerImageClear(tileset);
-	shovelerImageGet(tileset, 0, 0, 0) = 255; // red
-	shovelerImageGet(tileset, 0, 1, 1) = 255; // green
-	shovelerImageGet(tileset, 1, 0, 2) = 255; // blue
-	shovelerImageGet(tileset, 1, 1, 0) = 255;
-	shovelerImageGet(tileset, 1, 1, 1) = 255;
-	shovelerImageGet(tileset, 1, 1, 2) = 255; // white
-	ShovelerTexture *tilesetTexture = shovelerTextureCreate2d(tileset);
+	ShovelerMaterial *tilemapMaterial = shovelerMaterialTilemapCreate(2, 2);
+
+	ShovelerImage *tilesetImage = shovelerImageCreate(2, 2, 3);
+	shovelerImageClear(tilesetImage);
+	shovelerImageGet(tilesetImage, 0, 0, 0) = 255; // red
+	shovelerImageGet(tilesetImage, 0, 1, 1) = 255; // green
+	shovelerImageGet(tilesetImage, 1, 0, 2) = 255; // blue
+	shovelerImageGet(tilesetImage, 1, 1, 0) = 255;
+	shovelerImageGet(tilesetImage, 1, 1, 1) = 255;
+	shovelerImageGet(tilesetImage, 1, 1, 2) = 255; // white
+	ShovelerTexture *tilesetTexture = shovelerTextureCreate2d(tilesetImage);
 	shovelerTextureUpdate(tilesetTexture);
 
-	ShovelerImage *tilemap = shovelerImageCreate(2, 2, 3);
-	shovelerImageClear(tilemap);
-	shovelerImageGet(tilemap, 0, 0, 0) = 0;
-	shovelerImageGet(tilemap, 0, 0, 1) = 0;
-	shovelerImageGet(tilemap, 0, 0, 2) = 0; // red
-	shovelerImageGet(tilemap, 0, 1, 0) = 0;
-	shovelerImageGet(tilemap, 0, 1, 1) = 0;
-	shovelerImageGet(tilemap, 0, 1, 2) = 0; // red
-	shovelerImageGet(tilemap, 1, 0, 0) = 0;
-	shovelerImageGet(tilemap, 1, 0, 1) = 1;
-	shovelerImageGet(tilemap, 1, 0, 2) = 0; // green
-	shovelerImageGet(tilemap, 1, 1, 0) = 0;
-	shovelerImageGet(tilemap, 1, 1, 1) = 0;
-	shovelerImageGet(tilemap, 1, 1, 2) = 1; // full tileset
-	ShovelerTexture *tilemapTexture = shovelerTextureCreate2d(tilemap);
-	shovelerTextureUpdate(tilemapTexture);
+	ShovelerMaterialTilemapTileset tileset = {2, 2, tilesetTexture, nearestNeighborSampler};
+	shovelerMaterialTilemapAddTileset(tilemapMaterial, tileset);
+	ShovelerMaterialTilemapTileset tileset2 = {1, 1, tilesetTexture, interpolatingSampler};
+	shovelerMaterialTilemapAddTileset(tilemapMaterial, tileset2);
+
+	ShovelerImage *layerImage = shovelerImageCreate(2, 2, 3);
+	shovelerImageClear(layerImage);
+	shovelerImageGet(layerImage, 0, 0, 0) = 0;
+	shovelerImageGet(layerImage, 0, 0, 1) = 0;
+	shovelerImageGet(layerImage, 0, 0, 2) = 1; // red
+	shovelerImageGet(layerImage, 0, 1, 0) = 0;
+	shovelerImageGet(layerImage, 0, 1, 1) = 0;
+	shovelerImageGet(layerImage, 0, 1, 2) = 1; // red
+	shovelerImageGet(layerImage, 1, 0, 0) = 0;
+	shovelerImageGet(layerImage, 1, 0, 1) = 1;
+	shovelerImageGet(layerImage, 1, 0, 2) = 1; // green
+	shovelerImageGet(layerImage, 1, 1, 0) = 0;
+	shovelerImageGet(layerImage, 1, 1, 1) = 0;
+	shovelerImageGet(layerImage, 1, 1, 2) = 2; // full tileset
+	ShovelerTexture *layerTexture = shovelerTextureCreate2d(layerImage);
+	shovelerTextureUpdate(layerTexture);
+	shovelerMaterialTilemapAddLayer(tilemapMaterial, layerTexture);
+
+	ShovelerImage *layer2Image = shovelerImageCreate(2, 2, 3);
+	shovelerImageClear(layer2Image);
+	shovelerImageGet(layer2Image, 0, 0, 0) = 0;
+	shovelerImageGet(layer2Image, 0, 0, 1) = 0;
+	shovelerImageGet(layer2Image, 0, 0, 2) = 2; // full tileset
+	ShovelerTexture *layer2Texture = shovelerTextureCreate2d(layer2Image);
+	shovelerTextureUpdate(layer2Texture);
+	shovelerMaterialTilemapAddLayer(tilemapMaterial, layer2Texture);
 
 	ShovelerDrawable *tiles = shovelerDrawableTilesCreate(2, 2);
-	ShovelerMaterial *tilemapMaterial = shovelerMaterialTilemapCreate();
-
-	ShovelerMaterialTilemapLayer layer;
-	layer.tilemapWidth = tilemapTexture->image->width;
-	layer.tilemapHeight = tilemapTexture->image->height;
-	layer.tilemapTexture = tilemapTexture;
-	layer.tilesetHeight = 2;
-	layer.tilesetWidth = 2;
-	layer.tilesetId = 0;
-	layer.tilesetTexture = tilesetTexture;
-	layer.tilesetSampler = nearestNeighborSampler;
-
-	ShovelerMaterialTilemapLayer layer2;
-	layer2.tilemapWidth = tilemapTexture->image->width;
-	layer2.tilemapHeight = tilemapTexture->image->height;
-	layer2.tilemapTexture = tilemapTexture;
-	layer2.tilesetHeight = 1;
-	layer2.tilesetWidth = 1;
-	layer2.tilesetId = 1;
-	layer2.tilesetTexture = tilesetTexture;
-	layer2.tilesetSampler = interpolatingSampler;
-
-	shovelerMaterialTilemapAddLayer(tilemapMaterial, layer);
-	shovelerMaterialTilemapAddLayer(tilemapMaterial, layer2);
-
 	ShovelerModel *tilesModel = shovelerModelCreate(tiles, tilemapMaterial);
 	tilesModel->screenspace = true;
 	shovelerSceneAddModel(game->scene, tilesModel);
