@@ -24,6 +24,7 @@ set(SHOVELER_BASE_SRC
 set(SHOVELER_BASE_TEST_SRC
 	src/image/png_test.cpp
 	src/executor_test.cpp
+	src/resources_test.cpp
 	src/test.cpp
 	src/types_test.cpp
 )
