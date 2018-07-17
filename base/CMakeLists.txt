@@ -6,6 +6,7 @@ set(SHOVELER_BASE_SRC
 	src/file.c
 	src/image.c
 	src/log.c
+	src/resources.c
 	src/view.c
 	include/shoveler/image/png.h
 	include/shoveler/image/ppm.h
@@ -15,6 +16,7 @@ set(SHOVELER_BASE_SRC
 	include/shoveler/file.h
 	include/shoveler/image.h
 	include/shoveler/log.h
+	include/shoveler/resources.h
 	include/shoveler/types.h
 	include/shoveler/view.h
 )
