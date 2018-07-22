@@ -8,7 +8,7 @@ extern "C" {
 
 static void requestResources(ShovelerResources *resources, const char *typeId, const char *resourceId, void *testPointer);
 void *loadResource(ShovelerResourcesTypeLoader *typeLoader, const unsigned char *buffer, size_t bytes);
-void freeResource(ShovelerResourcesTypeLoader *typeLoader, void *resourceData);
+void freeResourceData(ShovelerResourcesTypeLoader *typeLoader, void *resourceData);
 void freeTypeLoader(ShovelerResourcesTypeLoader *typeLoader);
 
 class ShovelerResourcesTest : public ::testing::Test {
@@ -21,10 +21,10 @@ public:
 		testDefaultResourceData = "test default resource";
 
 		testTypeLoader.typeId = testTypeId;
-		testTypeLoader.defaultResource = (void *) testDefaultResourceData;
+		testTypeLoader.defaultResourceData = (void *) testDefaultResourceData;
 		testTypeLoader.data = this;
 		testTypeLoader.load = loadResource;
-		testTypeLoader.freeResourceData = freeResource;
+		testTypeLoader.freeResourceData = freeResourceData;
 		testTypeLoader.free = freeTypeLoader;
 		bool typeLoaderRegistered = shovelerResourcesRegisterTypeLoader(resources, testTypeLoader);
 		ASSERT_TRUE(typeLoaderRegistered) << "test type loader should register correctly";
@@ -37,7 +37,7 @@ public:
 		lastLoadBytes = 0;
 		nextLoadResourceData = NULL;
 
-		lastFreeResourceData = NULL;
+		freeResourceDataArguments.clear();
 
 		freeTypeLoaderCalled = false;
 	}
@@ -46,6 +46,7 @@ public:
 	{
 		shovelerResourcesFree(resources);
 
+		ASSERT_EQ(*freeResourceDataArguments.rbegin(), testTypeLoader.defaultResourceData) << "type loader's default resource data should be freed after resources was freed";
 		ASSERT_TRUE(freeTypeLoaderCalled) << "type loader should be freed after resources was freed";
 	}
 
@@ -62,7 +63,7 @@ public:
 	size_t lastLoadBytes;
 	void *nextLoadResourceData;
 
-	void *lastFreeResourceData;
+	std::vector<void *> freeResourceDataArguments;
 
 	bool freeTypeLoaderCalled;
 };
@@ -82,15 +83,38 @@ TEST_F(ShovelerResourcesTest, requestUnloaded)
 	ASSERT_EQ(resource->data, testDefaultResourceData) << "returned resource should have correct default data";
 }
 
+TEST_F(ShovelerResourcesTest, requestInvalidType)
+{
+	const char *testInvalidTypeId = "foo/bar";
+	const char *testResourceId = "test resource id";
+
+	ShovelerResource *resource = shovelerResourcesGet(resources, testInvalidTypeId, testResourceId);
+	ASSERT_TRUE(resource == NULL) << "request should have failed";
+}
+
 TEST_F(ShovelerResourcesTest, loadUnrequested)
 {
 	const char *testResourceId = "test resource id";
 	unsigned char testResourceBuffer = 42;
 	size_t testResourceBytes = 1337;
+	const char *testResourceData = "test resource data";
 
-	shovelerResourcesSet(resources, testTypeId, testResourceId, &testResourceBuffer, testResourceBytes);
+	nextLoadResourceData = (void *) testResourceData;
+	bool loaded = shovelerResourcesSet(resources, testTypeId, testResourceId, &testResourceBuffer, testResourceBytes);
+	ASSERT_TRUE(loaded) << "load should have succeeded";
 	ASSERT_EQ(lastLoadBuffer, &testResourceBuffer) << "load should be called with correct buffer";
 	ASSERT_EQ(lastLoadBytes, testResourceBytes) << "load should be called with correct bytes";
+}
+
+TEST_F(ShovelerResourcesTest, loadInvalidType)
+{
+	const char *testInvalidTypeId = "foo/bar";
+	const char *testResourceId = "test resource id";
+	unsigned char testResourceBuffer = 42;
+	size_t testResourceBytes = 1337;
+
+	bool loaded = shovelerResourcesSet(resources, testInvalidTypeId, testResourceId, &testResourceBuffer, testResourceBytes);
+	ASSERT_FALSE(loaded) << "load should have failed";
 }
 
 TEST_F(ShovelerResourcesTest, freeLoaded)
@@ -104,7 +128,7 @@ TEST_F(ShovelerResourcesTest, freeLoaded)
 	shovelerResourcesSet(resources, testTypeId, testResourceId, &testResourceBuffer, testResourceBytes);
 	shovelerResourcesFree(resources);
 
-	ASSERT_EQ(lastFreeResourceData, testResourceData) << "free resource data should be called with correct resource data";
+	ASSERT_EQ(*freeResourceDataArguments.begin(), testResourceData) << "free resource data should be called with correct resource data";
 
 	resources = NULL;
 }
@@ -119,9 +143,26 @@ TEST_F(ShovelerResourcesTest, requestAndLoad)
 	ShovelerResource *resource = shovelerResourcesGet(resources, testTypeId, testResourceId);
 
 	nextLoadResourceData = (void *) testResourceData;
-	shovelerResourcesSet(resources, testTypeId, testResourceId, &testResourceBuffer, testResourceBytes);
+	bool loaded = shovelerResourcesSet(resources, testTypeId, testResourceId, &testResourceBuffer, testResourceBytes);
+	ASSERT_TRUE(loaded) << "load should have succeeded";
 
 	ASSERT_EQ(resource->data, testResourceData) << "resource data should have changed after loading";
+}
+
+
+TEST_F(ShovelerResourcesTest, requestAndFailToLoad)
+{
+	const char *testResourceId = "test resource id";
+	unsigned char testResourceBuffer = 42;
+	size_t testResourceBytes = 1337;
+
+	ShovelerResource *resource = shovelerResourcesGet(resources, testTypeId, testResourceId);
+
+	nextLoadResourceData = NULL;
+	bool loaded = shovelerResourcesSet(resources, testTypeId, testResourceId, &testResourceBuffer, testResourceBytes);
+	ASSERT_FALSE(loaded) << "load should have failed";
+
+	ASSERT_EQ(resource->data, testDefaultResourceData) << "resource data should be unchanged after failing to load";
 }
 
 TEST_F(ShovelerResourcesTest, loadAndRequest)
@@ -156,10 +197,10 @@ void *loadResource(ShovelerResourcesTypeLoader *typeLoader, const unsigned char 
 	return test->nextLoadResourceData;
 }
 
-void freeResource(ShovelerResourcesTypeLoader *typeLoader, void *resourceData)
+void freeResourceData(ShovelerResourcesTypeLoader *typeLoader, void *resourceData)
 {
 	ShovelerResourcesTest *test = (ShovelerResourcesTest *) typeLoader->data;
-	test->lastFreeResourceData = resourceData;
+	test->freeResourceDataArguments.push_back(resourceData);
 }
 
 void freeTypeLoader(ShovelerResourcesTypeLoader *typeLoader)

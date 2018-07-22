@@ -5,7 +5,7 @@
 
 #include <glib.h>
 
-struct ShovelerResourceTypeLoaderStruct; // forward declaration
+struct ShovelerResourcesTypeLoaderStruct; // forward declaration
 struct ShovelerResourcesStruct; // forward declaration
 
 typedef struct {
@@ -18,13 +18,14 @@ typedef struct {
 	void *data;
 } ShovelerResource;
 
-typedef void *(ShovelerResourcesTypeLoaderLoadFunction)(struct ShovelerResourceTypeLoaderStruct *typeLoader, const unsigned char *buffer, size_t bytes);
-typedef void (ShovelerResourcesTypeLoaderFreeResourceFunction)(struct ShovelerResourceTypeLoaderStruct *typeLoader, void *resourceData);
-typedef void (ShovelerResourcesTypeLoaderFreeFunction)(struct ShovelerResourceTypeLoaderStruct *typeLoader);
+typedef void *(ShovelerResourcesTypeLoaderLoadFunction)(struct ShovelerResourcesTypeLoaderStruct *typeLoader, const unsigned char *buffer, size_t bytes);
+typedef void (ShovelerResourcesTypeLoaderFreeResourceFunction)(struct ShovelerResourcesTypeLoaderStruct *typeLoader, void *resourceData);
+typedef void (ShovelerResourcesTypeLoaderFreeFunction)(struct ShovelerResourcesTypeLoaderStruct *typeLoader);
 
-typedef struct ShovelerResourceTypeLoaderStruct {
+typedef struct ShovelerResourcesTypeLoaderStruct {
 	const char *typeId;
-	void *defaultResource;
+	/** the default resource gets freed automatically using freeResourceData on freeing of the typeloader before free is called */
+	void *defaultResourceData;
 	void *data;
 	ShovelerResourcesTypeLoaderLoadFunction *load;
 	ShovelerResourcesTypeLoaderFreeResourceFunction *freeResourceData;
@@ -45,7 +46,7 @@ typedef struct ShovelerResourcesStruct {
 ShovelerResources *shovelerResourcesCreate(ShovelerResourcesRequestFunction *request, void *userData);
 bool shovelerResourcesRegisterTypeLoader(ShovelerResources *resources, ShovelerResourcesTypeLoader typeLoader);
 ShovelerResource *shovelerResourcesGet(ShovelerResources *resources, const char *typeId, const char *resourceId);
-void shovelerResourcesSet(ShovelerResources *resources, const char *typeId, const char *resourceId, const unsigned char *buffer, size_t bytes);
+bool shovelerResourcesSet(ShovelerResources *resources, const char *typeId, const char *resourceId, const unsigned char *buffer, size_t bytes);
 void shovelerResourcesFree(ShovelerResources *resources);
 
 #endif

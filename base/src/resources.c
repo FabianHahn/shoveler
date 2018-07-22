@@ -35,7 +35,10 @@ bool shovelerResourcesRegisterTypeLoader(ShovelerResources *resources, ShovelerR
 ShovelerResource *shovelerResourcesGet(ShovelerResources *resources, const char *typeId, const char *resourceId)
 {
 	ShovelerResourcesTypeLoader *typeLoader = (ShovelerResourcesTypeLoader *) g_hash_table_lookup(resources->typeLoaders, typeId);
-	assert(typeLoader != NULL);
+	if(typeLoader == NULL) {
+		shovelerLogError("Failed to request resource '%s' of unknown type '%s'.", resourceId, typeId);
+		return NULL;
+	}
 
 	ShovelerResource *resource = (ShovelerResource *) g_hash_table_lookup(resources->resources, resourceId);
 	if(resource == NULL) {
@@ -45,24 +48,27 @@ ShovelerResource *shovelerResourcesGet(ShovelerResources *resources, const char 
 		resource->resources = resources;
 		resource->id = strdup(resourceId);
 		resource->typeId = typeId;
-		resource->data = typeLoader->defaultResource;
+		resource->data = typeLoader->defaultResourceData;
 
 		g_hash_table_insert(resources->resources, resource->id, resource);
 		resources->request(resources, typeId, resourceId, resources->requestUserData);
 	}
 
 	if(strcmp(resource->typeId, typeId) != 0) {
-		shovelerLogWarning("Requested resource '%s' of type '%s' but it is already loaded as type '%d', returning default resource.", resourceId, typeId, resource->typeId);
-		return typeLoader->defaultResource;
+		shovelerLogError("Requested resource '%s' of type '%s' but it is already loaded as type '%d'.", resourceId, typeId, resource->typeId);
+		return NULL;
 	}
 
 	return resource;
 }
 
-void shovelerResourcesSet(ShovelerResources *resources, const char *typeId, const char *resourceId, const unsigned char *buffer, size_t bytes)
+bool shovelerResourcesSet(ShovelerResources *resources, const char *typeId, const char *resourceId, const unsigned char *buffer, size_t bytes)
 {
 	ShovelerResourcesTypeLoader *typeLoader = (ShovelerResourcesTypeLoader *) g_hash_table_lookup(resources->typeLoaders, typeId);
-	assert(typeLoader != NULL);
+	if(typeLoader == NULL) {
+		shovelerLogError("Failed to load resource '%s' of unknown type '%s' (%zu bytes).", resourceId, typeId, bytes);
+		return false;
+	}
 
 	ShovelerResource *resource = (ShovelerResource *) g_hash_table_lookup(resources->resources, resourceId);
 	if(resource == NULL) {
@@ -72,7 +78,7 @@ void shovelerResourcesSet(ShovelerResources *resources, const char *typeId, cons
 		resource->resources = resources;
 		resource->id = strdup(resourceId);
 		resource->typeId = typeId;
-		resource->data = typeLoader->defaultResource;
+		resource->data = typeLoader->defaultResourceData;
 
 		g_hash_table_insert(resources->resources, resource->id, resource);
 	} else {
@@ -80,8 +86,16 @@ void shovelerResourcesSet(ShovelerResources *resources, const char *typeId, cons
 	}
 
 	freeResourceData(typeLoader, resource);
+
 	resource->data = typeLoader->load(typeLoader, buffer, bytes);
+	if(resource->data == NULL) {
+		shovelerLogWarning("Failed to load resource '%s' of type '%s' (%zu bytes), reverting to default resource data.", resourceId, typeId, bytes);
+		resource->data = typeLoader->defaultResourceData;
+		return false;
+	}
+
 	shovelerLogInfo("Loaded resource '%s' of type '%s'.", resourceId, typeId);
+	return true;
 }
 
 void shovelerResourcesFree(ShovelerResources *resources)
@@ -98,6 +112,7 @@ void shovelerResourcesFree(ShovelerResources *resources)
 static void freeTypeLoader(void *typeLoaderPointer)
 {
 	ShovelerResourcesTypeLoader *typeLoader = (ShovelerResourcesTypeLoader *) typeLoaderPointer;
+	typeLoader->freeResourceData(typeLoader, typeLoader->defaultResourceData);
 	typeLoader->free(typeLoader);
 }
 
@@ -115,7 +130,7 @@ static void freeResource(void *resourcePointer)
 
 static void freeResourceData(ShovelerResourcesTypeLoader *typeLoader, ShovelerResource *resource)
 {
-	if(typeLoader->freeResourceData != NULL && resource->data != typeLoader->defaultResource) {
+	if(typeLoader->freeResourceData != NULL && resource->data != typeLoader->defaultResourceData) {
 		typeLoader->freeResourceData(typeLoader, resource->data);
 	}
 }
