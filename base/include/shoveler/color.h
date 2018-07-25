@@ -14,7 +14,7 @@ ShovelerColor shovelerColorFromHsv(float h, float s, float v);
 
 static inline ShovelerVector3 shovelerColorToVector3(ShovelerColor color)
 {
-	return (ShovelerVector3){color.r / 255.0f, color.g / 255.0f, color.b / 255.0f};
+	return shovelerVector3(color.r / 255.0f, color.g / 255.0f, color.b / 255.0f);
 }
 
 #endif
