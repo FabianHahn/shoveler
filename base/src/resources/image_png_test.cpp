@@ -57,6 +57,8 @@ public:
 
 	virtual void TearDown()
 	{
+		shovelerImageFree(testImage);
+		shovelerResourcesFree(resources);
 		remove(testFilename);
 	}
 
