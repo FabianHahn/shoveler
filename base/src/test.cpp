@@ -8,6 +8,8 @@ int main(int argc, char **argv) {
 	::testing::InitGoogleTest(&argc, argv);
 
 	shovelerLogInit("shoveler/", SHOVELER_LOG_LEVEL_ALL, stdout);
+	int result = RUN_ALL_TESTS();
+	shovelerLogTerminate();
 
-	return RUN_ALL_TESTS();
+	return result;
 }
