@@ -38,6 +38,7 @@ public:
 
 	virtual void TearDown()
 	{
+		shovelerImageFree(testImage);
 		remove(testFilename);
 	}
 
@@ -53,6 +54,8 @@ TEST_F(ShovelerImagePngTest, writeReadFile)
 	ShovelerImage *image = shovelerImagePngReadFile(testFilename);
 	ASSERT_TRUE(image != NULL) << "png should be read successfully";
 	ASSERT_EQ(*image, *testImage) << "read image should be equal to test image";
+
+	shovelerImageFree(image);
 }
 
 TEST_F(ShovelerImagePngTest, writeReadMemory)
@@ -68,4 +71,6 @@ TEST_F(ShovelerImagePngTest, writeReadMemory)
 	ShovelerImage *image = shovelerImagePngReadBuffer(reinterpret_cast<const unsigned char *>(contents.c_str()), contents.size());
 	ASSERT_TRUE(image != NULL) << "png should be read successfully";
 	ASSERT_EQ(*image, *testImage) << "read image should be equal to test image";
+
+	shovelerImageFree(image);
 }
