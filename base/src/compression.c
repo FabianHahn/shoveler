@@ -89,7 +89,7 @@ bool shovelerCompressionDecompress(ShovelerCompressionFormat format, const unsig
 		}
 
 		uLong bytesRead = inflateChunkSize - stream.avail_out;
-		g_string_append_len(outputString, outputBuffer, bytesRead);
+		g_string_append_len(outputString, (const char *) outputBuffer, bytesRead);
 	} while(ret != Z_STREAM_END);
 
 	free(outputBuffer);
