@@ -38,6 +38,7 @@ set(SHOVELER_BASE_TEST_SRC
 	src/types_test.cpp
 )
 
+include_directories(${ZLIB_INCLUDE_DIR})
 add_library(shoveler_base ${SHOVELER_BASE_SRC})
 set_property(TARGET shoveler_base PROPERTY C_STANDARD 99)
 
