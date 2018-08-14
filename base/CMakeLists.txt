@@ -3,6 +3,7 @@ set(SHOVELER_BASE_SRC
 	src/image/ppm.c
 	src/resources/image_png.c
 	src/view/position.c
+	src/view/resources.c
 	src/color.c
 	src/compression.c
 	src/executor.c
@@ -15,6 +16,7 @@ set(SHOVELER_BASE_SRC
 	include/shoveler/image/ppm.h
 	include/shoveler/resources/image_png.h
 	include/shoveler/view/position.h
+	include/shoveler/view/resources.h
 	include/shoveler/color.h
 	include/shoveler/compression.h
 	include/shoveler/constants.h
