@@ -92,6 +92,20 @@ TEST_F(ShovelerResourcesTest, requestInvalidType)
 	ASSERT_TRUE(resource == NULL) << "request should have failed";
 }
 
+TEST_F(ShovelerResourcesTest, requestNull)
+{
+	const char *testResourceId = "test resource id";
+
+	ShovelerResources *resources = shovelerResourcesCreate(NULL, NULL);
+	bool typeLoaderRegistered = shovelerResourcesRegisterTypeLoader(resources, testTypeLoader);
+	ASSERT_TRUE(typeLoaderRegistered) << "test type loader should register correctly";
+
+	ShovelerResource *resource = shovelerResourcesGet(resources, testTypeId, testResourceId);
+	ASSERT_TRUE(resource != NULL) << "returned resource must not be NULL";
+
+	shovelerResourcesFree(resources);
+}
+
 TEST_F(ShovelerResourcesTest, loadUnrequested)
 {
 	const char *testResourceId = "test resource id";

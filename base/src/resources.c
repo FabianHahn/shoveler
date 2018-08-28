@@ -51,7 +51,10 @@ ShovelerResource *shovelerResourcesGet(ShovelerResources *resources, const char 
 		resource->data = typeLoader->defaultResourceData;
 
 		g_hash_table_insert(resources->resources, resource->id, resource);
-		resources->request(resources, typeId, resourceId, resources->requestUserData);
+
+		if (resources->request != NULL) {
+			resources->request(resources, typeId, resourceId, resources->requestUserData);
+		}
 	}
 
 	if(strcmp(resource->typeId, typeId) != 0) {
