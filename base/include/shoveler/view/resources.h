@@ -19,6 +19,11 @@ bool shovelerViewAddEntityResource(ShovelerView *view, long long int entityId, c
 bool shovelerViewUpdateEntityResource(ShovelerView *view, long long int entityId, const unsigned char *buffer, size_t bytes);
 bool shovelerViewRemoveEntityResource(ShovelerView *view, long long int entityId);
 
+static inline bool shovelerViewSetResources(ShovelerView *view, ShovelerResources *resources)
+{
+	return shovelerViewSetTarget(view, shovelerViewResourcesTargetName, resources);
+}
+
 static inline ShovelerResources *shovelerViewGetResources(ShovelerView *view)
 {
 	return (ShovelerResources *) shovelerViewGetTarget(view, shovelerViewResourcesTargetName);

@@ -115,8 +115,15 @@ void shovelerResourcesFree(ShovelerResources *resources)
 static void freeTypeLoader(void *typeLoaderPointer)
 {
 	ShovelerResourcesTypeLoader *typeLoader = (ShovelerResourcesTypeLoader *) typeLoaderPointer;
-	typeLoader->freeResourceData(typeLoader, typeLoader->defaultResourceData);
-	typeLoader->free(typeLoader);
+
+	if(typeLoader->freeResourceData != NULL) {
+		typeLoader->freeResourceData(typeLoader, typeLoader->defaultResourceData);
+	}
+
+	if(typeLoader->free != NULL) {
+		typeLoader->free(typeLoader);
+	}
+
 	free(typeLoader);
 }
 

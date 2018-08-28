@@ -32,6 +32,7 @@ set(SHOVELER_BASE_SRC
 set(SHOVELER_BASE_TEST_SRC
 	src/image/png_test.cpp
 	src/resources/image_png_test.cpp
+	src/view/resources_test.cpp
 	src/color_test.cpp
 	src/compression_test.cpp
 	src/executor_test.cpp
