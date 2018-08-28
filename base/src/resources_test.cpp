@@ -7,9 +7,9 @@ extern "C" {
 }
 
 static void requestResources(ShovelerResources *resources, const char *typeId, const char *resourceId, void *testPointer);
-void *loadResource(ShovelerResourcesTypeLoader *typeLoader, const unsigned char *buffer, size_t bytes);
-void freeResourceData(ShovelerResourcesTypeLoader *typeLoader, void *resourceData);
-void freeTypeLoader(ShovelerResourcesTypeLoader *typeLoader);
+static void *loadResource(ShovelerResourcesTypeLoader *typeLoader, const unsigned char *buffer, size_t bytes);
+static void freeResourceData(ShovelerResourcesTypeLoader *typeLoader, void *resourceData);
+static void freeTypeLoader(ShovelerResourcesTypeLoader *typeLoader);
 
 class ShovelerResourcesTest : public ::testing::Test {
 public:
@@ -202,7 +202,7 @@ static void requestResources(ShovelerResources *resources, const char *typeId, c
 	test->lastRequestResourceId = resourceId;
 }
 
-void *loadResource(ShovelerResourcesTypeLoader *typeLoader, const unsigned char *buffer, size_t bytes)
+static void *loadResource(ShovelerResourcesTypeLoader *typeLoader, const unsigned char *buffer, size_t bytes)
 {
 	ShovelerResourcesTest *test = (ShovelerResourcesTest *) typeLoader->data;
 	test->lastLoadBuffer = buffer;
@@ -211,13 +211,13 @@ void *loadResource(ShovelerResourcesTypeLoader *typeLoader, const unsigned char 
 	return test->nextLoadResourceData;
 }
 
-void freeResourceData(ShovelerResourcesTypeLoader *typeLoader, void *resourceData)
+static void freeResourceData(ShovelerResourcesTypeLoader *typeLoader, void *resourceData)
 {
 	ShovelerResourcesTest *test = (ShovelerResourcesTest *) typeLoader->data;
 	test->freeResourceDataArguments.push_back(resourceData);
 }
 
-void freeTypeLoader(ShovelerResourcesTypeLoader *typeLoader)
+static void freeTypeLoader(ShovelerResourcesTypeLoader *typeLoader)
 {
 	ShovelerResourcesTest *test = (ShovelerResourcesTest *) typeLoader->data;
 	test->freeTypeLoaderCalled = true;
