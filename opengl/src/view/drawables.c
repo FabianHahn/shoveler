@@ -8,6 +8,7 @@
 ShovelerViewDrawables *shovelerViewDrawablesCreate(ShovelerView *view)
 {
 	ShovelerViewDrawables *drawables = malloc(sizeof(ShovelerViewDrawables));
+	drawables->entities = g_hash_table_new(g_int64_hash, g_int64_equal);
 	drawables->cube = shovelerDrawableCubeCreate();
 	drawables->quad = shovelerDrawableQuadCreate();
 	drawables->point = shovelerDrawablePointCreate();
@@ -22,5 +23,6 @@ void shovelerViewDrawablesFree(ShovelerViewDrawables *drawables)
 	shovelerDrawableFree(drawables->cube);
 	shovelerDrawableFree(drawables->quad);
 	shovelerDrawableFree(drawables->point);
+	g_hash_table_destroy(drawables->entities);
 	free(drawables);
 }

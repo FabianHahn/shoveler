@@ -1,10 +1,14 @@
 #ifndef SHOVELER_VIEW_DRAWABLES_H
 #define SHOVELER_VIEW_DRAWABLES_H
 
+#include <glib.h>
+
 #include <shoveler/drawable.h>
 #include <shoveler/view.h>
 
 typedef struct {
+	/** map from (long long int) to (ShovelerDrawable *) */
+	GHashTable *entities;
 	ShovelerDrawable *cube;
 	ShovelerDrawable *quad;
 	ShovelerDrawable *point;
