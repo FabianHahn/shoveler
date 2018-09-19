@@ -12,6 +12,8 @@ typedef struct {
 	GHashTable *entities;
 	/** map from string target name to target type */
 	GHashTable *targets;
+	/** map from target (ShovelerViewQualifiedComponent *) to (ShovelerViewDependency *) */
+	GHashTable *dependencies;
 } ShovelerView;
 
 typedef enum {
@@ -45,9 +47,22 @@ typedef struct ShovelerViewComponentStruct {
 	ShovelerViewEntity *entity;
 	char *name;
 	void *data;
+	bool active;
 	bool authoritative;
+	/** list of (ShovelerViewQualifiedComponent *) */
+	GQueue *dependencies;
 	ShovelerViewComponentFreeFunction *free;
 } ShovelerViewComponent;
+
+typedef struct {
+	long long int entityId;
+	char *componentName;
+} ShovelerViewQualifiedComponent;
+
+typedef struct {
+	ShovelerViewQualifiedComponent sourceComponent;
+	ShovelerViewQualifiedComponent targetComponent;
+} ShovelerViewDependency;
 
 ShovelerView *shovelerViewCreate();
 bool shovelerViewAddEntity(ShovelerView *view, long long int entityId);
@@ -56,6 +71,7 @@ bool shovelerViewEntityAddComponent(ShovelerViewEntity *entity, const char *comp
 bool shovelerViewEntityUpdateComponent(ShovelerViewEntity *entity, const char *componentName);
 bool shovelerViewDelegateComponent(ShovelerViewEntity *entity, const char *componentName);
 bool shovelerViewUndelegateComponent(ShovelerViewEntity *entity, const char *componentName);
+bool shovelerViewEntityAddComponentDependency(ShovelerViewEntity *entity, const char *componentName, long long int dependencyEntityId, const char *dependencyComponentName);
 bool shovelerViewEntityRemoveComponent(ShovelerViewEntity *entity, const char *componentName);
 ShovelerViewComponentCallback *shovelerViewEntityAddCallback(ShovelerViewEntity *entity, const char *componentName, ShovelerViewComponentCallbackFunction *function, void *userData);
 bool shovelerViewEntityRemoveCallback(ShovelerViewEntity *entity, const char *componentName, ShovelerViewComponentCallback *callback);
