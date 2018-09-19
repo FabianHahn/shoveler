@@ -4,6 +4,7 @@
 #include <string.h> // strdup, memcmp
 
 #include "shoveler/camera.h"
+#include "shoveler/hash.h"
 #include "shoveler/light.h"
 #include "shoveler/log.h"
 #include "shoveler/opengl.h"
@@ -11,7 +12,6 @@
 #include "shoveler/shader.h"
 #include "shoveler/uniform_attachment.h"
 
-static guint combineHashes(guint a, guint b);
 static void freeAttachment(void *attachmentPointer);
 
 guint shovelerShaderKeyHash(gconstpointer shaderKeyPointer)
@@ -25,7 +25,7 @@ guint shovelerShaderKeyHash(gconstpointer shaderKeyPointer)
 	guint materialHash = g_direct_hash(shaderKey->material);
 	guint userDataHash = g_direct_hash(shaderKey->userData);
 
-	return combineHashes(sceneHash, combineHashes(cameraHash, combineHashes(lightHash, combineHashes(modelHash, combineHashes(materialHash, userDataHash)))));
+	return shovelerHashCombine(sceneHash, shovelerHashCombine(cameraHash, shovelerHashCombine(lightHash, shovelerHashCombine(modelHash, shovelerHashCombine(materialHash, userDataHash)))));
 }
 
 gboolean shovelerShaderKeyEqual(gconstpointer firstShaderKeyPointer, gconstpointer secondShaderKeyPointer)
@@ -84,12 +84,6 @@ void shovelerShaderFree(ShovelerShader *shader)
 {
 	g_hash_table_destroy(shader->attachments);
 	free(shader);
-}
-
-static guint combineHashes(guint a, guint b)
-{
-	// see https://stackoverflow.com/questions/5889238/why-is-xor-the-default-way-to-combine-hashes/27952689#27952689
-	return a ^ (b + 0x9e3779b9 + (a << 6) + (a >> 2));
 }
 
 static void freeAttachment(void *attachmentPointer)

@@ -22,6 +22,7 @@ set(SHOVELER_BASE_SRC
 	include/shoveler/constants.h
 	include/shoveler/executor.h
 	include/shoveler/file.h
+	include/shoveler/hash.h
 	include/shoveler/image.h
 	include/shoveler/log.h
 	include/shoveler/resources.h
@@ -68,4 +69,3 @@ if(SHOVELER_BUILD_TESTS)
 	set_property(TARGET shoveler_base_test PROPERTY CXX_STANDARD 11)
 	add_test(shoveler_base shoveler_base_test)
 endif()
-
