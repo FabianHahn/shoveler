@@ -54,3 +54,27 @@ TEST_F(ShovelerViewTest, activate)
 	ShovelerViewComponent *testComponent = shovelerViewEntityGetComponent(testEntity, testComponentName);
 	ASSERT_TRUE(testComponent->active) << "test component has also been activated after activating its reverse dependency";
 }
+
+TEST_F(ShovelerViewTest, deactivateWhenAddingUnsatisfiedDependency)
+{
+	long long int testEntityId = 1337;
+	const char *testComponentName = "test";
+	long long int testDependencyEntityId = 42;
+	const char *testDependencyComponentName = "dependency";
+
+	bool entityAdded = shovelerViewAddEntity(view, testEntityId);
+	ASSERT_TRUE(entityAdded);
+
+	ShovelerViewEntity *testEntity = shovelerViewGetEntity(view, testEntityId);
+	bool componentAdded = shovelerViewEntityAddComponent(testEntity, testComponentName, NULL, NULL);
+	ASSERT_TRUE(componentAdded);
+
+	bool activated = shovelerViewEntityActivateComponent(testEntity, testComponentName);
+	ASSERT_TRUE(activated);
+
+	bool dependencyAdded = shovelerViewEntityAddComponentDependency(testEntity, testComponentName, testDependencyEntityId, testDependencyComponentName);
+	ASSERT_TRUE(dependencyAdded);
+
+	ShovelerViewComponent *testComponent = shovelerViewEntityGetComponent(testEntity, testComponentName);
+	ASSERT_FALSE(testComponent->active) << "test component should be deactivated after adding unsatisfied dependency";
+}
