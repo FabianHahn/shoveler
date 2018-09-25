@@ -57,6 +57,8 @@ bool shovelerViewEntityAddComponent(ShovelerViewEntity *entity, const char *comp
 	component->active = false;
 	component->authoritative = false;
 	component->dependencies = g_queue_new();
+	component->activate = NULL;
+	component->deactivate = NULL;
 	component->free = freeFunction;
 
 	if(!g_hash_table_insert(entity->components, component->name, component)) {
