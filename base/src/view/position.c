@@ -30,7 +30,7 @@ bool shovelerViewAddEntityPosition(ShovelerView *view, long long int entityId, d
 		freeComponent(component);
 		return false;
 	}
-	return true;
+	return shovelerViewEntityActivateComponent(entity, shovelerViewPositionComponentName);
 }
 
 bool shovelerViewUpdateEntityPosition(ShovelerView *view, long long int entityId, double x, double y, double z)
