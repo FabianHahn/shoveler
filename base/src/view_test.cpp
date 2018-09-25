@@ -133,3 +133,24 @@ TEST_F(ShovelerViewTest, deactivateRemovedComponent)
 
 	// TODO: assert deactivate was called
 }
+
+TEST_F(ShovelerViewTest, removeEntityRemovesComponents)
+{
+	long long int testEntityId = 1337;
+	const char *testComponentName = "test";
+
+	bool entityAdded = shovelerViewAddEntity(view, testEntityId);
+	ASSERT_TRUE(entityAdded);
+
+	ShovelerViewEntity *testEntity = shovelerViewGetEntity(view, testEntityId);
+	bool componentAdded = shovelerViewEntityAddComponent(testEntity, testComponentName, NULL, NULL);
+	ASSERT_TRUE(componentAdded);
+
+	bool activated = shovelerViewEntityActivateComponent(testEntity, testComponentName);
+	ASSERT_TRUE(activated);
+
+	bool removed = shovelerViewRemoveEntity(view, testEntityId);
+	ASSERT_TRUE(removed);
+
+	// TODO: assert deactivate was called
+}

@@ -47,6 +47,20 @@ bool shovelerViewAddEntity(ShovelerView *view, long long int entityId)
 
 bool shovelerViewRemoveEntity(ShovelerView *view, long long int entityId)
 {
+	ShovelerViewEntity *entity = g_hash_table_lookup(view->entities, &entityId);
+	if(entity == NULL) {
+		return false;
+	}
+
+	GList *componentNames = g_hash_table_get_keys(entity->components);
+	for(GList *iter = componentNames; iter != NULL; iter = iter->next) {
+		char *componentName = iter->data;
+		shovelerViewEntityRemoveComponent(entity, componentName);
+	}
+	g_list_free(componentNames);
+
+	assert(g_hash_table_size(entity->components) == 0);
+
 	if(!g_hash_table_remove(view->entities, &entityId)) {
 		return false;
 	}
@@ -322,9 +336,9 @@ bool shovelerViewEntityRemoveComponent(ShovelerViewEntity *entity, const char *c
 
 	triggerComponentCallback(component, SHOVELER_VIEW_COMPONENT_CALLBACK_REMOVE);
 
-	g_hash_table_remove(entity->components, componentName);
-
 	shovelerLogInfo("Removed component '%s' from entity %lld.", componentName, entity->entityId);
+
+	g_hash_table_remove(entity->components, componentName);
 	return true;
 }
 
