@@ -4,6 +4,7 @@
 #include <shoveler/view.h>
 
 #include "shoveler/hash.h"
+#include "shoveler/log.h"
 #include "shoveler/view.h"
 
 guint qualifiedComponentHash(gconstpointer qualifiedComponentPointer);
@@ -38,14 +39,20 @@ bool shovelerViewAddEntity(ShovelerView *view, long long int entityId)
 	if(!g_hash_table_insert(view->entities, &entity->entityId, entity)) {
 		freeEntity(entity);
 		return false;
-	} else {
-		return true;
 	}
+
+	shovelerLogInfo("Added entity %lld.", entity->entityId);
+	return true;
 }
 
 bool shovelerViewRemoveEntity(ShovelerView *view, long long int entityId)
 {
-	return g_hash_table_remove(view->entities, &entityId);
+	if(!g_hash_table_remove(view->entities, &entityId)) {
+		return false;
+	}
+
+	shovelerLogInfo("Removed entity %lld.", entityId);
+	return true;
 }
 
 bool shovelerViewEntityAddComponent(ShovelerViewEntity *entity, const char *componentName, void *data, ShovelerViewComponentFreeFunction *freeFunction)
@@ -67,6 +74,8 @@ bool shovelerViewEntityAddComponent(ShovelerViewEntity *entity, const char *comp
 	}
 
 	triggerComponentCallback(component, SHOVELER_VIEW_COMPONENT_CALLBACK_ADD);
+
+	shovelerLogInfo("Added component '%s' to entity %lld.", componentName, entity->entityId);
 	return true;
 }
 
@@ -132,6 +141,8 @@ bool shovelerViewEntityAddComponentDependency(ShovelerViewEntity *entity, const 
 	g_queue_push_tail(component->dependencies, dependencyTarget);
 	g_queue_push_tail(reverseDependencies, dependencySource);
 
+	shovelerLogInfo("Added component dependency on component '%s' of entity %lld to component '%s' of entity %lld.", dependencyComponentName, dependencyEntityId, componentName, entity->entityId);
+
 	// if the component is already active, we need to check if the new dependency is active and deactivate in case it isn't
 	if(component->active) {
 		bool needsDeactivation = true;
@@ -174,7 +185,12 @@ bool shovelerViewEntityRemoveComponentDependency(ShovelerViewEntity *entity, con
 		return false;
 	}
 
-	return removeDependency(component->dependencies, dependencyEntityId, dependencyComponentName);
+	if(!removeDependency(component->dependencies, dependencyEntityId, dependencyComponentName)) {
+		return false;
+	}
+
+	shovelerLogInfo("Removed component dependency on component '%s' of entity %lld from component '%s' of entity %lld.", dependencyComponentName, dependencyEntityId, componentName, entity->entityId);
+	return true;
 }
 
 bool shovelerViewEntityActivateComponent(ShovelerViewEntity *entity, const char *componentName)
@@ -194,15 +210,18 @@ bool shovelerViewEntityActivateComponent(ShovelerViewEntity *entity, const char 
 
 		ShovelerViewEntity *dependencyEntity = g_hash_table_lookup(entity->view->entities, &dependencyTarget->entityId);
 		if(dependencyEntity == NULL) {
+			shovelerLogWarning("Couldn't activate component '%s' of entity %lld because dependency entity %lld is not in view.", componentName, entity->entityId, dependencyTarget->entityId);
 			return false;
 		}
 
 		ShovelerViewComponent *dependencyComponent = g_hash_table_lookup(dependencyEntity->components, dependencyTarget->componentName);
 		if(dependencyComponent == NULL) {
+			shovelerLogWarning("Couldn't activate component '%s' of entity %lld because dependency entity %lld doesn't contain required component '%s'.", componentName, entity->entityId, dependencyTarget->entityId, dependencyTarget->componentName);
 			return false;
 		}
 
 		if(!dependencyComponent->active) {
+			shovelerLogWarning("Couldn't activate component '%s' of entity %lld because dependency component '%s' of entity %lld isn't active.", componentName, entity->entityId, dependencyTarget->componentName, dependencyTarget->entityId);
 			return false;
 		}
 	}
@@ -213,6 +232,8 @@ bool shovelerViewEntityActivateComponent(ShovelerViewEntity *entity, const char 
 	if(component->activate != NULL) {
 		component->activate(component->data);
 	}
+
+	shovelerLogInfo("Activated component '%s' of entity %lld.", componentName, entity->entityId);
 
 	// activate reverse dependencies
 	ShovelerViewQualifiedComponent qualifiedComponent;
@@ -262,6 +283,7 @@ bool shovelerViewEntityDeactivateComponent(ShovelerViewEntity *entity, const cha
 			ShovelerViewEntity *reverseDependencyEntity = g_hash_table_lookup(entity->view->entities, &reverseDependency->entityId);
 			assert(reverseDependencyEntity != NULL);
 
+			shovelerLogInfo("Deactivating component '%s' of entity %lld because its dependency component '%s' of entity %lld is being deactivated.", reverseDependency->componentName, reverseDependency->entityId, componentName, entity->entityId);
 			if(!shovelerViewEntityDeactivateComponent(reverseDependencyEntity, reverseDependency->componentName)) {
 				return false;
 			}
@@ -275,6 +297,7 @@ bool shovelerViewEntityDeactivateComponent(ShovelerViewEntity *entity, const cha
 		component->deactivate(component->data);
 	}
 
+	shovelerLogInfo("Deactivated component '%s' of entity %lld.", componentName, entity->entityId);
 	return true;
 }
 
@@ -298,7 +321,11 @@ bool shovelerViewEntityRemoveComponent(ShovelerViewEntity *entity, const char *c
 	g_queue_free(dependenciesCopy);
 
 	triggerComponentCallback(component, SHOVELER_VIEW_COMPONENT_CALLBACK_REMOVE);
-	return g_hash_table_remove(entity->components, componentName);
+
+	g_hash_table_remove(entity->components, componentName);
+
+	shovelerLogInfo("Removed component '%s' from entity %lld.", componentName, entity->entityId);
+	return true;
 }
 
 ShovelerViewComponentCallback *shovelerViewEntityAddCallback(ShovelerViewEntity *entity, const char *componentName, ShovelerViewComponentCallbackFunction *function, void *userData)
