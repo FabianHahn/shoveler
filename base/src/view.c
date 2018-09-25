@@ -414,10 +414,12 @@ static void freeEntity(void *entityPointer)
 static void freeComponent(void *componentPointer)
 {
 	ShovelerViewComponent *component = componentPointer;
-	component->free(component);
 
-	assert(component->dependencies->length == 0);
-	g_queue_free(component->dependencies);
+	if(component->free != NULL) {
+		component->free(component);
+	}
+
+	g_queue_free_full(component->dependencies, freeQualifiedComponent);
 
 	free(component->name);
 	free(component);
