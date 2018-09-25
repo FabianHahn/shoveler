@@ -70,7 +70,10 @@ bool shovelerViewEntityAddComponent(ShovelerViewEntity *entity, const char *comp
 bool shovelerViewEntityUpdateComponent(ShovelerViewEntity *entity, const char *componentName);
 bool shovelerViewDelegateComponent(ShovelerViewEntity *entity, const char *componentName);
 bool shovelerViewUndelegateComponent(ShovelerViewEntity *entity, const char *componentName);
+/** Adds a new dependency for a component, potentially deactivating it if the dependency isn't active. */
 bool shovelerViewEntityAddComponentDependency(ShovelerViewEntity *entity, const char *componentName, long long int dependencyEntityId, const char *dependencyComponentName);
+/** Removes an existing dependency from a component, but doesn't automatically activate it even if this was the only unsatisfied one. */
+bool shovelerViewEntityRemoveComponentDependency(ShovelerViewEntity *entity, const char *componentName, long long int dependencyEntityId, const char *dependencyComponentName);
 bool shovelerViewEntityActivateComponent(ShovelerViewEntity *entity, const char *componentName);
 bool shovelerViewEntityDeactivateComponent(ShovelerViewEntity *entity, const char *componentName);
 bool shovelerViewEntityRemoveComponent(ShovelerViewEntity *entity, const char *componentName);
