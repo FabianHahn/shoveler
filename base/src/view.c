@@ -69,7 +69,7 @@ bool shovelerViewRemoveEntity(ShovelerView *view, long long int entityId)
 	return true;
 }
 
-bool shovelerViewEntityAddComponent(ShovelerViewEntity *entity, const char *componentName, void *data, ShovelerViewComponentFreeFunction *freeFunction)
+bool shovelerViewEntityAddComponent(ShovelerViewEntity *entity, const char *componentName, void *data, ShovelerViewComponentActivateFunction *activate, ShovelerViewComponentDeactivateFunction *deactivate, ShovelerViewComponentFreeFunction *freeFunction)
 {
 	ShovelerViewComponent *component = malloc(sizeof(ShovelerViewComponent));
 	component->entity = entity;
@@ -78,8 +78,8 @@ bool shovelerViewEntityAddComponent(ShovelerViewEntity *entity, const char *comp
 	component->active = false;
 	component->authoritative = false;
 	component->dependencies = g_queue_new();
-	component->activate = NULL;
-	component->deactivate = NULL;
+	component->activate = activate;
+	component->deactivate = deactivate;
 	component->free = freeFunction;
 
 	if(!g_hash_table_insert(entity->components, component->name, component)) {

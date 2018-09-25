@@ -50,7 +50,7 @@ bool shovelerViewAddEntityClient(ShovelerView *view, long long int entityId)
 	clientComponentData->positionCallback = NULL;
 	clientComponentData->moveCallback = NULL;
 
-	if (!shovelerViewEntityAddComponent(entity, shovelerViewClientComponentName, clientComponentData, &freeComponent)) {
+	if (!shovelerViewEntityAddComponent(entity, shovelerViewClientComponentName, clientComponentData, NULL, NULL, &freeComponent)) {
 		freeComponent(component);
 		return false;
 	}

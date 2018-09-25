@@ -66,7 +66,7 @@ typedef struct {
 ShovelerView *shovelerViewCreate();
 bool shovelerViewAddEntity(ShovelerView *view, long long int entityId);
 bool shovelerViewRemoveEntity(ShovelerView *view, long long int entityId);
-bool shovelerViewEntityAddComponent(ShovelerViewEntity *entity, const char *componentName, void *data, ShovelerViewComponentFreeFunction *freeFunction);
+bool shovelerViewEntityAddComponent(ShovelerViewEntity *entity, const char *componentName, void *data, ShovelerViewComponentActivateFunction *activate, ShovelerViewComponentDeactivateFunction *deactivate, ShovelerViewComponentFreeFunction *freeFunction);
 bool shovelerViewEntityUpdateComponent(ShovelerViewEntity *entity, const char *componentName);
 bool shovelerViewDelegateComponent(ShovelerViewEntity *entity, const char *componentName);
 bool shovelerViewUndelegateComponent(ShovelerViewEntity *entity, const char *componentName);

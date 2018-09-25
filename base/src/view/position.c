@@ -26,7 +26,7 @@ bool shovelerViewAddEntityPosition(ShovelerView *view, long long int entityId, d
 	position->requestUpdate = NULL;
 	position->requestUpdateUserData = NULL;
 
-	if (!shovelerViewEntityAddComponent(entity, shovelerViewPositionComponentName, position, &freeComponent)) {
+	if (!shovelerViewEntityAddComponent(entity, shovelerViewPositionComponentName, position, NULL, NULL, &freeComponent)) {
 		freeComponent(component);
 		return false;
 	}

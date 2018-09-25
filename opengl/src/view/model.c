@@ -65,7 +65,7 @@ bool shovelerViewAddEntityModel(ShovelerView *view, long long int entityId, Shov
 	modelComponentData->model = model;
 	modelComponentData->positionCallback = shovelerViewEntityAddCallback(entity, shovelerViewPositionComponentName, &positionCallback, modelComponentData);
 
-	if (!shovelerViewEntityAddComponent(entity, shovelerViewModelComponentName, modelComponentData, &freeComponent)) {
+	if (!shovelerViewEntityAddComponent(entity, shovelerViewModelComponentName, modelComponentData, NULL, NULL, &freeComponent)) {
 		freeComponent(component);
 		return false;
 	}

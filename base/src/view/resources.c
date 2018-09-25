@@ -37,7 +37,7 @@ bool shovelerViewAddEntityResource(ShovelerView *view, long long int entityId, c
 	ShovelerResources *resources = shovelerViewGetResources(view);
 	shovelerResourcesSet(resources, typeId, resource->resourceId, buffer, bytes);
 
-	if (!shovelerViewEntityAddComponent(entity, shovelerViewResourceComponentName, resource, freeResourceComponentData)) {
+	if (!shovelerViewEntityAddComponent(entity, shovelerViewResourceComponentName, resource, NULL, NULL, freeResourceComponentData)) {
 		return false;
 	}
 	return true;

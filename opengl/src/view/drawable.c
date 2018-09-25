@@ -40,7 +40,7 @@ bool shovelerViewAddEntityDrawable(ShovelerView *view, long long int entityId, S
 		return false;
 	}
 
-	if(!shovelerViewEntityAddComponent(entity, shovelerViewDrawableComponentName, drawableComponentData, &freeComponent)) {
+	if(!shovelerViewEntityAddComponent(entity, shovelerViewDrawableComponentName, drawableComponentData, NULL, NULL, &freeComponent)) {
 		freeComponentData(drawableComponentData);
 		return false;
 	}

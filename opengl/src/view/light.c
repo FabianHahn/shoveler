@@ -55,7 +55,7 @@ bool shovelerViewAddEntityLight(ShovelerView *view, long long int entityId, Shov
 	lightComponentData->light = light;
 	lightComponentData->positionCallback = shovelerViewEntityAddCallback(entity, shovelerViewPositionComponentName, &positionCallback, lightComponentData);
 
-	if (!shovelerViewEntityAddComponent(entity, shovelerViewLightComponentName, lightComponentData, &freeComponent)) {
+	if (!shovelerViewEntityAddComponent(entity, shovelerViewLightComponentName, lightComponentData, NULL, NULL, &freeComponent)) {
 		freeComponent(component);
 		return false;
 	}
