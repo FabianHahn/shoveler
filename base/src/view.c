@@ -363,7 +363,11 @@ guint qualifiedComponentHash(gconstpointer qualifiedComponentPointer)
 
 gboolean qualifiedComponentEqual(gconstpointer firstQualifiedComponentPointer, gconstpointer secondQualifiedComponentPointer)
 {
-	return memcmp(firstQualifiedComponentPointer, secondQualifiedComponentPointer, sizeof(ShovelerViewQualifiedComponent)) == 0;
+	ShovelerViewQualifiedComponent *firstQualifiedComponent = (ShovelerViewQualifiedComponent *) firstQualifiedComponentPointer;
+	ShovelerViewQualifiedComponent *secondQualifiedComponent = (ShovelerViewQualifiedComponent *) secondQualifiedComponentPointer;
+
+	return firstQualifiedComponent->entityId == secondQualifiedComponent->entityId
+		&& strcmp(firstQualifiedComponent->componentName, secondQualifiedComponent->componentName) == 0;
 }
 
 static void triggerComponentCallback(ShovelerViewComponent *component, ShovelerViewComponentCallbackType callbackType)
