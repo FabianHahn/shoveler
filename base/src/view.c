@@ -197,12 +197,12 @@ bool shovelerViewEntityActivateComponent(ShovelerViewEntity *entity, const char 
 			return false;
 		}
 
-		ShovelerViewComponent *dependencyComponent = g_hash_table_lookup(dependencyEntity->components, &dependencyTarget->componentName);
+		ShovelerViewComponent *dependencyComponent = g_hash_table_lookup(dependencyEntity->components, dependencyTarget->componentName);
 		if(dependencyComponent == NULL) {
 			return false;
 		}
 
-		if(dependencyComponent->active) {
+		if(!dependencyComponent->active) {
 			return false;
 		}
 	}
