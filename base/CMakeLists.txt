@@ -40,6 +40,7 @@ set(SHOVELER_BASE_TEST_SRC
 	src/resources_test.cpp
 	src/test.cpp
 	src/types_test.cpp
+	src/view_test.cpp
 )
 
 include_directories(${ZLIB_INCLUDE_DIR})
