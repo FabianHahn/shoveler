@@ -26,14 +26,11 @@ typedef struct {
 	ShovelerViewDrawableTilesSize tilesSize;
 } ShovelerViewDrawableConfiguration;
 
-typedef struct {
-	long long int entityId;
-	ShovelerDrawable *drawable;
-} ShovelerViewDrawable;
-
 static const char *shovelerViewDrawableComponentName = "drawable";
 
 bool shovelerViewAddEntityDrawable(ShovelerView *view, long long int entityId, ShovelerViewDrawableConfiguration configuration);
+ShovelerDrawable *shovelerViewGetEntityDrawable(ShovelerView *view, long long int entityId);
+ShovelerDrawable *shovelerViewEntityGetDrawable(ShovelerViewEntity *entity);
 bool shovelerViewUpdateEntityDrawable(ShovelerView *view, long long int entityId, ShovelerViewDrawableConfiguration configuration);
 bool shovelerViewRemoveEntityDrawable(ShovelerView *view, long long int entityId);
 

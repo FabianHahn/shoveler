@@ -10,9 +10,14 @@
 #include "shoveler/log.h"
 #include "shoveler/view.h"
 
+typedef struct {
+	long long int entityId;
+	ShovelerDrawable *drawable;
+} DrawableComponentData;
+
 static ShovelerDrawable *createDrawable(ShovelerViewDrawableConfiguration configuration);
 static void freeComponent(ShovelerViewComponent *drawableComponent);
-static void freeComponentData(ShovelerViewDrawable *drawableComponentData);
+static void freeComponentData(DrawableComponentData *drawableComponentData);
 
 bool shovelerViewAddEntityDrawable(ShovelerView *view, long long int entityId, ShovelerViewDrawableConfiguration configuration)
 {
@@ -30,7 +35,7 @@ bool shovelerViewAddEntityDrawable(ShovelerView *view, long long int entityId, S
 		return false;
 	}
 
-	ShovelerViewDrawable *drawableComponentData = malloc(sizeof(ShovelerViewDrawable));
+	DrawableComponentData *drawableComponentData = malloc(sizeof(DrawableComponentData));
 	drawableComponentData->entityId = entityId;
 	drawableComponentData->drawable = createDrawable(configuration);
 
@@ -44,13 +49,34 @@ bool shovelerViewAddEntityDrawable(ShovelerView *view, long long int entityId, S
 		freeComponentData(drawableComponentData);
 		return false;
 	}
+
+	shovelerViewEntityActivateComponent(entity, shovelerViewDrawableComponentName);
 	return true;
+}
+
+ShovelerDrawable *shovelerViewGetEntityDrawable(ShovelerView *view, long long int entityId)
+{
+	ShovelerViewEntity *entity = shovelerViewGetEntity(view, entityId);
+	if(entity == NULL) {
+		return NULL;
+	}
+
+	return shovelerViewEntityGetDrawable(entity);
+}
+
+ShovelerDrawable *shovelerViewEntityGetDrawable(ShovelerViewEntity *entity)
+{
+	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewDrawableComponentName);
+	if(component == NULL) {
+		return NULL;
+	}
+
+	DrawableComponentData *drawableComponentData = component->data;
+	return drawableComponentData->drawable;
 }
 
 bool shovelerViewUpdateEntityDrawable(ShovelerView *view, long long int entityId, ShovelerViewDrawableConfiguration configuration)
 {
-	assert(shovelerViewHasDrawables(view));
-
 	ShovelerViewEntity *entity = shovelerViewGetEntity(view, entityId);
 	if(entity == NULL) {
 		shovelerLogWarning("Trying to update drawable of non existing entity %lld, ignoring.", entityId);
@@ -62,24 +88,16 @@ bool shovelerViewUpdateEntityDrawable(ShovelerView *view, long long int entityId
 		shovelerLogWarning("Trying to update drawable of entity %lld which does not have a drawable, ignoring.", entityId);
 		return false;
 	}
-	ShovelerViewDrawable *drawableComponentData = component->data;
 
+	DrawableComponentData *drawableComponentData = component->data;
 	shovelerDrawableFree(drawableComponentData->drawable);
 	drawableComponentData->drawable = createDrawable(configuration);
-
-	ShovelerViewDrawables *drawables = shovelerViewGetDrawables(view);
-	if(!g_hash_table_replace(drawables->entities, &drawableComponentData->entityId, drawableComponentData->drawable)) {
-		freeComponentData(drawableComponentData);
-		return false;
-	}
 
 	return true;
 }
 
 bool shovelerViewRemoveEntityDrawable(ShovelerView *view, long long int entityId)
 {
-	assert(shovelerViewHasDrawables(view));
-
 	ShovelerViewEntity *entity = shovelerViewGetEntity(view, entityId);
 	if(entity == NULL) {
 		shovelerLogWarning("Trying to remove drawable from non existing entity %lld, ignoring.", entityId);
@@ -91,7 +109,6 @@ bool shovelerViewRemoveEntityDrawable(ShovelerView *view, long long int entityId
 		shovelerLogWarning("Trying to remove drawable from entity %lld which does not have a drawable, ignoring.", entityId);
 		return false;
 	}
-	ShovelerViewDrawable *drawableComponentData = component->data;
 
 	return shovelerViewEntityRemoveComponent(entity, shovelerViewDrawableComponentName);
 }
@@ -115,15 +132,10 @@ static ShovelerDrawable *createDrawable(ShovelerViewDrawableConfiguration config
 
 static void freeComponent(ShovelerViewComponent *drawableComponent)
 {
-	assert(shovelerViewHasDrawables(drawableComponent->entity->view));
-
-	ShovelerViewDrawables *drawables = shovelerViewGetDrawables(drawableComponent->entity->view);
-	g_hash_table_remove(drawables->entities, &drawableComponent->entity->entityId);
-
 	freeComponentData(drawableComponent->data);
 }
 
-static void freeComponentData(ShovelerViewDrawable *drawableComponentData)
+static void freeComponentData(DrawableComponentData *drawableComponentData)
 {
 	shovelerDrawableFree(drawableComponentData->drawable);
 	free(drawableComponentData);
