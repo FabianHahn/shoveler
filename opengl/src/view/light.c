@@ -59,6 +59,13 @@ bool shovelerViewAddEntityLight(ShovelerView *view, long long int entityId, Shov
 		freeComponent(component);
 		return false;
 	}
+
+	if(!shovelerViewEntityAddComponentDependency(entity, shovelerViewLightComponentName, entity->entityId, shovelerViewPositionComponentName)) {
+		shovelerViewEntityRemoveComponent(entity, shovelerViewLightComponentName);
+		return false;
+	}
+
+	shovelerViewEntityActivateComponent(entity, shovelerViewLightComponentName);
 	return true;
 }
 

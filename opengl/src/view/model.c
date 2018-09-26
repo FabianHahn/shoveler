@@ -69,6 +69,13 @@ bool shovelerViewAddEntityModel(ShovelerView *view, long long int entityId, Shov
 		freeComponent(component);
 		return false;
 	}
+
+	if(!shovelerViewEntityAddComponentDependency(entity, shovelerViewModelComponentName, entity->entityId, shovelerViewPositionComponentName)) {
+		shovelerViewEntityRemoveComponent(entity, shovelerViewModelComponentName);
+		return false;
+	}
+
+	shovelerViewEntityActivateComponent(entity, shovelerViewModelComponentName);
 	return true;
 }
 
