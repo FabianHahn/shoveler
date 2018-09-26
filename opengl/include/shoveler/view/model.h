@@ -54,6 +54,8 @@ typedef struct {
 static const char *shovelerViewModelComponentName = "model";
 
 bool shovelerViewAddEntityModel(ShovelerView *view, long long int entityId, ShovelerViewModelConfiguration modelConfiguration);
+ShovelerModel *shovelerViewGetEntityModel(ShovelerView *view, long long int entityId);
+ShovelerModel *shovelerViewEntityGetModel(ShovelerViewEntity *entity);
 bool shovelerViewUpdateEntityModelDrawable(ShovelerView *view, long long int entityId, ShovelerViewDrawableConfiguration drawableConfiguration);
 bool shovelerViewUpdateEntityModelMaterial(ShovelerView *view, long long int entityId, ShovelerViewMaterialConfiguration materialConfiguration);
 bool shovelerViewUpdateEntityModelRotation(ShovelerView *view, long long int entityId, ShovelerVector3 rotation);

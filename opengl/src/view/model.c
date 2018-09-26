@@ -79,6 +79,27 @@ bool shovelerViewAddEntityModel(ShovelerView *view, long long int entityId, Shov
 	return true;
 }
 
+ShovelerModel *shovelerViewGetEntityModel(ShovelerView *view, long long int entityId)
+{
+	ShovelerViewEntity *entity = shovelerViewGetEntity(view, entityId);
+	if(entity == NULL) {
+		return NULL;
+	}
+
+	return shovelerViewEntityGetModel(entity);
+}
+
+ShovelerModel *shovelerViewEntityGetModel(ShovelerViewEntity *entity)
+{
+	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewModelComponentName);
+	if(component == NULL) {
+		return NULL;
+	}
+
+	ShovelerViewModel *modelComponentData = component->data;
+	return modelComponentData->model;
+}
+
 bool shovelerViewUpdateEntityModelDrawable(ShovelerView *view, long long int entityId, ShovelerViewDrawableConfiguration drawableConfiguration)
 {
 	assert(shovelerViewHasScene(view));

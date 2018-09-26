@@ -3,6 +3,12 @@
 #include "shoveler/view/position.h"
 #include "shoveler/log.h"
 
+typedef struct {
+	ShovelerViewPosition position;
+	ShovelerViewPositionRequestUpdateFunction *requestUpdate;
+	void *requestUpdateUserData;
+} PositionComponentData;
+
 static void freeComponent(ShovelerViewComponent *component);
 
 bool shovelerViewAddEntityPosition(ShovelerView *view, long long int entityId, double x, double y, double z)
@@ -19,20 +25,41 @@ bool shovelerViewAddEntityPosition(ShovelerView *view, long long int entityId, d
 		return false;
 	}
 
-	ShovelerViewPosition *position = malloc(sizeof(ShovelerViewPosition));
-	position->x = x;
-	position->y = y;
-	position->z = z;
-	position->requestUpdate = NULL;
-	position->requestUpdateUserData = NULL;
+	PositionComponentData *positionComponentData = malloc(sizeof(PositionComponentData));
+	positionComponentData->position.x = x;
+	positionComponentData->position.y = y;
+	positionComponentData->position.z = z;
+	positionComponentData->requestUpdate = NULL;
+	positionComponentData->requestUpdateUserData = NULL;
 
-	if (!shovelerViewEntityAddComponent(entity, shovelerViewPositionComponentName, position, NULL, NULL, &freeComponent)) {
+	if (!shovelerViewEntityAddComponent(entity, shovelerViewPositionComponentName, positionComponentData, NULL, NULL, &freeComponent)) {
 		freeComponent(component);
 		return false;
 	}
 
 	shovelerViewEntityActivateComponent(entity, shovelerViewPositionComponentName);
 	return true;
+}
+
+ShovelerViewPosition *shovelerViewGetEntityPosition(ShovelerView *view, long long int entityId)
+{
+	ShovelerViewEntity *entity = shovelerViewGetEntity(view, entityId);
+	if(entity == NULL) {
+		return NULL;
+	}
+
+	return shovelerViewEntityGetPosition(entity);
+}
+
+ShovelerViewPosition *shovelerViewEntityGetPosition(ShovelerViewEntity *entity)
+{
+	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewPositionComponentName);
+	if(component == NULL) {
+		return NULL;
+	}
+
+	PositionComponentData *positionComponentData = component->data;
+	return &positionComponentData->position;
 }
 
 bool shovelerViewUpdateEntityPosition(ShovelerView *view, long long int entityId, double x, double y, double z)
@@ -48,11 +75,11 @@ bool shovelerViewUpdateEntityPosition(ShovelerView *view, long long int entityId
 		shovelerLogWarning("Trying to update position for entity %lld which does not have a position, ignoring.", entityId);
 		return false;
 	}
-	ShovelerViewPosition *position = component->data;
 
-	position->x = x;
-	position->y = y;
-	position->z = z;
+	PositionComponentData *positionComponentData = component->data;
+	positionComponentData->position.x = x;
+	positionComponentData->position.y = y;
+	positionComponentData->position.z = z;
 
 	return shovelerViewEntityUpdateComponent(entity, shovelerViewPositionComponentName);
 }
@@ -70,10 +97,10 @@ bool shovelerViewDelegatePosition(ShovelerView *view, long long int entityId, Sh
 		shovelerLogWarning("Trying to delegate position for entity %lld which does not have a position, ignoring.", entityId);
 		return false;
 	}
-	ShovelerViewPosition *position = component->data;
 
-	position->requestUpdate = requestUpdateFunction;
-	position->requestUpdateUserData = userData;
+	PositionComponentData *positionComponentData = component->data;
+	positionComponentData->requestUpdate = requestUpdateFunction;
+	positionComponentData->requestUpdateUserData = userData;
 
 	return shovelerViewDelegateComponent(entity, shovelerViewPositionComponentName);
 }
@@ -91,10 +118,10 @@ bool shovelerViewUndelegatePosition(ShovelerView *view, long long int entityId)
 		shovelerLogWarning("Trying to undelegate position for entity %lld which does not have a position, ignoring.", entityId);
 		return false;
 	}
-	ShovelerViewPosition *position = component->data;
 
-	position->requestUpdate = NULL;
-	position->requestUpdateUserData = NULL;
+	PositionComponentData *positionComponentData = component->data;
+	positionComponentData->requestUpdate = NULL;
+	positionComponentData->requestUpdateUserData = NULL;
 
 	return shovelerViewUndelegateComponent(entity, shovelerViewPositionComponentName);
 }
@@ -112,14 +139,15 @@ bool shovelerViewRequestPositionUpdate(ShovelerView *view, long long int entityI
 		shovelerLogWarning("Trying to request position update for entity %lld which does not have a position, ignoring.", entityId);
 		return false;
 	}
-	ShovelerViewPosition *position = component->data;
 
 	if (!component->authoritative) {
 		shovelerLogWarning("Trying to request position update for entity %lld for which this worker is not authoritative, ignoring.", entityId);
 		return false;
 	}
 
-	position->requestUpdate(component, x, y, z, position->requestUpdateUserData);
+	PositionComponentData *positionComponentData = component->data;
+	positionComponentData->requestUpdate(component, x, y, z, positionComponentData->requestUpdateUserData);
+
 	return true;
 }
 
@@ -143,6 +171,6 @@ bool shovelerViewRemoveEntityPosition(ShovelerView *view, long long int entityId
 
 static void freeComponent(ShovelerViewComponent *component)
 {
-	ShovelerViewPosition *position = component->data;
-	free(position);
+	PositionComponentData *positionComponentData = component->data;
+	free(positionComponentData);
 }
