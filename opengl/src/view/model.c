@@ -45,9 +45,9 @@ bool shovelerViewAddEntityModel(ShovelerView *view, long long int entityId, Shov
 
 	ModelComponentData *modelComponentData = malloc(sizeof(ModelComponentData));
 	modelComponentData->entity = entity;
-	modelComponentData->model = NULL;
 	modelComponentData->configuration = modelConfiguration;
-	modelComponentData->positionCallback = shovelerViewEntityAddCallback(entity, shovelerViewPositionComponentName, &positionCallback, modelComponentData);
+	modelComponentData->model = NULL;
+	modelComponentData->positionCallback = NULL;
 
 	if (!shovelerViewEntityAddComponent(entity, shovelerViewModelComponentName, modelComponentData, activateComponent, deactivateComponent, freeComponent)) {
 		freeComponent(component);
@@ -338,9 +338,10 @@ static void updatePositionIfAvailable(ShovelerViewEntity *entity, ModelComponent
 
 static void positionCallback(ShovelerViewComponent *positionComponent, ShovelerViewComponentCallbackType callbackType, void *modelComponentDataPointer)
 {
-	ShovelerViewPosition *position = positionComponent->data;
 	ModelComponentData *modelComponentData = modelComponentDataPointer;
 	ShovelerModel *model = modelComponentData->model;
+
+	ShovelerViewPosition *position = shovelerViewEntityGetPosition(positionComponent->entity);
 
 	model->translation.values[0] = position->x;
 	model->translation.values[1] = position->y;
@@ -359,8 +360,13 @@ static void activateComponent(void *modelComponentDataPointer)
 		return;
 	}
 
+	ShovelerViewPosition *position = shovelerViewEntityGetPosition(modelComponentData->entity);
+
 	ShovelerDrawable *drawable = shovelerViewGetEntityDrawable(modelComponentData->entity->view, modelComponentData->configuration.drawableEntityId);
 	modelComponentData->model = shovelerModelCreate(drawable, material);
+	modelComponentData->model->translation.values[0] = position->x;
+	modelComponentData->model->translation.values[1] = position->y;
+	modelComponentData->model->translation.values[2] = position->z;
 	modelComponentData->model->rotation = modelComponentData->configuration.rotation;
 	modelComponentData->model->scale = modelComponentData->configuration.scale;
 	modelComponentData->model->visible = modelComponentData->configuration.visible;
@@ -368,9 +374,12 @@ static void activateComponent(void *modelComponentDataPointer)
 	modelComponentData->model->screenspace = modelComponentData->configuration.screenspace;
 	modelComponentData->model->castsShadow = modelComponentData->configuration.castsShadow;
 	modelComponentData->model->polygonMode = modelComponentData->configuration.polygonMode;
+	shovelerModelUpdateTransformation(modelComponentData->model);
 
 	ShovelerScene *scene = shovelerViewGetScene(modelComponentData->entity->view);
 	shovelerSceneAddModel(scene, modelComponentData->model);
+
+	modelComponentData->positionCallback = shovelerViewEntityAddCallback(modelComponentData->entity, shovelerViewPositionComponentName, &positionCallback, modelComponentData);
 }
 
 static void deactivateComponent(void *modelComponentDataPointer)
@@ -378,10 +387,12 @@ static void deactivateComponent(void *modelComponentDataPointer)
 	ModelComponentData *modelComponentData = modelComponentDataPointer;
 	assert(shovelerViewHasScene(modelComponentData->entity->view));
 
-	if(modelComponentData->model != NULL) {
-		ShovelerScene *scene = shovelerViewGetScene(modelComponentData->entity->view);
-		shovelerSceneRemoveModel(scene, modelComponentData->model);
-	}
+	ShovelerScene *scene = shovelerViewGetScene(modelComponentData->entity->view);
+	shovelerSceneRemoveModel(scene, modelComponentData->model);
+	modelComponentData->model = NULL;
+
+	shovelerViewEntityRemoveCallback(modelComponentData->entity, shovelerViewPositionComponentName, modelComponentData->positionCallback);
+	modelComponentData->positionCallback = NULL;
 }
 
 static void freeComponent(ShovelerViewComponent *component)
@@ -396,7 +407,9 @@ static void freeComponent(ShovelerViewComponent *component)
 		shovelerSceneRemoveModel(scene, model);
 	}
 
-	shovelerViewEntityRemoveCallback(component->entity, shovelerViewPositionComponentName, modelComponentData->positionCallback);
+	if(modelComponentData->positionCallback != NULL) {
+		shovelerViewEntityRemoveCallback(component->entity, shovelerViewPositionComponentName, modelComponentData->positionCallback);
+	}
 
 	free(modelComponentData);
 }

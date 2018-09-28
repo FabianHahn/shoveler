@@ -11,11 +11,15 @@
 #include "shoveler/view.h"
 
 typedef struct {
+	ShovelerViewEntity *entity;
+	ShovelerViewLightConfiguration configuration;
 	ShovelerLight *light;
 	ShovelerViewComponentCallback *positionCallback;
 } LightComponentData;
 
 static void positionCallback(ShovelerViewComponent *positionComponent, ShovelerViewComponentCallbackType callbackType, void *lightComponentDataPointer);
+static void activateComponent(void *lightComponentDataPointer);
+static void deactivateComponent(void *lightComponentDataPointer);
 static void freeComponent(ShovelerViewComponent *component);
 
 bool shovelerViewAddEntityLight(ShovelerView *view, long long int entityId, ShovelerViewLightConfiguration lightConfiguration)
@@ -34,28 +38,13 @@ bool shovelerViewAddEntityLight(ShovelerView *view, long long int entityId, Shov
 		return false;
 	}
 
-	ShovelerLight *light;
-	switch(lightConfiguration.type) {
-		case SHOVELER_VIEW_LIGHT_TYPE_SPOT:
-			shovelerLogWarning("Trying to create light with unsupported spot type, ignoring.");
-			return false;
-			break;
-		case SHOVELER_VIEW_LIGHT_TYPE_POINT:
-			light = shovelerLightPointCreate((ShovelerVector3) {0.0f, 0.0f, 0.0f}, lightConfiguration.width, lightConfiguration.height, lightConfiguration.samples, lightConfiguration.ambientFactor, lightConfiguration.exponentialFactor, lightConfiguration.color);
-			break;
-		default:
-			shovelerLogWarning("Trying to create light with unknown light type %d, ignoring.", lightConfiguration.type);
-			return false;
-	}
-
-	ShovelerScene *scene = shovelerViewGetScene(view);
-	shovelerSceneAddLight(scene, light);
-
 	LightComponentData *lightComponentData = malloc(sizeof(LightComponentData));
-	lightComponentData->light = light;
-	lightComponentData->positionCallback = shovelerViewEntityAddCallback(entity, shovelerViewPositionComponentName, &positionCallback, lightComponentData);
+	lightComponentData->entity = entity;
+	lightComponentData->configuration = lightConfiguration;
+	lightComponentData->light = NULL;
+	lightComponentData->positionCallback = NULL;
 
-	if (!shovelerViewEntityAddComponent(entity, shovelerViewLightComponentName, lightComponentData, NULL, NULL, &freeComponent)) {
+	if (!shovelerViewEntityAddComponent(entity, shovelerViewLightComponentName, lightComponentData, activateComponent, deactivateComponent, freeComponent)) {
 		freeComponent(component);
 		return false;
 	}
@@ -94,9 +83,48 @@ bool shovelerViewRemoveEntityLight(ShovelerView *view, long long int entityId)
 
 static void positionCallback(ShovelerViewComponent *positionComponent, ShovelerViewComponentCallbackType callbackType, void *lightComponentDataPointer)
 {
-	ShovelerViewPosition *position = positionComponent->data;
 	LightComponentData *lightComponentData = lightComponentDataPointer;
-	shovelerLightUpdatePosition(lightComponentData->light, (ShovelerVector3){position->x, position->y, position->z});
+
+	ShovelerViewPosition *position = shovelerViewEntityGetPosition(positionComponent->entity);
+	shovelerLightUpdatePosition(lightComponentData->light, shovelerVector3(position->x, position->y, position->z));
+}
+
+static void activateComponent(void *lightComponentDataPointer)
+{
+	LightComponentData *lightComponentData = lightComponentDataPointer;
+	assert(shovelerViewHasScene(lightComponentData->entity->view));
+
+	ShovelerViewPosition *position = shovelerViewEntityGetPosition(lightComponentData->entity);
+
+	switch(lightComponentData->configuration.type) {
+		case SHOVELER_VIEW_LIGHT_TYPE_SPOT:
+			shovelerLogWarning("Trying to create light with unsupported spot type, ignoring.");
+			return;
+		case SHOVELER_VIEW_LIGHT_TYPE_POINT:
+			lightComponentData->light = shovelerLightPointCreate(shovelerVector3(position->x, position->y, position->z), lightComponentData->configuration.width, lightComponentData->configuration.height, lightComponentData->configuration.samples, lightComponentData->configuration.ambientFactor, lightComponentData->configuration.exponentialFactor, lightComponentData->configuration.color);
+			break;
+		default:
+			shovelerLogWarning("Trying to create light with unknown light type %d, ignoring.", lightComponentData->configuration.type);
+			return;
+	}
+
+	ShovelerScene *scene = shovelerViewGetScene(lightComponentData->entity->view);
+	shovelerSceneAddLight(scene, lightComponentData->light);
+
+	lightComponentData->positionCallback = shovelerViewEntityAddCallback(lightComponentData->entity, shovelerViewPositionComponentName, &positionCallback, lightComponentData);
+}
+
+static void deactivateComponent(void *lightComponentDataPointer)
+{
+	LightComponentData *lightComponentData = lightComponentDataPointer;
+	assert(shovelerViewHasScene(lightComponentData->entity->view));
+
+	ShovelerScene *scene = shovelerViewGetScene(lightComponentData->entity->view);
+	shovelerSceneRemoveLight(scene, lightComponentData->light);
+	lightComponentData->light = NULL;
+
+	shovelerViewEntityRemoveCallback(lightComponentData->entity, shovelerViewPositionComponentName, lightComponentData->positionCallback);
+	lightComponentData->positionCallback = NULL;
 }
 
 static void freeComponent(ShovelerViewComponent *component)
@@ -112,7 +140,9 @@ static void freeComponent(ShovelerViewComponent *component)
 		shovelerSceneRemoveLight(scene, light);
 	}
 
-	shovelerViewEntityRemoveCallback(component->entity, shovelerViewPositionComponentName, lightComponentData->positionCallback);
+	if(lightComponentData != NULL) {
+		shovelerViewEntityRemoveCallback(component->entity, shovelerViewPositionComponentName, lightComponentData->positionCallback);
+	}
 
 	free(lightComponentData);
 }
