@@ -25,6 +25,7 @@ typedef struct {
 } ShovelerViewMaterialConfiguration;
 
 typedef struct {
+	long long int drawableEntityId;
 	ShovelerViewMaterialConfiguration material;
 	ShovelerVector3 rotation;
 	ShovelerVector3 scale;
@@ -40,6 +41,7 @@ static const char *shovelerViewModelComponentName = "model";
 bool shovelerViewAddEntityModel(ShovelerView *view, long long int entityId, ShovelerViewModelConfiguration modelConfiguration);
 ShovelerModel *shovelerViewGetEntityModel(ShovelerView *view, long long int entityId);
 ShovelerModel *shovelerViewEntityGetModel(ShovelerViewEntity *entity);
+bool shovelerViewUpdateEntityModelDrawableEntityId(ShovelerView *view, long long int entityId, long long int drawableEntityId);
 bool shovelerViewUpdateEntityModelMaterial(ShovelerView *view, long long int entityId, ShovelerViewMaterialConfiguration materialConfiguration);
 bool shovelerViewUpdateEntityModelRotation(ShovelerView *view, long long int entityId, ShovelerVector3 rotation);
 bool shovelerViewUpdateEntityModelScale(ShovelerView *view, long long int entityId, ShovelerVector3 scale);

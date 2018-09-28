@@ -60,7 +60,7 @@ bool shovelerViewAddEntityModel(ShovelerView *view, long long int entityId, Shov
 		return false;
 	}
 
-	if(!shovelerViewEntityAddComponentDependency(entity, shovelerViewModelComponentName, entity->entityId, shovelerViewDrawableComponentName)) {
+	if(!shovelerViewEntityAddComponentDependency(entity, shovelerViewModelComponentName, modelConfiguration.drawableEntityId, shovelerViewDrawableComponentName)) {
 		shovelerViewEntityRemoveComponent(entity, shovelerViewModelComponentName);
 		return false;
 	}
@@ -88,6 +88,34 @@ ShovelerModel *shovelerViewEntityGetModel(ShovelerViewEntity *entity)
 
 	ModelComponentData *modelComponentData = component->data;
 	return modelComponentData->model;
+}
+
+bool shovelerViewUpdateEntityModelDrawableEntityId(ShovelerView *view, long long int entityId, long long int drawableEntityId)
+{
+	assert(shovelerViewHasScene(view));
+
+	ShovelerViewEntity *entity = shovelerViewGetEntity(view, entityId);
+	if(entity == NULL) {
+		shovelerLogWarning("Trying to update model material of non existing entity %lld, ignoring.", entityId);
+		return false;
+	}
+
+	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewModelComponentName);
+	if(component == NULL) {
+		shovelerLogWarning("Trying to update model material of entity %lld which does not have a model, ignoring.", entityId);
+		return false;
+	}
+
+	ModelComponentData *modelComponentData = component->data;
+
+	shovelerViewEntityDeactivateComponent(entity, shovelerViewModelComponentName);
+	shovelerViewEntityRemoveComponentDependency(entity, shovelerViewModelComponentName, modelComponentData->configuration.drawableEntityId, shovelerViewDrawableComponentName);
+
+	modelComponentData->configuration.drawableEntityId = drawableEntityId;
+	shovelerViewEntityAddComponentDependency(entity, shovelerViewModelComponentName, drawableEntityId, shovelerViewDrawableComponentName);
+	shovelerViewEntityActivateComponent(entity, shovelerViewModelComponentName);
+
+	return shovelerViewEntityUpdateComponent(entity, shovelerViewModelComponentName);
 }
 
 bool shovelerViewUpdateEntityModelMaterial(ShovelerView *view, long long int entityId, ShovelerViewMaterialConfiguration materialConfiguration)
@@ -332,7 +360,7 @@ static void activateComponent(void *modelComponentDataPointer)
 		return;
 	}
 
-	ShovelerDrawable *drawable = shovelerViewEntityGetDrawable(modelComponentData->entity);
+	ShovelerDrawable *drawable = shovelerViewGetEntityDrawable(modelComponentData->entity->view, modelComponentData->configuration.drawableEntityId);
 	modelComponentData->model = shovelerModelCreate(drawable, material);
 	modelComponentData->model->rotation = modelComponentData->configuration.rotation;
 	modelComponentData->model->scale = modelComponentData->configuration.scale;
