@@ -18,7 +18,6 @@ set(SHOVELER_OPENGL_SRC
 	src/material/variation.c
 	src/view/client.c
 	src/view/drawable.c
-	src/view/drawables.c
 	src/view/light.c
 	src/view/model.c
 	src/camera.c
@@ -58,7 +57,6 @@ set(SHOVELER_OPENGL_SRC
 	include/shoveler/view/client.h
 	include/shoveler/view/controller.h
 	include/shoveler/view/drawable.h
-	include/shoveler/view/drawables.h
 	include/shoveler/view/light.h
 	include/shoveler/view/model.h
 	include/shoveler/view/scene.h

@@ -8,7 +8,6 @@
 #include "shoveler/material/particle.h"
 #include "shoveler/material/texture.h"
 #include "shoveler/view/drawable.h"
-#include "shoveler/view/drawables.h"
 #include "shoveler/view/model.h"
 #include "shoveler/view/position.h"
 #include "shoveler/view/scene.h"

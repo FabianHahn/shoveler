@@ -6,7 +6,6 @@
 #include "shoveler/drawable/quad.h"
 #include "shoveler/drawable/tiles.h"
 #include "shoveler/view/drawable.h"
-#include "shoveler/view/drawables.h"
 #include "shoveler/log.h"
 #include "shoveler/view.h"
 
@@ -21,8 +20,6 @@ static void freeComponentData(DrawableComponentData *drawableComponentData);
 
 bool shovelerViewAddEntityDrawable(ShovelerView *view, long long int entityId, ShovelerViewDrawableConfiguration configuration)
 {
-	assert(shovelerViewHasDrawables(view));
-
 	ShovelerViewEntity *entity = shovelerViewGetEntity(view, entityId);
 	if(entity == NULL) {
 		shovelerLogWarning("Trying to add drawable to non existing entity %lld, ignoring.", entityId);
@@ -38,12 +35,6 @@ bool shovelerViewAddEntityDrawable(ShovelerView *view, long long int entityId, S
 	DrawableComponentData *drawableComponentData = malloc(sizeof(DrawableComponentData));
 	drawableComponentData->entityId = entityId;
 	drawableComponentData->drawable = createDrawable(configuration);
-
-	ShovelerViewDrawables *drawables = shovelerViewGetDrawables(view);
-	if(!g_hash_table_insert(drawables->entities, &drawableComponentData->entityId, drawableComponentData->drawable)) {
-		freeComponentData(drawableComponentData);
-		return false;
-	}
 
 	if(!shovelerViewEntityAddComponent(entity, shovelerViewDrawableComponentName, drawableComponentData, NULL, NULL, &freeComponent)) {
 		freeComponentData(drawableComponentData);
