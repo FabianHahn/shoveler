@@ -20,9 +20,6 @@
 #include <shoveler/shader_program.h>
 #include <shoveler/texture.h>
 
-static float previousCursorX;
-static float previousCursorY;
-
 static float eps = 1e-9;
 
 static void shovelerSampleInit(ShovelerGame *sampleGame, int width, int height, int samples);
@@ -105,12 +102,6 @@ int main(int argc, char *argv[])
 	shovelerSceneAddModel(game->scene, tilesModel);
 
 	shovelerOpenGLCheckSuccess();
-
-	double newCursorX;
-	double newCursorY;
-	glfwGetCursorPos(game->window, &newCursorX, &newCursorY);
-	previousCursorX = newCursorX;
-	previousCursorY = newCursorY;
 
 	game->update = shovelerSampleUpdate;
 
