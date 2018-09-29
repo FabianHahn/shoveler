@@ -17,13 +17,12 @@ typedef struct {
 	double z;
 } ShovelerViewPosition;
 
-bool shovelerViewAddEntityPosition(ShovelerView *view, long long int entityId, double x, double y, double z);
-ShovelerViewPosition *shovelerViewGetEntityPosition(ShovelerView *view, long long int entityId);
+bool shovelerViewEntityAddPosition(ShovelerViewEntity *entity, double x, double y, double z);
 ShovelerViewPosition *shovelerViewEntityGetPosition(ShovelerViewEntity *entity);
-bool shovelerViewUpdateEntityPosition(ShovelerView *view, long long int entityId, double x, double y, double z);
-bool shovelerViewDelegatePosition(ShovelerView *view, long long int entityId, ShovelerViewPositionRequestUpdateFunction *requestUpdateFunction, void *userData);
-bool shovelerViewUndelegatePosition(ShovelerView *view, long long int entityId);
-bool shovelerViewRequestPositionUpdate(ShovelerView *view, long long int entityId, double x, double y, double z);
-bool shovelerViewRemoveEntityPosition(ShovelerView *view, long long int entityId);
+bool shovelerViewEntityUpdatePosition(ShovelerViewEntity *entity, double x, double y, double z);
+bool shovelerViewEntityDelegatePosition(ShovelerViewEntity *entity, ShovelerViewPositionRequestUpdateFunction *requestUpdateFunction, void *userData);
+bool shovelerViewEntityUndelegatePosition(ShovelerViewEntity *entity);
+bool shovelerViewEntityRequestPositionUpdate(ShovelerViewEntity *entity, double x, double y, double z);
+bool shovelerViewEntityRemoveEntityPosition(ShovelerViewEntity *entity);
 
 #endif

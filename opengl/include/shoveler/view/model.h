@@ -38,17 +38,16 @@ typedef struct {
 
 static const char *shovelerViewModelComponentName = "model";
 
-bool shovelerViewAddEntityModel(ShovelerView *view, long long int entityId, ShovelerViewModelConfiguration modelConfiguration);
-ShovelerModel *shovelerViewGetEntityModel(ShovelerView *view, long long int entityId);
+bool shovelerViewEntityAddModel(ShovelerViewEntity *entity, ShovelerViewModelConfiguration modelConfiguration);
 ShovelerModel *shovelerViewEntityGetModel(ShovelerViewEntity *entity);
-bool shovelerViewUpdateEntityModelDrawableEntityId(ShovelerView *view, long long int entityId, long long int drawableEntityId);
-bool shovelerViewUpdateEntityModelMaterial(ShovelerView *view, long long int entityId, ShovelerViewMaterialConfiguration materialConfiguration);
-bool shovelerViewUpdateEntityModelRotation(ShovelerView *view, long long int entityId, ShovelerVector3 rotation);
-bool shovelerViewUpdateEntityModelScale(ShovelerView *view, long long int entityId, ShovelerVector3 scale);
-bool shovelerViewUpdateEntityModelVisible(ShovelerView *view, long long int entityId, bool visible);
-bool shovelerViewUpdateEntityModelEmitter(ShovelerView *view, long long int entityId, bool emitter);
-bool shovelerViewUpdateEntityModelScreenspace(ShovelerView *view, long long int entityId, bool screenspace);
-bool shovelerViewUpdateEntityModelPolygonMode(ShovelerView *view, long long int entityId, GLuint polygonMode);
-bool shovelerViewRemoveEntityModel(ShovelerView *view, long long int entityId);
+bool shovelerViewEntityUpdateModelDrawableEntityId(ShovelerViewEntity *entity, long long int drawableEntityId);
+bool shovelerViewEntityUpdateModelMaterial(ShovelerViewEntity *entity, ShovelerViewMaterialConfiguration materialConfiguration);
+bool shovelerViewEntityUpdateModelRotation(ShovelerViewEntity *entity, ShovelerVector3 rotation);
+bool shovelerViewEntityUpdateModelScale(ShovelerViewEntity *entity, ShovelerVector3 scale);
+bool shovelerViewEntityUpdateModelVisible(ShovelerViewEntity *entity, bool visible);
+bool shovelerViewEntityUpdateModelEmitter(ShovelerViewEntity *entity, bool emitter);
+bool shovelerViewEntityUpdateModelScreenspace(ShovelerViewEntity *entity, bool screenspace);
+bool shovelerViewEntityUpdateModelPolygonMode(ShovelerViewEntity *entity, GLuint polygonMode);
+bool shovelerViewEntityRemoveModel(ShovelerViewEntity *entity);
 
 #endif

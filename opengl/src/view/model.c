@@ -28,17 +28,11 @@ static bool activateComponent(ShovelerViewComponent *component, void *modelCompo
 static void deactivateComponent(ShovelerViewComponent *component, void *modelComponentDataPointer);
 static void freeComponent(ShovelerViewComponent *component, void *modelComponentDataPointer);
 
-bool shovelerViewAddEntityModel(ShovelerView *view, long long int entityId, ShovelerViewModelConfiguration modelConfiguration)
+bool shovelerViewEntityAddModel(ShovelerViewEntity *entity, ShovelerViewModelConfiguration modelConfiguration)
 {
-	ShovelerViewEntity *entity = shovelerViewGetEntity(view, entityId);
-	if(entity == NULL) {
-		shovelerLogWarning("Trying to add model to non existing entity %lld, ignoring.", entityId);
-		return false;
-	}
-
 	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewModelComponentName);
 	if(component != NULL) {
-		shovelerLogWarning("Trying to add model to entity %lld which already has a model, ignoring.", entityId);
+		shovelerLogWarning("Trying to add model to entity %lld which already has a model, ignoring.", entity->entityId);
 		return false;
 	}
 
@@ -47,33 +41,14 @@ bool shovelerViewAddEntityModel(ShovelerView *view, long long int entityId, Shov
 	modelComponentData->model = NULL;
 	modelComponentData->positionCallback = NULL;
 
-	if (!shovelerViewEntityAddComponent(entity, shovelerViewModelComponentName, modelComponentData, activateComponent, deactivateComponent, freeComponent)) {
-		free(modelComponentData);
-		return false;
-	}
+	component = shovelerViewEntityAddComponent(entity, shovelerViewModelComponentName, modelComponentData, activateComponent, deactivateComponent, freeComponent);
+	assert(component != NULL);
 
-	if(!shovelerViewEntityAddComponentDependency(entity, shovelerViewModelComponentName, entity->entityId, shovelerViewPositionComponentName)) {
-		shovelerViewEntityRemoveComponent(entity, shovelerViewModelComponentName);
-		return false;
-	}
+	shovelerViewComponentAddDependency(component, entity->entityId, shovelerViewPositionComponentName);
+	shovelerViewComponentAddDependency(component, modelConfiguration.drawableEntityId, shovelerViewDrawableComponentName);
 
-	if(!shovelerViewEntityAddComponentDependency(entity, shovelerViewModelComponentName, modelConfiguration.drawableEntityId, shovelerViewDrawableComponentName)) {
-		shovelerViewEntityRemoveComponent(entity, shovelerViewModelComponentName);
-		return false;
-	}
-
-	shovelerViewEntityActivateComponent(entity, shovelerViewModelComponentName);
+	shovelerViewComponentActivate(component);
 	return true;
-}
-
-ShovelerModel *shovelerViewGetEntityModel(ShovelerView *view, long long int entityId)
-{
-	ShovelerViewEntity *entity = shovelerViewGetEntity(view, entityId);
-	if(entity == NULL) {
-		return NULL;
-	}
-
-	return shovelerViewEntityGetModel(entity);
 }
 
 ShovelerModel *shovelerViewEntityGetModel(ShovelerViewEntity *entity)
@@ -87,72 +62,58 @@ ShovelerModel *shovelerViewEntityGetModel(ShovelerViewEntity *entity)
 	return modelComponentData->model;
 }
 
-bool shovelerViewUpdateEntityModelDrawableEntityId(ShovelerView *view, long long int entityId, long long int drawableEntityId)
+bool shovelerViewEntityUpdateModelDrawableEntityId(ShovelerViewEntity *entity, long long int drawableEntityId)
 {
-	assert(shovelerViewHasScene(view));
-
-	ShovelerViewEntity *entity = shovelerViewGetEntity(view, entityId);
-	if(entity == NULL) {
-		shovelerLogWarning("Trying to update model material of non existing entity %lld, ignoring.", entityId);
-		return false;
-	}
+	assert(shovelerViewHasScene(entity->view));
 
 	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewModelComponentName);
 	if(component == NULL) {
-		shovelerLogWarning("Trying to update model material of entity %lld which does not have a model, ignoring.", entityId);
+		shovelerLogWarning("Trying to update model material of entity %lld which does not have a model, ignoring.", entity->entityId);
 		return false;
 	}
 
 	ModelComponentData *modelComponentData = component->data;
 
-	shovelerViewEntityDeactivateComponent(entity, shovelerViewModelComponentName);
-	shovelerViewEntityRemoveComponentDependency(entity, shovelerViewModelComponentName, modelComponentData->configuration.drawableEntityId, shovelerViewDrawableComponentName);
-
-	modelComponentData->configuration.drawableEntityId = drawableEntityId;
-	shovelerViewEntityAddComponentDependency(entity, shovelerViewModelComponentName, drawableEntityId, shovelerViewDrawableComponentName);
-	shovelerViewEntityActivateComponent(entity, shovelerViewModelComponentName);
-
-	return shovelerViewEntityUpdateComponent(entity, shovelerViewModelComponentName);
-}
-
-bool shovelerViewUpdateEntityModelMaterial(ShovelerView *view, long long int entityId, ShovelerViewMaterialConfiguration materialConfiguration)
-{
-	assert(shovelerViewHasScene(view));
-
-	ShovelerViewEntity *entity = shovelerViewGetEntity(view, entityId);
-	if(entity == NULL) {
-		shovelerLogWarning("Trying to update model material of non existing entity %lld, ignoring.", entityId);
+	shovelerViewComponentDeactivate(component);
+	if(!shovelerViewComponentRemoveDependency(component, modelComponentData->configuration.drawableEntityId, shovelerViewDrawableComponentName)) {
 		return false;
 	}
 
+	modelComponentData->configuration.drawableEntityId = drawableEntityId;
+	shovelerViewComponentAddDependency(component, drawableEntityId, shovelerViewDrawableComponentName);
+	shovelerViewComponentActivate(component);
+
+	shovelerViewComponentUpdate(component);
+	return true;
+}
+
+bool shovelerViewEntityUpdateModelMaterial(ShovelerViewEntity *entity, ShovelerViewMaterialConfiguration materialConfiguration)
+{
+	assert(shovelerViewHasScene(entity->view));
+
 	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewModelComponentName);
 	if(component == NULL) {
-		shovelerLogWarning("Trying to update model material of entity %lld which does not have a model, ignoring.", entityId);
+		shovelerLogWarning("Trying to update model material of entity %lld which does not have a model, ignoring.", entity->entityId);
 		return false;
 	}
 
 	ModelComponentData *modelComponentData = component->data;
 	modelComponentData->configuration.material = materialConfiguration;
 
-	shovelerViewEntityDeactivateComponent(entity, shovelerViewModelComponentName);
-	shovelerViewEntityActivateComponent(entity, shovelerViewModelComponentName);
+	shovelerViewComponentDeactivate(component);
+	shovelerViewComponentActivate(component);
 
-	return shovelerViewEntityUpdateComponent(entity, shovelerViewModelComponentName);
+	shovelerViewComponentUpdate(component);
+	return true;
 }
 
-bool shovelerViewUpdateEntityModelRotation(ShovelerView *view, long long int entityId, ShovelerVector3 rotation)
+bool shovelerViewEntityUpdateModelRotation(ShovelerViewEntity *entity, ShovelerVector3 rotation)
 {
-	assert(shovelerViewHasScene(view));
-
-	ShovelerViewEntity *entity = shovelerViewGetEntity(view, entityId);
-	if(entity == NULL) {
-		shovelerLogWarning("Trying to update model rotation of non existing entity %lld, ignoring.", entityId);
-		return false;
-	}
+	assert(shovelerViewHasScene(entity->view));
 
 	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewModelComponentName);
 	if(component == NULL) {
-		shovelerLogWarning("Trying to update model rotation of entity %lld which does not have a model, ignoring.", entityId);
+		shovelerLogWarning("Trying to update model rotation of entity %lld which does not have a model, ignoring.", entity->entityId);
 		return false;
 	}
 
@@ -164,20 +125,15 @@ bool shovelerViewUpdateEntityModelRotation(ShovelerView *view, long long int ent
 		shovelerModelUpdateTransformation(modelComponentData->model);
 	}
 
-	return shovelerViewEntityUpdateComponent(entity, shovelerViewModelComponentName);
+	shovelerViewComponentUpdate(component);
+	return true;
 }
 
-bool shovelerViewUpdateEntityModelScale(ShovelerView *view, long long int entityId, ShovelerVector3 scale)
+bool shovelerViewEntityUpdateModelScale(ShovelerViewEntity *entity, ShovelerVector3 scale)
 {
-	ShovelerViewEntity *entity = shovelerViewGetEntity(view, entityId);
-	if(entity == NULL) {
-		shovelerLogWarning("Trying to update model scale of non existing entity %lld, ignoring.", entityId);
-		return false;
-	}
-
 	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewModelComponentName);
 	if(component == NULL) {
-		shovelerLogWarning("Trying to update model scale of entity %lld which does not have a model, ignoring.", entityId);
+		shovelerLogWarning("Trying to update model scale of entity %lld which does not have a model, ignoring.", entity->entityId);
 		return false;
 	}
 
@@ -189,20 +145,15 @@ bool shovelerViewUpdateEntityModelScale(ShovelerView *view, long long int entity
 		shovelerModelUpdateTransformation(modelComponentData->model);
 	}
 
-	return shovelerViewEntityUpdateComponent(entity, shovelerViewModelComponentName);
+	shovelerViewComponentUpdate(component);
+	return true;
 }
 
-bool shovelerViewUpdateEntityModelVisible(ShovelerView *view, long long int entityId, bool visible)
+bool shovelerViewEntityUpdateModelVisible(ShovelerViewEntity *entity, bool visible)
 {
-	ShovelerViewEntity *entity = shovelerViewGetEntity(view, entityId);
-	if(entity == NULL) {
-		shovelerLogWarning("Trying to update model visibility of non existing entity %lld, ignoring.", entityId);
-		return false;
-	}
-
 	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewModelComponentName);
 	if(component == NULL) {
-		shovelerLogWarning("Trying to update model visibility of entity %lld which does not have a model, ignoring.", entityId);
+		shovelerLogWarning("Trying to update model visibility of entity %lld which does not have a model, ignoring.", entity->entityId);
 		return false;
 	}
 
@@ -213,20 +164,15 @@ bool shovelerViewUpdateEntityModelVisible(ShovelerView *view, long long int enti
 		modelComponentData->model->visible = visible;
 	}
 
-	return shovelerViewEntityUpdateComponent(entity, shovelerViewModelComponentName);
+	shovelerViewComponentUpdate(component);
+	return true;
 }
 
-bool shovelerViewUpdateEntityModelEmitter(ShovelerView *view, long long int entityId, bool emitter)
+bool shovelerViewEntityUpdateModelEmitter(ShovelerViewEntity *entity, bool emitter)
 {
-	ShovelerViewEntity *entity = shovelerViewGetEntity(view, entityId);
-	if(entity == NULL) {
-		shovelerLogWarning("Trying to update model emitter of non existing entity %lld, ignoring.", entityId);
-		return false;
-	}
-
 	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewModelComponentName);
 	if(component == NULL) {
-		shovelerLogWarning("Trying to update model emitter of entity %lld which does not have a model, ignoring.", entityId);
+		shovelerLogWarning("Trying to update model emitter of entity %lld which does not have a model, ignoring.", entity->entityId);
 		return false;
 	}
 
@@ -237,20 +183,15 @@ bool shovelerViewUpdateEntityModelEmitter(ShovelerView *view, long long int enti
 		modelComponentData->model->emitter = emitter;
 	}
 
-	return shovelerViewEntityUpdateComponent(entity, shovelerViewModelComponentName);
+	shovelerViewComponentUpdate(component);
+	return true;
 }
 
-bool shovelerViewUpdateEntityModelScreenspace(ShovelerView *view, long long int entityId, bool screenspace)
+bool shovelerViewEntityUpdateModelScreenspace(ShovelerViewEntity *entity, bool screenspace)
 {
-	ShovelerViewEntity *entity = shovelerViewGetEntity(view, entityId);
-	if(entity == NULL) {
-		shovelerLogWarning("Trying to update model screenspace of non existing entity %lld, ignoring.", entityId);
-		return false;
-	}
-
 	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewModelComponentName);
 	if(component == NULL) {
-		shovelerLogWarning("Trying to update model screenspace of entity %lld which does not have a model, ignoring.", entityId);
+		shovelerLogWarning("Trying to update model screenspace of entity %lld which does not have a model, ignoring.", entity->entityId);
 		return false;
 	}
 
@@ -261,20 +202,15 @@ bool shovelerViewUpdateEntityModelScreenspace(ShovelerView *view, long long int 
 		modelComponentData->model->screenspace = screenspace;
 	}
 
-	return shovelerViewEntityUpdateComponent(entity, shovelerViewModelComponentName);
+	shovelerViewComponentUpdate(component);
+	return true;
 }
 
-bool shovelerViewUpdateEntityModelPolygonMode(ShovelerView *view, long long int entityId, GLuint polygonMode)
+bool shovelerViewEntityUpdateModelPolygonMode(ShovelerViewEntity *entity, GLuint polygonMode)
 {
-	ShovelerViewEntity *entity = shovelerViewGetEntity(view, entityId);
-	if(entity == NULL) {
-		shovelerLogWarning("Trying to update model polygon mode of non existing entity %lld, ignoring.", entityId);
-		return false;
-	}
-
 	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewModelComponentName);
 	if(component == NULL) {
-		shovelerLogWarning("Trying to update model polygon mode of entity %lld which does not have a model, ignoring.", entityId);
+		shovelerLogWarning("Trying to update model polygon mode of entity %lld which does not have a model, ignoring.", entity->entityId);
 		return false;
 	}
 
@@ -285,22 +221,17 @@ bool shovelerViewUpdateEntityModelPolygonMode(ShovelerView *view, long long int 
 		modelComponentData->model->polygonMode = polygonMode;
 	}
 
-	return shovelerViewEntityUpdateComponent(entity, shovelerViewModelComponentName);
+	shovelerViewComponentUpdate(component);
+	return true;
 }
 
-bool shovelerViewRemoveEntityModel(ShovelerView *view, long long int entityId)
+bool shovelerViewEntityRemoveModel(ShovelerViewEntity *entity)
 {
-	assert(shovelerViewHasScene(view));
-
-	ShovelerViewEntity *entity = shovelerViewGetEntity(view, entityId);
-	if(entity == NULL) {
-		shovelerLogWarning("Trying to remove model from non existing entity %lld, ignoring.", entityId);
-		return false;
-	}
+	assert(shovelerViewHasScene(entity->view));
 
 	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewModelComponentName);
 	if(component == NULL) {
-		shovelerLogWarning("Trying to remove model from entity %lld which does not have a model, ignoring.", entityId);
+		shovelerLogWarning("Trying to remove model from entity %lld which does not have a model, ignoring.", entity->entityId);
 		return false;
 	}
 
@@ -360,7 +291,11 @@ static bool activateComponent(ShovelerViewComponent *component, void *modelCompo
 
 	ShovelerViewPosition *position = shovelerViewEntityGetPosition(component->entity);
 
-	ShovelerDrawable *drawable = shovelerViewGetEntityDrawable(component->entity->view, modelComponentData->configuration.drawableEntityId);
+	ShovelerViewEntity *drawableEntity = shovelerViewGetEntity(component->entity->view, modelComponentData->configuration.drawableEntityId);
+	assert(drawableEntity != NULL);
+	ShovelerDrawable *drawable = shovelerViewEntityGetDrawable(drawableEntity);
+	assert(drawable != NULL);
+
 	modelComponentData->model = shovelerModelCreate(drawable, material);
 	modelComponentData->model->translation.values[0] = position->x;
 	modelComponentData->model->translation.values[1] = position->y;

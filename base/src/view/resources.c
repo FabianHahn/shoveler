@@ -9,24 +9,18 @@
 
 static void freeResourceComponentData(ShovelerViewComponent *component, void *resourcePointer);
 
-bool shovelerViewAddEntityResource(ShovelerView *view, long long int entityId, const char *typeId, const unsigned char *buffer, size_t bytes)
+bool shovelerViewEntityAddResource(ShovelerViewEntity *entity, const char *typeId, const unsigned char *buffer, size_t bytes)
 {
-	assert(shovelerViewHasResources(view));
-
-	ShovelerViewEntity *entity = shovelerViewGetEntity(view, entityId);
-	if(entity == NULL) {
-		shovelerLogWarning("Trying to add resource to non existing entity %lld, ignoring.", entityId);
-		return false;
-	}
+	assert(shovelerViewHasResources(entity->view));
 
 	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewResourceComponentName);
 	if(component != NULL) {
-		shovelerLogWarning("Trying to add resource to entity %lld which already has a resource, ignoring.", entityId);
+		shovelerLogWarning("Trying to add resource to entity %lld which already has a resource, ignoring.", entity->entityId);
 		return false;
 	}
 
 	GString *resourceId = g_string_new("");
-	g_string_append_printf(resourceId, "%lld", entityId);
+	g_string_append_printf(resourceId, "%lld", entity->entityId);
 
 	ShovelerViewResource *resource = malloc(sizeof(ShovelerViewResource));
 	resource->typeId = strdup(typeId);
@@ -34,49 +28,39 @@ bool shovelerViewAddEntityResource(ShovelerView *view, long long int entityId, c
 
 	g_string_free(resourceId, false);
 
-	ShovelerResources *resources = shovelerViewGetResources(view);
+	ShovelerResources *resources = shovelerViewGetResources(entity->view);
 	shovelerResourcesSet(resources, typeId, resource->resourceId, buffer, bytes);
 
-	if (!shovelerViewEntityAddComponent(entity, shovelerViewResourceComponentName, resource, NULL, NULL, freeResourceComponentData)) {
-		return false;
-	}
+	component = shovelerViewEntityAddComponent(entity, shovelerViewResourceComponentName, resource, NULL, NULL, freeResourceComponentData);
+	assert(component != NULL);
+
+	shovelerViewComponentActivate(component);
 	return true;
 }
 
-bool shovelerViewUpdateEntityResource(ShovelerView *view, long long int entityId, const unsigned char *buffer, size_t bytes)
+bool shovelerViewEntityUpdateResource(ShovelerViewEntity *entity, const unsigned char *buffer, size_t bytes)
 {
-	assert(shovelerViewHasResources(view));
-
-	ShovelerViewEntity *entity = shovelerViewGetEntity(view, entityId);
-	if(entity == NULL) {
-		shovelerLogWarning("Trying to update resource for non existing entity %lld, ignoring.", entityId);
-		return false;
-	}
+	assert(shovelerViewHasResources(entity->view));
 
 	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewResourceComponentName);
 	if(component == NULL) {
-		shovelerLogWarning("Trying to update resource for entity %lld which does not have a resource, ignoring.", entityId);
+		shovelerLogWarning("Trying to update resource for entity %lld which does not have a resource, ignoring.", entity->entityId);
 		return false;
 	}
 
 	ShovelerViewResource *resource = (ShovelerViewResource *) component->data;
-	ShovelerResources *resources = shovelerViewGetResources(view);
+	ShovelerResources *resources = shovelerViewGetResources(entity->view);
 	shovelerResourcesSet(resources, resource->typeId, resource->resourceId, buffer, bytes);
 
-	return shovelerViewEntityUpdateComponent(entity, shovelerViewResourceComponentName);
+	shovelerViewComponentUpdate(component);
+	return true;
 }
 
-bool shovelerViewRemoveEntityResource(ShovelerView *view, long long int entityId)
+bool shovelerViewEntityRemoveResource(ShovelerViewEntity *entity)
 {
-	ShovelerViewEntity *entity = shovelerViewGetEntity(view, entityId);
-	if(entity == NULL) {
-		shovelerLogWarning("Trying to remove resource from non existing entity %lld, ignoring.", entityId);
-		return false;
-	}
-
 	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewResourceComponentName);
 	if(component == NULL) {
-		shovelerLogWarning("Trying to remove resource from entity %lld which does not have a resource, ignoring.", entityId);
+		shovelerLogWarning("Trying to remove resource from entity %lld which does not have a resource, ignoring.", entity->entityId);
 		return false;
 	}
 

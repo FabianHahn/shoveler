@@ -21,19 +21,13 @@ static bool activateComponent(ShovelerViewComponent *component, void *lightCompo
 static void deactivateComponent(ShovelerViewComponent *component, void *lightComponentDataPointer);
 static void freeComponent(ShovelerViewComponent *component, void *lightComponentDataPointer);
 
-bool shovelerViewAddEntityLight(ShovelerView *view, long long int entityId, ShovelerViewLightConfiguration lightConfiguration)
+bool shovelerViewEntityAddLight(ShovelerViewEntity *entity, ShovelerViewLightConfiguration lightConfiguration)
 {
-	assert(shovelerViewHasScene(view));
-
-	ShovelerViewEntity *entity = shovelerViewGetEntity(view, entityId);
-	if(entity == NULL) {
-		shovelerLogWarning("Trying to add light to non existing entity %lld, ignoring.", entityId);
-		return false;
-	}
+	assert(shovelerViewHasScene(entity->view));
 
 	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewLightComponentName);
 	if(component != NULL) {
-		shovelerLogWarning("Trying to add light to entity %lld which already has a light, ignoring.", entityId);
+		shovelerLogWarning("Trying to add light to entity %lld which already has a light, ignoring.", entity->entityId);
 		return false;
 	}
 
@@ -42,38 +36,27 @@ bool shovelerViewAddEntityLight(ShovelerView *view, long long int entityId, Shov
 	lightComponentData->light = NULL;
 	lightComponentData->positionCallback = NULL;
 
-	if (!shovelerViewEntityAddComponent(entity, shovelerViewLightComponentName, lightComponentData, activateComponent, deactivateComponent, freeComponent)) {
-		free(lightComponentData);
-		return false;
-	}
+	component = shovelerViewEntityAddComponent(entity, shovelerViewLightComponentName, lightComponentData, activateComponent, deactivateComponent, freeComponent);
+	assert(component != NULL);
 
-	if(!shovelerViewEntityAddComponentDependency(entity, shovelerViewLightComponentName, entity->entityId, shovelerViewPositionComponentName)) {
-		shovelerViewEntityRemoveComponent(entity, shovelerViewLightComponentName);
-		return false;
-	}
+	shovelerViewComponentAddDependency(component, entity->entityId, shovelerViewPositionComponentName);
 
-	shovelerViewEntityActivateComponent(entity, shovelerViewLightComponentName);
+	shovelerViewComponentActivate(component);
 	return true;
 }
 
-bool shovelerViewRemoveEntityLight(ShovelerView *view, long long int entityId)
+bool shovelerViewEntityRemoveLight(ShovelerViewEntity *entity)
 {
-	assert(shovelerViewHasScene(view));
-
-	ShovelerViewEntity *entity = shovelerViewGetEntity(view, entityId);
-	if(entity == NULL) {
-		shovelerLogWarning("Trying to remove light from non existing entity %lld, ignoring.", entityId);
-		return false;
-	}
+	assert(shovelerViewHasScene(entity->view));
 
 	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewLightComponentName);
 	if(component == NULL) {
-		shovelerLogWarning("Trying to remove light from entity %lld which does not have a light, ignoring.", entityId);
+		shovelerLogWarning("Trying to remove light from entity %lld which does not have a light, ignoring.", entity->entityId);
 		return false;
 	}
 	LightComponentData *lightComponentData = component->data;
 
-	ShovelerScene *scene = shovelerViewGetScene(view);
+	ShovelerScene *scene = shovelerViewGetScene(entity->view);
 	shovelerSceneRemoveLight(scene, lightComponentData->light);
 
 	return shovelerViewEntityRemoveComponent(entity, shovelerViewLightComponentName);

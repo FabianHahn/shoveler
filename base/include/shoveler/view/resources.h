@@ -15,9 +15,9 @@ typedef struct {
 static const char *shovelerViewResourceComponentName = "resource";
 static const char *shovelerViewResourcesTargetName = "resources";
 
-bool shovelerViewAddEntityResource(ShovelerView *view, long long int entityId, const char *typeId, const unsigned char *buffer, size_t bytes);
-bool shovelerViewUpdateEntityResource(ShovelerView *view, long long int entityId, const unsigned char *buffer, size_t bytes);
-bool shovelerViewRemoveEntityResource(ShovelerView *view, long long int entityId);
+bool shovelerViewEntityAddResource(ShovelerViewEntity *entity, const char *typeId, const unsigned char *buffer, size_t bytes);
+bool shovelerViewEntityUpdateResource(ShovelerViewEntity *entity, const unsigned char *buffer, size_t bytes);
+bool shovelerViewEntityRemoveResource(ShovelerViewEntity *entity);
 
 static inline bool shovelerViewSetResources(ShovelerView *view, ShovelerResources *resources)
 {
