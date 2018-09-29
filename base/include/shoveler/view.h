@@ -41,9 +41,9 @@ typedef struct {
 	GHashTable *callbacks;
 } ShovelerViewEntity;
 
-typedef void (ShovelerViewComponentActivateFunction)(void *data);
-typedef void (ShovelerViewComponentDeactivateFunction)(void *data);
-typedef void (ShovelerViewComponentFreeFunction)(struct ShovelerViewComponentStruct *);
+typedef bool (ShovelerViewComponentActivateFunction)(struct ShovelerViewComponentStruct *, void *data);
+typedef void (ShovelerViewComponentDeactivateFunction)(struct ShovelerViewComponentStruct *, void *data);
+typedef void (ShovelerViewComponentFreeFunction)(struct ShovelerViewComponentStruct *, void *data);
 
 typedef struct ShovelerViewComponentStruct {
 	ShovelerViewEntity *entity;

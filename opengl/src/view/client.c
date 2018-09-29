@@ -20,8 +20,8 @@ typedef struct {
 } ClientComponentData;
 
 static void moveCallback(ShovelerController *controller, ShovelerVector3 position, void *clientComponentDataPointer);
-static void activateComponent(void *clientComponentDataPointer);
-static void freeComponent(ShovelerViewComponent *component);
+static bool activateComponent(ShovelerViewComponent *component, void *clientComponentDataPointer);
+static void freeComponent(ShovelerViewComponent *component, void *clientComponentDataPointer);
 
 bool shovelerViewAddEntityClient(ShovelerView *view, long long int entityId)
 {
@@ -46,8 +46,8 @@ bool shovelerViewAddEntityClient(ShovelerView *view, long long int entityId)
 	clientComponentData->z = 0;
 	clientComponentData->moveCallback = NULL;
 
-	if (!shovelerViewEntityAddComponent(entity, shovelerViewClientComponentName, clientComponentData, NULL, NULL, &freeComponent)) {
-		freeComponent(component);
+	if (!shovelerViewEntityAddComponent(entity, shovelerViewClientComponentName, clientComponentData, activateComponent, NULL, freeComponent)) {
+		free(clientComponentData);
 		return false;
 	}
 
@@ -137,24 +137,25 @@ static void moveCallback(ShovelerController *controller, ShovelerVector3 positio
 	shovelerViewRequestPositionUpdate(clientComponentData->entity->view, clientComponentData->entity->entityId, clientComponentData->x, clientComponentData->y, clientComponentData->z);
 }
 
-static void activateComponent(void *clientComponentDataPointer)
+static bool activateComponent(ShovelerViewComponent *component, void *clientComponentDataPointer)
 {
 	ClientComponentData *clientComponentData = clientComponentDataPointer;
 
-	ShovelerViewPosition *position = shovelerViewEntityGetPosition(clientComponentData->entity);
+	ShovelerViewPosition *position = shovelerViewEntityGetPosition(component->entity);
 	clientComponentData->x = position->x;
 	clientComponentData->y = position->y;
 	clientComponentData->z = position->z;
 
-	ShovelerModel *model = shovelerViewEntityGetModel(clientComponentData->entity);
+	ShovelerModel *model = shovelerViewEntityGetModel(component->entity);
 	model->visible = false;
+	return true;
 }
 
-static void freeComponent(ShovelerViewComponent *component)
+static void freeComponent(ShovelerViewComponent *component, void *clientComponentDataPointer)
 {
 	assert(shovelerViewHasController(component->entity->view));
 
-	ClientComponentData *clientComponentData = component->data;
+	ClientComponentData *clientComponentData = clientComponentDataPointer;
 
 	if(clientComponentData->moveCallback != NULL) {
 		ShovelerController *controller = shovelerViewGetController(component->entity->view);

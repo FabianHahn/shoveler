@@ -11,16 +11,15 @@
 #include "shoveler/view.h"
 
 typedef struct {
-	ShovelerViewEntity *entity;
 	ShovelerViewLightConfiguration configuration;
 	ShovelerLight *light;
 	ShovelerViewComponentCallback *positionCallback;
 } LightComponentData;
 
 static void positionCallback(ShovelerViewComponent *positionComponent, ShovelerViewComponentCallbackType callbackType, void *lightComponentDataPointer);
-static void activateComponent(void *lightComponentDataPointer);
-static void deactivateComponent(void *lightComponentDataPointer);
-static void freeComponent(ShovelerViewComponent *component);
+static bool activateComponent(ShovelerViewComponent *component, void *lightComponentDataPointer);
+static void deactivateComponent(ShovelerViewComponent *component, void *lightComponentDataPointer);
+static void freeComponent(ShovelerViewComponent *component, void *lightComponentDataPointer);
 
 bool shovelerViewAddEntityLight(ShovelerView *view, long long int entityId, ShovelerViewLightConfiguration lightConfiguration)
 {
@@ -39,13 +38,12 @@ bool shovelerViewAddEntityLight(ShovelerView *view, long long int entityId, Shov
 	}
 
 	LightComponentData *lightComponentData = malloc(sizeof(LightComponentData));
-	lightComponentData->entity = entity;
 	lightComponentData->configuration = lightConfiguration;
 	lightComponentData->light = NULL;
 	lightComponentData->positionCallback = NULL;
 
 	if (!shovelerViewEntityAddComponent(entity, shovelerViewLightComponentName, lightComponentData, activateComponent, deactivateComponent, freeComponent)) {
-		freeComponent(component);
+		free(lightComponentData);
 		return false;
 	}
 
@@ -89,45 +87,46 @@ static void positionCallback(ShovelerViewComponent *positionComponent, ShovelerV
 	shovelerLightUpdatePosition(lightComponentData->light, shovelerVector3(position->x, position->y, position->z));
 }
 
-static void activateComponent(void *lightComponentDataPointer)
+static bool activateComponent(ShovelerViewComponent *component, void *lightComponentDataPointer)
 {
 	LightComponentData *lightComponentData = lightComponentDataPointer;
-	assert(shovelerViewHasScene(lightComponentData->entity->view));
+	assert(shovelerViewHasScene(component->entity->view));
 
-	ShovelerViewPosition *position = shovelerViewEntityGetPosition(lightComponentData->entity);
+	ShovelerViewPosition *position = shovelerViewEntityGetPosition(component->entity);
 
 	switch(lightComponentData->configuration.type) {
 		case SHOVELER_VIEW_LIGHT_TYPE_SPOT:
 			shovelerLogWarning("Trying to create light with unsupported spot type, ignoring.");
-			return;
+			return false;
 		case SHOVELER_VIEW_LIGHT_TYPE_POINT:
 			lightComponentData->light = shovelerLightPointCreate(shovelerVector3(position->x, position->y, position->z), lightComponentData->configuration.width, lightComponentData->configuration.height, lightComponentData->configuration.samples, lightComponentData->configuration.ambientFactor, lightComponentData->configuration.exponentialFactor, lightComponentData->configuration.color);
 			break;
 		default:
 			shovelerLogWarning("Trying to create light with unknown light type %d, ignoring.", lightComponentData->configuration.type);
-			return;
+			return false;
 	}
 
-	ShovelerScene *scene = shovelerViewGetScene(lightComponentData->entity->view);
+	ShovelerScene *scene = shovelerViewGetScene(component->entity->view);
 	shovelerSceneAddLight(scene, lightComponentData->light);
 
-	lightComponentData->positionCallback = shovelerViewEntityAddCallback(lightComponentData->entity, shovelerViewPositionComponentName, &positionCallback, lightComponentData);
+	lightComponentData->positionCallback = shovelerViewEntityAddCallback(component->entity, shovelerViewPositionComponentName, &positionCallback, lightComponentData);
+	return true;
 }
 
-static void deactivateComponent(void *lightComponentDataPointer)
+static void deactivateComponent(ShovelerViewComponent *component, void *lightComponentDataPointer)
 {
 	LightComponentData *lightComponentData = lightComponentDataPointer;
-	assert(shovelerViewHasScene(lightComponentData->entity->view));
+	assert(shovelerViewHasScene(component->entity->view));
 
-	ShovelerScene *scene = shovelerViewGetScene(lightComponentData->entity->view);
+	ShovelerScene *scene = shovelerViewGetScene(component->entity->view);
 	shovelerSceneRemoveLight(scene, lightComponentData->light);
 	lightComponentData->light = NULL;
 
-	shovelerViewEntityRemoveCallback(lightComponentData->entity, shovelerViewPositionComponentName, lightComponentData->positionCallback);
+	shovelerViewEntityRemoveCallback(component->entity, shovelerViewPositionComponentName, lightComponentData->positionCallback);
 	lightComponentData->positionCallback = NULL;
 }
 
-static void freeComponent(ShovelerViewComponent *component)
+static void freeComponent(ShovelerViewComponent *component, void *lightComponentDataPointer)
 {
 	assert(shovelerViewHasScene(component->entity->view));
 

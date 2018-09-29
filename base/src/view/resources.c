@@ -7,7 +7,7 @@
 #include "shoveler/view/resources.h"
 #include "shoveler/log.h"
 
-static void freeResourceComponentData(ShovelerViewComponent *component);
+static void freeResourceComponentData(ShovelerViewComponent *component, void *resourcePointer);
 
 bool shovelerViewAddEntityResource(ShovelerView *view, long long int entityId, const char *typeId, const unsigned char *buffer, size_t bytes)
 {
@@ -83,7 +83,7 @@ bool shovelerViewRemoveEntityResource(ShovelerView *view, long long int entityId
 	return shovelerViewEntityRemoveComponent(entity, shovelerViewResourceComponentName);
 }
 
-static void freeResourceComponentData(ShovelerViewComponent *component)
+static void freeResourceComponentData(ShovelerViewComponent *component, void *resourcePointer)
 {
 	ShovelerViewResource *resource = component->data;
 	free(resource->typeId);

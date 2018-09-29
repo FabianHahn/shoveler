@@ -6,9 +6,9 @@ extern "C" {
 #include "shoveler/view.h"
 }
 
-static void activateComponent(void *testPointer);
-static void deactivateComponent(void *testPointer);
-static void freeComponent(ShovelerViewComponent *component);
+static bool activateComponent(ShovelerViewComponent *component, void *testPointer);
+static void deactivateComponent(ShovelerViewComponent *component, void *testPointer);
+static void freeComponent(ShovelerViewComponent *component, void *testPointer);
 
 class ShovelerViewTest : public ::testing::Test {
 public:
@@ -166,19 +166,20 @@ TEST_F(ShovelerViewTest, removeEntityRemovesComponents)
 	ASSERT_TRUE(freeCalled);
 }
 
-static void activateComponent(void *testPointer)
+static bool activateComponent(ShovelerViewComponent *component, void *testPointer)
 {
 	ShovelerViewTest *test = (ShovelerViewTest *) testPointer;
 	test->activateCalled = true;
+	return true;
 }
 
-static void deactivateComponent(void *testPointer)
+static void deactivateComponent(ShovelerViewComponent *component, void *testPointer)
 {
 	ShovelerViewTest *test = (ShovelerViewTest *) testPointer;
 	test->deactivateCalled = true;
 }
 
-static void freeComponent(ShovelerViewComponent *component)
+static void freeComponent(ShovelerViewComponent *component, void *testPointer)
 {
 	ShovelerViewTest *test = (ShovelerViewTest *) component->data;
 	test->freeCalled = true;

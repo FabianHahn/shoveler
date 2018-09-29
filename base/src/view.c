@@ -241,11 +241,13 @@ bool shovelerViewEntityActivateComponent(ShovelerViewEntity *entity, const char 
 	}
 
 	// activate the component
-	component->active = true;
-
 	if(component->activate != NULL) {
-		component->activate(component->data);
+		if(!component->activate(component, component->data)) {
+			shovelerLogInfo("Failed to activate component '%s' of entity %lld.", componentName, entity->entityId);
+			return false;
+		}
 	}
+	component->active = true;
 
 	shovelerLogInfo("Activated component '%s' of entity %lld.", componentName, entity->entityId);
 
@@ -308,7 +310,7 @@ bool shovelerViewEntityDeactivateComponent(ShovelerViewEntity *entity, const cha
 	component->active = false;
 
 	if(component->deactivate != NULL) {
-		component->deactivate(component->data);
+		component->deactivate(component, component->data);
 	}
 
 	shovelerLogInfo("Deactivated component '%s' of entity %lld.", componentName, entity->entityId);
@@ -457,7 +459,7 @@ static void freeComponent(void *componentPointer)
 	ShovelerViewComponent *component = componentPointer;
 
 	if(component->free != NULL) {
-		component->free(component);
+		component->free(component, component->data);
 	}
 
 	g_queue_free_full(component->dependencies, freeQualifiedComponent);

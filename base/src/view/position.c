@@ -9,7 +9,7 @@ typedef struct {
 	void *requestUpdateUserData;
 } PositionComponentData;
 
-static void freeComponent(ShovelerViewComponent *component);
+static void freeComponent(ShovelerViewComponent *component, void *positionComponentDataPointer);
 
 bool shovelerViewAddEntityPosition(ShovelerView *view, long long int entityId, double x, double y, double z)
 {
@@ -32,8 +32,8 @@ bool shovelerViewAddEntityPosition(ShovelerView *view, long long int entityId, d
 	positionComponentData->requestUpdate = NULL;
 	positionComponentData->requestUpdateUserData = NULL;
 
-	if (!shovelerViewEntityAddComponent(entity, shovelerViewPositionComponentName, positionComponentData, NULL, NULL, &freeComponent)) {
-		freeComponent(component);
+	if (!shovelerViewEntityAddComponent(entity, shovelerViewPositionComponentName, positionComponentData, NULL, NULL, freeComponent)) {
+		free(positionComponentData);
 		return false;
 	}
 
@@ -169,8 +169,8 @@ bool shovelerViewRemoveEntityPosition(ShovelerView *view, long long int entityId
 }
 
 
-static void freeComponent(ShovelerViewComponent *component)
+static void freeComponent(ShovelerViewComponent *component, void *positionComponentDataPointer)
 {
-	PositionComponentData *positionComponentData = component->data;
+	PositionComponentData *positionComponentData = positionComponentDataPointer;
 	free(positionComponentData);
 }

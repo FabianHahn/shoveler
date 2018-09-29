@@ -15,7 +15,7 @@ typedef struct {
 } DrawableComponentData;
 
 static ShovelerDrawable *createDrawable(ShovelerViewDrawableConfiguration configuration);
-static void freeComponent(ShovelerViewComponent *drawableComponent);
+static void freeComponent(ShovelerViewComponent *drawableComponent, void *drawableComponentDataPointer);
 static void freeComponentData(DrawableComponentData *drawableComponentData);
 
 bool shovelerViewAddEntityDrawable(ShovelerView *view, long long int entityId, ShovelerViewDrawableConfiguration configuration)
@@ -36,7 +36,7 @@ bool shovelerViewAddEntityDrawable(ShovelerView *view, long long int entityId, S
 	drawableComponentData->entityId = entityId;
 	drawableComponentData->drawable = createDrawable(configuration);
 
-	if(!shovelerViewEntityAddComponent(entity, shovelerViewDrawableComponentName, drawableComponentData, NULL, NULL, &freeComponent)) {
+	if(!shovelerViewEntityAddComponent(entity, shovelerViewDrawableComponentName, drawableComponentData, NULL, NULL, freeComponent)) {
 		freeComponentData(drawableComponentData);
 		return false;
 	}
@@ -121,9 +121,9 @@ static ShovelerDrawable *createDrawable(ShovelerViewDrawableConfiguration config
 	}
 }
 
-static void freeComponent(ShovelerViewComponent *drawableComponent)
+static void freeComponent(ShovelerViewComponent *drawableComponent, void *drawableComponentDataPointer)
 {
-	freeComponentData(drawableComponent->data);
+	freeComponentData(drawableComponentDataPointer);
 }
 
 static void freeComponentData(DrawableComponentData *drawableComponentData)
