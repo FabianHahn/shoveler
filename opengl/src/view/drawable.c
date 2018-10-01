@@ -58,6 +58,7 @@ bool shovelerViewEntityUpdateDrawable(ShovelerViewEntity *entity, ShovelerViewDr
 	shovelerDrawableFree(drawableComponentData->drawable);
 	drawableComponentData->drawable = createDrawable(configuration);
 
+	shovelerViewComponentUpdate(component);
 	return true;
 }
 
