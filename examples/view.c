@@ -7,6 +7,7 @@
 #include <shoveler/camera/perspective.h>
 #include <shoveler/view/drawable.h>
 #include <shoveler/view/light.h>
+#include <shoveler/view/material.h>
 #include <shoveler/view/model.h>
 #include <shoveler/view/position.h>
 #include <shoveler/constants.h>
@@ -55,10 +56,15 @@ int main(int argc, char *argv[])
 	ShovelerViewEntity *cubeDrawableEntity = shovelerViewAddEntity(view, 1);
 	shovelerViewEntityAddDrawable(cubeDrawableEntity, cubeDrawableConfiguration);
 
+	ShovelerViewMaterialConfiguration grayColorMaterialConfiguration;
+	grayColorMaterialConfiguration.type = SHOVELER_VIEW_MATERIAL_TYPE_COLOR;
+	grayColorMaterialConfiguration.color = shovelerVector3(0.7, 0.7, 0.7);
+	ShovelerViewEntity *grayColorMaterialEntity = shovelerViewAddEntity(view, 2);
+	shovelerViewEntityAddMaterial(grayColorMaterialEntity, grayColorMaterialConfiguration);
+
 	ShovelerViewModelConfiguration cubeModelConfiguration;
 	cubeModelConfiguration.drawableEntityId = 1;
-	cubeModelConfiguration.material.type = SHOVELER_VIEW_MATERIAL_TYPE_COLOR;
-	cubeModelConfiguration.material.color = shovelerVector3(0.7, 0.7, 0.7);
+	cubeModelConfiguration.materialEntityId = 2;
 	cubeModelConfiguration.rotation = shovelerVector3(0.0, 0.0, 0.0);
 	cubeModelConfiguration.scale = shovelerVector3(1.0, 1.0, 1.0);
 	cubeModelConfiguration.visible = true;
@@ -66,16 +72,15 @@ int main(int argc, char *argv[])
 	cubeModelConfiguration.screenspace = false;
 	cubeModelConfiguration.castsShadow = true;
 	cubeModelConfiguration.polygonMode = GL_FILL;
-	ShovelerViewEntity *cubeEntity = shovelerViewAddEntity(view, 2);
+	ShovelerViewEntity *cubeEntity = shovelerViewAddEntity(view, 3);
 	shovelerViewEntityAddModel(cubeEntity, cubeModelConfiguration);
 	shovelerViewEntityAddPosition(cubeEntity, 0.0, 0.0, 5.0);
 
 	ShovelerViewDrawableConfiguration quadDrawableConfiguration;
 	quadDrawableConfiguration.type = SHOVELER_VIEW_DRAWABLE_TYPE_QUAD;
 	ShovelerViewModelConfiguration planeModelConfiguration;
-	planeModelConfiguration.drawableEntityId = 3;
-	planeModelConfiguration.material.type = SHOVELER_VIEW_MATERIAL_TYPE_COLOR;
-	planeModelConfiguration.material.color = shovelerVector3(0.7, 0.7, 0.7);
+	planeModelConfiguration.drawableEntityId = 4;
+	planeModelConfiguration.materialEntityId = 2;
 	planeModelConfiguration.rotation = shovelerVector3(SHOVELER_PI, 0.0, 0.0);
 	planeModelConfiguration.scale = shovelerVector3(10.0, 10.0, 1.0);
 	planeModelConfiguration.visible = true;
@@ -83,17 +88,19 @@ int main(int argc, char *argv[])
 	planeModelConfiguration.screenspace = false;
 	planeModelConfiguration.castsShadow = true;
 	planeModelConfiguration.polygonMode = GL_FILL;
-	ShovelerViewEntity *planeEntity = shovelerViewAddEntity(view, 3);
+	ShovelerViewEntity *planeEntity = shovelerViewAddEntity(view, 4);
 	shovelerViewEntityAddDrawable(planeEntity, quadDrawableConfiguration);
 	shovelerViewEntityAddModel(planeEntity, planeModelConfiguration);
 	shovelerViewEntityAddPosition(planeEntity, 0.0, 0.0, 10.0);
 
 	ShovelerViewDrawableConfiguration pointDrawableConfiguration;
 	pointDrawableConfiguration.type = SHOVELER_VIEW_DRAWABLE_TYPE_POINT;
+	ShovelerViewMaterialConfiguration whiteParticleMaterialConfiguration;
+	whiteParticleMaterialConfiguration.type = SHOVELER_VIEW_MATERIAL_TYPE_PARTICLE;
+	whiteParticleMaterialConfiguration.color = shovelerVector3(1.0, 1.0, 1.0);
 	ShovelerViewModelConfiguration lightModelConfiguration;
-	lightModelConfiguration.drawableEntityId = 4;
-	lightModelConfiguration.material.type = SHOVELER_VIEW_MATERIAL_TYPE_PARTICLE;
-	lightModelConfiguration.material.color = shovelerVector3(1.0, 1.0, 1.0);
+	lightModelConfiguration.drawableEntityId = 5;
+	lightModelConfiguration.materialEntityId = 5;
 	lightModelConfiguration.rotation = shovelerVector3(0.0, 0.0, 0.0);
 	lightModelConfiguration.scale = shovelerVector3(0.5, 0.5, 0.5);
 	lightModelConfiguration.visible = true;
@@ -109,8 +116,9 @@ int main(int argc, char *argv[])
 	lightConfiguration.ambientFactor = 0.0;
 	lightConfiguration.exponentialFactor = 80.0;
 	lightConfiguration.color = shovelerVector3(1.0, 1.0, 1.0);
-	ShovelerViewEntity *lightEntity = shovelerViewAddEntity(view, 4);
+	ShovelerViewEntity *lightEntity = shovelerViewAddEntity(view, 5);
 	shovelerViewEntityAddDrawable(lightEntity, pointDrawableConfiguration);
+	shovelerViewEntityAddMaterial(lightEntity, whiteParticleMaterialConfiguration);
 	shovelerViewEntityAddModel(lightEntity, lightModelConfiguration);
 	shovelerViewEntityAddLight(lightEntity, lightConfiguration);
 	shovelerViewEntityAddPosition(lightEntity, 0.0, 2.0, 0.0);
@@ -140,6 +148,6 @@ static void updateGame(ShovelerGame *game, double dt)
 	shovelerCameraUpdateView(game->camera);
 
 	time += dt;
-	ShovelerViewEntity *lightEntity = shovelerViewGetEntity(view, 4);
+	ShovelerViewEntity *lightEntity = shovelerViewGetEntity(view, 5);
 	shovelerViewEntityUpdatePosition(lightEntity, 2.0 * sin(time), 2.0 * cos(time), 0.0);
 }

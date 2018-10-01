@@ -5,28 +5,14 @@
 
 #include <glib.h>
 
-#include <shoveler/drawable.h>
-#include <shoveler/material.h>
 #include <shoveler/model.h>
 #include <shoveler/scene.h>
 #include <shoveler/types.h>
 #include <shoveler/view.h>
 
-typedef enum {
-	SHOVELER_VIEW_MATERIAL_TYPE_COLOR,
-	SHOVELER_VIEW_MATERIAL_TYPE_TEXTURE,
-	SHOVELER_VIEW_MATERIAL_TYPE_PARTICLE,
-} ShovelerViewMaterialType;
-
-typedef struct {
-	ShovelerViewMaterialType type;
-	ShovelerVector3 color;
-	const char *texture;
-} ShovelerViewMaterialConfiguration;
-
 typedef struct {
 	long long int drawableEntityId;
-	ShovelerViewMaterialConfiguration material;
+	long long int materialEntityId;
 	ShovelerVector3 rotation;
 	ShovelerVector3 scale;
 	bool visible;
@@ -38,10 +24,10 @@ typedef struct {
 
 static const char *shovelerViewModelComponentName = "model";
 
-bool shovelerViewEntityAddModel(ShovelerViewEntity *entity, ShovelerViewModelConfiguration modelConfiguration);
+bool shovelerViewEntityAddModel(ShovelerViewEntity *entity, ShovelerViewModelConfiguration configuration);
 ShovelerModel *shovelerViewEntityGetModel(ShovelerViewEntity *entity);
 bool shovelerViewEntityUpdateModelDrawableEntityId(ShovelerViewEntity *entity, long long int drawableEntityId);
-bool shovelerViewEntityUpdateModelMaterial(ShovelerViewEntity *entity, ShovelerViewMaterialConfiguration materialConfiguration);
+bool shovelerViewEntityUpdateModelMaterialEntityId(ShovelerViewEntity *entity, long long int materialEntityId);
 bool shovelerViewEntityUpdateModelRotation(ShovelerViewEntity *entity, ShovelerVector3 rotation);
 bool shovelerViewEntityUpdateModelScale(ShovelerViewEntity *entity, ShovelerVector3 scale);
 bool shovelerViewEntityUpdateModelVisible(ShovelerViewEntity *entity, bool visible);

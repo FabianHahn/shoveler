@@ -8,6 +8,7 @@
 #include "shoveler/material/particle.h"
 #include "shoveler/material/texture.h"
 #include "shoveler/view/drawable.h"
+#include "shoveler/view/material.h"
 #include "shoveler/view/model.h"
 #include "shoveler/view/position.h"
 #include "shoveler/view/scene.h"
@@ -17,19 +18,17 @@
 
 typedef struct {
 	ShovelerViewModelConfiguration configuration;
-	ShovelerMaterial *material;
 	ShovelerModel *model;
 	ShovelerViewComponentCallback *positionCallback;
 } ModelComponentData;
 
-static ShovelerMaterial *createMaterial(ShovelerView *view, ShovelerViewMaterialConfiguration configuration);
 static void updatePositionIfAvailable(ShovelerViewEntity *entity, ModelComponentData *modelComponentData);
 static void positionCallback(ShovelerViewComponent *positionComponent, ShovelerViewComponentCallbackType callbackType, void *modelComponentDataPointer);
 static bool activateComponent(ShovelerViewComponent *component, void *modelComponentDataPointer);
 static void deactivateComponent(ShovelerViewComponent *component, void *modelComponentDataPointer);
 static void freeComponent(ShovelerViewComponent *component, void *modelComponentDataPointer);
 
-bool shovelerViewEntityAddModel(ShovelerViewEntity *entity, ShovelerViewModelConfiguration modelConfiguration)
+bool shovelerViewEntityAddModel(ShovelerViewEntity *entity, ShovelerViewModelConfiguration configuration)
 {
 	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewModelComponentName);
 	if(component != NULL) {
@@ -38,8 +37,7 @@ bool shovelerViewEntityAddModel(ShovelerViewEntity *entity, ShovelerViewModelCon
 	}
 
 	ModelComponentData *modelComponentData = malloc(sizeof(ModelComponentData));
-	modelComponentData->configuration = modelConfiguration;
-	modelComponentData->material = NULL;
+	modelComponentData->configuration = configuration;
 	modelComponentData->model = NULL;
 	modelComponentData->positionCallback = NULL;
 
@@ -47,7 +45,8 @@ bool shovelerViewEntityAddModel(ShovelerViewEntity *entity, ShovelerViewModelCon
 	assert(component != NULL);
 
 	shovelerViewComponentAddDependency(component, entity->entityId, shovelerViewPositionComponentName);
-	shovelerViewComponentAddDependency(component, modelConfiguration.drawableEntityId, shovelerViewDrawableComponentName);
+	shovelerViewComponentAddDependency(component, configuration.drawableEntityId, shovelerViewDrawableComponentName);
+	shovelerViewComponentAddDependency(component, configuration.materialEntityId, shovelerViewMaterialComponentName);
 
 	shovelerViewComponentActivate(component);
 	return true;
@@ -70,7 +69,7 @@ bool shovelerViewEntityUpdateModelDrawableEntityId(ShovelerViewEntity *entity, l
 
 	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewModelComponentName);
 	if(component == NULL) {
-		shovelerLogWarning("Trying to update model material of entity %lld which does not have a model, ignoring.", entity->entityId);
+		shovelerLogWarning("Trying to update model drawable entity id of entity %lld which does not have a model, ignoring.", entity->entityId);
 		return false;
 	}
 
@@ -89,20 +88,25 @@ bool shovelerViewEntityUpdateModelDrawableEntityId(ShovelerViewEntity *entity, l
 	return true;
 }
 
-bool shovelerViewEntityUpdateModelMaterial(ShovelerViewEntity *entity, ShovelerViewMaterialConfiguration materialConfiguration)
+bool shovelerViewEntityUpdateModelMaterialEntityId(ShovelerViewEntity *entity, long long int materialEntityId)
 {
 	assert(shovelerViewHasScene(entity->view));
 
 	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewModelComponentName);
 	if(component == NULL) {
-		shovelerLogWarning("Trying to update model material of entity %lld which does not have a model, ignoring.", entity->entityId);
+		shovelerLogWarning("Trying to update model material entity id of entity %lld which does not have a model, ignoring.", entity->entityId);
 		return false;
 	}
 
 	ModelComponentData *modelComponentData = component->data;
-	modelComponentData->configuration.material = materialConfiguration;
 
 	shovelerViewComponentDeactivate(component);
+	if(!shovelerViewComponentRemoveDependency(component, modelComponentData->configuration.materialEntityId, shovelerViewMaterialComponentName)) {
+		return false;
+	}
+
+	modelComponentData->configuration.materialEntityId = materialEntityId;
+	shovelerViewComponentAddDependency(component, materialEntityId, shovelerViewMaterialComponentName);
 	shovelerViewComponentActivate(component);
 
 	shovelerViewComponentUpdate(component);
@@ -240,25 +244,6 @@ bool shovelerViewEntityRemoveModel(ShovelerViewEntity *entity)
 	return shovelerViewEntityRemoveComponent(entity, shovelerViewModelComponentName);
 }
 
-static ShovelerMaterial *createMaterial(ShovelerView *view, ShovelerViewMaterialConfiguration configuration)
-{
-	switch (configuration.type) {
-		case SHOVELER_VIEW_MATERIAL_TYPE_COLOR:
-			return shovelerMaterialColorCreate(configuration.color);
-			break;
-		case SHOVELER_VIEW_MATERIAL_TYPE_TEXTURE:
-			shovelerLogWarning("Trying to create model with unsupported texture type, ignoring.", configuration.type);
-			return NULL;
-			break;
-		case SHOVELER_VIEW_MATERIAL_TYPE_PARTICLE:
-			return shovelerMaterialParticleCreate(configuration.color);
-			break;
-		default:
-			shovelerLogWarning("Trying to create model with unknown material type %d, ignoring.", configuration.type);
-			return NULL;
-	}
-}
-
 static void updatePositionIfAvailable(ShovelerViewEntity *entity, ModelComponentData *modelComponentData)
 {
 	ShovelerViewComponent *positionComponent = shovelerViewEntityGetComponent(entity, shovelerViewPositionComponentName);
@@ -285,12 +270,6 @@ static bool activateComponent(ShovelerViewComponent *component, void *modelCompo
 	ModelComponentData *modelComponentData = modelComponentDataPointer;
 	assert(shovelerViewHasScene(component->entity->view));
 
-	modelComponentData->material = createMaterial(component->entity->view, modelComponentData->configuration.material);
-	if(modelComponentData->material == NULL) {
-		shovelerLogWarning("Trying to activate model to entity %lld but failed to create material, ignoring.", component->entity->entityId);
-		return false;
-	}
-
 	ShovelerViewPosition *position = shovelerViewEntityGetPosition(component->entity);
 
 	ShovelerViewEntity *drawableEntity = shovelerViewGetEntity(component->entity->view, modelComponentData->configuration.drawableEntityId);
@@ -298,7 +277,12 @@ static bool activateComponent(ShovelerViewComponent *component, void *modelCompo
 	ShovelerDrawable *drawable = shovelerViewEntityGetDrawable(drawableEntity);
 	assert(drawable != NULL);
 
-	modelComponentData->model = shovelerModelCreate(drawable, modelComponentData->material);
+	ShovelerViewEntity *materialEntity = shovelerViewGetEntity(component->entity->view, modelComponentData->configuration.materialEntityId);
+	assert(materialEntity != NULL);
+	ShovelerMaterial *material = shovelerViewEntityGetMaterial(materialEntity);
+	assert(material != NULL);
+
+	modelComponentData->model = shovelerModelCreate(drawable, material);
 	modelComponentData->model->translation.values[0] = position->x;
 	modelComponentData->model->translation.values[1] = position->y;
 	modelComponentData->model->translation.values[2] = position->z;
@@ -315,7 +299,7 @@ static bool activateComponent(ShovelerViewComponent *component, void *modelCompo
 	shovelerSceneAddModel(scene, modelComponentData->model);
 
 	modelComponentData->positionCallback = shovelerViewEntityAddCallback(component->entity, shovelerViewPositionComponentName, &positionCallback, modelComponentData);
-	return false;
+	return true;
 }
 
 static void deactivateComponent(ShovelerViewComponent *component, void *modelComponentDataPointer)
@@ -327,9 +311,6 @@ static void deactivateComponent(ShovelerViewComponent *component, void *modelCom
 	shovelerSceneRemoveModel(scene, modelComponentData->model);
 	modelComponentData->model = NULL;
 
-	shovelerMaterialFree(modelComponentData->material);
-	modelComponentData->material = NULL;
-
 	shovelerViewEntityRemoveCallback(component->entity, shovelerViewPositionComponentName, modelComponentData->positionCallback);
 	modelComponentData->positionCallback = NULL;
 }
@@ -338,16 +319,12 @@ static void freeComponent(ShovelerViewComponent *component, void *modelComponent
 {
 	assert(shovelerViewHasScene(component->entity->view));
 
-	ModelComponentData *modelComponentData = component->data;
+	ModelComponentData *modelComponentData = modelComponentDataPointer;
 
 	ShovelerModel *model = modelComponentData->model;
 	if(model != NULL) {
 		ShovelerScene *scene = shovelerViewGetScene(component->entity->view);
 		shovelerSceneRemoveModel(scene, model);
-	}
-
-	if(modelComponentData->material != NULL) {
-		shovelerMaterialFree(modelComponentData->material);
 	}
 
 	if(modelComponentData->positionCallback != NULL) {
