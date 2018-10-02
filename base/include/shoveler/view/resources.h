@@ -8,15 +8,17 @@
 #include <shoveler/view.h>
 
 typedef struct {
-	char *typeId;
-	char *resourceId;
-} ShovelerViewResource;
+	const char *typeId;
+	const unsigned char *buffer;
+	size_t bufferSize;
+} ShovelerViewResourceConfiguration;
 
 static const char *shovelerViewResourceComponentName = "resource";
 static const char *shovelerViewResourcesTargetName = "resources";
 
-bool shovelerViewEntityAddResource(ShovelerViewEntity *entity, const char *typeId, const unsigned char *buffer, size_t bytes);
-bool shovelerViewEntityUpdateResource(ShovelerViewEntity *entity, const unsigned char *buffer, size_t bytes);
+bool shovelerViewEntityAddResource(ShovelerViewEntity *entity, ShovelerViewResourceConfiguration configuration);
+void *shovelerViewEntityGetResource(ShovelerViewEntity *entity);
+bool shovelerViewEntityUpdateResource(ShovelerViewEntity *entity, ShovelerViewResourceConfiguration configuration);
 bool shovelerViewEntityRemoveResource(ShovelerViewEntity *entity);
 
 static inline bool shovelerViewSetResources(ShovelerView *view, ShovelerResources *resources)
