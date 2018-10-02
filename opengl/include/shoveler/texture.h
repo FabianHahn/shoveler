@@ -9,13 +9,14 @@
 
 typedef struct {
 	ShovelerImage *image;
+	bool manageImage;
 	GLuint target;
 	GLuint texture;
 	GLuint internalFormat;
 	GLuint format;
 } ShovelerTexture;
 
-ShovelerTexture *shovelerTextureCreate2d(ShovelerImage *image);
+ShovelerTexture *shovelerTextureCreate2d(ShovelerImage *image, bool manageImage);
 ShovelerTexture *shovelerTextureCreateRenderTarget(GLsizei width, GLsizei height, GLsizei samples, int channels, int bitsPerChannel);
 ShovelerTexture *shovelerTextureCreateDepthTarget(GLsizei width, GLsizei height, GLsizei samples);
 bool shovelerTextureUpdate(ShovelerTexture *texture);

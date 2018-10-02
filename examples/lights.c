@@ -101,7 +101,7 @@ static void shovelerSampleInit(ShovelerGame *sampleGame, int width, int height, 
 	shovelerImageGet(image, 1, 1, 0) = 255;
 	shovelerImageGet(image, 1, 1, 1) = 255;
 	shovelerImageGet(image, 1, 1, 2) = 255;
-	ShovelerTexture *texture = shovelerTextureCreate2d(image);
+	ShovelerTexture *texture = shovelerTextureCreate2d(image, true);
 	shovelerTextureUpdate(texture);
 	textureMaterial = shovelerMaterialTextureCreate(texture, true, nearestNeighborSampler, false);
 

@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
 	shovelerImageGet(tilesetImage, 1, 1, 0) = 255;
 	shovelerImageGet(tilesetImage, 1, 1, 1) = 255;
 	shovelerImageGet(tilesetImage, 1, 1, 2) = 255; // white
-	ShovelerTexture *tilesetTexture = shovelerTextureCreate2d(tilesetImage);
+	ShovelerTexture *tilesetTexture = shovelerTextureCreate2d(tilesetImage, true);
 	shovelerTextureUpdate(tilesetTexture);
 
 	ShovelerMaterialTilemapTileset tileset = {2, 2, tilesetTexture, nearestNeighborSampler};
@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
 	shovelerImageGet(layerImage, 1, 1, 0) = 0;
 	shovelerImageGet(layerImage, 1, 1, 1) = 0;
 	shovelerImageGet(layerImage, 1, 1, 2) = 2; // full tileset
-	ShovelerTexture *layerTexture = shovelerTextureCreate2d(layerImage);
+	ShovelerTexture *layerTexture = shovelerTextureCreate2d(layerImage, true);
 	shovelerTextureUpdate(layerTexture);
 	shovelerMaterialTilemapAddLayer(tilemapMaterial, layerTexture);
 
@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
 	shovelerImageGet(layer2Image, 0, 0, 0) = 0;
 	shovelerImageGet(layer2Image, 0, 0, 1) = 0;
 	shovelerImageGet(layer2Image, 0, 0, 2) = 2; // full tileset
-	ShovelerTexture *layer2Texture = shovelerTextureCreate2d(layer2Image);
+	ShovelerTexture *layer2Texture = shovelerTextureCreate2d(layer2Image, true);
 	shovelerTextureUpdate(layer2Texture);
 	shovelerMaterialTilemapAddLayer(tilemapMaterial, layer2Texture);
 

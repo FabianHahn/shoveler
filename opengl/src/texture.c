@@ -8,13 +8,14 @@
 
 static int getNumMipmapLevels(int width, int height);
 
-ShovelerTexture *shovelerTextureCreate2d(ShovelerImage *image)
+ShovelerTexture *shovelerTextureCreate2d(ShovelerImage *image, bool manageImage)
 {
 	assert(image->channels >= 1);
 	assert(image->channels <= 4);
 
 	ShovelerTexture *texture = malloc(sizeof(ShovelerTexture));
 	texture->image = image;
+	texture->manageImage = manageImage;
 	texture->target = GL_TEXTURE_2D;
 	glGenTextures(1, &texture->texture);
 	glBindTexture(texture->target, texture->texture);
@@ -152,7 +153,10 @@ void shovelerTextureFree(ShovelerTexture *texture)
 		return;
 	}
 
-	shovelerImageFree(texture->image);
+	if(texture->image != NULL && texture->manageImage) {
+		shovelerImageFree(texture->image);
+	}
+
 	glDeleteTextures(1, &texture->texture);
 	free(texture);
 }
