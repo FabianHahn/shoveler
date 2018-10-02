@@ -1,6 +1,7 @@
 #ifndef SHOVELER_FILE_H
 #define SHOVELER_FILE_H
 
-char *shovelerFileRead(const char *filename);
+bool shovelerFileRead(const char *filename, unsigned char **contentsPointer, size_t *contentsSizePointer);
+char *shovelerFileReadString(const char *filename);
 
 #endif

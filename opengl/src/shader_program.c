@@ -34,7 +34,7 @@ GLuint shovelerShaderProgramCompileFromString(const char *source, GLenum type)
 
 GLuint shovelerShaderProgramCompileFromFile(const char *filename, GLenum type)
 {
-	char *shaderSource = shovelerFileRead(filename);
+	char *shaderSource = shovelerFileReadString(filename);
 	if(shaderSource == NULL) {
 		shovelerLogError("Failed to read shader from '%s'.", filename);
 		return 0;
