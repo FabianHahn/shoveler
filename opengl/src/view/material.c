@@ -3,7 +3,10 @@
 
 #include "shoveler/material/color.h"
 #include "shoveler/material/particle.h"
+#include "shoveler/material/texture.h"
 #include "shoveler/view/material.h"
+#include "shoveler/view/resources.h"
+#include "shoveler/texture.h"
 #include "shoveler/log.h"
 
 typedef struct {
@@ -19,7 +22,7 @@ bool shovelerViewEntityAddMaterial(ShovelerViewEntity *entity, ShovelerViewMater
 {
 	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewMaterialComponentName);
 	if(component != NULL) {
-		shovelerLogWarning("Trying to add drawable to entity %lld which already has a material, ignoring.", entity->entityId);
+		shovelerLogWarning("Trying to add material to entity %lld which already has a material, ignoring.", entity->entityId);
 		return false;
 	}
 
@@ -29,6 +32,10 @@ bool shovelerViewEntityAddMaterial(ShovelerViewEntity *entity, ShovelerViewMater
 
 	component = shovelerViewEntityAddComponent(entity, shovelerViewMaterialComponentName, componentData, activateComponent, deactivateComponent, freeComponent);
 	assert(component != NULL);
+
+	if(configuration.type == SHOVELER_VIEW_MATERIAL_TYPE_TEXTURE) {
+		shovelerViewComponentAddDependency(component, configuration.textureConfiguration.imageResourceEntityId, shovelerViewResourceComponentName);
+	}
 
 	shovelerViewComponentActivate(component);
 	return true;
@@ -53,14 +60,25 @@ bool shovelerViewEntityUpdateMaterialConfiguration(ShovelerViewEntity *entity, S
 		return false;
 	}
 
+	MaterialComponentData *componentData = component->data;
+
 	shovelerViewComponentDeactivate(component);
 
-	MaterialComponentData *componentData = component->data;
+	if(componentData->configuration.type == SHOVELER_VIEW_MATERIAL_TYPE_TEXTURE) {
+		if(!shovelerViewComponentRemoveDependency(component, configuration.textureConfiguration.imageResourceEntityId, shovelerViewResourceComponentName)) {
+			return false;
+		}
+	}
+
 	componentData->configuration = configuration;
+
+	if(configuration.type == SHOVELER_VIEW_MATERIAL_TYPE_TEXTURE) {
+		shovelerViewComponentAddDependency(component, configuration.textureConfiguration.imageResourceEntityId, shovelerViewResourceComponentName);
+	}
+
 	shovelerViewComponentActivate(component);
 
 	shovelerViewComponentUpdate(component);
-
 	return true;
 }
 
@@ -83,9 +101,19 @@ static bool activateComponent(ShovelerViewComponent *component, void *componentD
 		case SHOVELER_VIEW_MATERIAL_TYPE_COLOR:
 			componentData->material = shovelerMaterialColorCreate(componentData->configuration.color);
 			break;
-		case SHOVELER_VIEW_MATERIAL_TYPE_TEXTURE:
-			shovelerLogWarning("Trying to activate material with unsupported texture type, ignoring.");
-			return false;
+		case SHOVELER_VIEW_MATERIAL_TYPE_TEXTURE: {
+			ShovelerViewEntity *imageResourceEntity = shovelerViewGetEntity(component->entity->view, componentData->configuration.textureConfiguration.imageResourceEntityId);
+			assert(imageResourceEntity != NULL);
+			ShovelerImage *image = shovelerViewEntityGetResource(imageResourceEntity);
+			assert(image != NULL);
+
+			ShovelerTexture *texture = shovelerTextureCreate2d(image, false);
+			shovelerTextureUpdate(texture);
+
+			ShovelerSampler *sampler = shovelerSamplerCreate(componentData->configuration.textureConfiguration.interpolate, componentData->configuration.textureConfiguration.clamp);
+			componentData->material = shovelerMaterialTextureCreate(texture, true, sampler, true);
+			break;
+		}
 		case SHOVELER_VIEW_MATERIAL_TYPE_PARTICLE:
 			componentData->material = shovelerMaterialParticleCreate(componentData->configuration.color);
 			break;
