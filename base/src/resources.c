@@ -80,7 +80,7 @@ bool shovelerResourcesSet(ShovelerResources *resources, const char *typeId, cons
 		resource = malloc(sizeof(ShovelerResource));
 		resource->resources = resources;
 		resource->id = strdup(resourceId);
-		resource->typeId = typeId;
+		resource->typeId = typeLoader->typeId;
 		resource->data = typeLoader->defaultResourceData;
 
 		g_hash_table_insert(resources->resources, resource->id, resource);
