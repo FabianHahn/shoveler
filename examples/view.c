@@ -5,23 +5,29 @@
 #include <GLFW/glfw3.h>
 
 #include <shoveler/camera/perspective.h>
+#include <shoveler/image/png.h>
+#include <shoveler/resources/image_png.h>
 #include <shoveler/view/drawable.h>
 #include <shoveler/view/light.h>
 #include <shoveler/view/material.h>
 #include <shoveler/view/model.h>
 #include <shoveler/view/position.h>
+#include <shoveler/view/resources.h>
 #include <shoveler/constants.h>
 #include <shoveler/controller.h>
+#include <shoveler/file.h>
 #include <shoveler/global.h>
 #include <shoveler/opengl.h>
+#include <shoveler/resources.h>
 #include <shoveler/scene.h>
 #include <shoveler/types.h>
 #include <shoveler/view.h>
 
-static void updateGame(ShovelerGame *game, double dt);
-
 static double time = 0.0;
 static ShovelerView *view = NULL;
+
+static GString *createTextureImageData();
+static void updateGame(ShovelerGame *game, double dt);
 
 int main(int argc, char *argv[])
 {
@@ -47,8 +53,12 @@ int main(int argc, char *argv[])
 	ShovelerController *controller = shovelerControllerCreate(game, shovelerVector3(0.0, 0.0, -5.0), shovelerVector3(0.0, 0.0, 1.0), shovelerVector3(0.0, 1.0, 0.0), 2.0f, 0.0005f);
 	shovelerCameraPerspectiveAttachController(game->camera, controller);
 
+	ShovelerResources *resources = shovelerResourcesCreate(NULL, NULL);
+	shovelerResourcesImagePngRegister(resources);
+
 	view = shovelerViewCreate();
 	shovelerViewSetTarget(view, "controller", controller);
+	shovelerViewSetResources(view, resources);
 	shovelerViewSetTarget(view, "scene", game->scene);
 
 	ShovelerViewDrawableConfiguration cubeDrawableConfiguration;
@@ -64,7 +74,7 @@ int main(int argc, char *argv[])
 
 	ShovelerViewModelConfiguration cubeModelConfiguration;
 	cubeModelConfiguration.drawableEntityId = 1;
-	cubeModelConfiguration.materialEntityId = 2;
+	cubeModelConfiguration.materialEntityId = 7;
 	cubeModelConfiguration.rotation = shovelerVector3(0.0, 0.0, 0.0);
 	cubeModelConfiguration.scale = shovelerVector3(1.0, 1.0, 1.0);
 	cubeModelConfiguration.visible = true;
@@ -123,6 +133,23 @@ int main(int argc, char *argv[])
 	shovelerViewEntityAddLight(lightEntity, lightConfiguration);
 	shovelerViewEntityAddPosition(lightEntity, 0.0, 2.0, 0.0);
 
+	GString *imageData = createTextureImageData();
+	ShovelerViewResourceConfiguration imageResourceConfiguration;
+	imageResourceConfiguration.typeId = "image/png";
+	imageResourceConfiguration.buffer = (unsigned char *) imageData->str;
+	imageResourceConfiguration.bufferSize = imageData->len;
+	ShovelerViewEntity *resourceEntity = shovelerViewAddEntity(view, 6);
+	shovelerViewEntityAddResource(resourceEntity, imageResourceConfiguration);
+	g_string_free(imageData, true);
+
+	ShovelerViewMaterialConfiguration textureMaterialConfiguration;
+	textureMaterialConfiguration.type = SHOVELER_VIEW_MATERIAL_TYPE_TEXTURE;
+	textureMaterialConfiguration.textureConfiguration.imageResourceEntityId = 6;
+	textureMaterialConfiguration.textureConfiguration.interpolate = true;
+	textureMaterialConfiguration.textureConfiguration.clamp = true;
+	ShovelerViewEntity *textureMaterialEntity = shovelerViewAddEntity(view, 7);
+	shovelerViewEntityAddMaterial(textureMaterialEntity, textureMaterialConfiguration);
+
 	shovelerOpenGLCheckSuccess();
 
 	while(shovelerGameIsRunning(game)) {
@@ -131,6 +158,7 @@ int main(int argc, char *argv[])
 	shovelerLogInfo("Exiting main loop, goodbye.");
 
 	shovelerViewFree(view);
+	shovelerResourcesFree(resources);
 	shovelerCameraPerspectiveDetachController(game->camera);
 	shovelerControllerFree(controller);
 	shovelerSceneFree(game->scene);
@@ -140,6 +168,31 @@ int main(int argc, char *argv[])
 	shovelerLogTerminate();
 
 	return EXIT_SUCCESS;
+}
+
+static GString *createTextureImageData()
+{
+	const char *tempImageFilename = "temp.png";
+
+	ShovelerImage *image = shovelerImageCreate(2, 2, 3);
+	shovelerImageClear(image);
+	shovelerImageGet(image, 0, 0, 0) = 255;
+	shovelerImageGet(image, 0, 1, 1) = 255;
+	shovelerImageGet(image, 1, 0, 2) = 255;
+	shovelerImageGet(image, 1, 1, 1) = 255;
+	shovelerImageGet(image, 1, 1, 2) = 255;
+	shovelerImagePngWriteFile(image, tempImageFilename);
+	shovelerImageFree(image);
+
+	unsigned char *contents;
+	size_t contentsSize;
+	shovelerFileRead(tempImageFilename, &contents, &contentsSize);
+
+	GString *data = g_string_new("");
+	g_string_append_len(data, (gchar *) contents, contentsSize);
+	free(contents);
+
+	return data;
 }
 
 static void updateGame(ShovelerGame *game, double dt)
