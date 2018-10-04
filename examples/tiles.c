@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
 	ShovelerSampler *nearestNeighborSampler = shovelerSamplerCreate(false, true);
 	ShovelerSampler *interpolatingSampler = shovelerSamplerCreate(true, true);
 
-	ShovelerMaterial *tilemapMaterial = shovelerMaterialTilemapCreate(2, 2);
+	ShovelerMaterial *tilemapMaterial = shovelerMaterialTilemapCreate();
 
 	ShovelerImage *tilesetImage = shovelerImageCreate(2, 2, 3);
 	shovelerImageClear(tilesetImage);
@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
 	shovelerTextureUpdate(layerTexture);
 	shovelerMaterialTilemapAddLayer(tilemapMaterial, layerTexture);
 
-	ShovelerImage *layer2Image = shovelerImageCreate(2, 2, 3);
+	ShovelerImage *layer2Image = shovelerImageCreate(3, 3, 3);
 	shovelerImageClear(layer2Image);
 	shovelerImageGet(layer2Image, 0, 0, 0) = 0;
 	shovelerImageGet(layer2Image, 0, 0, 1) = 0;
