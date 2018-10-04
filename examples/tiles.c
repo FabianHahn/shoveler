@@ -5,7 +5,7 @@
 #include <GLFW/glfw3.h>
 
 #include <shoveler/camera/perspective.h>
-#include <shoveler/drawable/tiles.h>
+#include <shoveler/drawable/quad.h>
 #include <shoveler/material/tilemap.h>
 #include <shoveler/constants.h>
 #include <shoveler/controller.h>
@@ -44,8 +44,8 @@ int main(int argc, char *argv[])
 	}
 	game->scene = shovelerSceneCreate();
 
-	ShovelerController *controller = shovelerControllerCreate(game, (ShovelerVector3){0.5, 0.5, 1}, (ShovelerVector3){0, 0, -1}, (ShovelerVector3){0, 1, 0}, 2.0f, 0.0005f);
-	game->camera = shovelerCameraPerspectiveCreate((ShovelerVector3){0.5, 0.5, 1}, (ShovelerVector3){0, 0, -1}, (ShovelerVector3){0, 1, 0}, 2.0f * SHOVELER_PI * 50.0f / 360.0f, (float) width / height, 0.01, 1000);
+	ShovelerController *controller = shovelerControllerCreate(game, shovelerVector3(0, 0, 1), shovelerVector3(0, 0, -1), shovelerVector3(0, 1, 0), 2.0f, 0.0005f);
+	game->camera = shovelerCameraPerspectiveCreate(shovelerVector3(0, 0, 1), shovelerVector3(0, 0, -1), shovelerVector3(0, 1, 0), 2.0f * SHOVELER_PI * 50.0f / 360.0f, (float) width / height, 0.01, 1000);
 	shovelerCameraPerspectiveAttachController(game->camera, controller);
 
 	ShovelerSampler *nearestNeighborSampler = shovelerSamplerCreate(false, true);
@@ -96,9 +96,11 @@ int main(int argc, char *argv[])
 	shovelerTextureUpdate(layer2Texture);
 	shovelerMaterialTilemapAddLayer(tilemapMaterial, layer2Texture);
 
-	ShovelerDrawable *tiles = shovelerDrawableTilesCreate(2, 2);
+	ShovelerDrawable *tiles = shovelerDrawableQuadCreate();
 	ShovelerModel *tilesModel = shovelerModelCreate(tiles, tilemapMaterial);
+	tilesModel->scale = shovelerVector3(0.5, 0.5, 1.0);
 	tilesModel->screenspace = true;
+	shovelerModelUpdateTransformation(tilesModel);
 	shovelerSceneAddModel(game->scene, tilesModel);
 
 	shovelerOpenGLCheckSuccess();
