@@ -1,3 +1,4 @@
+#include <cstring> // memcmp
 #include <string>
 
 #include <gtest/gtest.h>
@@ -57,7 +58,7 @@ TEST_F(ShovelerViewResourcesTest, addResource)
 	long long int testEntityId = 42;
 	const char *testResourceId = "42";
 	unsigned char testResourceBuffer = 27;
-	size_t testResourceBytes = 1337;
+	size_t testResourceBytes = 1;
 	const char *testResourceData = "test resource data";
 
 	bool entityAdded = shovelerViewAddEntity(view, testEntityId);
@@ -70,8 +71,8 @@ TEST_F(ShovelerViewResourcesTest, addResource)
 	const ShovelerViewResourceConfiguration configuration{testTypeId, &testResourceBuffer, testResourceBytes};
 	bool resourceComponentAdded = shovelerViewEntityAddResource(testEntity, configuration);
 	ASSERT_TRUE(resourceComponentAdded);
-	ASSERT_EQ(lastLoadBuffer, &testResourceBuffer) << "load should be called with correct buffer";
 	ASSERT_EQ(lastLoadBytes, testResourceBytes) << "load should be called with correct bytes";
+	ASSERT_EQ(memcmp(&testResourceBuffer, lastLoadBuffer, testResourceBytes), 0) << "load should be called with correct buffer";
 
 	ShovelerResource *resource = shovelerResourcesGet(resources, testTypeId, testResourceId);
 	ASSERT_TRUE(resource != NULL);
