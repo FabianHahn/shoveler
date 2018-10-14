@@ -21,6 +21,7 @@ set(SHOVELER_OPENGL_SRC
 	src/view/light.c
 	src/view/material.c
 	src/view/model.c
+	src/view/texture.c
 	src/camera.c
 	src/controller.c
 	src/framebuffer.c
@@ -62,6 +63,7 @@ set(SHOVELER_OPENGL_SRC
 	include/shoveler/view/material.h
 	include/shoveler/view/model.h
 	include/shoveler/view/scene.h
+	include/shoveler/view/texture.h
 	include/shoveler/camera.h
 	include/shoveler/controller.h
 	include/shoveler/drawable.h
