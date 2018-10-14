@@ -5,7 +5,7 @@
 #include "shoveler/material/particle.h"
 #include "shoveler/material/texture.h"
 #include "shoveler/view/material.h"
-#include "shoveler/view/resources.h"
+#include "shoveler/view/texture.h"
 #include "shoveler/texture.h"
 #include "shoveler/log.h"
 
@@ -34,7 +34,7 @@ bool shovelerViewEntityAddMaterial(ShovelerViewEntity *entity, ShovelerViewMater
 	assert(component != NULL);
 
 	if(configuration.type == SHOVELER_VIEW_MATERIAL_TYPE_TEXTURE) {
-		shovelerViewComponentAddDependency(component, configuration.textureConfiguration.imageResourceEntityId, shovelerViewResourceComponentName);
+		shovelerViewComponentAddDependency(component, configuration.textureEntityId, shovelerViewTextureComponentName);
 	}
 
 	shovelerViewComponentActivate(component);
@@ -65,7 +65,7 @@ bool shovelerViewEntityUpdateMaterialConfiguration(ShovelerViewEntity *entity, S
 	shovelerViewComponentDeactivate(component);
 
 	if(componentData->configuration.type == SHOVELER_VIEW_MATERIAL_TYPE_TEXTURE) {
-		if(!shovelerViewComponentRemoveDependency(component, configuration.textureConfiguration.imageResourceEntityId, shovelerViewResourceComponentName)) {
+		if(!shovelerViewComponentRemoveDependency(component, configuration.textureEntityId, shovelerViewTextureComponentName)) {
 			return false;
 		}
 	}
@@ -73,7 +73,7 @@ bool shovelerViewEntityUpdateMaterialConfiguration(ShovelerViewEntity *entity, S
 	componentData->configuration = configuration;
 
 	if(configuration.type == SHOVELER_VIEW_MATERIAL_TYPE_TEXTURE) {
-		shovelerViewComponentAddDependency(component, configuration.textureConfiguration.imageResourceEntityId, shovelerViewResourceComponentName);
+		shovelerViewComponentAddDependency(component, configuration.textureEntityId, shovelerViewTextureComponentName);
 	}
 
 	shovelerViewComponentActivate(component);
@@ -102,16 +102,14 @@ static bool activateComponent(ShovelerViewComponent *component, void *componentD
 			componentData->material = shovelerMaterialColorCreate(componentData->configuration.color);
 			break;
 		case SHOVELER_VIEW_MATERIAL_TYPE_TEXTURE: {
-			ShovelerViewEntity *imageResourceEntity = shovelerViewGetEntity(component->entity->view, componentData->configuration.textureConfiguration.imageResourceEntityId);
-			assert(imageResourceEntity != NULL);
-			ShovelerImage *image = shovelerViewEntityGetResource(imageResourceEntity);
-			assert(image != NULL);
+			ShovelerViewEntity *textureEntity = shovelerViewGetEntity(component->entity->view, componentData->configuration.textureEntityId);
+			assert(textureEntity != NULL);
+			ShovelerTexture *texture = shovelerViewEntityGetTexture(textureEntity);
+			assert(texture != NULL);
+			ShovelerSampler *sampler = shovelerViewEntityGetTextureSampler(textureEntity);
+			assert(sampler != NULL);
 
-			ShovelerTexture *texture = shovelerTextureCreate2d(image, false);
-			shovelerTextureUpdate(texture);
-
-			ShovelerSampler *sampler = shovelerSamplerCreate(componentData->configuration.textureConfiguration.interpolate, componentData->configuration.textureConfiguration.clamp);
-			componentData->material = shovelerMaterialTextureCreate(texture, true, sampler, true);
+			componentData->material = shovelerMaterialTextureCreate(texture, false, sampler, false);
 			break;
 		}
 		case SHOVELER_VIEW_MATERIAL_TYPE_PARTICLE:

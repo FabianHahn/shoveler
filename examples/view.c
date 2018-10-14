@@ -13,6 +13,7 @@
 #include <shoveler/view/model.h>
 #include <shoveler/view/position.h>
 #include <shoveler/view/resources.h>
+#include <shoveler/view/texture.h>
 #include <shoveler/constants.h>
 #include <shoveler/controller.h>
 #include <shoveler/file.h>
@@ -138,15 +139,18 @@ int main(int argc, char *argv[])
 	imageResourceConfiguration.typeId = "image/png";
 	imageResourceConfiguration.buffer = (unsigned char *) imageData->str;
 	imageResourceConfiguration.bufferSize = imageData->len;
+	ShovelerViewTextureConfiguration textureConfiguration;
+	textureConfiguration.imageResourceEntityId = 6;
+	textureConfiguration.interpolate = true;
+	textureConfiguration.clamp = true;
 	ShovelerViewEntity *resourceEntity = shovelerViewAddEntity(view, 6);
 	shovelerViewEntityAddResource(resourceEntity, imageResourceConfiguration);
+	shovelerViewEntityAddTexture(resourceEntity, textureConfiguration);
 	g_string_free(imageData, true);
 
 	ShovelerViewMaterialConfiguration textureMaterialConfiguration;
 	textureMaterialConfiguration.type = SHOVELER_VIEW_MATERIAL_TYPE_TEXTURE;
-	textureMaterialConfiguration.textureConfiguration.imageResourceEntityId = 6;
-	textureMaterialConfiguration.textureConfiguration.interpolate = true;
-	textureMaterialConfiguration.textureConfiguration.clamp = true;
+	textureMaterialConfiguration.textureEntityId = 6;
 	ShovelerViewEntity *textureMaterialEntity = shovelerViewAddEntity(view, 7);
 	shovelerViewEntityAddMaterial(textureMaterialEntity, textureMaterialConfiguration);
 

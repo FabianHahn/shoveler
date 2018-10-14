@@ -12,15 +12,9 @@ typedef enum {
 } ShovelerViewMaterialType;
 
 typedef struct {
-	long long int imageResourceEntityId;
-	bool interpolate;
-	bool clamp;
-} ShovelerViewMaterialTextureConfiguration;
-
-typedef struct {
 	ShovelerViewMaterialType type;
 	ShovelerVector3 color;
-	ShovelerViewMaterialTextureConfiguration textureConfiguration;
+	long long int textureEntityId;
 } ShovelerViewMaterialConfiguration;
 
 static const char *shovelerViewMaterialComponentName = "material";
