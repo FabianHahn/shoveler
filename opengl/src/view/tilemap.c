@@ -47,6 +47,32 @@ bool shovelerViewEntityAddTilemap(ShovelerViewEntity *entity, ShovelerViewTilema
 	return true;
 }
 
+bool shovelerViewEntityGetTilemapLayers(ShovelerViewEntity *entity, int *numLayersPointer, ShovelerTexture ***layersPointer)
+{
+	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTilemapComponentName);
+	if(component == NULL) {
+		return false;
+	}
+
+	ComponentData *componentData = component->data;
+	*numLayersPointer = componentData->numLayers;
+	*layersPointer = componentData->layers;
+	return true;
+}
+
+bool shovelerViewEntityGetTilemapTilesets(ShovelerViewEntity *entity, int *numTilesetsPointer, ShovelerMaterialTilemapTileset ***tilesetsPointer)
+{
+	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTilemapComponentName);
+	if(component == NULL) {
+		return false;
+	}
+
+	ComponentData *componentData = component->data;
+	*numTilesetsPointer = componentData->numLayers;
+	*tilesetsPointer = componentData->tilesets;
+	return true;
+}
+
 bool shovelerViewEntityUpdateTilemap(ShovelerViewEntity *entity, ShovelerViewTilemapConfiguration configuration)
 {
 	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTilemapComponentName);

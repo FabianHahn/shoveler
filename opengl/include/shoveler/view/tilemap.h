@@ -18,6 +18,8 @@ typedef struct {
 static const char *shovelerViewTilemapComponentName = "tilemap";
 
 bool shovelerViewEntityAddTilemap(ShovelerViewEntity *entity, ShovelerViewTilemapConfiguration configuration);
+bool shovelerViewEntityGetTilemapLayers(ShovelerViewEntity *entity, int *numLayersPointer, ShovelerTexture ***layersPointer);
+bool shovelerViewEntityGetTilemapTilesets(ShovelerViewEntity *entity, int *numTilesetsPointer, ShovelerMaterialTilemapTileset ***tilesetsPointer);
 bool shovelerViewEntityUpdateTilemap(ShovelerViewEntity *entity, ShovelerViewTilemapConfiguration configuration);
 bool shovelerViewEntityRemoveTilemap(ShovelerViewEntity *entity);
 
