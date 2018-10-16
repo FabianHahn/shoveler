@@ -14,6 +14,8 @@
 #include <shoveler/view/position.h>
 #include <shoveler/view/resources.h>
 #include <shoveler/view/texture.h>
+#include <shoveler/view/tilemap.h>
+#include <shoveler/view/tileset.h>
 #include <shoveler/constants.h>
 #include <shoveler/controller.h>
 #include <shoveler/file.h>
@@ -27,7 +29,7 @@
 static double time = 0.0;
 static ShovelerView *view = NULL;
 
-static GString *createTextureImageData();
+static GString *getImageData(ShovelerImage *image);
 static void updateGame(ShovelerGame *game, double dt);
 
 int main(int argc, char *argv[])
@@ -134,7 +136,15 @@ int main(int argc, char *argv[])
 	shovelerViewEntityAddLight(lightEntity, lightConfiguration);
 	shovelerViewEntityAddPosition(lightEntity, 0.0, 2.0, 0.0);
 
-	GString *imageData = createTextureImageData();
+	ShovelerImage *image = shovelerImageCreate(2, 2, 3);
+	shovelerImageClear(image);
+	shovelerImageGet(image, 0, 0, 0) = 255;
+	shovelerImageGet(image, 0, 1, 1) = 255;
+	shovelerImageGet(image, 1, 0, 2) = 255;
+	shovelerImageGet(image, 1, 1, 1) = 255;
+	shovelerImageGet(image, 1, 1, 2) = 255;
+	GString *imageData = getImageData(image);
+	shovelerImageFree(image);
 	ShovelerViewResourceConfiguration imageResourceConfiguration;
 	imageResourceConfiguration.typeId = "image/png";
 	imageResourceConfiguration.buffer = (unsigned char *) imageData->str;
@@ -153,6 +163,85 @@ int main(int argc, char *argv[])
 	textureMaterialConfiguration.textureEntityId = 6;
 	ShovelerViewEntity *textureMaterialEntity = shovelerViewAddEntity(view, 7);
 	shovelerViewEntityAddMaterial(textureMaterialEntity, textureMaterialConfiguration);
+
+	ShovelerImage *layerImage = shovelerImageCreate(2, 2, 3);
+	shovelerImageClear(layerImage);
+	shovelerImageGet(layerImage, 0, 0, 0) = 0;
+	shovelerImageGet(layerImage, 0, 0, 1) = 0;
+	shovelerImageGet(layerImage, 0, 0, 2) = 1; // red
+	shovelerImageGet(layerImage, 0, 1, 0) = 0;
+	shovelerImageGet(layerImage, 0, 1, 1) = 0;
+	shovelerImageGet(layerImage, 0, 1, 2) = 1; // red
+	shovelerImageGet(layerImage, 1, 0, 0) = 0;
+	shovelerImageGet(layerImage, 1, 0, 1) = 1;
+	shovelerImageGet(layerImage, 1, 0, 2) = 1; // green
+	shovelerImageGet(layerImage, 1, 1, 0) = 0;
+	shovelerImageGet(layerImage, 1, 1, 1) = 0;
+	shovelerImageGet(layerImage, 1, 1, 2) = 2; // full tileset
+	GString *layerImageData = getImageData(layerImage);
+	shovelerImageFree(layerImage);
+	ShovelerViewResourceConfiguration layerImageResourceConfiguration;
+	layerImageResourceConfiguration.typeId = "image/png";
+	layerImageResourceConfiguration.buffer = (unsigned char *) layerImageData->str;
+	layerImageResourceConfiguration.bufferSize = layerImageData->len;
+	ShovelerViewEntity *layerResourceEntity = shovelerViewAddEntity(view, 8);
+	shovelerViewEntityAddResource(layerResourceEntity, layerImageResourceConfiguration);
+	g_string_free(layerImageData, true);
+
+	ShovelerImage *layer2Image = shovelerImageCreate(3, 3, 3);
+	shovelerImageClear(layer2Image);
+	shovelerImageGet(layer2Image, 0, 0, 0) = 0;
+	shovelerImageGet(layer2Image, 0, 0, 1) = 0;
+	shovelerImageGet(layer2Image, 0, 0, 2) = 2; // full tileset
+	GString *layer2ImageData = getImageData(layer2Image);
+	shovelerImageFree(layer2Image);
+	ShovelerViewResourceConfiguration layer2ImageResourceConfiguration;
+	layer2ImageResourceConfiguration.typeId = "image/png";
+	layer2ImageResourceConfiguration.buffer = (unsigned char *) layer2ImageData->str;
+	layer2ImageResourceConfiguration.bufferSize = layer2ImageData->len;
+	ShovelerViewEntity *layer2ResourceEntity = shovelerViewAddEntity(view, 9);
+	shovelerViewEntityAddResource(layer2ResourceEntity, layer2ImageResourceConfiguration);
+	g_string_free(layer2ImageData, true);
+
+	ShovelerViewTilesetConfiguration tilesetConfiguration;
+	tilesetConfiguration.textureEntityId = 6;
+	tilesetConfiguration.columns = 2;
+	tilesetConfiguration.rows = 2;
+	ShovelerViewEntity *tilesetMaterialEntity = shovelerViewAddEntity(view, 10);
+	shovelerViewEntityAddTileset(tilesetMaterialEntity, tilesetConfiguration);
+
+	ShovelerViewTilesetConfiguration tileset2Configuration;
+	tileset2Configuration.textureEntityId = 6;
+	tileset2Configuration.columns = 1;
+	tileset2Configuration.rows = 1;
+	ShovelerViewEntity *tileset2MaterialEntity = shovelerViewAddEntity(view, 11);
+	shovelerViewEntityAddTileset(tileset2MaterialEntity, tileset2Configuration);
+
+	ShovelerViewTilemapConfiguration tilemapConfiguration;
+	tilemapConfiguration.numLayers = 2;
+	tilemapConfiguration.layerImageResourceEntityIds = (long long int[]){8, 9};
+	tilemapConfiguration.numTilesets = 2;
+	tilemapConfiguration.tilesetEntityIds = (long long int[]){10, 11};
+	ShovelerViewMaterialConfiguration tilemapMaterialConfiguration;
+	tilemapMaterialConfiguration.type = SHOVELER_VIEW_MATERIAL_TYPE_TILEMAP;
+	tilemapMaterialConfiguration.tilemapEntityId = 12;
+	ShovelerViewEntity *tilemapMaterialEntity = shovelerViewAddEntity(view, 12);
+	shovelerViewEntityAddTilemap(tilemapMaterialEntity, tilemapConfiguration);
+	shovelerViewEntityAddMaterial(tilemapMaterialEntity, tilemapMaterialConfiguration);
+
+	ShovelerViewModelConfiguration tilemapModelConfiguration;
+	tilemapModelConfiguration.drawableEntityId = 4;
+	tilemapModelConfiguration.materialEntityId = 12;
+	tilemapModelConfiguration.rotation = shovelerVector3(SHOVELER_PI, 0.0, SHOVELER_PI);
+	tilemapModelConfiguration.scale = shovelerVector3(0.5, 0.5, 1.0);
+	tilemapModelConfiguration.visible = true;
+	tilemapModelConfiguration.emitter = false;
+	tilemapModelConfiguration.screenspace = false;
+	tilemapModelConfiguration.castsShadow = true;
+	tilemapModelConfiguration.polygonMode = GL_FILL;
+	ShovelerViewEntity *tilemapModelEntity = shovelerViewAddEntity(view, 13);
+	shovelerViewEntityAddModel(tilemapModelEntity, tilemapModelConfiguration);
+	shovelerViewEntityAddPosition(tilemapModelEntity, 5.0, 5.0, 7.5);
 
 	shovelerOpenGLCheckSuccess();
 
@@ -174,19 +263,10 @@ int main(int argc, char *argv[])
 	return EXIT_SUCCESS;
 }
 
-static GString *createTextureImageData()
+static GString *getImageData(ShovelerImage *image)
 {
 	const char *tempImageFilename = "temp.png";
-
-	ShovelerImage *image = shovelerImageCreate(2, 2, 3);
-	shovelerImageClear(image);
-	shovelerImageGet(image, 0, 0, 0) = 255;
-	shovelerImageGet(image, 0, 1, 1) = 255;
-	shovelerImageGet(image, 1, 0, 2) = 255;
-	shovelerImageGet(image, 1, 1, 1) = 255;
-	shovelerImageGet(image, 1, 1, 2) = 255;
 	shovelerImagePngWriteFile(image, tempImageFilename);
-	shovelerImageFree(image);
 
 	unsigned char *contents;
 	size_t contentsSize;
