@@ -9,12 +9,14 @@ typedef enum {
 	SHOVELER_VIEW_MATERIAL_TYPE_COLOR,
 	SHOVELER_VIEW_MATERIAL_TYPE_TEXTURE,
 	SHOVELER_VIEW_MATERIAL_TYPE_PARTICLE,
+	SHOVELER_VIEW_MATERIAL_TYPE_TILEMAP,
 } ShovelerViewMaterialType;
 
 typedef struct {
 	ShovelerViewMaterialType type;
 	ShovelerVector3 color;
 	long long int textureEntityId;
+	long long int tilemapEntityId;
 } ShovelerViewMaterialConfiguration;
 
 static const char *shovelerViewMaterialComponentName = "material";

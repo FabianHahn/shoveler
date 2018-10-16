@@ -4,8 +4,10 @@
 #include "shoveler/material/color.h"
 #include "shoveler/material/particle.h"
 #include "shoveler/material/texture.h"
+#include "shoveler/material/tilemap.h"
 #include "shoveler/view/material.h"
 #include "shoveler/view/texture.h"
+#include "shoveler/view/tilemap.h"
 #include "shoveler/texture.h"
 #include "shoveler/log.h"
 
@@ -35,6 +37,8 @@ bool shovelerViewEntityAddMaterial(ShovelerViewEntity *entity, ShovelerViewMater
 
 	if(configuration.type == SHOVELER_VIEW_MATERIAL_TYPE_TEXTURE) {
 		shovelerViewComponentAddDependency(component, configuration.textureEntityId, shovelerViewTextureComponentName);
+	} else if(configuration.type == SHOVELER_VIEW_MATERIAL_TYPE_TILEMAP) {
+		shovelerViewComponentAddDependency(component, configuration.tilemapEntityId, shovelerViewTilemapComponentName);
 	}
 
 	shovelerViewComponentActivate(component);
@@ -68,12 +72,18 @@ bool shovelerViewEntityUpdateMaterialConfiguration(ShovelerViewEntity *entity, S
 		if(!shovelerViewComponentRemoveDependency(component, configuration.textureEntityId, shovelerViewTextureComponentName)) {
 			return false;
 		}
+	} else if(componentData->configuration.type == SHOVELER_VIEW_MATERIAL_TYPE_TILEMAP) {
+		if(!shovelerViewComponentRemoveDependency(component, configuration.tilemapEntityId, shovelerViewTilemapComponentName)) {
+			return false;
+		}
 	}
 
 	componentData->configuration = configuration;
 
 	if(configuration.type == SHOVELER_VIEW_MATERIAL_TYPE_TEXTURE) {
 		shovelerViewComponentAddDependency(component, configuration.textureEntityId, shovelerViewTextureComponentName);
+	} else if(configuration.type == SHOVELER_VIEW_MATERIAL_TYPE_TILEMAP) {
+		shovelerViewComponentAddDependency(component, configuration.tilemapEntityId, shovelerViewTilemapComponentName);
 	}
 
 	shovelerViewComponentActivate(component);
@@ -115,6 +125,29 @@ static bool activateComponent(ShovelerViewComponent *component, void *componentD
 		case SHOVELER_VIEW_MATERIAL_TYPE_PARTICLE:
 			componentData->material = shovelerMaterialParticleCreate(componentData->configuration.color);
 			break;
+		case SHOVELER_VIEW_MATERIAL_TYPE_TILEMAP: {
+			ShovelerViewEntity *tilemapEntity = shovelerViewGetEntity(component->entity->view, componentData->configuration.tilemapEntityId);
+			assert(tilemapEntity != NULL);
+
+			int numLayers;
+			ShovelerTexture **layers;
+			bool gotLayers = shovelerViewEntityGetTilemapLayers(tilemapEntity, &numLayers, &layers);
+			assert(gotLayers);
+
+			int numTilesets;
+			ShovelerMaterialTilemapTileset **tilesets;
+			bool gotTilesets = shovelerViewEntityGetTilemapTilesets(tilemapEntity, &numTilesets, &tilesets);
+			assert(gotTilesets);
+
+			componentData->material = shovelerMaterialTilemapCreate();
+			for(int i = 0; i < numLayers; i++) {
+				shovelerMaterialTilemapAddLayer(componentData->material, layers[i]);
+			}
+			for(int i = 0; i < numTilesets; i++) {
+				shovelerMaterialTilemapAddTileset(componentData->material, *tilesets[i]);
+			}
+			break;
+		}
 		default:
 			shovelerLogWarning("Trying to activate material with unknown material type %d, ignoring.", componentData->configuration.type);
 			return false;
