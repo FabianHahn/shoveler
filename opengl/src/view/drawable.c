@@ -10,12 +10,13 @@
 #include "shoveler/view.h"
 
 typedef struct {
+	ShovelerViewDrawableConfiguration configuration;
 	ShovelerDrawable *drawable;
-} DrawableComponentData;
+} ComponentData;
 
-static ShovelerDrawable *createDrawable(ShovelerViewDrawableConfiguration configuration);
-static void freeComponent(ShovelerViewComponent *drawableComponent, void *drawableComponentDataPointer);
-static void freeComponentData(DrawableComponentData *drawableComponentData);
+static bool activateComponent(ShovelerViewComponent *component, void *componentDataPointer);
+static void deactivateComponent(ShovelerViewComponent *component, void *componentDataPointer);
+static void freeComponent(ShovelerViewComponent *component, void *componentDataPointer);
 
 bool shovelerViewEntityAddDrawable(ShovelerViewEntity *entity, ShovelerViewDrawableConfiguration configuration)
 {
@@ -25,10 +26,11 @@ bool shovelerViewEntityAddDrawable(ShovelerViewEntity *entity, ShovelerViewDrawa
 		return false;
 	}
 
-	DrawableComponentData *drawableComponentData = malloc(sizeof(DrawableComponentData));
-	drawableComponentData->drawable = createDrawable(configuration);
+	ComponentData *componentData = malloc(sizeof(ComponentData));
+	componentData->configuration = configuration;
+	componentData->drawable = NULL;
 
-	component = shovelerViewEntityAddComponent(entity, shovelerViewDrawableComponentName, drawableComponentData, NULL, NULL, freeComponent);
+	component = shovelerViewEntityAddComponent(entity, shovelerViewDrawableComponentName, componentData, activateComponent, deactivateComponent, freeComponent);
 	assert(component != NULL);
 
 	shovelerViewComponentActivate(component);
@@ -42,7 +44,7 @@ ShovelerDrawable *shovelerViewEntityGetDrawable(ShovelerViewEntity *entity)
 		return NULL;
 	}
 
-	DrawableComponentData *drawableComponentData = component->data;
+	ComponentData *drawableComponentData = component->data;
 	return drawableComponentData->drawable;
 }
 
@@ -54,9 +56,11 @@ bool shovelerViewEntityUpdateDrawable(ShovelerViewEntity *entity, ShovelerViewDr
 		return false;
 	}
 
-	DrawableComponentData *drawableComponentData = component->data;
-	shovelerDrawableFree(drawableComponentData->drawable);
-	drawableComponentData->drawable = createDrawable(configuration);
+	ComponentData *componentData = component->data;
+
+	shovelerViewComponentDeactivate(component);
+	componentData->configuration = configuration;
+	shovelerViewComponentActivate(component);
 
 	shovelerViewComponentUpdate(component);
 	return true;
@@ -73,30 +77,47 @@ bool shovelerViewEntityRemoveDrawable(ShovelerViewEntity *entity)
 	return shovelerViewEntityRemoveComponent(entity, shovelerViewDrawableComponentName);
 }
 
-static ShovelerDrawable *createDrawable(ShovelerViewDrawableConfiguration configuration)
+
+static bool activateComponent(ShovelerViewComponent *component, void *componentDataPointer)
 {
-	switch (configuration.type) {
+	ComponentData *componentData = componentDataPointer;
+
+	switch (componentData->configuration.type) {
 		case SHOVELER_VIEW_DRAWABLE_TYPE_CUBE:
-			return shovelerDrawableCubeCreate();
+			componentData->drawable = shovelerDrawableCubeCreate();
+			break;
 		case SHOVELER_VIEW_DRAWABLE_TYPE_QUAD:
-			return shovelerDrawableQuadCreate();
+			componentData->drawable = shovelerDrawableQuadCreate();
+			break;
 		case SHOVELER_VIEW_DRAWABLE_TYPE_POINT:
-			return shovelerDrawablePointCreate();
+			componentData->drawable = shovelerDrawablePointCreate();
+			break;
 		case SHOVELER_VIEW_DRAWABLE_TYPE_TILES:
-			return shovelerDrawableTilesCreate(configuration.tilesSize.width, configuration.tilesSize.height);
+			componentData->drawable = shovelerDrawableTilesCreate(componentData->configuration.tilesSize.width, componentData->configuration.tilesSize.height);
+			break;
 		default:
-			shovelerLogWarning("Trying to create drawable with unknown type %d, ignoring.", configuration.type);
-			return NULL;
+			shovelerLogWarning("Failed to activate drawable with unknown type %d.", componentData->configuration.type);
+			return false;
 	}
+
+	return true;
 }
 
-static void freeComponent(ShovelerViewComponent *drawableComponent, void *drawableComponentDataPointer)
+static void deactivateComponent(ShovelerViewComponent *component, void *componentDataPointer)
 {
-	freeComponentData(drawableComponentDataPointer);
+	ComponentData *componentData = componentDataPointer;
+
+	shovelerDrawableFree(componentData->drawable);
+	componentData->drawable = NULL;
 }
 
-static void freeComponentData(DrawableComponentData *drawableComponentData)
+static void freeComponent(ShovelerViewComponent *component, void *componentDataPointer)
 {
-	shovelerDrawableFree(drawableComponentData->drawable);
-	free(drawableComponentData);
+	ComponentData *componentData = componentDataPointer;
+
+	if(componentData->drawable != NULL) {
+		shovelerDrawableFree(componentData->drawable);
+	}
+
+	free(componentData);
 }
