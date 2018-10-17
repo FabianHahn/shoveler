@@ -45,6 +45,24 @@ bool shovelerViewEntityAddLight(ShovelerViewEntity *entity, ShovelerViewLightCon
 	return true;
 }
 
+bool shovelerViewEntityUpdateLight(ShovelerViewEntity *entity, ShovelerViewLightConfiguration configuration)
+{
+	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewLightComponentName);
+	if(component == NULL) {
+		shovelerLogWarning("Trying to update light of entity %lld which does not have a light, ignoring.", entity->entityId);
+		return false;
+	}
+
+	LightComponentData *componentData = component->data;
+
+	shovelerViewComponentDeactivate(component);
+	componentData->configuration = configuration;
+	shovelerViewComponentActivate(component);
+
+	shovelerViewComponentUpdate(component);
+	return true;
+}
+
 bool shovelerViewEntityRemoveLight(ShovelerViewEntity *entity)
 {
 	assert(shovelerViewHasScene(entity->view));
