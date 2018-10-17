@@ -12,7 +12,7 @@
 
 bool shovelerFileRead(const char *filename, unsigned char **contentsPointer, size_t *contentsSizePointer)
 {
-	FILE *file = fopen(filename, "r");
+	FILE *file = fopen(filename, "rb");
 	if(file == NULL) {
 		shovelerLogError("Failed to read file from '%s': %s.", filename, strerror(errno));
 		return false;
