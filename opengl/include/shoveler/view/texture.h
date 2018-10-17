@@ -20,6 +20,7 @@ static const char *shovelerViewTextureComponentName = "texture";
 bool shovelerViewEntityAddTexture(ShovelerViewEntity *entity, ShovelerViewTextureConfiguration configuration);
 ShovelerTexture *shovelerViewEntityGetTexture(ShovelerViewEntity *entity);
 ShovelerSampler *shovelerViewEntityGetTextureSampler(ShovelerViewEntity *entity);
+const ShovelerViewTextureConfiguration *shovelerViewEntityGetTextureConfiguration(ShovelerViewEntity *entity);
 bool shovelerViewEntityUpdateTexture(ShovelerViewEntity *entity, ShovelerViewTextureConfiguration configuration);
 bool shovelerViewEntityRemoveTexture(ShovelerViewEntity *entity);
 

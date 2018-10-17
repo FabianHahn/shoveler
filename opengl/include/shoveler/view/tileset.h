@@ -18,6 +18,7 @@ static const char *shovelerViewTilesetComponentName = "tileset";
 
 bool shovelerViewEntityAddTileset(ShovelerViewEntity *entity, ShovelerViewTilesetConfiguration configuration);
 ShovelerMaterialTilemapTileset *shovelerViewEntityGetTileset(ShovelerViewEntity *entity);
+const ShovelerViewTilesetConfiguration *shovelerViewEntityGetTilesetConfiguration(ShovelerViewEntity *entity);
 bool shovelerViewEntityUpdateTileset(ShovelerViewEntity *entity, ShovelerViewTilesetConfiguration configuration);
 bool shovelerViewEntityRemoveTileset(ShovelerViewEntity *entity);
 

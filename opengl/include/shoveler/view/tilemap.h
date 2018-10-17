@@ -20,6 +20,7 @@ static const char *shovelerViewTilemapComponentName = "tilemap";
 bool shovelerViewEntityAddTilemap(ShovelerViewEntity *entity, ShovelerViewTilemapConfiguration configuration);
 bool shovelerViewEntityGetTilemapLayers(ShovelerViewEntity *entity, int *numLayersPointer, ShovelerTexture ***layersPointer);
 bool shovelerViewEntityGetTilemapTilesets(ShovelerViewEntity *entity, int *numTilesetsPointer, ShovelerMaterialTilemapTileset ***tilesetsPointer);
+const ShovelerViewTilemapConfiguration *shovelerViewEntityGetTilemapConfiguration(ShovelerViewEntity *entity);
 bool shovelerViewEntityUpdateTilemap(ShovelerViewEntity *entity, ShovelerViewTilemapConfiguration configuration);
 bool shovelerViewEntityRemoveTilemap(ShovelerViewEntity *entity);
 

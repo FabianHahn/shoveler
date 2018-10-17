@@ -48,6 +48,17 @@ ShovelerDrawable *shovelerViewEntityGetDrawable(ShovelerViewEntity *entity)
 	return drawableComponentData->drawable;
 }
 
+const ShovelerViewDrawableConfiguration *shovelerViewEntityGetDrawableConfiguration(ShovelerViewEntity *entity)
+{
+	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewDrawableComponentName);
+	if(component == NULL) {
+		return NULL;
+	}
+
+	ComponentData *drawableComponentData = component->data;
+	return &drawableComponentData->configuration;
+}
+
 bool shovelerViewEntityUpdateDrawable(ShovelerViewEntity *entity, ShovelerViewDrawableConfiguration configuration)
 {
 	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewDrawableComponentName);

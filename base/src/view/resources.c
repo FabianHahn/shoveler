@@ -61,6 +61,17 @@ void *shovelerViewEntityGetResource(ShovelerViewEntity *entity)
 	return resource->data;
 }
 
+const ShovelerViewResourceConfiguration *shovelerViewEntityGetResourceConfiguration(ShovelerViewEntity *entity)
+{
+	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewResourceComponentName);
+	if(component == NULL) {
+		return NULL;
+	}
+
+	ResourceComponentData *componentData = component->data;
+	return &componentData->configuration;
+}
+
 bool shovelerViewEntityUpdateResource(ShovelerViewEntity *entity, ShovelerViewResourceConfiguration configuration)
 {
 	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewResourceComponentName);

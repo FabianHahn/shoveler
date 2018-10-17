@@ -26,6 +26,7 @@ static const char *shovelerViewModelComponentName = "model";
 
 bool shovelerViewEntityAddModel(ShovelerViewEntity *entity, ShovelerViewModelConfiguration configuration);
 ShovelerModel *shovelerViewEntityGetModel(ShovelerViewEntity *entity);
+const ShovelerViewModelConfiguration *shovelerViewEntityGetModelConfiguration(ShovelerViewEntity *entity);
 bool shovelerViewEntityUpdateModelDrawableEntityId(ShovelerViewEntity *entity, long long int drawableEntityId);
 bool shovelerViewEntityUpdateModelMaterialEntityId(ShovelerViewEntity *entity, long long int materialEntityId);
 bool shovelerViewEntityUpdateModelRotation(ShovelerViewEntity *entity, ShovelerVector3 rotation);

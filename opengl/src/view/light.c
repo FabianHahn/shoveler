@@ -45,6 +45,17 @@ bool shovelerViewEntityAddLight(ShovelerViewEntity *entity, ShovelerViewLightCon
 	return true;
 }
 
+const ShovelerViewLightConfiguration *shovelerViewEntityGetLightConfiguration(ShovelerViewEntity *entity)
+{
+	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewLightComponentName);
+	if(component == NULL) {
+		return NULL;
+	}
+
+	LightComponentData *componentData = component->data;
+	return &componentData->configuration;
+}
+
 bool shovelerViewEntityUpdateLight(ShovelerViewEntity *entity, ShovelerViewLightConfiguration configuration)
 {
 	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewLightComponentName);

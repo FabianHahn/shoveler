@@ -49,6 +49,17 @@ ShovelerMaterialTilemapTileset *shovelerViewEntityGetTileset(ShovelerViewEntity 
 	return &componentData->tileset;
 }
 
+const ShovelerViewTilesetConfiguration *shovelerViewEntityGetTilesetConfiguration(ShovelerViewEntity *entity)
+{
+	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTilesetComponentName);
+	if(component == NULL) {
+		return NULL;
+	}
+
+	TilesetComponentData *componentData = component->data;
+	return &componentData->configuration;
+}
+
 bool shovelerViewEntityUpdateTileset(ShovelerViewEntity *entity, ShovelerViewTilesetConfiguration configuration)
 {
 	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTilesetComponentName);

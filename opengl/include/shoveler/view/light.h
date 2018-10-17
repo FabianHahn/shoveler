@@ -24,6 +24,7 @@ typedef struct {
 static const char *shovelerViewLightComponentName = "light";
 
 bool shovelerViewEntityAddLight(ShovelerViewEntity *entity, ShovelerViewLightConfiguration configuration);
+const ShovelerViewLightConfiguration *shovelerViewEntityGetLightConfiguration(ShovelerViewEntity *entity);
 bool shovelerViewEntityUpdateLight(ShovelerViewEntity *entity, ShovelerViewLightConfiguration configuration);
 bool shovelerViewEntityRemoveLight(ShovelerViewEntity *entity);
 

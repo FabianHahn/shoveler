@@ -56,6 +56,17 @@ ShovelerMaterial *shovelerViewEntityGetMaterial(ShovelerViewEntity *entity)
 	return componentData->material;
 }
 
+const ShovelerViewMaterialConfiguration *shovelerViewEntityGetMaterialConfiguration(ShovelerViewEntity *entity)
+{
+	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewMaterialComponentName);
+	if(component == NULL) {
+		return NULL;
+	}
+
+	MaterialComponentData *componentData = component->data;
+	return &componentData->configuration;
+}
+
 bool shovelerViewEntityUpdateMaterialConfiguration(ShovelerViewEntity *entity, ShovelerViewMaterialConfiguration configuration)
 {
 	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewMaterialComponentName);

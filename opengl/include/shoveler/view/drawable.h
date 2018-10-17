@@ -30,6 +30,7 @@ static const char *shovelerViewDrawableComponentName = "drawable";
 
 bool shovelerViewEntityAddDrawable(ShovelerViewEntity *entity, ShovelerViewDrawableConfiguration configuration);
 ShovelerDrawable *shovelerViewEntityGetDrawable(ShovelerViewEntity *entity);
+const ShovelerViewDrawableConfiguration *shovelerViewEntityGetDrawableConfiguration(ShovelerViewEntity *entity);
 bool shovelerViewEntityUpdateDrawable(ShovelerViewEntity *entity, ShovelerViewDrawableConfiguration configuration);
 bool shovelerViewEntityRemoveDrawable(ShovelerViewEntity *entity);
 

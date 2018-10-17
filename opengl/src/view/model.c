@@ -63,6 +63,17 @@ ShovelerModel *shovelerViewEntityGetModel(ShovelerViewEntity *entity)
 	return modelComponentData->model;
 }
 
+const ShovelerViewModelConfiguration *shovelerViewEntityGetModelConfiguration(ShovelerViewEntity *entity)
+{
+	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewModelComponentName);
+	if(component == NULL) {
+		return NULL;
+	}
+
+	ModelComponentData *modelComponentData = component->data;
+	return &modelComponentData->configuration;
+}
+
 bool shovelerViewEntityUpdateModelDrawableEntityId(ShovelerViewEntity *entity, long long int drawableEntityId)
 {
 	assert(shovelerViewHasScene(entity->view));

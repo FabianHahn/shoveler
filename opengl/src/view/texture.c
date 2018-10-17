@@ -59,6 +59,17 @@ ShovelerSampler *shovelerViewEntityGetTextureSampler(ShovelerViewEntity *entity)
 	return componentData->sampler;
 }
 
+const ShovelerViewTextureConfiguration *shovelerViewEntityGetTextureConfiguration(ShovelerViewEntity *entity)
+{
+	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTextureComponentName);
+	if(component == NULL) {
+		return NULL;
+	}
+
+	TextureComponentData *componentData = component->data;
+	return &componentData->configuration;
+}
+
 bool shovelerViewEntityUpdateTexture(ShovelerViewEntity *entity, ShovelerViewTextureConfiguration configuration)
 {
 	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTextureComponentName);

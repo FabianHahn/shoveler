@@ -73,6 +73,17 @@ bool shovelerViewEntityGetTilemapTilesets(ShovelerViewEntity *entity, int *numTi
 	return true;
 }
 
+const ShovelerViewTilemapConfiguration *shovelerViewEntityGetTilemapConfiguration(ShovelerViewEntity *entity)
+{
+	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTilemapComponentName);
+	if(component == NULL) {
+		return false;
+	}
+
+	ComponentData *componentData = component->data;
+	return &componentData->configuration;
+}
+
 bool shovelerViewEntityUpdateTilemap(ShovelerViewEntity *entity, ShovelerViewTilemapConfiguration configuration)
 {
 	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTilemapComponentName);

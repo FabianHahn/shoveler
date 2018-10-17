@@ -18,6 +18,7 @@ static const char *shovelerViewResourcesTargetName = "resources";
 
 bool shovelerViewEntityAddResource(ShovelerViewEntity *entity, ShovelerViewResourceConfiguration configuration);
 void *shovelerViewEntityGetResource(ShovelerViewEntity *entity);
+const ShovelerViewResourceConfiguration *shovelerViewEntityGetResourceConfiguration(ShovelerViewEntity *entity);
 bool shovelerViewEntityUpdateResource(ShovelerViewEntity *entity, ShovelerViewResourceConfiguration configuration);
 bool shovelerViewEntityRemoveResource(ShovelerViewEntity *entity);
 

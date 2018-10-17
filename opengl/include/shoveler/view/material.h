@@ -23,6 +23,7 @@ static const char *shovelerViewMaterialComponentName = "material";
 
 bool shovelerViewEntityAddMaterial(ShovelerViewEntity *entity, ShovelerViewMaterialConfiguration configuration);
 ShovelerMaterial *shovelerViewEntityGetMaterial(ShovelerViewEntity *entity);
+const ShovelerViewMaterialConfiguration *shovelerViewEntityGetMaterialConfiguration(ShovelerViewEntity *entity);
 bool shovelerViewEntityUpdateMaterialConfiguration(ShovelerViewEntity *entity, ShovelerViewMaterialConfiguration configuration);
 bool shovelerViewEntityRemoveMaterial(ShovelerViewEntity *entity);
 
