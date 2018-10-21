@@ -153,25 +153,25 @@ void shovelerViewComponentAddDependency(ShovelerViewComponent *component, long l
 
 bool shovelerViewComponentRemoveDependency(ShovelerViewComponent *component, long long int dependencyEntityId, const char *dependencyComponentName)
 {
-	// We remove the reverse dependency first since removeComponent calls this function with a dependencyComponentName
-	// that is in the dependency list, and we wouldn't be able to access it anymore after we remove it from the list
-	// and free it.
 	ShovelerViewQualifiedComponent dependencyTarget;
 	dependencyTarget.entityId = dependencyEntityId;
-	dependencyTarget.componentName = (char *) dependencyComponentName; // safe because will only be used read only
+	dependencyTarget.componentName = strdup(dependencyComponentName);
 
 	GQueue *reverseDependencies = g_hash_table_lookup(component->entity->view->reverseDependencies, &dependencyTarget);
 	assert(reverseDependencies != NULL);
 
 	if(!removeDependency(reverseDependencies, component->entity->entityId, component->name)) {
+		free(dependencyTarget.componentName);
 		return false;
 	}
 
-	if(!removeDependency(component->dependencies, dependencyEntityId, dependencyComponentName)) {
+	if(!removeDependency(component->dependencies, dependencyEntityId, dependencyTarget.componentName)) {
+		free(dependencyTarget.componentName);
 		return false;
 	}
 
-	shovelerLogInfo("Removed component dependency on component '%s' of entity %lld from component '%s' of entity %lld.", dependencyComponentName, dependencyEntityId, component->name, component->entity->entityId);
+	shovelerLogInfo("Removed component dependency on component '%s' of entity %lld from component '%s' of entity %lld.", dependencyTarget.componentName, dependencyEntityId, component->name, component->entity->entityId);
+	free(dependencyTarget.componentName);
 	return true;
 }
 
