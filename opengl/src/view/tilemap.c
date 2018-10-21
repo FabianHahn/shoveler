@@ -68,7 +68,7 @@ bool shovelerViewEntityGetTilemapTilesets(ShovelerViewEntity *entity, int *numTi
 	}
 
 	ComponentData *componentData = component->data;
-	*numTilesetsPointer = componentData->numLayers;
+	*numTilesetsPointer = componentData->numTilesets;
 	*tilesetsPointer = componentData->tilesets;
 	return true;
 }
