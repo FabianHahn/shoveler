@@ -166,7 +166,7 @@ static void deactivateComponent(ShovelerViewComponent *component, void *componen
 {
 	ComponentData *componentData = componentDataPointer;
 
-	for(int i = 0; i < componentData->configuration.numLayers; i++) {
+	for(int i = 0; i < componentData->numLayers; i++) {
 		shovelerTextureFree(componentData->layers[i]);
 	}
 	free(componentData->layers);
@@ -184,7 +184,7 @@ static void freeComponent(ShovelerViewComponent *component, void *componentDataP
 {
 	ComponentData *componentData = componentDataPointer;
 
-	for(int i = 0; i < componentData->configuration.numLayers; i++) {
+	for(int i = 0; i < componentData->numLayers; i++) {
 		shovelerTextureFree(componentData->layers[i]);
 	}
 
