@@ -67,7 +67,7 @@ const ShovelerViewMaterialConfiguration *shovelerViewEntityGetMaterialConfigurat
 	return &componentData->configuration;
 }
 
-bool shovelerViewEntityUpdateMaterialConfiguration(ShovelerViewEntity *entity, ShovelerViewMaterialConfiguration configuration)
+bool shovelerViewEntityUpdateMaterial(ShovelerViewEntity *entity, ShovelerViewMaterialConfiguration configuration)
 {
 	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewMaterialComponentName);
 	if(component == NULL) {
