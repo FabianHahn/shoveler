@@ -113,7 +113,7 @@ bool shovelerViewEntityRequestPositionUpdate(ShovelerViewEntity *entity, double 
 	return true;
 }
 
-bool shovelerViewEntityRemoveEntityPosition(ShovelerViewEntity *entity)
+bool shovelerViewEntityRemovePosition(ShovelerViewEntity *entity)
 {
 	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewPositionComponentName);
 	if(component == NULL) {

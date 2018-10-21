@@ -23,6 +23,6 @@ bool shovelerViewEntityUpdatePosition(ShovelerViewEntity *entity, double x, doub
 bool shovelerViewEntityDelegatePosition(ShovelerViewEntity *entity, ShovelerViewPositionRequestUpdateFunction *requestUpdateFunction, void *userData);
 bool shovelerViewEntityUndelegatePosition(ShovelerViewEntity *entity);
 bool shovelerViewEntityRequestPositionUpdate(ShovelerViewEntity *entity, double x, double y, double z);
-bool shovelerViewEntityRemoveEntityPosition(ShovelerViewEntity *entity);
+bool shovelerViewEntityRemovePosition(ShovelerViewEntity *entity);
 
 #endif
