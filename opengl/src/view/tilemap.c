@@ -151,7 +151,7 @@ static void assignConfiguration(ShovelerViewTilemapConfiguration *destination, S
 
 	destination->numTilesets = source->numTilesets;
 	destination->tilesetEntityIds = malloc(destination->numTilesets * sizeof(long long int));
-	memcpy(destination->tilesetEntityIds, source->tilesetEntityIds, destination->numLayers * sizeof(long long int));
+	memcpy(destination->tilesetEntityIds, source->tilesetEntityIds, destination->numTilesets * sizeof(long long int));
 }
 
 static void clearConfiguration(ShovelerViewTilemapConfiguration *configuration)
