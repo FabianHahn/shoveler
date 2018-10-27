@@ -1,13 +1,13 @@
 #include <assert.h> // assert
 #include <stdlib.h> // malloc free
 
-#include "shoveler/view/texture.h"
+#include "shoveler/view/resources.h"
 #include "shoveler/view/tileset.h"
 #include "shoveler/log.h"
 
 typedef struct {
 	ShovelerViewTilesetConfiguration configuration;
-	ShovelerMaterialTilemapTileset tileset;
+	ShovelerTileset *tileset;
 } TilesetComponentData;
 
 static bool activateComponent(ShovelerViewComponent *component, void *componentDataPointer);
@@ -24,21 +24,18 @@ bool shovelerViewEntityAddTileset(ShovelerViewEntity *entity, ShovelerViewTilese
 
 	TilesetComponentData *componentData = malloc(sizeof(TilesetComponentData));
 	componentData->configuration = configuration;
-	componentData->tileset.columns = 0;
-	componentData->tileset.rows = 0;
-	componentData->tileset.texture = NULL;
-	componentData->tileset.sampler = NULL;
+	componentData->tileset = NULL;
 
 	component = shovelerViewEntityAddComponent(entity, shovelerViewTilesetComponentName, componentData, activateComponent, deactivateComponent, freeComponent);
 	assert(component != NULL);
 
-	shovelerViewComponentAddDependency(component, configuration.textureEntityId, shovelerViewTextureComponentName);
+	shovelerViewComponentAddDependency(component, configuration.imageResourceEntityId, shovelerViewResourceComponentName);
 
 	shovelerViewComponentActivate(component);
 	return true;
 }
 
-ShovelerMaterialTilemapTileset *shovelerViewEntityGetTileset(ShovelerViewEntity *entity)
+ShovelerTileset *shovelerViewEntityGetTileset(ShovelerViewEntity *entity)
 {
 	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTilesetComponentName);
 	if(component == NULL) {
@@ -46,7 +43,7 @@ ShovelerMaterialTilemapTileset *shovelerViewEntityGetTileset(ShovelerViewEntity 
 	}
 
 	TilesetComponentData *componentData = component->data;
-	return &componentData->tileset;
+	return componentData->tileset;
 }
 
 const ShovelerViewTilesetConfiguration *shovelerViewEntityGetTilesetConfiguration(ShovelerViewEntity *entity)
@@ -72,12 +69,12 @@ bool shovelerViewEntityUpdateTileset(ShovelerViewEntity *entity, ShovelerViewTil
 
 	shovelerViewComponentDeactivate(component);
 
-	if(!shovelerViewComponentRemoveDependency(component, configuration.textureEntityId, shovelerViewTextureComponentName)) {
+	if(!shovelerViewComponentRemoveDependency(component, componentData->configuration.imageResourceEntityId, shovelerViewResourceComponentName)) {
 		return false;
 	}
 
 	componentData->configuration = configuration;
-	shovelerViewComponentAddDependency(component, configuration.textureEntityId, shovelerViewTextureComponentName);
+	shovelerViewComponentAddDependency(component, componentData->configuration.imageResourceEntityId, shovelerViewResourceComponentName);
 	shovelerViewComponentActivate(component);
 
 	shovelerViewComponentUpdate(component);
@@ -99,32 +96,25 @@ static bool activateComponent(ShovelerViewComponent *component, void *componentD
 {
 	TilesetComponentData *componentData = componentDataPointer;
 
-	ShovelerViewEntity *textureEntity = shovelerViewGetEntity(component->entity->view, componentData->configuration.textureEntityId);
-	assert(textureEntity != NULL);
-	ShovelerTexture *texture = shovelerViewEntityGetTexture(textureEntity);
-	assert(texture != NULL);
-	ShovelerSampler *sampler = shovelerViewEntityGetTextureSampler(textureEntity);
-	assert(sampler != NULL);
+	ShovelerViewEntity *imageResourceEntity = shovelerViewGetEntity(component->entity->view, componentData->configuration.imageResourceEntityId);
+	assert(imageResourceEntity != NULL);
+	ShovelerImage *image = shovelerViewEntityGetResource(imageResourceEntity);
+	assert(image != NULL);
 
-	componentData->tileset.columns = componentData->configuration.columns;
-	componentData->tileset.rows = componentData->configuration.rows;
-	componentData->tileset.texture = texture;
-	componentData->tileset.sampler = sampler;
+	componentData->tileset = shovelerTilesetCreate(image, componentData->configuration.columns, componentData->configuration.rows, componentData->configuration.padding);
 	return true;
 }
 
 static void deactivateComponent(ShovelerViewComponent *component, void *componentDataPointer)
 {
 	TilesetComponentData *componentData = componentDataPointer;
-
-	componentData->tileset.columns = 0;
-	componentData->tileset.rows = 0;
-	componentData->tileset.texture = NULL;
-	componentData->tileset.sampler = NULL;
+	shovelerTilesetFree(componentData->tileset);
+	componentData->tileset = NULL;
 }
 
 static void freeComponent(ShovelerViewComponent *component, void *componentDataPointer)
 {
 	TilesetComponentData *componentData = componentDataPointer;
+	shovelerTilesetFree(componentData->tileset);
 	free(componentData);
 }

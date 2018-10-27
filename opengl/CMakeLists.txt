@@ -38,6 +38,7 @@ set(SHOVELER_OPENGL_SRC
 	src/shader.c
 	src/shader_program.c
 	src/texture.c
+	src/tileset.c
 	src/uniform.c
 	src/uniform_attachment.c
 	src/uniform_map.c
@@ -85,6 +86,7 @@ set(SHOVELER_OPENGL_SRC
 	include/shoveler/shader.h
 	include/shoveler/shader_program.h
 	include/shoveler/texture.h
+	include/shoveler/tileset.h
 	include/shoveler/uniform_attachment.h
 	include/shoveler/uniform.h
 	include/shoveler/uniform_map.h
