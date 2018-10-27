@@ -146,7 +146,7 @@ static bool activateComponent(ShovelerViewComponent *component, void *componentD
 			assert(gotLayers);
 
 			int numTilesets;
-			ShovelerMaterialTilemapTileset **tilesets;
+			ShovelerTileset **tilesets;
 			bool gotTilesets = shovelerViewEntityGetTilemapTilesets(tilemapEntity, &numTilesets, &tilesets);
 			assert(gotTilesets);
 
@@ -155,7 +155,7 @@ static bool activateComponent(ShovelerViewComponent *component, void *componentD
 				shovelerMaterialTilemapAddLayer(componentData->material, layers[i]);
 			}
 			for(int i = 0; i < numTilesets; i++) {
-				shovelerMaterialTilemapAddTileset(componentData->material, *tilesets[i]);
+				shovelerMaterialTilemapAddTileset(componentData->material, tilesets[i]);
 			}
 			break;
 		}

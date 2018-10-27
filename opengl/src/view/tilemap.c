@@ -12,7 +12,7 @@ typedef struct {
 	int numLayers;
 	ShovelerTexture **layers;
 	int numTilesets;
-	ShovelerMaterialTilemapTileset **tilesets;
+	ShovelerTileset **tilesets;
 } ComponentData;
 
 static void assignConfiguration(ShovelerViewTilemapConfiguration *destination, ShovelerViewTilemapConfiguration *source);
@@ -68,7 +68,7 @@ bool shovelerViewEntityGetTilemapLayers(ShovelerViewEntity *entity, int *numLaye
 	return true;
 }
 
-bool shovelerViewEntityGetTilemapTilesets(ShovelerViewEntity *entity, int *numTilesetsPointer, ShovelerMaterialTilemapTileset ***tilesetsPointer)
+bool shovelerViewEntityGetTilemapTilesets(ShovelerViewEntity *entity, int *numTilesetsPointer, ShovelerTileset ***tilesetsPointer)
 {
 	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTilemapComponentName);
 	if(component == NULL) {
@@ -187,7 +187,7 @@ static bool activateComponent(ShovelerViewComponent *component, void *componentD
 	}
 
 	componentData->numTilesets = componentData->configuration.numTilesets;
-	componentData->tilesets = malloc(componentData->numTilesets * sizeof(ShovelerMaterialTilemapTileset *));
+	componentData->tilesets = malloc(componentData->numTilesets * sizeof(ShovelerTileset *));
 
 	for(int i = 0; i < componentData->configuration.numTilesets; i++) {
 		ShovelerViewEntity *tilesetEntity = shovelerViewGetEntity(component->entity->view, componentData->configuration.tilesetEntityIds[i]);

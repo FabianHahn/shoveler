@@ -204,16 +204,18 @@ int main(int argc, char *argv[])
 	g_string_free(layer2ImageData, true);
 
 	ShovelerViewTilesetConfiguration tilesetConfiguration;
-	tilesetConfiguration.textureEntityId = 6;
+	tilesetConfiguration.imageResourceEntityId = 6;
 	tilesetConfiguration.columns = 2;
 	tilesetConfiguration.rows = 2;
+	tilesetConfiguration.padding = 1;
 	ShovelerViewEntity *tilesetMaterialEntity = shovelerViewAddEntity(view, 10);
 	shovelerViewEntityAddTileset(tilesetMaterialEntity, tilesetConfiguration);
 
 	ShovelerViewTilesetConfiguration tileset2Configuration;
-	tileset2Configuration.textureEntityId = 6;
+	tileset2Configuration.imageResourceEntityId = 6;
 	tileset2Configuration.columns = 1;
 	tileset2Configuration.rows = 1;
+	tileset2Configuration.padding = 1;
 	ShovelerViewEntity *tileset2MaterialEntity = shovelerViewAddEntity(view, 11);
 	shovelerViewEntityAddTileset(tileset2MaterialEntity, tileset2Configuration);
 

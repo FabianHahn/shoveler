@@ -4,7 +4,7 @@
 #include "shoveler/image.h"
 #include "shoveler/tileset.h"
 
-ShovelerTileset *shovelerTilesetCreate(ShovelerImage *image, int columns, int rows, int padding)
+ShovelerTileset *shovelerTilesetCreate(ShovelerImage *image, unsigned char columns, unsigned char rows, unsigned char padding)
 {
 	assert(image->width % columns == 0);
 	assert(image->height % rows == 0);
@@ -17,8 +17,8 @@ ShovelerTileset *shovelerTilesetCreate(ShovelerImage *image, int columns, int ro
 	tileset->padding = padding;
 
 	ShovelerImage *paddedImage = shovelerImageCreate(image->width + 2 * padding * columns, image->height + 2 * padding * rows, image->channels);
-	for(int column = 0; column < columns; column++) {
-		for(int row = 0; row < rows; row++) {
+	for(unsigned char column = 0; column < columns; column++) {
+		for(unsigned char row = 0; row < rows; row++) {
 			for(int i = -padding; i < tileWidth + padding; i++) {
 				int tileI = i;
 				if(tileI < 0) {
@@ -60,12 +60,18 @@ ShovelerTileset *shovelerTilesetCreate(ShovelerImage *image, int columns, int ro
 	}
 
 	tileset->texture = shovelerTextureCreate2d(paddedImage, true);
+	shovelerTextureUpdate(tileset->texture);
+
 	tileset->sampler = shovelerSamplerCreate(true, true);
 	return tileset;
 }
 
 void shovelerTilesetFree(ShovelerTileset *tileset)
 {
+	if(tileset == NULL) {
+		return;
+	}
+
 	shovelerSamplerFree(tileset->sampler);
 	shovelerTextureFree(tileset->texture);
 	free(tileset);

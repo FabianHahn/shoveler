@@ -5,19 +5,20 @@
 
 #include <glib.h>
 
-#include <shoveler/material/tilemap.h>
+#include <shoveler/tileset.h>
 #include <shoveler/view.h>
 
 typedef struct {
-	long long int textureEntityId;
-	int columns;
-	int rows;
+	long long int imageResourceEntityId;
+	unsigned char columns;
+	unsigned char rows;
+	unsigned char padding;
 } ShovelerViewTilesetConfiguration;
 
 static const char *shovelerViewTilesetComponentName = "tileset";
 
 bool shovelerViewEntityAddTileset(ShovelerViewEntity *entity, ShovelerViewTilesetConfiguration configuration);
-ShovelerMaterialTilemapTileset *shovelerViewEntityGetTileset(ShovelerViewEntity *entity);
+ShovelerTileset *shovelerViewEntityGetTileset(ShovelerViewEntity *entity);
 const ShovelerViewTilesetConfiguration *shovelerViewEntityGetTilesetConfiguration(ShovelerViewEntity *entity);
 bool shovelerViewEntityUpdateTileset(ShovelerViewEntity *entity, ShovelerViewTilesetConfiguration configuration);
 bool shovelerViewEntityRemoveTileset(ShovelerViewEntity *entity);
