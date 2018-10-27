@@ -18,6 +18,7 @@ struct ShovelerModelStruct; // forward declaration: model.h
 typedef struct ShovelerSceneStruct {
 	ShovelerUniformMap *uniforms;
 	struct ShovelerMaterialStruct *depthMaterial;
+	/* private */ int debugMode;
 	GHashTable *lights;
 	GHashTable *models;
 	GHashTable *shaderCache;
@@ -37,6 +38,7 @@ typedef struct {
 } ShovelerSceneRenderPassOptions;
 
 ShovelerScene *shovelerSceneCreate();
+void shovelerSceneToggleDebugMode(ShovelerScene *scene);
 bool shovelerSceneAddLight(ShovelerScene *scene, struct ShovelerLightStruct *light);
 bool shovelerSceneRemoveLight(ShovelerScene *scene, struct ShovelerLightStruct *light);
 bool shovelerSceneAddModel(ShovelerScene *scene, struct ShovelerModelStruct *model);

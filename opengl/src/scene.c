@@ -24,10 +24,23 @@ ShovelerScene *shovelerSceneCreate()
 	ShovelerScene *scene = malloc(sizeof(ShovelerScene));
 	scene->uniforms = shovelerUniformMapCreate();
 	scene->depthMaterial = shovelerMaterialDepthCreate();
+	scene->debugMode = 0;
 	scene->lights = g_hash_table_new_full(g_direct_hash, g_direct_equal, freeLight, NULL);
 	scene->models = g_hash_table_new_full(g_direct_hash, g_direct_equal, freeModel, NULL);
 	scene->shaderCache = g_hash_table_new_full(shovelerShaderKeyHash, shovelerShaderKeyEqual, NULL, freeShader);
+
+	shovelerUniformMapInsert(scene->uniforms, "sceneDebugMode", shovelerUniformCreateIntPointer(&scene->debugMode));
+
 	return scene;
+}
+
+void shovelerSceneToggleDebugMode(ShovelerScene *scene)
+{
+	if(scene->debugMode > 0) {
+		scene->debugMode = 0;
+	} else {
+		scene->debugMode = 1;
+	}
 }
 
 bool shovelerSceneAddLight(ShovelerScene *scene, ShovelerLight *light)
