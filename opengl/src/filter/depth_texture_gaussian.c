@@ -37,7 +37,7 @@ ShovelerFilter *shovelerFilterDepthTextureGaussianCreate(int width, int height, 
 	depthTextureGaussianFilter->filter.filterTexture = filterDepthTextureGaussian;
 	depthTextureGaussianFilter->filter.freeData = freeDepthTextureGaussian;
 
-	depthTextureGaussianFilter->filterSampler = shovelerSamplerCreate(false, true);
+	depthTextureGaussianFilter->filterSampler = shovelerSamplerCreate(false, false, true);
 	depthTextureGaussianFilter->filterCamera = shovelerCameraIdentityCreate();
 
 	depthTextureGaussianFilter->filterXFramebuffer = shovelerFramebufferCreateColorOnly(width, height, samples, 1, 32);

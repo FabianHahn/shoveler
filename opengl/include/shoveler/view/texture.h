@@ -12,6 +12,7 @@
 typedef struct {
 	long long int imageResourceEntityId;
 	bool interpolate;
+	bool useMipmaps;
 	bool clamp;
 } ShovelerViewTextureConfiguration;
 

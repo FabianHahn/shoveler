@@ -88,8 +88,8 @@ static void shovelerSampleInit(ShovelerGame *sampleGame, int width, int height, 
 
 	controller = shovelerControllerCreate(game, (ShovelerVector3){0, 0, -5}, (ShovelerVector3){0, 0, 1}, (ShovelerVector3){0, 1, 0}, 2.0f, 0.0005f);
 
-	nearestNeighborSampler = shovelerSamplerCreate(false, true);
-	interpolatingSampler = shovelerSamplerCreate(true, true);
+	nearestNeighborSampler = shovelerSamplerCreate(false, true, true);
+	interpolatingSampler = shovelerSamplerCreate(true, true, true);
 
 	colorMaterial = shovelerMaterialColorCreate((ShovelerVector3){0.7, 0.7, 0.7});
 

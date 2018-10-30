@@ -20,7 +20,7 @@ static void freeSpotLight(void *spotlightPointer);
 
 ShovelerLightSpotShared *shovelerLightSpotSharedCreate(int width, int height, GLsizei samples, float ambientFactor, float exponentialFactor, ShovelerVector3 color) {
 	ShovelerLightSpotShared *shared = malloc(sizeof(ShovelerLightSpotShared));
-	shared->shadowMapSampler = shovelerSamplerCreate(true, true);
+	shared->shadowMapSampler = shovelerSamplerCreate(true, true, true);
 	shared->depthFramebuffer = shovelerFramebufferCreateDepthOnly(width, height, samples);
 	shared->depthMaterial = shovelerMaterialDepthCreate();
 	shared->depthFilter = shovelerFilterDepthTextureGaussianCreate(width, height, samples, exponentialFactor);

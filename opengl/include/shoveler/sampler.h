@@ -9,7 +9,7 @@ typedef struct {
 	GLuint sampler;
 } ShovelerSampler;
 
-ShovelerSampler *shovelerSamplerCreate(bool interpolate, bool clamp);
+ShovelerSampler *shovelerSamplerCreate(bool interpolate, bool useMipmaps, bool clamp);
 bool shovelerSamplerUse(ShovelerSampler *sampler, GLuint unit);
 void shovelerSamplerFree(ShovelerSampler *shader);
 

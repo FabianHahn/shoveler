@@ -3,16 +3,24 @@
 #include "shoveler/opengl.h"
 #include "shoveler/sampler.h"
 
-ShovelerSampler *shovelerSamplerCreate(bool interpolate, bool clamp)
+ShovelerSampler *shovelerSamplerCreate(bool interpolate, bool useMipmaps, bool clamp)
 {
 	ShovelerSampler *sampler = malloc(sizeof(ShovelerSampler));
 	glGenSamplers(1, &sampler->sampler);
 
 	if(interpolate) {
-		glSamplerParameteri(sampler->sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		if(useMipmaps) {
+			glSamplerParameteri(sampler->sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		} else {
+			glSamplerParameteri(sampler->sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		}
 		glSamplerParameteri(sampler->sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	} else {
-		glSamplerParameteri(sampler->sampler, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+		if(useMipmaps) {
+			glSamplerParameteri(sampler->sampler, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+		} else {
+			glSamplerParameteri(sampler->sampler, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		}
 		glSamplerParameteri(sampler->sampler, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	}
 	shovelerOpenGLCheckSuccess();

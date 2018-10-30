@@ -117,7 +117,7 @@ static bool activateComponent(ShovelerViewComponent *component, void *componentD
 	componentData->texture = shovelerTextureCreate2d(image, false);
 	shovelerTextureUpdate(componentData->texture);
 
-	componentData->sampler = shovelerSamplerCreate(componentData->configuration.interpolate, componentData->configuration.clamp);
+	componentData->sampler = shovelerSamplerCreate(componentData->configuration.interpolate, componentData->configuration.useMipmaps, componentData->configuration.clamp);
 	return true;
 }
 

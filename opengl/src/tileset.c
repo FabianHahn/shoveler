@@ -62,7 +62,8 @@ ShovelerTileset *shovelerTilesetCreate(ShovelerImage *image, unsigned char colum
 	tileset->texture = shovelerTextureCreate2d(paddedImage, true);
 	shovelerTextureUpdate(tileset->texture);
 
-	tileset->sampler = shovelerSamplerCreate(true, true);
+	// create a sampler without mipmapping to prevent seam artifacts between tiles
+	tileset->sampler = shovelerSamplerCreate(true, false, true);
 	return tileset;
 }
 

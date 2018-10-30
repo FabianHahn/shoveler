@@ -151,7 +151,7 @@ ShovelerMaterial *shovelerMaterialTilemapCreate()
 	tilemap->material->data = tilemap;
 	tilemap->material->render = render;
 	tilemap->material->freeData = freeTilemap;
-	tilemap->tilemapSampler = shovelerSamplerCreate(false, true);
+	tilemap->tilemapSampler = shovelerSamplerCreate(false, false, true);
 	tilemap->activeLayerWidth = 0;
 	tilemap->activeLayerHeight = 0;
 	tilemap->activeLayerTexture = NULL;

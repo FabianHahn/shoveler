@@ -15,12 +15,9 @@
 #include <shoveler/input.h>
 #include <shoveler/model.h>
 #include <shoveler/opengl.h>
-#include <shoveler/sampler.h>
 #include <shoveler/scene.h>
 #include <shoveler/shader_program.h>
 #include <shoveler/texture.h>
-
-static float eps = 1e-9;
 
 static void shovelerSampleInit(ShovelerGame *sampleGame, int width, int height, int samples);
 static void shovelerSampleTerminate();
@@ -47,9 +44,6 @@ int main(int argc, char *argv[])
 	ShovelerController *controller = shovelerControllerCreate(game, shovelerVector3(0, 0, 1), shovelerVector3(0, 0, -1), shovelerVector3(0, 1, 0), 2.0f, 0.0005f);
 	game->camera = shovelerCameraPerspectiveCreate(shovelerVector3(0, 0, 1), shovelerVector3(0, 0, -1), shovelerVector3(0, 1, 0), 2.0f * SHOVELER_PI * 50.0f / 360.0f, (float) width / height, 0.01, 1000);
 	shovelerCameraPerspectiveAttachController(game->camera, controller);
-
-	ShovelerSampler *nearestNeighborSampler = shovelerSamplerCreate(false, true);
-	ShovelerSampler *interpolatingSampler = shovelerSamplerCreate(true, true);
 
 	ShovelerMaterial *tilemapMaterial = shovelerMaterialTilemapCreate();
 
@@ -116,8 +110,6 @@ int main(int argc, char *argv[])
 	shovelerCameraFree(game->camera);
 	shovelerDrawableFree(tiles);
 	shovelerMaterialFree(tilemapMaterial);
-	shovelerSamplerFree(interpolatingSampler);
-	shovelerSamplerFree(nearestNeighborSampler);
 	shovelerControllerFree(controller);
 
 	shovelerGameFree(game);
