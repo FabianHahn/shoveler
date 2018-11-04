@@ -118,7 +118,7 @@ static void assignConfiguration(ShovelerViewTilemapLayerConfiguration *destinati
 	destination->numColumns = source->numColumns;
 	destination->numRows = source->numRows;
 
-	if(destination->isImageResourceEntityDefinition) {
+	if(!source->isImageResourceEntityDefinition) {
 		destination->tiles = malloc(destination->numColumns * destination->numRows * sizeof(ShovelerViewTilemapLayerTileConfiguration));
 		memcpy(destination->tiles, source->tiles, destination->numColumns * destination->numRows * sizeof(ShovelerViewTilemapLayerTileConfiguration));
 	}
