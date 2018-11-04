@@ -1,6 +1,6 @@
 #include <assert.h> // assert
 #include <stdlib.h> // malloc free
-#include <string.h> // memcpy
+#include <string.h> // memmove
 
 #include "shoveler/view/resources.h"
 #include "shoveler/view/tilemap_layer.h"
@@ -16,6 +16,7 @@ static void clearConfiguration(ShovelerViewTilemapLayerConfiguration *configurat
 static bool activateComponent(ShovelerViewComponent *component, void *componentDataPointer);
 static void deactivateComponent(ShovelerViewComponent *component, void *componentDataPointer);
 static void freeComponent(ShovelerViewComponent *component, void *componentDataPointer);
+static void updateTiles(ComponentData *componentData);
 
 bool shovelerViewEntityAddTilemapLayer(ShovelerViewEntity *entity, ShovelerViewTilemapLayerConfiguration configuration)
 {
@@ -98,6 +99,30 @@ bool shovelerViewEntityUpdateTilemapLayer(ShovelerViewEntity *entity, ShovelerVi
 	return true;
 }
 
+bool shovelerViewEntityUpdateTilemapLayerTiles(ShovelerViewEntity *entity, const ShovelerViewTilemapLayerTileConfiguration *tiles)
+{
+	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTilemapLayerComponentName);
+	if(component == NULL) {
+		shovelerLogWarning("Trying to update tilemap layer tiles of entity %lld which does not have a tilemap layer, ignoring.", entity->entityId);
+		return false;
+	}
+
+	ComponentData *componentData = component->data;
+	if(componentData->configuration.isImageResourceEntityDefinition) {
+		shovelerLogWarning("Trying to update tilemap layer tiles of entity %lld which has an image resource entity definiton, ignoring.", entity->entityId);
+		return false;
+	}
+
+	memmove(componentData->configuration.tiles, tiles, componentData->configuration.numColumns * componentData->configuration.numRows * sizeof(ShovelerViewTilemapLayerTileConfiguration));
+
+	if(component->active) {
+		updateTiles(componentData);
+	}
+
+	shovelerViewComponentUpdate(component);
+	return true;
+}
+
 bool shovelerViewEntityRemoveTilemapLayer(ShovelerViewEntity *entity)
 {
 	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTilemapLayerComponentName);
@@ -120,7 +145,7 @@ static void assignConfiguration(ShovelerViewTilemapLayerConfiguration *destinati
 
 	if(!source->isImageResourceEntityDefinition) {
 		destination->tiles = malloc(destination->numColumns * destination->numRows * sizeof(ShovelerViewTilemapLayerTileConfiguration));
-		memcpy(destination->tiles, source->tiles, destination->numColumns * destination->numRows * sizeof(ShovelerViewTilemapLayerTileConfiguration));
+		memmove(destination->tiles, source->tiles, destination->numColumns * destination->numRows * sizeof(ShovelerViewTilemapLayerTileConfiguration));
 	}
 }
 
@@ -150,18 +175,8 @@ static bool activateComponent(ShovelerViewComponent *component, void *componentD
 		shovelerTextureUpdate(componentData->texture);
 	} else {
 		ShovelerImage *tilemapImage = shovelerImageCreate(componentData->configuration.numColumns, componentData->configuration.numRows, 3);
-
-		for(int column = 0; column < componentData->configuration.numColumns; ++column) {
-			for(int row = 0; row < componentData->configuration.numRows; ++row) {
-				ShovelerViewTilemapLayerTileConfiguration tileConfiguration = componentData->configuration.tiles[row * componentData->configuration.numColumns + column];
-				shovelerImageGet(tilemapImage, column, row, 0) = tileConfiguration.tilesetColumn;
-				shovelerImageGet(tilemapImage, column, row, 1) = tileConfiguration.tilesetRow;
-				shovelerImageGet(tilemapImage, column, row, 2) = tileConfiguration.tilesetId;
-			}
-		}
-
 		componentData->texture = shovelerTextureCreate2d(tilemapImage, true);
-		shovelerTextureUpdate(componentData->texture);
+		updateTiles(componentData);
 	}
 
 	return true;
@@ -183,4 +198,21 @@ static void freeComponent(ShovelerViewComponent *component, void *componentDataP
 
 	clearConfiguration(&componentData->configuration);
 	free(componentData);
+}
+
+static void updateTiles(ComponentData *componentData)
+{
+	assert(componentData->texture != NULL);
+	ShovelerImage *tilemapImage = componentData->texture->image;
+
+	for(int column = 0; column < componentData->configuration.numColumns; ++column) {
+		for(int row = 0; row < componentData->configuration.numRows; ++row) {
+			ShovelerViewTilemapLayerTileConfiguration tileConfiguration = componentData->configuration.tiles[row * componentData->configuration.numColumns + column];
+			shovelerImageGet(tilemapImage, column, row, 0) = tileConfiguration.tilesetColumn;
+			shovelerImageGet(tilemapImage, column, row, 1) = tileConfiguration.tilesetRow;
+			shovelerImageGet(tilemapImage, column, row, 2) = tileConfiguration.tilesetId;
+		}
+	}
+
+	shovelerTextureUpdate(componentData->texture);
 }

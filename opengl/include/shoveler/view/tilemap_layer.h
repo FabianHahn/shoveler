@@ -33,6 +33,7 @@ bool shovelerViewEntityAddTilemapLayer(ShovelerViewEntity *entity, ShovelerViewT
 ShovelerTexture *shovelerViewEntityGetTilemapLayer(ShovelerViewEntity *entity);
 const ShovelerViewTilemapLayerConfiguration *shovelerViewEntityGetTilemapLayerConfiguration(ShovelerViewEntity *entity);
 bool shovelerViewEntityUpdateTilemapLayer(ShovelerViewEntity *entity, ShovelerViewTilemapLayerConfiguration configuration);
+bool shovelerViewEntityUpdateTilemapLayerTiles(ShovelerViewEntity *entity, const ShovelerViewTilemapLayerTileConfiguration *tiles);
 bool shovelerViewEntityRemoveTilemapLayer(ShovelerViewEntity *entity);
 
 #endif

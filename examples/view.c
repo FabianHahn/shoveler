@@ -292,4 +292,9 @@ static void updateGame(ShovelerGame *game, double dt)
 	time += dt;
 	ShovelerViewEntity *lightEntity = shovelerViewGetEntity(view, 5);
 	shovelerViewEntityUpdatePosition(lightEntity, 2.0 * sin(time), 2.0 * cos(time), 0.0);
+
+	ShovelerViewEntity *tilemapEntity = shovelerViewGetEntity(view, 8);
+	const ShovelerViewTilemapLayerConfiguration *layerConfiguration = shovelerViewEntityGetTilemapLayerConfiguration(tilemapEntity);
+	layerConfiguration->tiles[0].tilesetColumn = (unsigned char) time % 2;
+	shovelerViewEntityUpdateTilemapLayerTiles(tilemapEntity, layerConfiguration->tiles);
 }
