@@ -15,6 +15,7 @@
 #include <shoveler/view/resources.h>
 #include <shoveler/view/texture.h>
 #include <shoveler/view/tilemap.h>
+#include <shoveler/view/tilemap_layer.h>
 #include <shoveler/view/tileset.h>
 #include <shoveler/constants.h>
 #include <shoveler/controller.h>
@@ -164,29 +165,27 @@ int main(int argc, char *argv[])
 	ShovelerViewEntity *textureMaterialEntity = shovelerViewAddEntity(view, 7);
 	shovelerViewEntityAddMaterial(textureMaterialEntity, textureMaterialConfiguration);
 
-	ShovelerImage *layerImage = shovelerImageCreate(2, 2, 3);
-	shovelerImageClear(layerImage);
-	shovelerImageGet(layerImage, 0, 0, 0) = 0;
-	shovelerImageGet(layerImage, 0, 0, 1) = 0;
-	shovelerImageGet(layerImage, 0, 0, 2) = 1; // red
-	shovelerImageGet(layerImage, 0, 1, 0) = 0;
-	shovelerImageGet(layerImage, 0, 1, 1) = 0;
-	shovelerImageGet(layerImage, 0, 1, 2) = 1; // red
-	shovelerImageGet(layerImage, 1, 0, 0) = 0;
-	shovelerImageGet(layerImage, 1, 0, 1) = 1;
-	shovelerImageGet(layerImage, 1, 0, 2) = 1; // green
-	shovelerImageGet(layerImage, 1, 1, 0) = 0;
-	shovelerImageGet(layerImage, 1, 1, 1) = 0;
-	shovelerImageGet(layerImage, 1, 1, 2) = 2; // full tileset
-	GString *layerImageData = getImageData(layerImage);
-	shovelerImageFree(layerImage);
-	ShovelerViewResourceConfiguration layerImageResourceConfiguration;
-	layerImageResourceConfiguration.typeId = "image/png";
-	layerImageResourceConfiguration.buffer = (unsigned char *) layerImageData->str;
-	layerImageResourceConfiguration.bufferSize = layerImageData->len;
-	ShovelerViewEntity *layerResourceEntity = shovelerViewAddEntity(view, 8);
-	shovelerViewEntityAddResource(layerResourceEntity, layerImageResourceConfiguration);
-	g_string_free(layerImageData, true);
+	ShovelerViewTilemapLayerTileConfiguration layerTiles[4];
+	layerTiles[0].tilesetColumn = 0;
+	layerTiles[0].tilesetRow = 0;
+	layerTiles[0].tilesetId = 1; // red
+	layerTiles[1].tilesetColumn = 0;
+	layerTiles[1].tilesetRow = 1;
+	layerTiles[1].tilesetId = 1; // green
+	layerTiles[2].tilesetColumn = 0;
+	layerTiles[2].tilesetRow = 0;
+	layerTiles[2].tilesetId = 1; // red
+	layerTiles[3].tilesetColumn = 0;
+	layerTiles[3].tilesetRow = 0;
+	layerTiles[3].tilesetId = 2; // full tileset
+	ShovelerViewTilemapLayerConfiguration layerConfiguration;
+	layerConfiguration.isImageResourceEntityDefinition = false;
+	layerConfiguration.imageResourceEntityId = 0;
+	layerConfiguration.numColumns = 2;
+	layerConfiguration.numRows = 2;
+	layerConfiguration.tiles = layerTiles;
+	ShovelerViewEntity *layerEntity = shovelerViewAddEntity(view, 8);
+	shovelerViewEntityAddTilemapLayer(layerEntity, layerConfiguration);
 
 	ShovelerImage *layer2Image = shovelerImageCreate(3, 3, 3);
 	shovelerImageClear(layer2Image);
@@ -199,8 +198,12 @@ int main(int argc, char *argv[])
 	layer2ImageResourceConfiguration.typeId = "image/png";
 	layer2ImageResourceConfiguration.buffer = (unsigned char *) layer2ImageData->str;
 	layer2ImageResourceConfiguration.bufferSize = layer2ImageData->len;
+	ShovelerViewTilemapLayerConfiguration layer2Configuration;
+	layer2Configuration.isImageResourceEntityDefinition = true;
+	layer2Configuration.imageResourceEntityId = 9;
 	ShovelerViewEntity *layer2ResourceEntity = shovelerViewAddEntity(view, 9);
 	shovelerViewEntityAddResource(layer2ResourceEntity, layer2ImageResourceConfiguration);
+	shovelerViewEntityAddTilemapLayer(layer2ResourceEntity, layer2Configuration);
 	g_string_free(layer2ImageData, true);
 
 	ShovelerViewTilesetConfiguration tilesetConfiguration;
@@ -221,7 +224,7 @@ int main(int argc, char *argv[])
 
 	ShovelerViewTilemapConfiguration tilemapConfiguration;
 	tilemapConfiguration.numLayers = 2;
-	tilemapConfiguration.layerImageResourceEntityIds = (long long int[]){8, 9};
+	tilemapConfiguration.layerEntityIds = (long long int[]){8, 9};
 	tilemapConfiguration.numTilesets = 2;
 	tilemapConfiguration.tilesetEntityIds = (long long int[]){10, 11};
 	ShovelerViewMaterialConfiguration tilemapMaterialConfiguration;

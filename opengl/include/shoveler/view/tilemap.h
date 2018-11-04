@@ -11,7 +11,7 @@
 
 typedef struct {
 	int numLayers;
-	long long int *layerImageResourceEntityIds;
+	long long int *layerEntityIds;
 	int numTilesets;
 	long long int *tilesetEntityIds;
 } ShovelerViewTilemapConfiguration;

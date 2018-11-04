@@ -2,8 +2,8 @@
 #include <stdlib.h> // malloc free
 #include <string.h> // memcpy
 
-#include "shoveler/view/resources.h"
 #include "shoveler/view/tilemap.h"
+#include "shoveler/view/tilemap_layer.h"
 #include "shoveler/view/tileset.h"
 #include "shoveler/log.h"
 
@@ -31,7 +31,7 @@ bool shovelerViewEntityAddTilemap(ShovelerViewEntity *entity, ShovelerViewTilema
 
 	ComponentData *componentData = malloc(sizeof(ComponentData));
 	componentData->configuration.numLayers = 0;
-	componentData->configuration.layerImageResourceEntityIds = NULL;
+	componentData->configuration.layerEntityIds = NULL;
 	componentData->configuration.numTilesets = 0;
 	componentData->configuration.tilesetEntityIds = NULL;
 	componentData->numLayers = 0;
@@ -45,7 +45,7 @@ bool shovelerViewEntityAddTilemap(ShovelerViewEntity *entity, ShovelerViewTilema
 	assert(component != NULL);
 
 	for(int i = 0; i < configuration.numLayers; i++) {
-		shovelerViewComponentAddDependency(component, configuration.layerImageResourceEntityIds[i], shovelerViewResourceComponentName);
+		shovelerViewComponentAddDependency(component, configuration.layerEntityIds[i], shovelerViewTilemapLayerComponentName);
 	}
 	for(int i = 0; i < configuration.numTilesets; i++) {
 		shovelerViewComponentAddDependency(component, configuration.tilesetEntityIds[i], shovelerViewTilesetComponentName);
@@ -105,7 +105,7 @@ bool shovelerViewEntityUpdateTilemap(ShovelerViewEntity *entity, ShovelerViewTil
 	shovelerViewComponentDeactivate(component);
 
 	for(int i = 0; i < componentData->configuration.numLayers; i++) {
-		if(!shovelerViewComponentRemoveDependency(component, componentData->configuration.layerImageResourceEntityIds[i], shovelerViewResourceComponentName)) {
+		if(!shovelerViewComponentRemoveDependency(component, componentData->configuration.layerEntityIds[i], shovelerViewTilemapLayerComponentName)) {
 			return false;
 		}
 	}
@@ -118,7 +118,7 @@ bool shovelerViewEntityUpdateTilemap(ShovelerViewEntity *entity, ShovelerViewTil
 	assignConfiguration(&componentData->configuration, &configuration);
 
 	for(int i = 0; i < configuration.numLayers; i++) {
-		shovelerViewComponentAddDependency(component, configuration.layerImageResourceEntityIds[i], shovelerViewResourceComponentName);
+		shovelerViewComponentAddDependency(component, configuration.layerEntityIds[i], shovelerViewTilemapLayerComponentName);
 	}
 	for(int i = 0; i < configuration.numTilesets; i++) {
 		shovelerViewComponentAddDependency(component, configuration.tilesetEntityIds[i], shovelerViewTilesetComponentName);
@@ -146,8 +146,8 @@ static void assignConfiguration(ShovelerViewTilemapConfiguration *destination, S
 	clearConfiguration(destination);
 
 	destination->numLayers = source->numLayers;
-	destination->layerImageResourceEntityIds = malloc(destination->numLayers * sizeof(long long int));
-	memcpy(destination->layerImageResourceEntityIds, source->layerImageResourceEntityIds, destination->numLayers * sizeof(long long int));
+	destination->layerEntityIds = malloc(destination->numLayers * sizeof(long long int));
+	memcpy(destination->layerEntityIds, source->layerEntityIds, destination->numLayers * sizeof(long long int));
 
 	destination->numTilesets = source->numTilesets;
 	destination->tilesetEntityIds = malloc(destination->numTilesets * sizeof(long long int));
@@ -157,8 +157,8 @@ static void assignConfiguration(ShovelerViewTilemapConfiguration *destination, S
 static void clearConfiguration(ShovelerViewTilemapConfiguration *configuration)
 {
 	if(configuration->numLayers > 0) {
-		free(configuration->layerImageResourceEntityIds);
-		configuration->layerImageResourceEntityIds = NULL;
+		free(configuration->layerEntityIds);
+		configuration->layerEntityIds = NULL;
 	}
 	configuration->numLayers = 0;
 
@@ -177,13 +177,10 @@ static bool activateComponent(ShovelerViewComponent *component, void *componentD
 	componentData->layers = malloc(componentData->numLayers * sizeof(ShovelerTexture *));
 
 	for(int i = 0; i < componentData->configuration.numLayers; i++) {
-		ShovelerViewEntity *imageResourceEntity = shovelerViewGetEntity(component->entity->view, componentData->configuration.layerImageResourceEntityIds[i]);
-		assert(imageResourceEntity != NULL);
-		ShovelerImage *image = shovelerViewEntityGetResource(imageResourceEntity);
-		assert(image != NULL);
-
-		componentData->layers[i] = shovelerTextureCreate2d(image, false);
-		shovelerTextureUpdate(componentData->layers[i]);
+		ShovelerViewEntity *layerEntity = shovelerViewGetEntity(component->entity->view, componentData->configuration.layerEntityIds[i]);
+		assert(layerEntity != NULL);
+		componentData->layers[i] = shovelerViewEntityGetTilemapLayer(layerEntity);
+		assert(componentData->layers[i] != NULL);
 	}
 
 	componentData->numTilesets = componentData->configuration.numTilesets;
@@ -193,6 +190,7 @@ static bool activateComponent(ShovelerViewComponent *component, void *componentD
 		ShovelerViewEntity *tilesetEntity = shovelerViewGetEntity(component->entity->view, componentData->configuration.tilesetEntityIds[i]);
 		assert(tilesetEntity != NULL);
 		componentData->tilesets[i] = shovelerViewEntityGetTileset(tilesetEntity);
+		assert(componentData->tilesets[i] != NULL);
 	}
 
 	return true;
@@ -202,16 +200,11 @@ static void deactivateComponent(ShovelerViewComponent *component, void *componen
 {
 	ComponentData *componentData = componentDataPointer;
 
-	for(int i = 0; i < componentData->numLayers; i++) {
-		shovelerTextureFree(componentData->layers[i]);
-	}
 	free(componentData->layers);
-
 	componentData->numLayers = 0;
 	componentData->layers = NULL;
 
 	free(componentData->tilesets);
-
 	componentData->numTilesets = 0;
 	componentData->tilesets = NULL;
 }
@@ -219,10 +212,6 @@ static void deactivateComponent(ShovelerViewComponent *component, void *componen
 static void freeComponent(ShovelerViewComponent *component, void *componentDataPointer)
 {
 	ComponentData *componentData = componentDataPointer;
-
-	for(int i = 0; i < componentData->numLayers; i++) {
-		shovelerTextureFree(componentData->layers[i]);
-	}
 
 	clearConfiguration(&componentData->configuration);
 	free(componentData->layers);
