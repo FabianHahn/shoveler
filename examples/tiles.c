@@ -55,13 +55,18 @@ int main(int argc, char *argv[])
 	shovelerImageGet(tilesetImage, 1, 1, 0) = 255;
 	shovelerImageGet(tilesetImage, 1, 1, 1) = 255;
 	shovelerImageGet(tilesetImage, 1, 1, 2) = 255; // white
-	ShovelerTexture *tilesetTexture = shovelerTextureCreate2d(tilesetImage, true);
-	shovelerTextureUpdate(tilesetTexture);
+
+	ShovelerImage *borderTilesetImage = shovelerImageCreate(20, 20, 4);
+	shovelerImageClear(borderTilesetImage);
+	shovelerImageSet(borderTilesetImage, shovelerColor(255, 200, 255), 0);
+	shovelerImageAddFrame(borderTilesetImage, 3, shovelerColor(255, 200, 255));
 
 	ShovelerTileset *tileset = shovelerTilesetCreate(tilesetImage, 2, 2, 1);
 	shovelerMaterialTilemapAddTileset(tilemapMaterial, tileset);
 	ShovelerTileset *tileset2 = shovelerTilesetCreate(tilesetImage, 1, 1, 1);
 	shovelerMaterialTilemapAddTileset(tilemapMaterial, tileset2);
+	ShovelerTileset *borderTileset = shovelerTilesetCreate(borderTilesetImage, 1, 1, 1);
+	shovelerMaterialTilemapAddTileset(tilemapMaterial, borderTileset);
 
 	ShovelerImage *layerImage = shovelerImageCreate(2, 2, 3);
 	shovelerImageClear(layerImage);
@@ -89,6 +94,15 @@ int main(int argc, char *argv[])
 	ShovelerTexture *layer2Texture = shovelerTextureCreate2d(layer2Image, true);
 	shovelerTextureUpdate(layer2Texture);
 	shovelerMaterialTilemapAddLayer(tilemapMaterial, layer2Texture);
+
+	ShovelerImage *layer3Image = shovelerImageCreate(1, 1, 3);
+	shovelerImageClear(layer3Image);
+	shovelerImageGet(layer3Image, 0, 0, 0) = 0;
+	shovelerImageGet(layer3Image, 0, 0, 1) = 0;
+	shovelerImageGet(layer3Image, 0, 0, 2) = 3; // full tileset
+	ShovelerTexture *layer3Texture = shovelerTextureCreate2d(layer3Image, true);
+	shovelerTextureUpdate(layer3Texture);
+	shovelerMaterialTilemapAddLayer(tilemapMaterial, layer3Texture);
 
 	ShovelerDrawable *tiles = shovelerDrawableQuadCreate();
 	ShovelerModel *tilesModel = shovelerModelCreate(tiles, tilemapMaterial);
