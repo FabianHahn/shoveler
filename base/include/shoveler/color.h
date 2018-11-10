@@ -17,4 +17,13 @@ static inline ShovelerVector3 shovelerColorToVector3(ShovelerColor color)
 	return shovelerVector3(color.r / 255.0f, color.g / 255.0f, color.b / 255.0f);
 }
 
+static inline ShovelerColor shovelerColor(unsigned char r, unsigned char g, unsigned char b)
+{
+	ShovelerColor color;
+	color.r = r;
+	color.g = g;
+	color.b = b;
+	return color;
+}
+
 #endif
