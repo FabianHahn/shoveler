@@ -14,6 +14,7 @@ set(SHOVELER_OPENGL_SRC
 	src/material/particle.c
 	src/material/screenspace_texture.c
 	src/material/texture.c
+	src/material/tile_sprite.c
 	src/material/tilemap.c
 	src/material/variation.c
 	src/view/client.c
@@ -58,6 +59,7 @@ set(SHOVELER_OPENGL_SRC
 	include/shoveler/material/particle.h
 	include/shoveler/material/screenspace_texture.h
 	include/shoveler/material/texture.h
+	include/shoveler/material/tile_sprite.h
 	include/shoveler/material/tilemap.h
 	include/shoveler/material/variation.h
 	include/shoveler/view/client.h
