@@ -2,6 +2,7 @@
 
 #include "shoveler/material/tile_sprite.h"
 #include "shoveler/shader_program.h"
+#include "shoveler/types.h"
 
 static const char *vertexShaderSource =
 	"#version 400\n"
@@ -39,14 +40,10 @@ static const char *fragmentShaderSource =
 	"#version 400\n"
 	"\n"
 	"uniform bool sceneDebugMode;\n"
-	"uniform float model2dPositionX;\n"
-	"uniform float model2dPositionZ;\n"
-	"uniform float model2dWidth;\n"
-	"uniform float model2dHeight;\n"
-	"uniform float spritePositionX;\n"
-	"uniform float spritePositionZ;\n"
-	"uniform float spriteWidth;\n"
-	"uniform float spriteHeight;\n"
+	"uniform vec2 modelPosition2d;\n"
+	"uniform vec2 modelSize2d;\n"
+	"uniform vec2 spritePosition;\n"
+	"uniform vec2 spriteSize;\n"
 	"uniform int tilesetColumn;\n"
 	"uniform int tilesetRow;\n"
 	"uniform int tilesetColumns;\n"
@@ -68,69 +65,96 @@ static const char *fragmentShaderSource =
 	"{\n"
 	"	vec2 tile = vec2(tilesetColumn, tilesetRow);\n"
 	""
-	"	vec2 model2dPosition = vec2(model2dPositionX, model2dPositionZ);\n"
-	"	vec2 model2dSize = vec2(spriteWidth, spriteHeight);\n"
-	""
-	"	vec2 spritePosition = vec2(spritePositionX, spritePositionZ);\n"
-	"	vec2 spriteSize = vec2(spriteWidth, spriteHeight);\n"
-	""
 	"	vec2 spriteCorner = spritePosition - 0.5 * spriteSize;\n"
-	"	vec2 spriteOffset = spritePosition - modelPosition;\n"
-	"	vec2 spriteOffsetUv = spriteOffset / model2dSize;\n"
+	"	vec2 spriteOffset = spritePosition - modelPosition2d;\n"
+	"	vec2 spriteOffsetUv = spriteOffset / modelSize2d;\n"
 	"	vec2 spriteTileOffsetUv = worldUv - spriteOffsetUv;\n"
 	""
-	"	vec2 spriteUvScale = model2dSize / spriteSize;\n"
+	"	vec2 spriteUvScale = modelSize2d / spriteSize;\n"
 	"	vec2 spriteTileUv = spriteTileOffsetUv * spriteUvScale;\n"
-	"	vec2 tileUv = clamp(tileUv, 0.0, 1.0);\n"
 	""
-	"	vec2 tilesetSize = textureSize(tileset, 0);\n"
-	"	vec2 tilesetInverseDimensions = 1.0 / vec2(tilesetColumns, tilesetRows);\n"
-	"	vec2 paddedTileSize = tilesetSize * tilesetInverseDimensions;\n"
-	"	vec2 paddedTilePaddingFraction = vec2(tilesetPadding) / paddedTileSize;\n"
-	"	vec2 tilePaddingScaleFactor = vec2(1.0) - 2.0 * paddedTilePaddingFraction;"
+	"	if (spriteTileUv.x >= 0.0 &&\n"
+	"		spriteTileUv.x <= 1.0 &&\n"
+	"		spriteTileUv.y >= 0.0 &&\n"
+	"		spriteTileUv.y <= 1.0) {\n"
+	"		vec2 tileUv = clamp(spriteTileUv, 0.0, 1.0);\n"
 	""
-	"	vec2 tilePaddedUv = paddedTilePaddingFraction + tilePaddingScaleFactor * tileUv;\n"
-	"	vec2 tilesetUv = (tile.xy + tilePaddedUv) * tilesetInverseDimensions;\n"
+	"		vec2 tilesetSize = textureSize(tileset, 0);\n"
+	"		vec2 tilesetInverseDimensions = 1.0 / vec2(tilesetColumns, tilesetRows);\n"
+	"		vec2 paddedTileSize = tilesetSize * tilesetInverseDimensions;\n"
+	"		vec2 paddedTilePaddingFraction = vec2(tilesetPadding) / paddedTileSize;\n"
+	"		vec2 tilePaddingScaleFactor = vec2(1.0) - 2.0 * paddedTilePaddingFraction;"
 	""
-	"	vec4 color = texture2D(tileset, tilesetUv).rgba;\n"
-	"	if (sceneDebugMode) {\n"
-	"		fragmentColor = vec4(tilesetUv.xy, tilesetUv.y, 1.0);\n"
+	"		vec2 tilePaddedUv = paddedTilePaddingFraction + tilePaddingScaleFactor * tileUv;\n"
+	"		vec2 tilesetUv = (tile.xy + tilePaddedUv) * tilesetInverseDimensions;\n"
+	""
+	"		vec4 color = texture2D(tileset, tilesetUv).rgba;\n"
+	"		if (sceneDebugMode) {\n"
+	"			fragmentColor = vec4(tilesetUv.xy, tilesetUv.y, 1.0);\n"
+	"		} else {\n"
+	"			fragmentColor = color;\n"
+	"		}\n"
 	"	} else {\n"
-	"		fragmentColor = color;\n"
+	"		fragmentColor = vec4(0.0);\n"
 	"	}\n"
 	"}\n";
 
 typedef struct {
 	ShovelerMaterial *material;
-	ShovelerTileset *tileset;
-	ShovelerMaterialTileSpriteConfiguration configuration;
-} TileSprite;
+	int activeSpriteTilesetColumn;
+	int activeSpriteTilesetRow;
+	ShovelerVector2 activeSpritePosition;
+	ShovelerVector2 activeSpriteSize;
+	int activeTilesetColumns;
+	int activeTilesetRows;
+	int activeTilesetPadding;
+	ShovelerTexture *activeTilesetTexture;
+	ShovelerSampler *activeTilesetSampler;
+} TileSpriteData;
 
-ShovelerMaterial *shovelerMaterialTileSpriteCreate(ShovelerTileset *tileset, ShovelerMaterialTileSpriteConfiguration configuration)
+ShovelerMaterial *shovelerMaterialTileSpriteCreate()
 {
 	GLuint vertexShaderObject = shovelerShaderProgramCompileFromString(vertexShaderSource, GL_VERTEX_SHADER);
 	GLuint fragmentShaderObject = shovelerShaderProgramCompileFromString(fragmentShaderSource, GL_FRAGMENT_SHADER);
 	GLuint program = shovelerShaderProgramLink(vertexShaderObject, 0, fragmentShaderObject, true);
 
-	TileSprite *tileSprite = malloc(sizeof(TileSprite));
-	tileSprite->material = shovelerMaterialCreate(program);
-	tileSprite->material->data = tileSprite;
-	tileSprite->tileset = tileset;
-	tileSprite->configuration = configuration;
+	TileSpriteData *tileSpriteData = malloc(sizeof(TileSpriteData));
+	tileSpriteData->material = shovelerMaterialCreate(program);
+	tileSpriteData->material->data = tileSpriteData;
+	tileSpriteData->activeSpriteTilesetColumn = 0;
+	tileSpriteData->activeSpriteTilesetRow = 0;
+	tileSpriteData->activeSpritePosition = shovelerVector2(0.0f, 0.0f);
+	tileSpriteData->activeSpriteSize = shovelerVector2(0.0f, 0.0f);
+	tileSpriteData->activeTilesetColumns = 0;
+	tileSpriteData->activeTilesetRows = 0;
+	tileSpriteData->activeTilesetPadding = 0;
+	tileSpriteData->activeTilesetTexture = NULL;
+	tileSpriteData->activeTilesetSampler = NULL;
 
-	shovelerUniformMapInsert(tileSprite->material->uniforms, "tilesetColumn", shovelerUniformCreateIntPointer(&tileSprite->configuration.tilesetColumn));
-	shovelerUniformMapInsert(tileSprite->material->uniforms, "tilesetRow", shovelerUniformCreateIntPointer(&tileSprite->configuration.tilesetRow));
+	shovelerUniformMapInsert(tileSpriteData->material->uniforms, "tilesetColumn", shovelerUniformCreateIntPointer(&tileSpriteData->activeSpriteTilesetColumn));
+	shovelerUniformMapInsert(tileSpriteData->material->uniforms, "tilesetRow", shovelerUniformCreateIntPointer(&tileSpriteData->activeSpriteTilesetRow));
 
-	shovelerUniformMapInsert(tileSprite->material->uniforms, "spritePositionX", shovelerUniformCreateFloatPointer(&tileSprite->configuration.positionX));
-	shovelerUniformMapInsert(tileSprite->material->uniforms, "spritePositionZ", shovelerUniformCreateFloatPointer(&tileSprite->configuration.positionZ));
+	shovelerUniformMapInsert(tileSpriteData->material->uniforms, "spritePosition", shovelerUniformCreateVector2Pointer(&tileSpriteData->activeSpritePosition));
+	shovelerUniformMapInsert(tileSpriteData->material->uniforms, "spriteSize", shovelerUniformCreateVector2Pointer(&tileSpriteData->activeSpriteSize));
 
-	shovelerUniformMapInsert(tileSprite->material->uniforms, "spriteWidth", shovelerUniformCreateFloatPointer(&tileSprite->configuration.width));
-	shovelerUniformMapInsert(tileSprite->material->uniforms, "spriteHeight", shovelerUniformCreateFloatPointer(&tileSprite->configuration.height));
+	shovelerUniformMapInsert(tileSpriteData->material->uniforms, "tilesetColumns", shovelerUniformCreateIntPointer(&tileSpriteData->activeTilesetColumns));
+	shovelerUniformMapInsert(tileSpriteData->material->uniforms, "tilesetRows", shovelerUniformCreateIntPointer(&tileSpriteData->activeTilesetColumns));
+	shovelerUniformMapInsert(tileSpriteData->material->uniforms, "tilesetPadding", shovelerUniformCreateIntPointer(&tileSpriteData->activeTilesetPadding));
+	shovelerUniformMapInsert(tileSpriteData->material->uniforms, "tileset", shovelerUniformCreateTexturePointer(&tileSpriteData->activeTilesetTexture, &tileSpriteData->activeTilesetSampler));
 
-	shovelerUniformMapInsert(tileSprite->material->uniforms, "tilesetColumns", shovelerUniformCreateInt(tileSprite->tileset->columns));
-	shovelerUniformMapInsert(tileSprite->material->uniforms, "tilesetRows", shovelerUniformCreateInt(tileSprite->tileset->columns));
-	shovelerUniformMapInsert(tileSprite->material->uniforms, "tilesetPadding", shovelerUniformCreateInt(tileSprite->tileset->padding));
-	shovelerUniformMapInsert(tileSprite->material->uniforms, "tileset", shovelerUniformCreateTexture(tileSprite->tileset->texture, tileSprite->tileset->sampler));
+	return tileSpriteData->material;
+}
 
-	return tileSprite->material;
+void shovelerMaterialTileSpriteSetActive(ShovelerMaterial *material, const ShovelerCanvasTileSprite *tileSprite)
+{
+	TileSpriteData *tileSpriteData = material->data;
+	tileSpriteData->activeSpriteTilesetColumn = tileSprite->tilesetColumn;
+	tileSpriteData->activeSpriteTilesetRow = tileSprite->tilesetRow;
+	tileSpriteData->activeSpritePosition = tileSprite->position;
+	tileSpriteData->activeSpriteSize = tileSprite->size;
+	tileSpriteData->activeTilesetRows = tileSprite->tileset->rows;
+	tileSpriteData->activeTilesetColumns = tileSprite->tileset->columns;
+	tileSpriteData->activeTilesetPadding = tileSprite->tileset->padding;
+	tileSpriteData->activeTilesetTexture = tileSprite->tileset->texture;
+	tileSpriteData->activeTilesetSampler = tileSprite->tileset->sampler;
 }
