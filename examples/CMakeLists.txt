@@ -1,3 +1,7 @@
+set(SHOVELER_EXAMPLE_CANVAS_SRC
+	canvas.c
+)
+
 set(SHOVELER_EXAMPLE_LIGHTS_SRC
 	lights.c
 )
@@ -11,6 +15,10 @@ set(SHOVELER_EXAMPLE_VIEW_SRC
 )
 
 if(SHOVELER_BUILD_EXAMPLES)
+	add_executable(shoveler_example_canvas ${SHOVELER_EXAMPLE_CANVAS_SRC})
+	set_property(TARGET shoveler_example_canvas PROPERTY C_STANDARD 99)
+	target_link_libraries(shoveler_example_canvas shoveler_opengl)
+
 	add_executable(shoveler_example_lights ${SHOVELER_EXAMPLE_LIGHTS_SRC})
 	set_property(TARGET shoveler_example_lights PROPERTY C_STANDARD 99)
 	target_link_libraries(shoveler_example_lights shoveler_opengl)
