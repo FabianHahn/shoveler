@@ -19,6 +19,8 @@ typedef struct ShovelerModelStruct {
 	ShovelerVector3 scale;
 	ShovelerMatrix transformation;
 	ShovelerMatrix normalTransformation;
+	ShovelerVector2 position2d;
+	ShovelerVector2 size2d;
 	bool visible;
 	bool emitter;
 	bool screenspace;
