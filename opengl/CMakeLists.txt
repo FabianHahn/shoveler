@@ -8,6 +8,7 @@ set(SHOVELER_OPENGL_SRC
 	src/filter/depth_texture_gaussian.c
 	src/light/point.c
 	src/light/spot.c
+	src/material/canvas.c
 	src/material/color.c
 	src/material/depth.c
 	src/material/depth_texture_gaussian_filter.c
@@ -52,11 +53,12 @@ set(SHOVELER_OPENGL_SRC
 	include/shoveler/drawable/quad.h
 	include/shoveler/drawable/tiles.h
 	include/shoveler/filter/depth_texture_gaussian.h
+	include/shoveler/light/point.h
+	include/shoveler/light/spot.h
+	include/shoveler/material/canvas.h
 	include/shoveler/material/color.h
 	include/shoveler/material/depth.h
 	include/shoveler/material/depth_texture_gaussian_filter.h
-	include/shoveler/light/point.h
-	include/shoveler/light/spot.h
 	include/shoveler/material/particle.h
 	include/shoveler/material/screenspace_texture.h
 	include/shoveler/material/texture.h
