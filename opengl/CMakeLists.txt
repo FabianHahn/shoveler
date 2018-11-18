@@ -27,6 +27,7 @@ set(SHOVELER_OPENGL_SRC
 	src/view/tilemap_layer.c
 	src/view/tileset.c
 	src/camera.c
+	src/canvas.c
 	src/controller.c
 	src/framebuffer.c
 	src/game.c
@@ -74,6 +75,7 @@ set(SHOVELER_OPENGL_SRC
 	include/shoveler/view/tilemap_layer.h
 	include/shoveler/view/tileset.h
 	include/shoveler/camera.h
+	include/shoveler/canvas.h
 	include/shoveler/controller.h
 	include/shoveler/drawable.h
 	include/shoveler/filter.h
