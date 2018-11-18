@@ -1,10 +1,18 @@
 #ifndef SHOVELER_CANVAS_H
 #define SHOVELER_CANVAS_H
 
+#include <stdbool.h> // bool
+
 #include <glib.h>
 
+#include <shoveler/material.h>
+#include <shoveler/scene.h>
 #include <shoveler/tileset.h>
 #include <shoveler/types.h>
+
+struct ShovelerCameraStruct; // forward declaration: camera.h
+struct ShovelerLightStruct; // forward declaration: light.h
+struct ShovelerModelStruct; // forward declaration: model.h
 
 typedef struct {
 	ShovelerTileset *tileset;
@@ -15,11 +23,13 @@ typedef struct {
 } ShovelerCanvasTileSprite;
 
 typedef struct {
+	ShovelerMaterial *tileSpriteMaterial;
 	GQueue *tileSprites;
 } ShovelerCanvas;
 
 ShovelerCanvas *shovelerCanvasCreate();
 int shovelerCanvasAddTileSprite(ShovelerCanvas *canvas, ShovelerCanvasTileSprite tileSprite);
+bool shovelerCanvasRender(ShovelerCanvas *canvas, ShovelerScene *scene, struct ShovelerCameraStruct *camera, struct ShovelerLightStruct *light, struct ShovelerModelStruct *model, ShovelerSceneRenderPassOptions options);
 void shovelerCanvasFree(ShovelerCanvas *canvas);
 
 #endif
