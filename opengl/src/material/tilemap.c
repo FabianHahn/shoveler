@@ -256,6 +256,27 @@ static bool render(ShovelerMaterial *material, ShovelerScene *scene, ShovelerCam
 	return true;
 }
 
+void shovelerMaterialTilemapSetActiveTiles(ShovelerMaterial *tilemapMaterial, ShovelerTexture *tiles)
+{
+	Tilemap *tilemap = tilemapMaterial->data;
+
+	tilemap->activeLayerWidth = tiles->image->width;
+	tilemap->activeLayerHeight = tiles->image->height;
+	tilemap->activeLayerTexture = tiles;
+}
+
+void shovelerMaterialTilemapSetActiveTileset(ShovelerMaterial *tilemapMaterial, int tilesetId, ShovelerTileset *tileset)
+{
+	Tilemap *tilemap = tilemapMaterial->data;
+
+	tilemap->activeTilesetId = tilesetId;
+	tilemap->activeTilesetColumns = tileset->columns;
+	tilemap->activeTilesetRows = tileset->rows;
+	tilemap->activeTilesetPadding = tileset->padding;
+	tilemap->activeTilesetTexture = tileset->texture;
+	tilemap->activeTilesetSampler = tileset->sampler;
+}
+
 static void freeTilemap(ShovelerMaterial *material)
 {
 	Tilemap *tilemap = material->data;

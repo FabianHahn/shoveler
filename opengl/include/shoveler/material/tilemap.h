@@ -10,5 +10,7 @@ ShovelerMaterial *shovelerMaterialTilemapCreate();
 int shovelerMaterialTilemapAddLayer(ShovelerMaterial *tilemapMaterial, ShovelerTexture *layerTexture);
 /** adds a tileset to a tilemap material, returning the index of the new tileset */
 int shovelerMaterialTilemapAddTileset(ShovelerMaterial *tilemapMaterial, ShovelerTileset *tileset);
+void shovelerMaterialTilemapSetActiveTiles(ShovelerMaterial *tilemapMaterial, ShovelerTexture *tiles);
+void shovelerMaterialTilemapSetActiveTileset(ShovelerMaterial *tilemapMaterial, int tilesetId, ShovelerTileset *tileset);
 
 #endif
