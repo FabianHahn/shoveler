@@ -31,7 +31,19 @@ ShovelerMaterial *shovelerMaterialCanvasCreate(ShovelerCanvas *canvas, bool mana
 static bool render(ShovelerMaterial *material, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerSceneRenderPassOptions options)
 {
 	CanvasData *canvasData = material->data;
-	return shovelerCanvasRender(canvasData->canvas, scene, camera, light, model, options);
+
+	ShovelerSceneRenderPassOptions currentOptions = options;
+	bool rendered = shovelerCanvasRender(canvasData->canvas, scene, camera, light, model, &currentOptions);
+
+	// reset back to original blending and depth test mode
+	if(options.blend && (currentOptions.blendSourceFactor != options.blendSourceFactor || currentOptions.blendDestinationFactor != options.blendDestinationFactor)) {
+		glBlendFunc(options.blendSourceFactor, options.blendDestinationFactor);
+	}
+	if(options.depthTest && currentOptions.depthFunction != options.depthFunction) {
+		glDepthFunc(options.depthFunction);
+	}
+
+	return rendered;
 }
 
 static void freeTilemap(ShovelerMaterial *material)

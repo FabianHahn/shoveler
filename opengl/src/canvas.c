@@ -23,26 +23,21 @@ int shovelerCanvasAddTileSprite(ShovelerCanvas *canvas, ShovelerCanvasTileSprite
 	return g_queue_get_length(canvas->tileSprites) - 1;
 }
 
-bool shovelerCanvasRender(ShovelerCanvas *canvas, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerSceneRenderPassOptions options)
+bool shovelerCanvasRender(ShovelerCanvas *canvas, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerSceneRenderPassOptions *options)
 {
 	// since we are only changing uniform pointer values per layer, we can reuse the same shader for all of them
 	ShovelerShader *shader = shovelerSceneGenerateShader(scene, camera, light, model, canvas->tileSpriteMaterial, NULL);
 
 	// enable alpha blending
-	if(options.blend) {
+	if(options->blend && (options->blendSourceFactor != GL_SRC_ALPHA || options->blendDestinationFactor != GL_ONE_MINUS_SRC_ALPHA)) {
 		// always use shader output, and ignore existing output if shader writes output
+		options->blendSourceFactor = GL_SRC_ALPHA;
+		options->blendDestinationFactor = GL_ONE_MINUS_SRC_ALPHA;
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	}
 
 	for(GList *iter = canvas->tileSprites->head; iter != NULL; iter = iter->next) {
 		const ShovelerCanvasTileSprite *tileSprite = iter->data;
-
-		if(iter == canvas->tileSprites->head->next) {
-			// starting from the second tileset, switch to equal depth test
-			if(options.depthTest) {
-				glDepthFunc(GL_EQUAL);
-			}
-		}
 
 		shovelerMaterialTileSpriteSetActive(canvas->tileSpriteMaterial, tileSprite);
 
@@ -55,14 +50,11 @@ bool shovelerCanvasRender(ShovelerCanvas *canvas, ShovelerScene *scene, Shoveler
 			shovelerLogWarning("Failed to render model %p for for sprite %p of canvas %p with tile sprite material %p in scene %p for camera %p and light %p.", model, tileSprite, canvas, canvas->tileSpriteMaterial, scene, camera, light);
 			return false;
 		}
-	}
 
-	// reset back to original blending and depth test mode
-	if(options.blend) {
-		glBlendFunc(options.blendSourceFactor, options.blendDestinationFactor);
-	}
-	if(options.depthTest) {
-		glDepthFunc(options.depthFunction);
+		if (options->depthTest && options->depthFunction != GL_EQUAL) {
+			options->depthFunction = GL_EQUAL;
+			glDepthFunc(GL_EQUAL);
+		}
 	}
 
 	return true;
