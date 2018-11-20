@@ -29,6 +29,7 @@ set(SHOVELER_OPENGL_SRC
 	src/view/tileset.c
 	src/camera.c
 	src/canvas.c
+	src/chunk.c
 	src/controller.c
 	src/framebuffer.c
 	src/game.c
@@ -79,6 +80,7 @@ set(SHOVELER_OPENGL_SRC
 	include/shoveler/view/tileset.h
 	include/shoveler/camera.h
 	include/shoveler/canvas.h
+	include/shoveler/chunk.h
 	include/shoveler/controller.h
 	include/shoveler/drawable.h
 	include/shoveler/filter.h
