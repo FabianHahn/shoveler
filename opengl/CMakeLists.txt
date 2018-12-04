@@ -39,6 +39,7 @@ set(SHOVELER_OPENGL_SRC
 	src/material.c
 	src/model.c
 	src/opengl.c
+	src/render_state.c
 	src/sampler.c
 	src/scene.c
 	src/shader.c
@@ -94,6 +95,7 @@ set(SHOVELER_OPENGL_SRC
 	include/shoveler/material.h
 	include/shoveler/model.h
 	include/shoveler/opengl.h
+	include/shoveler/render_state.h
 	include/shoveler/sampler.h
 	include/shoveler/scene.h
 	include/shoveler/shader.h
