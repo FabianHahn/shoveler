@@ -66,7 +66,7 @@ static const char *fragmentShaderSource =
 	"	vec2 tile = vec2(tilesetColumn, tilesetRow);\n"
 	""
 	"	vec2 spriteCorner = spritePosition - 0.5 * spriteSize;\n"
-	"	vec2 spriteOffset = spritePosition - modelPosition2d;\n"
+	"	vec2 spriteOffset = spriteCorner - modelPosition2d;\n"
 	"	vec2 spriteOffsetUv = spriteOffset / modelSize2d;\n"
 	"	vec2 spriteTileOffsetUv = worldUv - spriteOffsetUv;\n"
 	""
