@@ -5,6 +5,7 @@
 
 #include <glad/glad.h>
 
+#include <shoveler/render_state.h>
 #include <shoveler/sampler.h>
 #include <shoveler/scene.h>
 #include <shoveler/texture.h>
@@ -16,7 +17,7 @@ struct ShovelerMaterialStruct;
 struct ShovelerModelStruct; // forward declaration: model.h
 struct ShovelerShaderStruct; // forward declaration: shader.h
 
-typedef bool (ShovelerMaterialRenderFunction)(struct ShovelerMaterialStruct *material, ShovelerScene *scene, struct ShovelerCameraStruct *camera, struct ShovelerLightStruct *light, struct ShovelerModelStruct *model, ShovelerSceneRenderPassOptions options);
+typedef bool (ShovelerMaterialRenderFunction)(struct ShovelerMaterialStruct *material, ShovelerScene *scene, struct ShovelerCameraStruct *camera, struct ShovelerLightStruct *light, struct ShovelerModelStruct *model, ShovelerRenderState *renderState);
 typedef int (ShovelerMaterialAttachUniformsFunction)(struct ShovelerMaterialStruct *material, struct ShovelerShaderStruct *shader, void *userData);
 typedef void (ShovelerMaterialFreeDataFunction)(struct ShovelerMaterialStruct *material);
 
@@ -39,9 +40,9 @@ ShovelerMaterial *shovelerMaterialCreate(GLuint program);
 ShovelerMaterial *shovelerMaterialCreateUnmanaged(GLuint program);
 void shovelerMaterialFree(ShovelerMaterial *material);
 
-static inline bool shovelerMaterialRender(ShovelerMaterial *material, ShovelerScene *scene, struct ShovelerCameraStruct *camera, struct ShovelerLightStruct *light, struct ShovelerModelStruct *model, ShovelerSceneRenderPassOptions options)
+static inline bool shovelerMaterialRender(ShovelerMaterial *material, ShovelerScene *scene, struct ShovelerCameraStruct *camera, struct ShovelerLightStruct *light, struct ShovelerModelStruct *model, ShovelerRenderState *renderState)
 {
-	return material->render(material, scene, camera, light, model, options);
+	return material->render(material, scene, camera, light, model, renderState);
 }
 
 static inline int shovelerMaterialAttachUniforms(ShovelerMaterial *material, struct ShovelerShaderStruct *shader, void *userData)

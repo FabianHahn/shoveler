@@ -23,18 +23,12 @@ int shovelerCanvasAddTileSprite(ShovelerCanvas *canvas, ShovelerCanvasTileSprite
 	return g_queue_get_length(canvas->tileSprites) - 1;
 }
 
-bool shovelerCanvasRender(ShovelerCanvas *canvas, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerSceneRenderPassOptions *options)
+bool shovelerCanvasRender(ShovelerCanvas *canvas, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerRenderState *renderState)
 {
 	// since we are only changing uniform pointer values per layer, we can reuse the same shader for all of them
 	ShovelerShader *shader = shovelerSceneGenerateShader(scene, camera, light, model, canvas->tileSpriteMaterial, NULL);
 
-	// enable alpha blending
-	if(options->blend && (options->blendSourceFactor != GL_SRC_ALPHA || options->blendDestinationFactor != GL_ONE_MINUS_SRC_ALPHA)) {
-		// always use shader output, and ignore existing output if shader writes output
-		options->blendSourceFactor = GL_SRC_ALPHA;
-		options->blendDestinationFactor = GL_ONE_MINUS_SRC_ALPHA;
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	}
+	shovelerRenderStateEnableBlend(renderState, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	for(GList *iter = canvas->tileSprites->head; iter != NULL; iter = iter->next) {
 		const ShovelerCanvasTileSprite *tileSprite = iter->data;
@@ -51,10 +45,7 @@ bool shovelerCanvasRender(ShovelerCanvas *canvas, ShovelerScene *scene, Shoveler
 			return false;
 		}
 
-		if (options->depthTest && options->depthFunction != GL_EQUAL) {
-			options->depthFunction = GL_EQUAL;
-			glDepthFunc(GL_EQUAL);
-		}
+		shovelerRenderStateEnableDepthTest(renderState, GL_EQUAL);
 	}
 
 	return true;

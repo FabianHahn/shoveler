@@ -12,7 +12,7 @@ typedef struct {
 	bool manageChunk;
 } MaterialData;
 
-static bool render(ShovelerMaterial *material, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerSceneRenderPassOptions options);
+static bool render(ShovelerMaterial *material, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerRenderState *renderState);
 static void freeMaterialData(ShovelerMaterial *material);
 
 ShovelerMaterial *shovelerMaterialChunkCreate(ShovelerChunk *chunk, bool manageChunk)
@@ -28,22 +28,10 @@ ShovelerMaterial *shovelerMaterialChunkCreate(ShovelerChunk *chunk, bool manageC
 	return materialData->material;
 }
 
-static bool render(ShovelerMaterial *material, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerSceneRenderPassOptions options)
+static bool render(ShovelerMaterial *material, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerRenderState *renderState)
 {
 	MaterialData *materialData = material->data;
-
-	ShovelerSceneRenderPassOptions currentOptions = options;
-	bool rendered = shovelerChunkRender(materialData->chunk, scene, camera, light, model, &currentOptions);
-
-	// reset back to original blending and depth test mode
-	if(options.blend && (currentOptions.blendSourceFactor != options.blendSourceFactor || currentOptions.blendDestinationFactor != options.blendDestinationFactor)) {
-		glBlendFunc(options.blendSourceFactor, options.blendDestinationFactor);
-	}
-	if(options.depthTest && currentOptions.depthFunction != options.depthFunction) {
-		glDepthFunc(options.depthFunction);
-	}
-
-	return rendered;
+	return shovelerChunkRender(materialData->chunk, scene, camera, light, model, renderState);
 }
 
 static void freeMaterialData(ShovelerMaterial *material)

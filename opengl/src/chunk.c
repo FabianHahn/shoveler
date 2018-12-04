@@ -37,20 +37,20 @@ int shovelerChunkAddTilemapLayer(ShovelerChunk *chunk, ShovelerTilemap *tilemap)
 	return g_queue_get_length(chunk->layers) - 1;
 }
 
-bool shovelerChunkRender(ShovelerChunk *chunk, ShovelerScene *scene, struct ShovelerCameraStruct *camera, struct ShovelerLightStruct *light, struct ShovelerModelStruct *model, ShovelerSceneRenderPassOptions *options)
+bool shovelerChunkRender(ShovelerChunk *chunk, ShovelerScene *scene, struct ShovelerCameraStruct *camera, struct ShovelerLightStruct *light, struct ShovelerModelStruct *model, ShovelerRenderState *renderState)
 {
 	for(GList *iter = chunk->layers->head; iter != NULL; iter = iter->next) {
 		ShovelerChunkLayer *layer = iter->data;
 
 		switch(layer->type) {
 			case SHOVELER_CHUNK_LAYER_TYPE_CANVAS:
-				if(!shovelerCanvasRender(layer->value.canvas, scene, camera, light, model, options)) {
+				if(!shovelerCanvasRender(layer->value.canvas, scene, camera, light, model, renderState)) {
 					shovelerLogWarning("Failed to render canvas %p layer of chunk %p.", layer->value.canvas, chunk);
 					return false;
 				}
 				break;
 			case SHOVELER_CHUNK_LAYER_TYPE_TILEMAP:
-				if(!shovelerTilemapRender(layer->value.tilemap, chunk->tilemapMaterial, scene, camera, light, model, options)) {
+				if(!shovelerTilemapRender(layer->value.tilemap, chunk->tilemapMaterial, scene, camera, light, model, renderState)) {
 					shovelerLogWarning("Failed to render tilemap %p layer of chunk %p.", layer->value.tilemap, chunk);
 					return false;
 				}

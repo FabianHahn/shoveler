@@ -26,7 +26,7 @@ typedef struct {
 	float exponentialFactor;
 } DepthTextureGaussianFilter;
 
-static int filterDepthTextureGaussian(ShovelerFilter *filter);
+static int filterDepthTextureGaussian(ShovelerFilter *filter, ShovelerRenderState *renderState);
 static void freeDepthTextureGaussian(void *data);
 
 ShovelerFilter *shovelerFilterDepthTextureGaussianCreate(int width, int height, GLsizei samples, float exponentialFactor)
@@ -63,15 +63,18 @@ ShovelerFilter *shovelerFilterDepthTextureGaussianCreate(int width, int height, 
 	depthTextureGaussianFilter->filterSceneRenderPassOptions.emitters = false;
 	depthTextureGaussianFilter->filterSceneRenderPassOptions.screenspace = true;
 	depthTextureGaussianFilter->filterSceneRenderPassOptions.onlyShadowCasters = true;
-	depthTextureGaussianFilter->filterSceneRenderPassOptions.blend = false;
-	depthTextureGaussianFilter->filterSceneRenderPassOptions.depthTest = false;
-	depthTextureGaussianFilter->filterSceneRenderPassOptions.depthMask = GL_FALSE;
+	depthTextureGaussianFilter->filterSceneRenderPassOptions.renderState.blend = false;
+	depthTextureGaussianFilter->filterSceneRenderPassOptions.renderState.blendSourceFactor = GL_ONE;
+	depthTextureGaussianFilter->filterSceneRenderPassOptions.renderState.blendDestinationFactor = GL_ONE;
+	depthTextureGaussianFilter->filterSceneRenderPassOptions.renderState.depthTest = false;
+	depthTextureGaussianFilter->filterSceneRenderPassOptions.renderState.depthFunction = GL_EQUAL;
+	depthTextureGaussianFilter->filterSceneRenderPassOptions.renderState.depthMask = GL_FALSE;
 	shovelerSceneAddModel(depthTextureGaussianFilter->filterScene, depthTextureGaussianFilter->filterModel);
 
 	return &depthTextureGaussianFilter->filter;
 }
 
-static int filterDepthTextureGaussian(ShovelerFilter *filter)
+static int filterDepthTextureGaussian(ShovelerFilter *filter, ShovelerRenderState *renderState)
 {
 	DepthTextureGaussianFilter *depthTextureGaussianFilter = (DepthTextureGaussianFilter *) filter->data;
 
@@ -86,14 +89,14 @@ static int filterDepthTextureGaussian(ShovelerFilter *filter)
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	depthTextureGaussianFilter->filterSceneRenderPassOptions.overrideMaterial = depthTextureGaussianFilter->filterXMaterial;
-	rendered += shovelerSceneRenderPass(depthTextureGaussianFilter->filterScene, depthTextureGaussianFilter->filterCamera, NULL, depthTextureGaussianFilter->filterSceneRenderPassOptions);
+	rendered += shovelerSceneRenderPass(depthTextureGaussianFilter->filterScene, depthTextureGaussianFilter->filterCamera, NULL, depthTextureGaussianFilter->filterSceneRenderPassOptions, renderState);
 
 	// filter depth map in Y direction
 	shovelerFramebufferUse(depthTextureGaussianFilter->filterYFramebuffer);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	depthTextureGaussianFilter->filterSceneRenderPassOptions.overrideMaterial = depthTextureGaussianFilter->filterYMaterial;
-	rendered += shovelerSceneRenderPass(depthTextureGaussianFilter->filterScene, depthTextureGaussianFilter->filterCamera, NULL, depthTextureGaussianFilter->filterSceneRenderPassOptions);
+	rendered += shovelerSceneRenderPass(depthTextureGaussianFilter->filterScene, depthTextureGaussianFilter->filterCamera, NULL, depthTextureGaussianFilter->filterSceneRenderPassOptions, renderState);
 
 	return rendered;
 }

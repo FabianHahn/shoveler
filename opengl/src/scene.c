@@ -65,25 +65,9 @@ bool shovelerSceneRemoveModel(ShovelerScene *scene, ShovelerModel *model)
 	return g_hash_table_remove(scene->models, model);
 }
 
-int shovelerSceneRenderPass(ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerSceneRenderPassOptions options)
+int shovelerSceneRenderPass(ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerSceneRenderPassOptions options, ShovelerRenderState *renderState)
 {
 	int rendered = 0;
-
-	if(options.blend) {
-		glEnable(GL_BLEND);
-		glBlendFunc(options.blendSourceFactor, options.blendDestinationFactor);
-	} else {
-		glDisable(GL_BLEND);
-	}
-
-	if(options.depthTest) {
-		glEnable(GL_DEPTH_TEST);
-		glDepthFunc(options.depthFunction);
-	} else {
-		glDisable(GL_DEPTH_TEST);
-	}
-
-	glDepthMask(options.depthMask);
 
 	GHashTableIter iter;
 	ShovelerModel *model;
@@ -105,8 +89,10 @@ int shovelerSceneRenderPass(ShovelerScene *scene, ShovelerCamera *camera, Shovel
 			continue;
 		}
 
+		shovelerRenderStateSet(renderState, &options.renderState);
+
 		ShovelerMaterial *material = options.overrideMaterial == NULL ? model->material : options.overrideMaterial;
-		if(!shovelerMaterialRender(material, scene, camera, light, model, options)) {
+		if(!shovelerMaterialRender(material, scene, camera, light, model, renderState)) {
 			model->visible = false;
 			continue;
 		}
@@ -116,7 +102,7 @@ int shovelerSceneRenderPass(ShovelerScene *scene, ShovelerCamera *camera, Shovel
 	return rendered;
 }
 
-int shovelerSceneRenderFrame(ShovelerScene *scene, ShovelerCamera *camera, ShovelerFramebuffer *framebuffer)
+int shovelerSceneRenderFrame(ShovelerScene *scene, ShovelerCamera *camera, ShovelerFramebuffer *framebuffer, ShovelerRenderState *renderState)
 {
 	int rendered = 0;
 
@@ -124,7 +110,7 @@ int shovelerSceneRenderFrame(ShovelerScene *scene, ShovelerCamera *camera, Shove
 
 	glClearDepth(1.0f);
 	glClear(GL_DEPTH_BUFFER_BIT);
-	rendered += shovelerSceneRenderPass(scene, camera, NULL, createRenderPassOptions(scene, RENDER_MODE_OCCLUDED));
+	rendered += shovelerSceneRenderPass(scene, camera, NULL, createRenderPassOptions(scene, RENDER_MODE_OCCLUDED), renderState);
 
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -133,11 +119,11 @@ int shovelerSceneRenderFrame(ShovelerScene *scene, ShovelerCamera *camera, Shove
 	ShovelerLight *light;
 	g_hash_table_iter_init(&iter, scene->lights);
 	while(g_hash_table_iter_next(&iter, (gpointer *) &light, NULL)) {
-		rendered += shovelerLightRender(light, scene, camera, framebuffer, createRenderPassOptions(scene, RENDER_MODE_ADDITIVE_LIGHT));
+		rendered += shovelerLightRender(light, scene, camera, framebuffer, createRenderPassOptions(scene, RENDER_MODE_ADDITIVE_LIGHT), renderState);
 	}
 
-	rendered += shovelerSceneRenderPass(scene, camera, NULL, createRenderPassOptions(scene, RENDER_MODE_EMITTERS));
-	rendered += shovelerSceneRenderPass(scene, camera, NULL, createRenderPassOptions(scene, RENDER_MODE_SCREENSPACE));
+	rendered += shovelerSceneRenderPass(scene, camera, NULL, createRenderPassOptions(scene, RENDER_MODE_EMITTERS), renderState);
+	rendered += shovelerSceneRenderPass(scene, camera, NULL, createRenderPassOptions(scene, RENDER_MODE_SCREENSPACE), renderState);
 
 	return rendered;
 }
@@ -200,38 +186,38 @@ ShovelerSceneRenderPassOptions createRenderPassOptions(ShovelerScene *scene, Ren
 	options.emitters = false;
 	options.screenspace = false;
 	options.onlyShadowCasters = false;
-	options.blend = true;
-	options.blendSourceFactor = GL_ONE;
-	options.blendDestinationFactor = GL_ZERO;
-	options.depthTest = true;
-	options.depthFunction = GL_LESS;
-	options.depthMask = GL_TRUE;
+	options.renderState.blend = true;
+	options.renderState.blendSourceFactor = GL_ONE;
+	options.renderState.blendDestinationFactor = GL_ZERO;
+	options.renderState.depthTest = true;
+	options.renderState.depthFunction = GL_LESS;
+	options.renderState.depthMask = GL_TRUE;
 	switch(renderMode) {
 		case RENDER_MODE_OCCLUDED:
-			options.blendSourceFactor = GL_ONE;
-			options.blendDestinationFactor = GL_ZERO;
-			options.depthFunction = GL_LESS;
-			options.depthMask = GL_TRUE;
+			options.renderState.blendSourceFactor = GL_ONE;
+			options.renderState.blendDestinationFactor = GL_ZERO;
+			options.renderState.depthFunction = GL_LESS;
+			options.renderState.depthMask = GL_TRUE;
 		break;
 		case RENDER_MODE_EMITTERS:
 			options.emitters = true;
-			options.blendSourceFactor = GL_ONE;
-			options.blendDestinationFactor = GL_ONE;
-			options.depthFunction = GL_LESS;
-			options.depthMask = GL_FALSE;
+			options.renderState.blendSourceFactor = GL_ONE;
+			options.renderState.blendDestinationFactor = GL_ONE;
+			options.renderState.depthFunction = GL_LESS;
+			options.renderState.depthMask = GL_FALSE;
 		break;
 		case RENDER_MODE_SCREENSPACE:
 			options.screenspace = true;
-			options.blendSourceFactor = GL_ONE;
-			options.blendDestinationFactor = GL_ZERO;
-			options.depthFunction = GL_ALWAYS;
-			options.depthMask = GL_TRUE;
+			options.renderState.blendSourceFactor = GL_ONE;
+			options.renderState.blendDestinationFactor = GL_ZERO;
+			options.renderState.depthFunction = GL_ALWAYS;
+			options.renderState.depthMask = GL_TRUE;
 		break;
 		case RENDER_MODE_ADDITIVE_LIGHT:
-			options.blendSourceFactor = GL_ONE;
-			options.blendDestinationFactor = GL_ONE;
-			options.depthFunction = GL_EQUAL;
-			options.depthMask = GL_TRUE;
+			options.renderState.blendSourceFactor = GL_ONE;
+			options.renderState.blendDestinationFactor = GL_ONE;
+			options.renderState.depthFunction = GL_EQUAL;
+			options.renderState.depthMask = GL_TRUE;
 		break;
 	}
 

@@ -11,7 +11,7 @@
 #include "shoveler/uniform.h"
 #include "shoveler/scene.h"
 
-static bool render(ShovelerMaterial *material, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerSceneRenderPassOptions options);
+static bool render(ShovelerMaterial *material, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerRenderState *renderState);
 static int attachUniforms(ShovelerMaterial *material, ShovelerShader *shader, void *userData);
 static void freeMaterialData(ShovelerMaterial *material);
 
@@ -51,7 +51,7 @@ void shovelerMaterialFree(ShovelerMaterial *material)
 	free(material);
 }
 
-static bool render(ShovelerMaterial *material, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerSceneRenderPassOptions options)
+static bool render(ShovelerMaterial *material, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerRenderState *renderState)
 {
 	// by default, generate one shader from our shader program, use it, and render the model once
 	ShovelerShader *shader = shovelerSceneGenerateShader(scene, camera, light, model, material, NULL);

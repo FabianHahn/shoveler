@@ -21,7 +21,7 @@ typedef struct {
 ShovelerTilemap *shovelerTilemapCreate(ShovelerTexture *tiles);
 /** Adds a tileset to the tilemap, returning its index. */
 int shovelerTilemapAddTileset(ShovelerTilemap *tilemap, ShovelerTileset *tileset);
-bool shovelerTilemapRender(ShovelerTilemap *tilemap, struct ShovelerMaterialStruct *material, ShovelerScene *scene, struct ShovelerCameraStruct *camera, struct ShovelerLightStruct *light, struct ShovelerModelStruct *model, ShovelerSceneRenderPassOptions *options);
+bool shovelerTilemapRender(ShovelerTilemap *tilemap, struct ShovelerMaterialStruct *material, ShovelerScene *scene, struct ShovelerCameraStruct *camera, struct ShovelerLightStruct *light, struct ShovelerModelStruct *model, ShovelerRenderState *renderState);
 void shovelerTilemapFree(ShovelerTilemap *tilemap);
 
 #endif

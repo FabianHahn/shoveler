@@ -41,7 +41,7 @@ ShovelerChunk *shovelerChunkCreate();
 int shovelerChunkAddCanvasLayer(ShovelerChunk *chunk, ShovelerCanvas *canvas);
 /** Adds a layer of tile sprites to the canvas, not taking ownership over the passed tilemap. */
 int shovelerChunkAddTilemapLayer(ShovelerChunk *chunk, ShovelerTilemap *tilemap);
-bool shovelerChunkRender(ShovelerChunk *chunk, ShovelerScene *scene, struct ShovelerCameraStruct *camera, struct ShovelerLightStruct *light, struct ShovelerModelStruct *model, ShovelerSceneRenderPassOptions *options);
+bool shovelerChunkRender(ShovelerChunk *chunk, ShovelerScene *scene, struct ShovelerCameraStruct *camera, struct ShovelerLightStruct *light, struct ShovelerModelStruct *model, ShovelerRenderState *renderState);
 void shovelerChunkFree(ShovelerChunk *chunk);
 
 #endif

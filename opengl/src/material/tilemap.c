@@ -135,7 +135,7 @@ typedef struct {
 	GQueue *tilesets;
 } Tilemap;
 
-static bool render(ShovelerMaterial *material, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerSceneRenderPassOptions options);
+static bool render(ShovelerMaterial *material, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerRenderState *renderState);
 static void freeTilemap(ShovelerMaterial *material);
 
 ShovelerMaterial *shovelerMaterialTilemapCreate()
@@ -193,27 +193,21 @@ int shovelerMaterialTilemapAddTileset(ShovelerMaterial *material, ShovelerTilese
 	return g_queue_get_length(tilemap->tilesets); // start with one since zero is blank
 }
 
-static bool render(ShovelerMaterial *material, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerSceneRenderPassOptions options)
+static bool render(ShovelerMaterial *material, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerRenderState *renderState)
 {
 	Tilemap *tilemap = material->data;
 
 	// since we are only changing uniform pointer values per layer, we can reuse the same shader for all of them
 	ShovelerShader *shader = shovelerSceneGenerateShader(scene, camera, light, model, material, NULL);
 
-	// enable alpha blending
-	if(options.blend) {
-		// always use shader output, and ignore existing output if shader writes output
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	}
+	shovelerRenderStateEnableBlend(renderState, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	for(GList *iter = tilemap->layers->head; iter != NULL; iter = iter->next) {
 		ShovelerTexture *layerTexture = (ShovelerTexture *) iter->data;
 
 		if(iter == tilemap->layers->head->next) {
 			// starting from the second tileset, switch to equal depth test
-			if(options.depthTest) {
-				glDepthFunc(GL_EQUAL);
-			}
+			shovelerRenderStateEnableDepthTest(renderState, GL_EQUAL);
 		}
 
 		// set this layer as active
@@ -243,14 +237,6 @@ static bool render(ShovelerMaterial *material, ShovelerScene *scene, ShovelerCam
 				return false;
 			}
 		}
-	}
-
-	// reset back to original blending and depth test mode
-	if(options.blend) {
-		glBlendFunc(options.blendSourceFactor, options.blendDestinationFactor);
-	}
-	if(options.depthTest) {
-		glDepthFunc(options.depthFunction);
 	}
 
 	return true;

@@ -12,7 +12,7 @@ typedef struct {
 	bool manageCanvas;
 } CanvasData;
 
-static bool render(ShovelerMaterial *material, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerSceneRenderPassOptions options);
+static bool render(ShovelerMaterial *material, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerRenderState *renderState);
 static void freeTilemap(ShovelerMaterial *material);
 
 ShovelerMaterial *shovelerMaterialCanvasCreate(ShovelerCanvas *canvas, bool manageCanvas)
@@ -28,22 +28,10 @@ ShovelerMaterial *shovelerMaterialCanvasCreate(ShovelerCanvas *canvas, bool mana
 	return canvasData->material;
 }
 
-static bool render(ShovelerMaterial *material, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerSceneRenderPassOptions options)
+static bool render(ShovelerMaterial *material, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerRenderState *renderState)
 {
 	CanvasData *canvasData = material->data;
-
-	ShovelerSceneRenderPassOptions currentOptions = options;
-	bool rendered = shovelerCanvasRender(canvasData->canvas, scene, camera, light, model, &currentOptions);
-
-	// reset back to original blending and depth test mode
-	if(options.blend && (currentOptions.blendSourceFactor != options.blendSourceFactor || currentOptions.blendDestinationFactor != options.blendDestinationFactor)) {
-		glBlendFunc(options.blendSourceFactor, options.blendDestinationFactor);
-	}
-	if(options.depthTest && currentOptions.depthFunction != options.depthFunction) {
-		glDepthFunc(options.depthFunction);
-	}
-
-	return rendered;
+	return shovelerCanvasRender(canvasData->canvas, scene, camera, light, model, renderState);
 }
 
 static void freeTilemap(ShovelerMaterial *material)

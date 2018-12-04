@@ -29,7 +29,7 @@ typedef struct {
 
 ShovelerCanvas *shovelerCanvasCreate();
 int shovelerCanvasAddTileSprite(ShovelerCanvas *canvas, ShovelerCanvasTileSprite tileSprite);
-bool shovelerCanvasRender(ShovelerCanvas *canvas, ShovelerScene *scene, struct ShovelerCameraStruct *camera, struct ShovelerLightStruct *light, struct ShovelerModelStruct *model, ShovelerSceneRenderPassOptions *options);
+bool shovelerCanvasRender(ShovelerCanvas *canvas, ShovelerScene *scene, struct ShovelerCameraStruct *camera, struct ShovelerLightStruct *light, struct ShovelerModelStruct *model, ShovelerRenderState *renderState);
 void shovelerCanvasFree(ShovelerCanvas *canvas);
 
 #endif

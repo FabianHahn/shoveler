@@ -15,7 +15,7 @@ typedef struct {
 
 static void updatePosition(void *pointlightPointer, ShovelerVector3 position);
 static ShovelerVector3 getPosition(void *pointlightPointer);
-static int renderPointLight(void *pointlightPointer, ShovelerScene *scene, ShovelerCamera *camera, ShovelerFramebuffer *framebuffer, ShovelerSceneRenderPassOptions renderPassOptions);
+static int renderPointLight(void *pointlightPointer, ShovelerScene *scene, ShovelerCamera *camera, ShovelerFramebuffer *framebuffer, ShovelerSceneRenderPassOptions renderPassOptions, ShovelerRenderState *renderState);
 static void freePointLight(void *pointlightPointer);
 
 ShovelerLight *shovelerLightPointCreate(ShovelerVector3 position, int width, int height, GLsizei samples, float ambientFactor, float exponentialFactor, ShovelerVector3 color)
@@ -67,14 +67,14 @@ static ShovelerVector3 getPosition(void *pointlightPointer)
 	return shovelerLightGetPosition(pointlight->spotlights[0]);
 }
 
-static int renderPointLight(void *pointlightPointer, ShovelerScene *scene, ShovelerCamera *camera, ShovelerFramebuffer *framebuffer, ShovelerSceneRenderPassOptions renderPassOptions)
+static int renderPointLight(void *pointlightPointer, ShovelerScene *scene, ShovelerCamera *camera, ShovelerFramebuffer *framebuffer, ShovelerSceneRenderPassOptions renderPassOptions, ShovelerRenderState *renderState)
 {
 	ShovelerLightPoint *pointlight = (ShovelerLightPoint *) pointlightPointer;
 
 	int rendered = 0;
 
 	for(int i = 0; i < 6; i++) {
-		rendered += shovelerLightRender(pointlight->spotlights[i], scene, camera, framebuffer, renderPassOptions);
+		rendered += shovelerLightRender(pointlight->spotlights[i], scene, camera, framebuffer, renderPassOptions, renderState);
 	}
 
 	return rendered;

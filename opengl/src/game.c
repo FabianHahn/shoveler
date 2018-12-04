@@ -68,8 +68,15 @@ ShovelerGame *shovelerGameCreate(const char *windowTitle, int windowedWidth, int
 		return NULL;
 	}
 
+	game->renderState.blend = true;
+	game->renderState.blendSourceFactor = GL_ONE;
+	game->renderState.blendDestinationFactor = GL_ZERO;
+	game->renderState.depthTest = true;
+	game->renderState.depthFunction = GL_LESS;
+	game->renderState.depthMask = GL_TRUE;
+	shovelerRenderStateReset(&game->renderState);
+
 	glEnable(GL_CULL_FACE);
-	glEnable(GL_DEPTH_TEST);
 
 	glfwSwapInterval(vsync ? 1 : 0);
 
@@ -135,7 +142,7 @@ int shovelerGameRenderFrame(ShovelerGame *game)
 	shovelerExecutorUpdate(game->updateExecutor, elapsedNs(dt));
 	game->update(game, dt);
 
-	int rendered = shovelerSceneRenderFrame(game->scene, game->camera, game->framebuffer);
+	int rendered = shovelerSceneRenderFrame(game->scene, game->camera, game->framebuffer, &game->renderState);
 	shovelerFramebufferBlitToDefault(game->framebuffer);
 
 	glfwSwapBuffers(game->window);

@@ -15,7 +15,7 @@ typedef struct {
 
 static void updatePosition(void *spotlightPointer, ShovelerVector3 position);
 static ShovelerVector3 getPosition(void *spotlightPointer);
-static int renderSpotLight(void *spotlightPointer, ShovelerScene *scene, ShovelerCamera *camera, ShovelerFramebuffer *framebuffer, ShovelerSceneRenderPassOptions renderPassOptions);
+static int renderSpotLight(void *spotlightPointer, ShovelerScene *scene, ShovelerCamera *camera, ShovelerFramebuffer *framebuffer, ShovelerSceneRenderPassOptions renderPassOptions, ShovelerRenderState *renderState);
 static void freeSpotLight(void *spotlightPointer);
 
 ShovelerLightSpotShared *shovelerLightSpotSharedCreate(int width, int height, GLsizei samples, float ambientFactor, float exponentialFactor, ShovelerVector3 color) {
@@ -28,10 +28,12 @@ ShovelerLightSpotShared *shovelerLightSpotSharedCreate(int width, int height, GL
 	shared->depthRenderPassOptions.emitters = false;
 	shared->depthRenderPassOptions.screenspace = false;
 	shared->depthRenderPassOptions.onlyShadowCasters = true;
-	shared->depthRenderPassOptions.blend = false;
-	shared->depthRenderPassOptions.depthTest = true;
-	shared->depthRenderPassOptions.depthFunction = GL_LESS;
-	shared->depthRenderPassOptions.depthMask = GL_TRUE;
+	shared->depthRenderPassOptions.renderState.blend = false;
+	shared->depthRenderPassOptions.renderState.blendSourceFactor = GL_ONE;
+	shared->depthRenderPassOptions.renderState.blendDestinationFactor = GL_ONE;
+	shared->depthRenderPassOptions.renderState.depthTest = true;
+	shared->depthRenderPassOptions.renderState.depthFunction = GL_LESS;
+	shared->depthRenderPassOptions.renderState.depthMask = GL_TRUE;
 	shared->ambientFactor = ambientFactor;
 	shared->exponentialFactor = exponentialFactor;
 	shared->color = color;
@@ -90,7 +92,7 @@ static ShovelerVector3 getPosition(void *spotlightPointer)
 	return spotlight->camera->position;
 }
 
-static int renderSpotLight(void *spotlightPointer, ShovelerScene *scene, ShovelerCamera *camera, ShovelerFramebuffer *framebuffer, ShovelerSceneRenderPassOptions renderPassOptions)
+static int renderSpotLight(void *spotlightPointer, ShovelerScene *scene, ShovelerCamera *camera, ShovelerFramebuffer *framebuffer, ShovelerSceneRenderPassOptions renderPassOptions, ShovelerRenderState *renderState)
 {
 	ShovelerLightSpot *spotlight = (ShovelerLightSpot *) spotlightPointer;
 
@@ -100,14 +102,14 @@ static int renderSpotLight(void *spotlightPointer, ShovelerScene *scene, Shovele
 	shovelerFramebufferUse(spotlight->shared->depthFramebuffer);
 	glClear(GL_DEPTH_BUFFER_BIT);
 
-	rendered += shovelerSceneRenderPass(scene, spotlight->camera, NULL, spotlight->shared->depthRenderPassOptions);
+	rendered += shovelerSceneRenderPass(scene, spotlight->camera, NULL, spotlight->shared->depthRenderPassOptions, renderState);
 
 	// filter depth map
-	rendered += shovelerFilterRender(spotlight->shared->depthFilter, spotlight->shared->depthFramebuffer->depthTarget);
+	rendered += shovelerFilterRender(spotlight->shared->depthFilter, spotlight->shared->depthFramebuffer->depthTarget, renderState);
 
 	// render additive light to scene
 	shovelerFramebufferUse(framebuffer);
-	rendered += shovelerSceneRenderPass(scene, camera, &spotlight->light, renderPassOptions);
+	rendered += shovelerSceneRenderPass(scene, camera, &spotlight->light, renderPassOptions, renderState);
 
 	return rendered;
 }

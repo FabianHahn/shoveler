@@ -24,6 +24,7 @@ typedef struct ShovelerGameStruct {
 	bool fullscreen;
 	ShovelerExecutor *updateExecutor;
 	GLFWwindow *window;
+	ShovelerRenderState renderState;
 	ShovelerInput *input;
 	ShovelerFramebuffer *framebuffer;
 	ShovelerScene *scene;
