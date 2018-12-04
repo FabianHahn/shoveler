@@ -9,6 +9,7 @@ set(SHOVELER_OPENGL_SRC
 	src/light/point.c
 	src/light/spot.c
 	src/material/canvas.c
+	src/material/chunk.c
 	src/material/color.c
 	src/material/depth.c
 	src/material/depth_texture_gaussian_filter.c
@@ -58,6 +59,7 @@ set(SHOVELER_OPENGL_SRC
 	include/shoveler/light/point.h
 	include/shoveler/light/spot.h
 	include/shoveler/material/canvas.h
+	include/shoveler/material/chunk.h
 	include/shoveler/material/color.h
 	include/shoveler/material/depth.h
 	include/shoveler/material/depth_texture_gaussian_filter.h
