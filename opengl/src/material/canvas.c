@@ -3,44 +3,50 @@
 #include "shoveler/material/canvas.h"
 #include "shoveler/canvas.h"
 #include "shoveler/light.h"
+#include "shoveler/log.h"
 #include "shoveler/model.h"
 #include "shoveler/scene.h"
 
 typedef struct {
 	ShovelerMaterial *material;
-	ShovelerCanvas *canvas;
-	bool manageCanvas;
-} CanvasData;
+	ShovelerCanvas *activeCanvas;
+} MaterialData;
 
 static bool render(ShovelerMaterial *material, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerRenderState *renderState);
 static void freeTilemap(ShovelerMaterial *material);
 
-ShovelerMaterial *shovelerMaterialCanvasCreate(ShovelerCanvas *canvas, bool manageCanvas)
+ShovelerMaterial *shovelerMaterialCanvasCreate()
 {
-	CanvasData *canvasData = malloc(sizeof(CanvasData));
-	canvasData->material = shovelerMaterialCreateUnmanaged(0);
-	canvasData->material->data = canvasData;
-	canvasData->material->render = render;
-	canvasData->material->freeData = freeTilemap;
-	canvasData->canvas = canvas;
-	canvasData->manageCanvas = manageCanvas;
+	MaterialData *materialData = malloc(sizeof(MaterialData));
+	materialData->material = shovelerMaterialCreateUnmanaged(0);
+	materialData->material->data = materialData;
+	materialData->material->render = render;
+	materialData->material->freeData = freeTilemap;
+	materialData->activeCanvas = NULL;
 
-	return canvasData->material;
+	return materialData->material;
+}
+
+void shovelerMaterialCanvasSetActive(ShovelerMaterial *material, ShovelerCanvas *canvas)
+{
+	MaterialData *materialData = material->data;
+	materialData->activeCanvas = canvas;
 }
 
 static bool render(ShovelerMaterial *material, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerRenderState *renderState)
 {
-	CanvasData *canvasData = material->data;
-	return shovelerCanvasRender(canvasData->canvas, scene, camera, light, model, renderState);
+	MaterialData *materialData = material->data;
+
+	if(materialData->activeCanvas == NULL) {
+		shovelerLogWarning("Failed to render canvas material %p without an active canvas.", material);
+		return false;
+	}
+
+	return shovelerCanvasRender(materialData->activeCanvas, scene, camera, light, model, renderState);
 }
 
 static void freeTilemap(ShovelerMaterial *material)
 {
-	CanvasData *canvasData = material->data;
-
-	if(canvasData->manageCanvas) {
-		shovelerCanvasFree(canvasData->canvas);
-	}
-
-	free(canvasData);
+	MaterialData *materialData = material->data;
+	free(materialData);
 }

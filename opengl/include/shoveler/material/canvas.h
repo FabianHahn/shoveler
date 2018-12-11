@@ -6,6 +6,7 @@
 #include <shoveler/canvas.h>
 #include <shoveler/material.h>
 
-ShovelerMaterial *shovelerMaterialCanvasCreate(ShovelerCanvas *canvas, bool manageCanvas);
+ShovelerMaterial *shovelerMaterialCanvasCreate();
+void shovelerMaterialCanvasSetActive(ShovelerMaterial *material, ShovelerCanvas *canvas);
 
 #endif
