@@ -113,7 +113,8 @@ int main(int argc, char *argv[])
 	tileSprite.size = shovelerVector2(5.0, 5.0);
 	shovelerCanvasAddTileSprite(canvas, tileSprite);
 
-	ShovelerMaterial *chunkMaterial = shovelerMaterialChunkCreate(chunk, true);
+	ShovelerMaterial *chunkMaterial = shovelerMaterialChunkCreate();
+	shovelerMaterialChunkSetActive(chunkMaterial, chunk);
 	ShovelerDrawable *quad = shovelerDrawableQuadCreate();
 	ShovelerModel *chunkModel = shovelerModelCreate(quad, chunkMaterial);
 	chunkModel->size2d = shovelerVector2(10.0f, 10.0f);
@@ -135,6 +136,7 @@ int main(int argc, char *argv[])
 	shovelerCameraFree(game->camera);
 	shovelerDrawableFree(quad);
 	shovelerMaterialFree(chunkMaterial);
+	shovelerChunkFree(chunk);
 	shovelerCanvasFree(canvas);
 	shovelerTilemapFree(tilemap);
 	shovelerTilesetFree(tileset);

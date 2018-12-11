@@ -6,6 +6,7 @@
 #include <shoveler/chunk.h>
 #include <shoveler/material.h>
 
-ShovelerMaterial *shovelerMaterialChunkCreate(ShovelerChunk *chunk, bool manageChunk);
+ShovelerMaterial *shovelerMaterialChunkCreate();
+void shovelerMaterialChunkSetActive(ShovelerMaterial *material, ShovelerChunk *chunk);
 
 #endif
