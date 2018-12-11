@@ -12,6 +12,7 @@
 
 struct ShovelerCameraStruct; // forward declaration: camera.h
 struct ShovelerLightStruct; // forward declaration: light.h
+struct ShovelerMaterialStruct; // forward declaration: material.h
 struct ShovelerModelStruct; // forward declaration: model.h
 
 typedef struct {
@@ -29,7 +30,7 @@ typedef struct {
 
 ShovelerCanvas *shovelerCanvasCreate();
 int shovelerCanvasAddTileSprite(ShovelerCanvas *canvas, ShovelerCanvasTileSprite tileSprite);
-bool shovelerCanvasRender(ShovelerCanvas *canvas, ShovelerScene *scene, struct ShovelerCameraStruct *camera, struct ShovelerLightStruct *light, struct ShovelerModelStruct *model, ShovelerRenderState *renderState);
+bool shovelerCanvasRender(ShovelerCanvas *canvas, struct ShovelerMaterialStruct *tileSpriteMaterial, ShovelerScene *scene, struct ShovelerCameraStruct *camera, struct ShovelerLightStruct *light, struct ShovelerModelStruct *model, ShovelerRenderState *renderState);
 void shovelerCanvasFree(ShovelerCanvas *canvas);
 
 #endif

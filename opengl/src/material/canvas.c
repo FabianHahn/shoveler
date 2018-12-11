@@ -1,6 +1,7 @@
 #include <stdlib.h> // malloc, free
 
 #include "shoveler/material/canvas.h"
+#include "shoveler/material/tile_sprite.h"
 #include "shoveler/canvas.h"
 #include "shoveler/light.h"
 #include "shoveler/log.h"
@@ -9,6 +10,7 @@
 
 typedef struct {
 	ShovelerMaterial *material;
+	ShovelerMaterial *tileSpriteMaterial;
 	ShovelerCanvas *activeCanvas;
 } MaterialData;
 
@@ -22,6 +24,7 @@ ShovelerMaterial *shovelerMaterialCanvasCreate()
 	materialData->material->data = materialData;
 	materialData->material->render = render;
 	materialData->material->freeData = freeTilemap;
+	materialData->tileSpriteMaterial = shovelerMaterialTileSpriteCreate();
 	materialData->activeCanvas = NULL;
 
 	return materialData->material;
@@ -33,6 +36,12 @@ void shovelerMaterialCanvasSetActive(ShovelerMaterial *material, ShovelerCanvas 
 	materialData->activeCanvas = canvas;
 }
 
+ShovelerMaterial *shovelerMaterialCanvasGetTileSpriteMaterial(ShovelerMaterial *material)
+{
+	MaterialData *materialData = material->data;
+	return materialData->tileSpriteMaterial;
+}
+
 static bool render(ShovelerMaterial *material, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerRenderState *renderState)
 {
 	MaterialData *materialData = material->data;
@@ -42,11 +51,12 @@ static bool render(ShovelerMaterial *material, ShovelerScene *scene, ShovelerCam
 		return false;
 	}
 
-	return shovelerCanvasRender(materialData->activeCanvas, scene, camera, light, model, renderState);
+	return shovelerCanvasRender(materialData->activeCanvas, materialData->tileSpriteMaterial, scene, camera, light, model, renderState);
 }
 
 static void freeTilemap(ShovelerMaterial *material)
 {
 	MaterialData *materialData = material->data;
+	shovelerMaterialFree(materialData->tileSpriteMaterial);
 	free(materialData);
 }

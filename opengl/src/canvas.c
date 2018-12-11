@@ -11,7 +11,6 @@
 ShovelerCanvas *shovelerCanvasCreate()
 {
 	ShovelerCanvas *canvas = malloc(sizeof(ShovelerCanvas));
-	canvas->tileSpriteMaterial = shovelerMaterialTileSpriteCreate();
 	canvas->tileSprites = g_queue_new();
 }
 
@@ -23,25 +22,25 @@ int shovelerCanvasAddTileSprite(ShovelerCanvas *canvas, ShovelerCanvasTileSprite
 	return g_queue_get_length(canvas->tileSprites) - 1;
 }
 
-bool shovelerCanvasRender(ShovelerCanvas *canvas, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerRenderState *renderState)
+bool shovelerCanvasRender(ShovelerCanvas *canvas, ShovelerMaterial *tileSpriteMaterial, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerRenderState *renderState)
 {
 	// since we are only changing uniform pointer values per layer, we can reuse the same shader for all of them
-	ShovelerShader *shader = shovelerSceneGenerateShader(scene, camera, light, model, canvas->tileSpriteMaterial, NULL);
+	ShovelerShader *shader = shovelerSceneGenerateShader(scene, camera, light, model, tileSpriteMaterial, NULL);
 
 	shovelerRenderStateEnableBlend(renderState, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	for(GList *iter = canvas->tileSprites->head; iter != NULL; iter = iter->next) {
 		const ShovelerCanvasTileSprite *tileSprite = iter->data;
 
-		shovelerMaterialTileSpriteSetActive(canvas->tileSpriteMaterial, tileSprite);
+		shovelerMaterialTileSpriteSetActive(tileSpriteMaterial, tileSprite);
 
 		if(!shovelerShaderUse(shader)) {
-			shovelerLogWarning("Failed to use shader for sprite %p of canvas %p with tile sprite material %p, scene %p, camera %p, light %p and model %p.", tileSprite, canvas, canvas->tileSpriteMaterial, scene, camera, light, model);
+			shovelerLogWarning("Failed to use shader for sprite %p of canvas %p with tile sprite material %p, scene %p, camera %p, light %p and model %p.", tileSprite, canvas, tileSpriteMaterial, scene, camera, light, model);
 			return false;
 		}
 
 		if(!shovelerModelRender(model)) {
-			shovelerLogWarning("Failed to render model %p for for sprite %p of canvas %p with tile sprite material %p in scene %p for camera %p and light %p.", model, tileSprite, canvas, canvas->tileSpriteMaterial, scene, camera, light);
+			shovelerLogWarning("Failed to render model %p for for sprite %p of canvas %p with tile sprite material %p in scene %p for camera %p and light %p.", model, tileSprite, canvas, tileSpriteMaterial, scene, camera, light);
 			return false;
 		}
 
@@ -54,6 +53,5 @@ bool shovelerCanvasRender(ShovelerCanvas *canvas, ShovelerScene *scene, Shoveler
 void shovelerCanvasFree(ShovelerCanvas *canvas)
 {
 	g_queue_free_full(canvas->tileSprites, free);
-	shovelerMaterialFree(canvas->tileSpriteMaterial);
 	free(canvas);
 }

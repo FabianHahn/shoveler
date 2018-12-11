@@ -8,5 +8,6 @@
 
 ShovelerMaterial *shovelerMaterialCanvasCreate();
 void shovelerMaterialCanvasSetActive(ShovelerMaterial *material, ShovelerCanvas *canvas);
+ShovelerMaterial *shovelerMaterialCanvasGetTileSpriteMaterial(ShovelerMaterial *material);
 
 #endif
