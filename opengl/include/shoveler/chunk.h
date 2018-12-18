@@ -32,11 +32,13 @@ typedef struct {
 } ShovelerChunkLayer;
 
 typedef struct {
+	ShovelerVector2 position;
+	ShovelerVector2 size;
 	/** list of (ShovelerChunkLayer *) */
 	GQueue *layers;
 } ShovelerChunk;
 
-ShovelerChunk *shovelerChunkCreate();
+ShovelerChunk *shovelerChunkCreate(ShovelerVector2 position, ShovelerVector2 size);
 /** Adds a canvas layer to the chunk, not taking ownership of it. */
 int shovelerChunkAddCanvasLayer(ShovelerChunk *chunk, ShovelerCanvas *canvas);
 /** Adds a layer of tile sprites to the canvas, not taking ownership over the passed tilemap. */

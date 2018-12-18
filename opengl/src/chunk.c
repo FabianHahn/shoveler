@@ -9,9 +9,11 @@
 #include "shoveler/light.h"
 #include "shoveler/log.h"
 
-ShovelerChunk *shovelerChunkCreate()
+ShovelerChunk *shovelerChunkCreate(ShovelerVector2 position, ShovelerVector2 size)
 {
 	ShovelerChunk *chunk = malloc(sizeof(ShovelerChunk));
+	chunk->position = position;
+	chunk->size = size;
 	chunk->layers = g_queue_new();
 
 	return chunk;
@@ -40,6 +42,8 @@ int shovelerChunkAddTilemapLayer(ShovelerChunk *chunk, ShovelerTilemap *tilemap)
 bool shovelerChunkRender(ShovelerChunk *chunk, ShovelerMaterial *canvasMaterial, ShovelerMaterial *tilemapMaterial, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerRenderState *renderState)
 {
 	ShovelerMaterial *tileSpriteMaterial = shovelerMaterialCanvasGetTileSpriteMaterial(canvasMaterial);
+
+	shovelerMaterialCanvasSetActiveRegion(canvasMaterial, chunk->position, chunk->size);
 
 	for(GList *iter = chunk->layers->head; iter != NULL; iter = iter->next) {
 		ShovelerChunkLayer *layer = iter->data;
