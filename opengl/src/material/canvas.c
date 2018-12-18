@@ -12,6 +12,8 @@ typedef struct {
 	ShovelerMaterial *material;
 	ShovelerMaterial *tileSpriteMaterial;
 	ShovelerCanvas *activeCanvas;
+	ShovelerVector2 activeRegionPosition;
+	ShovelerVector2 activeRegionSize;
 } MaterialData;
 
 static bool render(ShovelerMaterial *material, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerRenderState *renderState);
@@ -26,6 +28,11 @@ ShovelerMaterial *shovelerMaterialCanvasCreate()
 	materialData->material->freeData = freeTilemap;
 	materialData->tileSpriteMaterial = shovelerMaterialTileSpriteCreate();
 	materialData->activeCanvas = NULL;
+	materialData->activeRegionPosition = shovelerVector2(0.0f, 0.0f);
+	materialData->activeRegionSize = shovelerVector2(1.0f, 1.0f);
+
+	shovelerUniformMapInsert(materialData->tileSpriteMaterial->uniforms, "regionPosition", shovelerUniformCreateVector2Pointer(&materialData->activeRegionPosition));
+	shovelerUniformMapInsert(materialData->tileSpriteMaterial->uniforms, "regionSize", shovelerUniformCreateVector2Pointer(&materialData->activeRegionSize));
 
 	return materialData->material;
 }
@@ -34,6 +41,13 @@ void shovelerMaterialCanvasSetActive(ShovelerMaterial *material, ShovelerCanvas 
 {
 	MaterialData *materialData = material->data;
 	materialData->activeCanvas = canvas;
+}
+
+void shovelerMaterialCanvasSetActiveRegion(ShovelerMaterial *material, ShovelerVector2 position, ShovelerVector2 size)
+{
+	MaterialData *materialData = material->data;
+	materialData->activeRegionPosition = position;
+	materialData->activeRegionSize = size;
 }
 
 ShovelerMaterial *shovelerMaterialCanvasGetTileSpriteMaterial(ShovelerMaterial *material)
