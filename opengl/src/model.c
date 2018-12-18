@@ -18,8 +18,6 @@ ShovelerModel *shovelerModelCreate(ShovelerDrawable *drawable, ShovelerMaterial 
 	model->scale = shovelerVector3(1, 1, 1);
 	model->transformation = shovelerMatrixIdentity;
 	model->normalTransformation = shovelerMatrixIdentity;
-	model->position2d = shovelerVector2(0.0, 0.0);
-	model->size2d = shovelerVector2(1.0, 1.0);
 	model->visible = true;
 	model->emitter = false;
 	model->screenspace = false;
@@ -31,11 +29,6 @@ ShovelerModel *shovelerModelCreate(ShovelerDrawable *drawable, ShovelerMaterial 
 	shovelerUniformMapInsert(model->uniforms, "model", modelUniform);
 	ShovelerUniform *modelNormalUniform = shovelerUniformCreateMatrixPointer(&model->normalTransformation);
 	shovelerUniformMapInsert(model->uniforms, "modelNormal", modelNormalUniform);
-
-	ShovelerUniform *position2dUniform = shovelerUniformCreateVector2Pointer(&model->position2d);
-	shovelerUniformMapInsert(model->uniforms, "modelPosition2d", position2dUniform);
-	ShovelerUniform *size2dUniform = shovelerUniformCreateVector2Pointer(&model->size2d);
-	shovelerUniformMapInsert(model->uniforms, "modelSize2d", size2dUniform);
 
 	return model;
 }

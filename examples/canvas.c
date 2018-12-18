@@ -80,7 +80,6 @@ int main(int argc, char *argv[])
 	shovelerMaterialCanvasSetActiveRegion(canvasMaterial, shovelerVector2(0.0f, 0.0f), shovelerVector2(10.0f, 10.0f));
 	ShovelerDrawable *quad = shovelerDrawableQuadCreate();
 	ShovelerModel *canvasModel = shovelerModelCreate(quad, canvasMaterial);
-	canvasModel->size2d = shovelerVector2(10.0f, 10.0f);
 	canvasModel->scale = shovelerVector3(0.5, 0.5, 1.0);
 	canvasModel->screenspace = true;
 	shovelerModelUpdateTransformation(canvasModel);

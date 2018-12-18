@@ -117,7 +117,6 @@ int main(int argc, char *argv[])
 	shovelerMaterialChunkSetActive(chunkMaterial, chunk);
 	ShovelerDrawable *quad = shovelerDrawableQuadCreate();
 	ShovelerModel *chunkModel = shovelerModelCreate(quad, chunkMaterial);
-	chunkModel->size2d = shovelerVector2(10.0f, 10.0f);
 	chunkModel->scale = shovelerVector3(0.5, 0.5, 1.0);
 	chunkModel->screenspace = true;
 	shovelerModelUpdateTransformation(chunkModel);
