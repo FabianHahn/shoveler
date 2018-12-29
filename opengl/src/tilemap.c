@@ -54,6 +54,10 @@ bool shovelerTilemapRender(ShovelerTilemap *tilemap, ShovelerMaterial *material,
 
 void shovelerTilemapFree(ShovelerTilemap *tilemap)
 {
+	if(tilemap == NULL) {
+		return;
+	}
+
 	g_queue_free(tilemap->tilesets);
 	free(tilemap);
 }

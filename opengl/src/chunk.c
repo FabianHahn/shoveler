@@ -72,6 +72,10 @@ bool shovelerChunkRender(ShovelerChunk *chunk, ShovelerMaterial *canvasMaterial,
 
 void shovelerChunkFree(ShovelerChunk *chunk)
 {
+	if(chunk == NULL) {
+		return;
+	}
+
 	g_queue_free_full(chunk->layers, free);
 	free(chunk);
 }
