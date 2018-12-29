@@ -16,6 +16,8 @@ typedef struct {
 
 void shovelerRenderStateReset(const ShovelerRenderState *renderState);
 void shovelerRenderStateSet(ShovelerRenderState *renderState, const ShovelerRenderState *targetRenderState);
+/** Same as shovelerRenderStateSet, but adds a log line for every performed change. */
+void shovelerRenderStateSetVerbose(ShovelerRenderState *renderState, const ShovelerRenderState *targetRenderState);
 void shovelerRenderStateEnableBlend(ShovelerRenderState *renderState, GLenum sourceFactor, GLenum destinationFactor);
 void shovelerRenderStateDisableBlend(ShovelerRenderState *renderState);
 void shovelerRenderStateEnableDepthTest(ShovelerRenderState *renderState, GLenum depthFunction);
