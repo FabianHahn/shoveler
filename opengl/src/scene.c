@@ -108,6 +108,7 @@ int shovelerSceneRenderFrame(ShovelerScene *scene, ShovelerCamera *camera, Shove
 
 	shovelerFramebufferUse(framebuffer);
 
+	shovelerRenderStateSetDepthMask(renderState, GL_TRUE);
 	glClearDepth(1.0f);
 	glClear(GL_DEPTH_BUFFER_BIT);
 	rendered += shovelerSceneRenderPass(scene, camera, NULL, createRenderPassOptions(scene, RENDER_MODE_OCCLUDED), renderState);
