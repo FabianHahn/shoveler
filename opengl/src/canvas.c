@@ -50,5 +50,10 @@ bool shovelerCanvasRender(ShovelerCanvas *canvas, ShovelerMaterial *tileSpriteMa
 
 void shovelerCanvasFree(ShovelerCanvas *canvas)
 {
+	if(canvas == NULL) {
+		return;
+	}
+
+	g_queue_free(canvas->tileSprites);
 	free(canvas);
 }
