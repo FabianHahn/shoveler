@@ -10,13 +10,16 @@ typedef enum {
 	SHOVELER_VIEW_MATERIAL_TYPE_TEXTURE,
 	SHOVELER_VIEW_MATERIAL_TYPE_PARTICLE,
 	SHOVELER_VIEW_MATERIAL_TYPE_TILEMAP,
+	SHOVELER_VIEW_MATERIAL_TYPE_CANVAS,
+	SHOVELER_VIEW_MATERIAL_TYPE_CHUNK,
 } ShovelerViewMaterialType;
 
 typedef struct {
 	ShovelerViewMaterialType type;
 	ShovelerVector3 color;
-	long long int textureEntityId;
-	long long int tilemapEntityId;
+	ShovelerVector2 canvasRegionPosition;
+	ShovelerVector2 canvasRegionSize;
+	long long int dataEntityId;
 } ShovelerViewMaterialConfiguration;
 
 static const char *shovelerViewMaterialComponentName = "material";

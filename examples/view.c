@@ -161,7 +161,7 @@ int main(int argc, char *argv[])
 
 	ShovelerViewMaterialConfiguration textureMaterialConfiguration;
 	textureMaterialConfiguration.type = SHOVELER_VIEW_MATERIAL_TYPE_TEXTURE;
-	textureMaterialConfiguration.textureEntityId = 6;
+	textureMaterialConfiguration.dataEntityId = 6;
 	ShovelerViewEntity *textureMaterialEntity = shovelerViewAddEntity(view, 7);
 	shovelerViewEntityAddMaterial(textureMaterialEntity, textureMaterialConfiguration);
 
@@ -230,7 +230,7 @@ int main(int argc, char *argv[])
 	tilemapConfiguration.tilesetEntityIds = (long long int[]){10, 11};
 	ShovelerViewMaterialConfiguration tilemapMaterialConfiguration;
 	tilemapMaterialConfiguration.type = SHOVELER_VIEW_MATERIAL_TYPE_TILEMAP;
-	tilemapMaterialConfiguration.tilemapEntityId = 12;
+	tilemapMaterialConfiguration.dataEntityId = 12;
 	ShovelerViewEntity *tilemapMaterialEntity = shovelerViewAddEntity(view, 12);
 	shovelerViewEntityAddTilemap(tilemapMaterialEntity, &tilemapConfiguration);
 	shovelerViewEntityAddMaterial(tilemapMaterialEntity, tilemapMaterialConfiguration);
