@@ -3,7 +3,7 @@
 #include <string.h> // memcpy
 
 #include "shoveler/view/tilemap.h"
-#include "shoveler/view/tilemap_layer.h"
+#include "shoveler/view/tilemap_tiles.h"
 #include "shoveler/view/tileset.h"
 #include "shoveler/log.h"
 
@@ -45,7 +45,7 @@ bool shovelerViewEntityAddTilemap(ShovelerViewEntity *entity, ShovelerViewTilema
 	assert(component != NULL);
 
 	for(int i = 0; i < configuration.numLayers; i++) {
-		shovelerViewComponentAddDependency(component, configuration.layerEntityIds[i], shovelerViewTilemapLayerComponentName);
+		shovelerViewComponentAddDependency(component, configuration.layerEntityIds[i], shovelerViewTilemapTilesComponentName);
 	}
 	for(int i = 0; i < configuration.numTilesets; i++) {
 		shovelerViewComponentAddDependency(component, configuration.tilesetEntityIds[i], shovelerViewTilesetComponentName);
@@ -105,7 +105,7 @@ bool shovelerViewEntityUpdateTilemap(ShovelerViewEntity *entity, ShovelerViewTil
 	shovelerViewComponentDeactivate(component);
 
 	for(int i = 0; i < componentData->configuration.numLayers; i++) {
-		if(!shovelerViewComponentRemoveDependency(component, componentData->configuration.layerEntityIds[i], shovelerViewTilemapLayerComponentName)) {
+		if(!shovelerViewComponentRemoveDependency(component, componentData->configuration.layerEntityIds[i], shovelerViewTilemapTilesComponentName)) {
 			return false;
 		}
 	}
@@ -118,7 +118,7 @@ bool shovelerViewEntityUpdateTilemap(ShovelerViewEntity *entity, ShovelerViewTil
 	assignConfiguration(&componentData->configuration, &configuration);
 
 	for(int i = 0; i < configuration.numLayers; i++) {
-		shovelerViewComponentAddDependency(component, configuration.layerEntityIds[i], shovelerViewTilemapLayerComponentName);
+		shovelerViewComponentAddDependency(component, configuration.layerEntityIds[i], shovelerViewTilemapTilesComponentName);
 	}
 	for(int i = 0; i < configuration.numTilesets; i++) {
 		shovelerViewComponentAddDependency(component, configuration.tilesetEntityIds[i], shovelerViewTilesetComponentName);
@@ -179,7 +179,7 @@ static bool activateComponent(ShovelerViewComponent *component, void *componentD
 	for(int i = 0; i < componentData->configuration.numLayers; i++) {
 		ShovelerViewEntity *layerEntity = shovelerViewGetEntity(component->entity->view, componentData->configuration.layerEntityIds[i]);
 		assert(layerEntity != NULL);
-		componentData->layers[i] = shovelerViewEntityGetTilemapLayer(layerEntity);
+		componentData->layers[i] = shovelerViewEntityGetTilemapTiles(layerEntity);
 		assert(componentData->layers[i] != NULL);
 	}
 

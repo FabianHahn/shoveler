@@ -15,7 +15,7 @@
 #include <shoveler/view/resources.h>
 #include <shoveler/view/texture.h>
 #include <shoveler/view/tilemap.h>
-#include <shoveler/view/tilemap_layer.h>
+#include <shoveler/view/tilemap_tiles.h>
 #include <shoveler/view/tileset.h>
 #include <shoveler/constants.h>
 #include <shoveler/controller.h>
@@ -165,7 +165,7 @@ int main(int argc, char *argv[])
 	ShovelerViewEntity *textureMaterialEntity = shovelerViewAddEntity(view, 7);
 	shovelerViewEntityAddMaterial(textureMaterialEntity, textureMaterialConfiguration);
 
-	ShovelerViewTilemapLayerTileConfiguration layerTiles[4];
+	ShovelerViewTilemapTilesTileConfiguration layerTiles[4];
 	layerTiles[0].tilesetColumn = 0;
 	layerTiles[0].tilesetRow = 0;
 	layerTiles[0].tilesetId = 1; // red
@@ -178,14 +178,14 @@ int main(int argc, char *argv[])
 	layerTiles[3].tilesetColumn = 0;
 	layerTiles[3].tilesetRow = 0;
 	layerTiles[3].tilesetId = 2; // full tileset
-	ShovelerViewTilemapLayerConfiguration layerConfiguration;
+	ShovelerViewTilemapTilesConfiguration layerConfiguration;
 	layerConfiguration.isImageResourceEntityDefinition = false;
 	layerConfiguration.imageResourceEntityId = 0;
 	layerConfiguration.numColumns = 2;
 	layerConfiguration.numRows = 2;
 	layerConfiguration.tiles = layerTiles;
 	ShovelerViewEntity *layerEntity = shovelerViewAddEntity(view, 8);
-	shovelerViewEntityAddTilemapLayer(layerEntity, layerConfiguration);
+	shovelerViewEntityAddTilemapTiles(layerEntity, &layerConfiguration);
 
 	ShovelerImage *layer2Image = shovelerImageCreate(3, 3, 3);
 	shovelerImageClear(layer2Image);
@@ -198,12 +198,12 @@ int main(int argc, char *argv[])
 	layer2ImageResourceConfiguration.typeId = "image/png";
 	layer2ImageResourceConfiguration.buffer = (unsigned char *) layer2ImageData->str;
 	layer2ImageResourceConfiguration.bufferSize = layer2ImageData->len;
-	ShovelerViewTilemapLayerConfiguration layer2Configuration;
+	ShovelerViewTilemapTilesConfiguration layer2Configuration;
 	layer2Configuration.isImageResourceEntityDefinition = true;
 	layer2Configuration.imageResourceEntityId = 9;
 	ShovelerViewEntity *layer2ResourceEntity = shovelerViewAddEntity(view, 9);
 	shovelerViewEntityAddResource(layer2ResourceEntity, layer2ImageResourceConfiguration);
-	shovelerViewEntityAddTilemapLayer(layer2ResourceEntity, layer2Configuration);
+	shovelerViewEntityAddTilemapTiles(layer2ResourceEntity, &layer2Configuration);
 	g_string_free(layer2ImageData, true);
 
 	ShovelerViewTilesetConfiguration tilesetConfiguration;
@@ -294,7 +294,7 @@ static void updateGame(ShovelerGame *game, double dt)
 	shovelerViewEntityUpdatePosition(lightEntity, 2.0 * sin(time), 2.0 * cos(time), 0.0);
 
 	ShovelerViewEntity *tilemapEntity = shovelerViewGetEntity(view, 8);
-	const ShovelerViewTilemapLayerConfiguration *layerConfiguration = shovelerViewEntityGetTilemapLayerConfiguration(tilemapEntity);
+	const ShovelerViewTilemapTilesConfiguration *layerConfiguration = shovelerViewEntityGetTilemapTilesConfiguration(tilemapEntity);
 	layerConfiguration->tiles[0].tilesetColumn = (unsigned char) time % 2;
-	shovelerViewEntityUpdateTilemapLayerTiles(tilemapEntity, layerConfiguration->tiles);
+	shovelerViewEntityUpdateTilemapTilesData(tilemapEntity, layerConfiguration->tiles);
 }
