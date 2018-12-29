@@ -151,7 +151,7 @@ static void assignConfiguration(ShovelerViewTilemapTilesConfiguration *destinati
 
 static void clearConfiguration(ShovelerViewTilemapTilesConfiguration *configuration)
 {
-	if(configuration->isImageResourceEntityDefinition) {
+	if(!configuration->isImageResourceEntityDefinition) {
 		free(configuration->tiles);
 		configuration->tiles = NULL;
 	}
