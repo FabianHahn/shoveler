@@ -6,22 +6,23 @@
 #include <glib.h>
 
 #include <shoveler/material/tilemap.h>
+#include <shoveler/tilemap.h>
 #include <shoveler/tileset.h>
 #include <shoveler/view.h>
 
 typedef struct {
-	int numLayers;
-	long long int *layerEntityIds;
+	long long int tilesEntityId;
 	int numTilesets;
 	long long int *tilesetEntityIds;
 } ShovelerViewTilemapConfiguration;
 
 static const char *shovelerViewTilemapComponentName = "tilemap";
 
-bool shovelerViewEntityAddTilemap(ShovelerViewEntity *entity, ShovelerViewTilemapConfiguration configuration);
-bool shovelerViewEntityGetTilemapLayers(ShovelerViewEntity *entity, int *numLayersPointer, ShovelerTexture ***layersPointer);
-bool shovelerViewEntityGetTilemapTilesets(ShovelerViewEntity *entity, int *numTilesetsPointer, ShovelerTileset ***tilesetsPointer);
+/** Adds a tilemap component to an entity, copying the supplied configuration. */
+bool shovelerViewEntityAddTilemap(ShovelerViewEntity *entity, const ShovelerViewTilemapConfiguration *configuration);
+ShovelerTilemap *shovelerViewEntityGetTilemap(ShovelerViewEntity *entity);
 const ShovelerViewTilemapConfiguration *shovelerViewEntityGetTilemapConfiguration(ShovelerViewEntity *entity);
+/** Updates a tilemap component of an entity, copying the supplied configuration. */
 bool shovelerViewEntityUpdateTilemap(ShovelerViewEntity *entity, ShovelerViewTilemapConfiguration configuration);
 bool shovelerViewEntityRemoveTilemap(ShovelerViewEntity *entity);
 

@@ -223,15 +223,16 @@ int main(int argc, char *argv[])
 	shovelerViewEntityAddTileset(tileset2MaterialEntity, tileset2Configuration);
 
 	ShovelerViewTilemapConfiguration tilemapConfiguration;
-	tilemapConfiguration.numLayers = 2;
-	tilemapConfiguration.layerEntityIds = (long long int[]){8, 9};
+	// tilemapConfiguration.numLayers = 2;
+	// tilemapConfiguration.layerEntityIds = (long long int[]){8, 9};
+	tilemapConfiguration.tilesEntityId = 8;
 	tilemapConfiguration.numTilesets = 2;
 	tilemapConfiguration.tilesetEntityIds = (long long int[]){10, 11};
 	ShovelerViewMaterialConfiguration tilemapMaterialConfiguration;
 	tilemapMaterialConfiguration.type = SHOVELER_VIEW_MATERIAL_TYPE_TILEMAP;
 	tilemapMaterialConfiguration.tilemapEntityId = 12;
 	ShovelerViewEntity *tilemapMaterialEntity = shovelerViewAddEntity(view, 12);
-	shovelerViewEntityAddTilemap(tilemapMaterialEntity, tilemapConfiguration);
+	shovelerViewEntityAddTilemap(tilemapMaterialEntity, &tilemapConfiguration);
 	shovelerViewEntityAddMaterial(tilemapMaterialEntity, tilemapMaterialConfiguration);
 
 	ShovelerViewModelConfiguration tilemapModelConfiguration;

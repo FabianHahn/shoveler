@@ -139,24 +139,11 @@ static bool activateComponent(ShovelerViewComponent *component, void *componentD
 		case SHOVELER_VIEW_MATERIAL_TYPE_TILEMAP: {
 			ShovelerViewEntity *tilemapEntity = shovelerViewGetEntity(component->entity->view, componentData->configuration.tilemapEntityId);
 			assert(tilemapEntity != NULL);
-
-			int numLayers;
-			ShovelerTexture **layers;
-			bool gotLayers = shovelerViewEntityGetTilemapLayers(tilemapEntity, &numLayers, &layers);
-			assert(gotLayers);
-
-			int numTilesets;
-			ShovelerTileset **tilesets;
-			bool gotTilesets = shovelerViewEntityGetTilemapTilesets(tilemapEntity, &numTilesets, &tilesets);
-			assert(gotTilesets);
+			ShovelerTilemap *tilemap = shovelerViewEntityGetTilemap(tilemapEntity);
+			assert(tilemap != NULL);
 
 			componentData->material = shovelerMaterialTilemapCreate();
-			for(int i = 0; i < numLayers; i++) {
-				shovelerMaterialTilemapAddLayer(componentData->material, layers[i]);
-			}
-			for(int i = 0; i < numTilesets; i++) {
-				shovelerMaterialTilemapAddTileset(componentData->material, tilesets[i]);
-			}
+			shovelerMaterialTilemapSetActive(componentData->material, tilemap);
 			break;
 		}
 		default:
