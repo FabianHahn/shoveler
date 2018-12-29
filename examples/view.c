@@ -7,6 +7,9 @@
 #include <shoveler/camera/perspective.h>
 #include <shoveler/image/png.h>
 #include <shoveler/resources/image_png.h>
+#include <shoveler/view/canvas.h>
+#include <shoveler/view/canvas_tile_sprite.h>
+#include <shoveler/view/chunk.h>
 #include <shoveler/view/drawable.h>
 #include <shoveler/view/light.h>
 #include <shoveler/view/material.h>
@@ -153,6 +156,7 @@ int main(int argc, char *argv[])
 	ShovelerViewTextureConfiguration textureConfiguration;
 	textureConfiguration.imageResourceEntityId = 6;
 	textureConfiguration.interpolate = true;
+	textureConfiguration.useMipmaps = true;
 	textureConfiguration.clamp = true;
 	ShovelerViewEntity *resourceEntity = shovelerViewAddEntity(view, 6);
 	shovelerViewEntityAddResource(resourceEntity, imageResourceConfiguration);
@@ -222,32 +226,102 @@ int main(int argc, char *argv[])
 	ShovelerViewEntity *tileset2MaterialEntity = shovelerViewAddEntity(view, 11);
 	shovelerViewEntityAddTileset(tileset2MaterialEntity, tileset2Configuration);
 
-	ShovelerViewTilemapConfiguration tilemapConfiguration;
-	// tilemapConfiguration.numLayers = 2;
-	// tilemapConfiguration.layerEntityIds = (long long int[]){8, 9};
-	tilemapConfiguration.tilesEntityId = 8;
-	tilemapConfiguration.numTilesets = 2;
-	tilemapConfiguration.tilesetEntityIds = (long long int[]){10, 11};
+	ShovelerViewTilemapConfiguration tilemapBackgroundConfiguration;
+	tilemapBackgroundConfiguration.tilesEntityId = 8;
+	tilemapBackgroundConfiguration.numTilesets = 2;
+	tilemapBackgroundConfiguration.tilesetEntityIds = (long long int[]){10, 11};
+	ShovelerViewEntity *tilemapBackgroundEntity = shovelerViewAddEntity(view, 12);
+	shovelerViewEntityAddTilemap(tilemapBackgroundEntity, &tilemapBackgroundConfiguration);
+
+	ShovelerViewTilemapConfiguration tilemapForegroundConfiguration;
+	tilemapForegroundConfiguration.tilesEntityId = 9;
+	tilemapForegroundConfiguration.numTilesets = 2;
+	tilemapForegroundConfiguration.tilesetEntityIds = (long long int[]){10, 11};
+	ShovelerViewEntity *tilemapForegroundEntity = shovelerViewAddEntity(view, 13);
+	shovelerViewEntityAddTilemap(tilemapForegroundEntity, &tilemapForegroundConfiguration);
+
+	ShovelerViewCanvasTileSpriteConfiguration canvasTileSpriteConfiguration;
+	canvasTileSpriteConfiguration.tilesetEntityId = 11;
+	canvasTileSpriteConfiguration.tilesetColumn = 0;
+	canvasTileSpriteConfiguration.tilesetRow = 0;
+	canvasTileSpriteConfiguration.position = shovelerVector2(3.0, 4.0);
+	canvasTileSpriteConfiguration.size = shovelerVector2(2.5, 4.0);
+	ShovelerViewEntity *canvasTileSpriteEntity = shovelerViewAddEntity(view, 14);
+	shovelerViewEntityAddCanvasTileSprite(canvasTileSpriteEntity, &canvasTileSpriteConfiguration);
+
+	ShovelerViewCanvasConfiguration canvasConfiguration;
+	canvasConfiguration.numTileSprites = 1;
+	canvasConfiguration.tileSpriteEntityIds = (long long int[]){14};
+	ShovelerViewEntity *canvasEntity = shovelerViewAddEntity(view, 15);
+	shovelerViewEntityAddCanvas(canvasEntity, &canvasConfiguration);
+
+	ShovelerViewChunkConfiguration chunkConfiguration;
+	chunkConfiguration.position = shovelerVector2(0.0f, 0.0f);
+	chunkConfiguration.size = shovelerVector2(10.0f, 10.0f);
+	chunkConfiguration.numLayers = 3;
+	chunkConfiguration.layers = (ShovelerViewChunkLayerConfiguration[]){
+		{SHOVELER_CHUNK_LAYER_TYPE_TILEMAP, 12},
+		{SHOVELER_CHUNK_LAYER_TYPE_CANVAS, 15},
+		{SHOVELER_CHUNK_LAYER_TYPE_TILEMAP, 13},
+	};
+	ShovelerViewEntity *chunkEntity = shovelerViewAddEntity(view, 16);
+	shovelerViewEntityAddChunk(chunkEntity, &chunkConfiguration);
+
+	ShovelerViewModelConfiguration tilemapMaterialModelConfiguration;
+	tilemapMaterialModelConfiguration.drawableEntityId = 4;
+	tilemapMaterialModelConfiguration.materialEntityId = 17;
+	tilemapMaterialModelConfiguration.rotation = shovelerVector3(SHOVELER_PI, 0.0, SHOVELER_PI);
+	tilemapMaterialModelConfiguration.scale = shovelerVector3(0.5, 0.5, 1.0);
+	tilemapMaterialModelConfiguration.visible = true;
+	tilemapMaterialModelConfiguration.emitter = false;
+	tilemapMaterialModelConfiguration.screenspace = false;
+	tilemapMaterialModelConfiguration.castsShadow = true;
+	tilemapMaterialModelConfiguration.polygonMode = GL_FILL;
 	ShovelerViewMaterialConfiguration tilemapMaterialConfiguration;
 	tilemapMaterialConfiguration.type = SHOVELER_VIEW_MATERIAL_TYPE_TILEMAP;
 	tilemapMaterialConfiguration.dataEntityId = 12;
-	ShovelerViewEntity *tilemapMaterialEntity = shovelerViewAddEntity(view, 12);
-	shovelerViewEntityAddTilemap(tilemapMaterialEntity, &tilemapConfiguration);
+	ShovelerViewEntity *tilemapMaterialEntity = shovelerViewAddEntity(view, 17);
+	shovelerViewEntityAddModel(tilemapMaterialEntity, tilemapMaterialModelConfiguration);
 	shovelerViewEntityAddMaterial(tilemapMaterialEntity, tilemapMaterialConfiguration);
+	shovelerViewEntityAddPosition(tilemapMaterialEntity, 5.0, 5.0, 7.5);
 
-	ShovelerViewModelConfiguration tilemapModelConfiguration;
-	tilemapModelConfiguration.drawableEntityId = 4;
-	tilemapModelConfiguration.materialEntityId = 12;
-	tilemapModelConfiguration.rotation = shovelerVector3(SHOVELER_PI, 0.0, SHOVELER_PI);
-	tilemapModelConfiguration.scale = shovelerVector3(0.5, 0.5, 1.0);
-	tilemapModelConfiguration.visible = true;
-	tilemapModelConfiguration.emitter = false;
-	tilemapModelConfiguration.screenspace = false;
-	tilemapModelConfiguration.castsShadow = true;
-	tilemapModelConfiguration.polygonMode = GL_FILL;
-	ShovelerViewEntity *tilemapModelEntity = shovelerViewAddEntity(view, 13);
-	shovelerViewEntityAddModel(tilemapModelEntity, tilemapModelConfiguration);
-	shovelerViewEntityAddPosition(tilemapModelEntity, 5.0, 5.0, 7.5);
+	ShovelerViewModelConfiguration canvasMaterialModelConfiguration;
+	canvasMaterialModelConfiguration.drawableEntityId = 4;
+	canvasMaterialModelConfiguration.materialEntityId = 18;
+	canvasMaterialModelConfiguration.rotation = shovelerVector3(SHOVELER_PI, 0.0, SHOVELER_PI);
+	canvasMaterialModelConfiguration.scale = shovelerVector3(0.5, 0.5, 1.0);
+	canvasMaterialModelConfiguration.visible = true;
+	canvasMaterialModelConfiguration.emitter = false;
+	canvasMaterialModelConfiguration.screenspace = false;
+	canvasMaterialModelConfiguration.castsShadow = true;
+	canvasMaterialModelConfiguration.polygonMode = GL_FILL;
+	ShovelerViewMaterialConfiguration canvasMaterialConfiguration;
+	canvasMaterialConfiguration.type = SHOVELER_VIEW_MATERIAL_TYPE_CANVAS;
+	canvasMaterialConfiguration.canvasRegionPosition = shovelerVector2(0.0f, 0.0f);
+	canvasMaterialConfiguration.canvasRegionSize = shovelerVector2(10.0f, 10.0f);
+	canvasMaterialConfiguration.dataEntityId = 15;
+	ShovelerViewEntity *canvasMaterialEntity = shovelerViewAddEntity(view, 18);
+	shovelerViewEntityAddModel(canvasMaterialEntity, canvasMaterialModelConfiguration);
+	shovelerViewEntityAddMaterial(canvasMaterialEntity, canvasMaterialConfiguration);
+	shovelerViewEntityAddPosition(canvasMaterialEntity, 0.0, 5.0, 7.5);
+
+	ShovelerViewModelConfiguration chunkMaterialModelConfiguration;
+	chunkMaterialModelConfiguration.drawableEntityId = 4;
+	chunkMaterialModelConfiguration.materialEntityId = 19;
+	chunkMaterialModelConfiguration.rotation = shovelerVector3(SHOVELER_PI, 0.0, SHOVELER_PI);
+	chunkMaterialModelConfiguration.scale = shovelerVector3(0.5, 0.5, 1.0);
+	chunkMaterialModelConfiguration.visible = true;
+	chunkMaterialModelConfiguration.emitter = false;
+	chunkMaterialModelConfiguration.screenspace = false;
+	chunkMaterialModelConfiguration.castsShadow = true;
+	chunkMaterialModelConfiguration.polygonMode = GL_FILL;
+	ShovelerViewMaterialConfiguration chunkMaterialConfiguration;
+	chunkMaterialConfiguration.type = SHOVELER_VIEW_MATERIAL_TYPE_CHUNK;
+	chunkMaterialConfiguration.dataEntityId = 16;
+	ShovelerViewEntity *chunkMaterialEntity = shovelerViewAddEntity(view, 19);
+	shovelerViewEntityAddModel(chunkMaterialEntity, chunkMaterialModelConfiguration);
+	shovelerViewEntityAddMaterial(chunkMaterialEntity, chunkMaterialConfiguration);
+	shovelerViewEntityAddPosition(chunkMaterialEntity, -5.0, 5.0, 7.5);
 
 	shovelerOpenGLCheckSuccess();
 
