@@ -49,13 +49,13 @@ static const char *fragmentShaderSource =
 	"#version 400\n"
 	"\n"
 	"uniform bool sceneDebugMode;\n"
-	"uniform int layerWidth;\n"
-	"uniform int layerHeight;\n"
+	"uniform int tilesWidth;\n"
+	"uniform int tilesHeight;\n"
 	"uniform int tilesetId;\n"
 	"uniform int tilesetColumns;\n"
 	"uniform int tilesetRows;\n"
 	"uniform int tilesetPadding;\n"
-	"uniform sampler2D layer;\n"
+	"uniform sampler2D tiles;\n"
 	"uniform sampler2D tileset;\n"
 	"\n"
 	"flat in vec2 fragmentPosition;\n"
@@ -70,30 +70,30 @@ static const char *fragmentShaderSource =
 	"\n"
 	"void main()\n"
 	"{\n"
-	"	vec3 tile = round(255 * texture2D(layer, worldUv).xyz);\n"
+	"	vec3 tile = round(255 * texture2D(tiles, worldUv).xyz);\n"
 	"	int tileTilesetId = int(tile.z);\n"
 	""
 	"	if (tileTilesetId == tilesetId) {\n"
-	"		vec2 layerSize = textureSize(layer, 0);\n"
-	"		vec2 layerInverseSize = 1.0 / layerSize;\n"
+	"		vec2 tilesSize = textureSize(tiles, 0);\n"
+	"		vec2 tilesInverseSize = 1.0 / tilesSize;\n"
 	""
-	"		vec2 tilemapScaledUv = worldUv * layerSize;\n"
+	"		vec2 tilemapScaledUv = worldUv * tilesSize;\n"
 	"		vec2 tileUv = tilemapScaledUv;\n"
 	""
 	"		// To avoid singularities around 0 and 1, make sure we don't break continuity of the uv function\n"
 	"		// because of flooring.\n"
-	"		if (worldUv.x > 0.5 * layerInverseSize.x) {\n"
-	"			if (worldUv.x < (1.0 - 0.5 * layerInverseSize.x)) {\n"
+	"		if (worldUv.x > 0.5 * tilesInverseSize.x) {\n"
+	"			if (worldUv.x < (1.0 - 0.5 * tilesInverseSize.x)) {\n"
 	"				tileUv.x -= floor(tilemapScaledUv.x);\n"
 	"			} else {\n"
-	"				tileUv.x -= floor((1.0 - 0.5 * layerInverseSize.x) * layerSize.x);\n"
+	"				tileUv.x -= floor((1.0 - 0.5 * tilesInverseSize.x) * tilesSize.x);\n"
 	"			}\n"
 	"		}\n"
-	"		if (worldUv.y > 0.5 * layerInverseSize.y) {\n"
-	"			if (worldUv.y < (1.0 - 0.5 * layerInverseSize.y)) {\n"
+	"		if (worldUv.y > 0.5 * tilesInverseSize.y) {\n"
+	"			if (worldUv.y < (1.0 - 0.5 * tilesInverseSize.y)) {\n"
 	"				tileUv.y -= floor(tilemapScaledUv.y);\n"
 	"			} else {\n"
-	"				tileUv.y -= floor((1.0 - 0.5 * layerInverseSize.y) * layerSize.y);\n"
+	"				tileUv.y -= floor((1.0 - 0.5 * tilesInverseSize.y) * tilesSize.y);\n"
 	"			}\n"
 	"		}\n"
 	""
@@ -120,6 +120,7 @@ static const char *fragmentShaderSource =
 typedef struct {
 	ShovelerMaterial *material;
 	ShovelerSampler *tilemapSampler;
+	ShovelerTilemap *activeTilemap;
 	int activeLayerWidth;
 	int activeLayerHeight;
 	ShovelerTexture *activeLayerTexture;
@@ -133,7 +134,7 @@ typedef struct {
 	GQueue *layers;
 	/** list of (ShovelerMaterialTilemapTileset *) */
 	GQueue *tilesets;
-} Tilemap;
+} MaterialData;
 
 static bool render(ShovelerMaterial *material, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerRenderState *renderState);
 static void freeTilemap(ShovelerMaterial *material);
@@ -144,88 +145,120 @@ ShovelerMaterial *shovelerMaterialTilemapCreate()
 	GLuint fragmentShaderObject = shovelerShaderProgramCompileFromString(fragmentShaderSource, GL_FRAGMENT_SHADER);
 	GLuint program = shovelerShaderProgramLink(vertexShaderObject, 0, fragmentShaderObject, true);
 
-	Tilemap *tilemap = malloc(sizeof(Tilemap));
-	tilemap->material = shovelerMaterialCreate(program);
-	tilemap->material->data = tilemap;
-	tilemap->material->render = render;
-	tilemap->material->freeData = freeTilemap;
-	tilemap->tilemapSampler = shovelerSamplerCreate(false, false, true);
-	tilemap->activeLayerWidth = 0;
-	tilemap->activeLayerHeight = 0;
-	tilemap->activeLayerTexture = NULL;
-	tilemap->activeTilesetId = 0;
-	tilemap->activeTilesetColumns = 0;
-	tilemap->activeTilesetRows = 0;
-	tilemap->activeTilesetPadding = 0;
-	tilemap->activeTilesetTexture = NULL;
-	tilemap->activeTilesetSampler = NULL;
-	tilemap->layers = g_queue_new();
-	tilemap->tilesets = g_queue_new();
+	MaterialData *materialData = malloc(sizeof(MaterialData));
+	materialData->material = shovelerMaterialCreate(program);
+	materialData->material->data = materialData;
+	materialData->material->render = render;
+	materialData->material->freeData = freeTilemap;
+	materialData->tilemapSampler = shovelerSamplerCreate(false, false, true);
+	materialData->activeLayerWidth = 0;
+	materialData->activeLayerHeight = 0;
+	materialData->activeLayerTexture = NULL;
+	materialData->activeTilesetId = 0;
+	materialData->activeTilesetColumns = 0;
+	materialData->activeTilesetRows = 0;
+	materialData->activeTilesetPadding = 0;
+	materialData->activeTilesetTexture = NULL;
+	materialData->activeTilesetSampler = NULL;
+	materialData->layers = g_queue_new();
+	materialData->tilesets = g_queue_new();
 
-	shovelerUniformMapInsert(tilemap->material->uniforms, "layerWidth", shovelerUniformCreateIntPointer(&tilemap->activeLayerWidth));
-	shovelerUniformMapInsert(tilemap->material->uniforms, "layerHeight", shovelerUniformCreateIntPointer(&tilemap->activeLayerHeight));
+	shovelerUniformMapInsert(materialData->material->uniforms, "tilesWidth", shovelerUniformCreateIntPointer(&materialData->activeLayerWidth));
+	shovelerUniformMapInsert(materialData->material->uniforms, "tilesHeight", shovelerUniformCreateIntPointer(&materialData->activeLayerHeight));
 
-	shovelerUniformMapInsert(tilemap->material->uniforms, "layer", shovelerUniformCreateTexturePointer(&tilemap->activeLayerTexture, &tilemap->tilemapSampler));
+	shovelerUniformMapInsert(materialData->material->uniforms, "tiles", shovelerUniformCreateTexturePointer(&materialData->activeLayerTexture, &materialData->tilemapSampler));
 
-	shovelerUniformMapInsert(tilemap->material->uniforms, "tilesetId", shovelerUniformCreateIntPointer(&tilemap->activeTilesetId));
+	shovelerUniformMapInsert(materialData->material->uniforms, "tilesetId", shovelerUniformCreateIntPointer(&materialData->activeTilesetId));
 
-	shovelerUniformMapInsert(tilemap->material->uniforms, "tilesetColumns", shovelerUniformCreateIntPointer(&tilemap->activeTilesetColumns));
-	shovelerUniformMapInsert(tilemap->material->uniforms, "tilesetRows", shovelerUniformCreateIntPointer(&tilemap->activeTilesetRows));
-	shovelerUniformMapInsert(tilemap->material->uniforms, "tilesetPadding", shovelerUniformCreateIntPointer(&tilemap->activeTilesetPadding));
-	shovelerUniformMapInsert(tilemap->material->uniforms, "tileset", shovelerUniformCreateTexturePointer(&tilemap->activeTilesetTexture, &tilemap->activeTilesetSampler));
+	shovelerUniformMapInsert(materialData->material->uniforms, "tilesetColumns", shovelerUniformCreateIntPointer(&materialData->activeTilesetColumns));
+	shovelerUniformMapInsert(materialData->material->uniforms, "tilesetRows", shovelerUniformCreateIntPointer(&materialData->activeTilesetRows));
+	shovelerUniformMapInsert(materialData->material->uniforms, "tilesetPadding", shovelerUniformCreateIntPointer(&materialData->activeTilesetPadding));
+	shovelerUniformMapInsert(materialData->material->uniforms, "tileset", shovelerUniformCreateTexturePointer(&materialData->activeTilesetTexture, &materialData->activeTilesetSampler));
 
-	return tilemap->material;
+	return materialData->material;
 }
 
 int shovelerMaterialTilemapAddLayer(ShovelerMaterial *material, ShovelerTexture *layerTexture)
 {
-	Tilemap *tilemap = material->data;
+	MaterialData *materialData = material->data;
 
-	g_queue_push_tail(tilemap->layers, layerTexture);
-	return g_queue_get_length(tilemap->layers) - 1;
+	g_queue_push_tail(materialData->layers, layerTexture);
+	return g_queue_get_length(materialData->layers) - 1;
 }
 
 int shovelerMaterialTilemapAddTileset(ShovelerMaterial *material, ShovelerTileset *tileset)
 {
-	Tilemap *tilemap = material->data;
+	MaterialData *materialData = material->data;
 
-	g_queue_push_tail(tilemap->tilesets, tileset);
-	return g_queue_get_length(tilemap->tilesets); // start with one since zero is blank
+	g_queue_push_tail(materialData->tilesets, tileset);
+	return g_queue_get_length(materialData->tilesets); // start with one since zero is blank
+}
+
+void shovelerMaterialTilemapSetActive(ShovelerMaterial *tilemapMaterial, ShovelerTilemap *tilemap)
+{
+	MaterialData *materialData = tilemapMaterial->data;
+
+	materialData->activeTilemap = tilemap;
+}
+
+void shovelerMaterialTilemapSetActiveTiles(ShovelerMaterial *tilemapMaterial, ShovelerTexture *tiles)
+{
+	MaterialData *materialData = tilemapMaterial->data;
+
+	materialData->activeLayerWidth = tiles->image->width;
+	materialData->activeLayerHeight = tiles->image->height;
+	materialData->activeLayerTexture = tiles;
+}
+
+void shovelerMaterialTilemapSetActiveTileset(ShovelerMaterial *tilemapMaterial, int tilesetId, ShovelerTileset *tileset)
+{
+	MaterialData *materialData = tilemapMaterial->data;
+
+	materialData->activeTilesetId = tilesetId;
+	materialData->activeTilesetColumns = tileset->columns;
+	materialData->activeTilesetRows = tileset->rows;
+	materialData->activeTilesetPadding = tileset->padding;
+	materialData->activeTilesetTexture = tileset->texture;
+	materialData->activeTilesetSampler = tileset->sampler;
 }
 
 static bool render(ShovelerMaterial *material, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerRenderState *renderState)
 {
-	Tilemap *tilemap = material->data;
+	MaterialData *materialData = material->data;
+
+	if(materialData->activeTilemap != NULL) {
+		return shovelerTilemapRender(materialData->activeTilemap, material, scene, camera, light, model, renderState);
+	}
 
 	// since we are only changing uniform pointer values per layer, we can reuse the same shader for all of them
 	ShovelerShader *shader = shovelerSceneGenerateShader(scene, camera, light, model, material, NULL);
 
 	shovelerRenderStateEnableBlend(renderState, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	for(GList *iter = tilemap->layers->head; iter != NULL; iter = iter->next) {
+	for(GList *iter = materialData->layers->head; iter != NULL; iter = iter->next) {
 		ShovelerTexture *layerTexture = (ShovelerTexture *) iter->data;
 
-		if(iter == tilemap->layers->head->next) {
+		if(iter == materialData->layers->head->next) {
 			// starting from the second tileset, switch to equal depth test
 			shovelerRenderStateEnableDepthTest(renderState, GL_EQUAL);
 		}
 
 		// set this layer as active
-		tilemap->activeLayerWidth = layerTexture->image->width;
-		tilemap->activeLayerHeight = layerTexture->image->height;
-		tilemap->activeLayerTexture = layerTexture;
+		materialData->activeLayerWidth = layerTexture->image->width;
+		materialData->activeLayerHeight = layerTexture->image->height;
+		materialData->activeLayerTexture = layerTexture;
 
 		int tilesetId = 1; // start with one since zero is blank
-		for(GList *iter2 = tilemap->tilesets->head; iter2 != NULL; iter2 = iter2->next, tilesetId++) {
+		for(GList *iter2 = materialData->tilesets->head; iter2 != NULL; iter2 = iter2->next, tilesetId++) {
 			ShovelerTileset *tileset = (ShovelerTileset *) iter2->data;
 
 			// set uniform values by setting this tileset as active
-			tilemap->activeTilesetId = tilesetId;
-			tilemap->activeTilesetColumns = tileset->columns;
-			tilemap->activeTilesetRows = tileset->rows;
-			tilemap->activeTilesetPadding = tileset->padding;
-			tilemap->activeTilesetTexture = tileset->texture;
-			tilemap->activeTilesetSampler = tileset->sampler;
+			materialData->activeTilesetId = tilesetId;
+			materialData->activeTilesetColumns = tileset->columns;
+			materialData->activeTilesetRows = tileset->rows;
+			materialData->activeTilesetPadding = tileset->padding;
+			materialData->activeTilesetTexture = tileset->texture;
+			materialData->activeTilesetSampler = tileset->sampler;
 
 			if(!shovelerShaderUse(shader)) {
 				shovelerLogWarning("Failed to use shader for layer %p of tilemap material %p, scene %p, camera %p, light %p and model %p.", layerTexture, material, scene, camera, light, model);
@@ -242,34 +275,13 @@ static bool render(ShovelerMaterial *material, ShovelerScene *scene, ShovelerCam
 	return true;
 }
 
-void shovelerMaterialTilemapSetActiveTiles(ShovelerMaterial *tilemapMaterial, ShovelerTexture *tiles)
-{
-	Tilemap *tilemap = tilemapMaterial->data;
-
-	tilemap->activeLayerWidth = tiles->image->width;
-	tilemap->activeLayerHeight = tiles->image->height;
-	tilemap->activeLayerTexture = tiles;
-}
-
-void shovelerMaterialTilemapSetActiveTileset(ShovelerMaterial *tilemapMaterial, int tilesetId, ShovelerTileset *tileset)
-{
-	Tilemap *tilemap = tilemapMaterial->data;
-
-	tilemap->activeTilesetId = tilesetId;
-	tilemap->activeTilesetColumns = tileset->columns;
-	tilemap->activeTilesetRows = tileset->rows;
-	tilemap->activeTilesetPadding = tileset->padding;
-	tilemap->activeTilesetTexture = tileset->texture;
-	tilemap->activeTilesetSampler = tileset->sampler;
-}
-
 static void freeTilemap(ShovelerMaterial *material)
 {
-	Tilemap *tilemap = material->data;
+	MaterialData *materialData = material->data;
 
-	g_queue_free(tilemap->tilesets);
-	g_queue_free(tilemap->layers);
+	g_queue_free(materialData->tilesets);
+	g_queue_free(materialData->layers);
 
-	free(tilemap->tilemapSampler);
-	free(tilemap);
+	free(materialData->tilemapSampler);
+	free(materialData);
 }
