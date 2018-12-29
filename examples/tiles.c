@@ -45,8 +45,6 @@ int main(int argc, char *argv[])
 	game->camera = shovelerCameraPerspectiveCreate(shovelerVector3(0, 0, 1), shovelerVector3(0, 0, -1), shovelerVector3(0, 1, 0), 2.0f * SHOVELER_PI * 50.0f / 360.0f, (float) width / height, 0.01, 1000);
 	shovelerCameraPerspectiveAttachController(game->camera, controller);
 
-	ShovelerMaterial *tilemapMaterial = shovelerMaterialTilemapCreate();
-
 	ShovelerImage *tilesetImage = shovelerImageCreate(2, 2, 3);
 	shovelerImageClear(tilesetImage);
 	shovelerImageGet(tilesetImage, 0, 0, 0) = 255; // red
@@ -61,51 +59,34 @@ int main(int argc, char *argv[])
 	shovelerImageSet(borderTilesetImage, shovelerColor(255, 200, 255), 0);
 	shovelerImageAddFrame(borderTilesetImage, 3, shovelerColor(255, 200, 255));
 
+	ShovelerImage *tilesImage = shovelerImageCreate(2, 2, 3);
+	shovelerImageClear(tilesImage);
+	shovelerImageGet(tilesImage, 0, 0, 0) = 0;
+	shovelerImageGet(tilesImage, 0, 0, 1) = 0;
+	shovelerImageGet(tilesImage, 0, 0, 2) = 1; // red
+	shovelerImageGet(tilesImage, 0, 1, 0) = 0;
+	shovelerImageGet(tilesImage, 0, 1, 1) = 0;
+	shovelerImageGet(tilesImage, 0, 1, 2) = 1; // red
+	shovelerImageGet(tilesImage, 1, 0, 0) = 0;
+	shovelerImageGet(tilesImage, 1, 0, 1) = 1;
+	shovelerImageGet(tilesImage, 1, 0, 2) = 1; // green
+	shovelerImageGet(tilesImage, 1, 1, 0) = 0;
+	shovelerImageGet(tilesImage, 1, 1, 1) = 0;
+	shovelerImageGet(tilesImage, 1, 1, 2) = 2; // full tileset
+	ShovelerTexture *tiles = shovelerTextureCreate2d(tilesImage, true);
+	shovelerTextureUpdate(tiles);
+
+	ShovelerTilemap *tilemap = shovelerTilemapCreate(tiles);
 	ShovelerTileset *tileset = shovelerTilesetCreate(tilesetImage, 2, 2, 1);
-	shovelerMaterialTilemapAddTileset(tilemapMaterial, tileset);
+	shovelerTilemapAddTileset(tilemap, tileset);
 	ShovelerTileset *tileset2 = shovelerTilesetCreate(tilesetImage, 1, 1, 1);
-	shovelerMaterialTilemapAddTileset(tilemapMaterial, tileset2);
-	ShovelerTileset *borderTileset = shovelerTilesetCreate(borderTilesetImage, 1, 1, 1);
-	shovelerMaterialTilemapAddTileset(tilemapMaterial, borderTileset);
+	shovelerTilemapAddTileset(tilemap, tileset2);
 
-	ShovelerImage *layerImage = shovelerImageCreate(2, 2, 3);
-	shovelerImageClear(layerImage);
-	shovelerImageGet(layerImage, 0, 0, 0) = 0;
-	shovelerImageGet(layerImage, 0, 0, 1) = 0;
-	shovelerImageGet(layerImage, 0, 0, 2) = 1; // red
-	shovelerImageGet(layerImage, 0, 1, 0) = 0;
-	shovelerImageGet(layerImage, 0, 1, 1) = 0;
-	shovelerImageGet(layerImage, 0, 1, 2) = 1; // red
-	shovelerImageGet(layerImage, 1, 0, 0) = 0;
-	shovelerImageGet(layerImage, 1, 0, 1) = 1;
-	shovelerImageGet(layerImage, 1, 0, 2) = 1; // green
-	shovelerImageGet(layerImage, 1, 1, 0) = 0;
-	shovelerImageGet(layerImage, 1, 1, 1) = 0;
-	shovelerImageGet(layerImage, 1, 1, 2) = 2; // full tileset
-	ShovelerTexture *layerTexture = shovelerTextureCreate2d(layerImage, true);
-	shovelerTextureUpdate(layerTexture);
-	shovelerMaterialTilemapAddLayer(tilemapMaterial, layerTexture);
+	ShovelerMaterial *tilemapMaterial = shovelerMaterialTilemapCreate();
+	shovelerMaterialTilemapSetActive(tilemapMaterial, tilemap);
 
-	ShovelerImage *layer2Image = shovelerImageCreate(3, 3, 3);
-	shovelerImageClear(layer2Image);
-	shovelerImageGet(layer2Image, 0, 0, 0) = 0;
-	shovelerImageGet(layer2Image, 0, 0, 1) = 0;
-	shovelerImageGet(layer2Image, 0, 0, 2) = 2; // full tileset
-	ShovelerTexture *layer2Texture = shovelerTextureCreate2d(layer2Image, true);
-	shovelerTextureUpdate(layer2Texture);
-	shovelerMaterialTilemapAddLayer(tilemapMaterial, layer2Texture);
-
-	ShovelerImage *layer3Image = shovelerImageCreate(1, 1, 3);
-	shovelerImageClear(layer3Image);
-	shovelerImageGet(layer3Image, 0, 0, 0) = 0;
-	shovelerImageGet(layer3Image, 0, 0, 1) = 0;
-	shovelerImageGet(layer3Image, 0, 0, 2) = 3; // full tileset
-	ShovelerTexture *layer3Texture = shovelerTextureCreate2d(layer3Image, true);
-	shovelerTextureUpdate(layer3Texture);
-	shovelerMaterialTilemapAddLayer(tilemapMaterial, layer3Texture);
-
-	ShovelerDrawable *tiles = shovelerDrawableQuadCreate();
-	ShovelerModel *tilesModel = shovelerModelCreate(tiles, tilemapMaterial);
+	ShovelerDrawable *quad = shovelerDrawableQuadCreate();
+	ShovelerModel *tilesModel = shovelerModelCreate(quad, tilemapMaterial);
 	tilesModel->scale = shovelerVector3(0.5, 0.5, 1.0);
 	tilesModel->screenspace = true;
 	shovelerModelUpdateTransformation(tilesModel);
@@ -122,7 +103,7 @@ int main(int argc, char *argv[])
 
 	shovelerSceneFree(game->scene);
 	shovelerCameraFree(game->camera);
-	shovelerDrawableFree(tiles);
+	shovelerDrawableFree(quad);
 	shovelerMaterialFree(tilemapMaterial);
 	shovelerControllerFree(controller);
 
