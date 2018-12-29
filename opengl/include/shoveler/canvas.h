@@ -29,7 +29,8 @@ typedef struct {
 } ShovelerCanvas;
 
 ShovelerCanvas *shovelerCanvasCreate();
-int shovelerCanvasAddTileSprite(ShovelerCanvas *canvas, ShovelerCanvasTileSprite tileSprite);
+/** Adds a tile sprite to the canvas, with the caller retaining ownership over it and changes to it being reflected live. Returns the id of the added sprite. */
+int shovelerCanvasAddTileSprite(ShovelerCanvas *canvas, const ShovelerCanvasTileSprite *tileSprite);
 bool shovelerCanvasRender(ShovelerCanvas *canvas, struct ShovelerMaterialStruct *tileSpriteMaterial, ShovelerScene *scene, struct ShovelerCameraStruct *camera, struct ShovelerLightStruct *light, struct ShovelerModelStruct *model, ShovelerRenderState *renderState);
 void shovelerCanvasFree(ShovelerCanvas *canvas);
 

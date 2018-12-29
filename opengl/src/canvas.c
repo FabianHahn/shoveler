@@ -14,11 +14,9 @@ ShovelerCanvas *shovelerCanvasCreate()
 	canvas->tileSprites = g_queue_new();
 }
 
-int shovelerCanvasAddTileSprite(ShovelerCanvas *canvas, ShovelerCanvasTileSprite tileSprite)
+int shovelerCanvasAddTileSprite(ShovelerCanvas *canvas, const ShovelerCanvasTileSprite *tileSprite)
 {
-	ShovelerCanvasTileSprite *tileSpriteCopy = malloc(sizeof(ShovelerCanvasTileSprite));
-	memcpy(tileSpriteCopy, &tileSprite, sizeof(ShovelerCanvasTileSprite));
-	g_queue_push_tail(canvas->tileSprites, tileSpriteCopy);
+	g_queue_push_tail(canvas->tileSprites, (gpointer) tileSprite);
 	return g_queue_get_length(canvas->tileSprites) - 1;
 }
 
@@ -52,6 +50,5 @@ bool shovelerCanvasRender(ShovelerCanvas *canvas, ShovelerMaterial *tileSpriteMa
 
 void shovelerCanvasFree(ShovelerCanvas *canvas)
 {
-	g_queue_free_full(canvas->tileSprites, free);
 	free(canvas);
 }

@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
 	tileSprite.tilesetRow = 0;
 	tileSprite.position = shovelerVector2(3.5, 3.5);
 	tileSprite.size = shovelerVector2(5.0, 5.0);
-	shovelerCanvasAddTileSprite(canvas, tileSprite);
+	shovelerCanvasAddTileSprite(canvas, &tileSprite);
 
 	ShovelerMaterial *chunkMaterial = shovelerMaterialChunkCreate();
 	shovelerMaterialChunkSetActive(chunkMaterial, chunk);
