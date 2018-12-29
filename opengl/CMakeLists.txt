@@ -19,6 +19,7 @@ set(SHOVELER_OPENGL_SRC
 	src/material/tile_sprite.c
 	src/material/tilemap.c
 	src/material/variation.c
+	src/view/canvas.c
 	src/view/canvas_tile_sprite.c
 	src/view/client.c
 	src/view/drawable.c
@@ -71,6 +72,7 @@ set(SHOVELER_OPENGL_SRC
 	include/shoveler/material/tile_sprite.h
 	include/shoveler/material/tilemap.h
 	include/shoveler/material/variation.h
+	include/shoveler/view/canvas.h
 	include/shoveler/view/canvas_tile_sprite.h
 	include/shoveler/view/client.h
 	include/shoveler/view/controller.h
