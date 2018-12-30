@@ -244,10 +244,12 @@ int main(int argc, char *argv[])
 	tileSpriteConfiguration.tilesetEntityId = 11;
 	tileSpriteConfiguration.tilesetColumn = 0;
 	tileSpriteConfiguration.tilesetRow = 0;
-	tileSpriteConfiguration.position = shovelerVector2(3.0, 4.0);
+	tileSpriteConfiguration.positionMappingX = SHOVELER_VIEW_TILE_SPRITE_COORDINATE_MAPPING_POSITIVE_X;
+	tileSpriteConfiguration.positionMappingY = SHOVELER_VIEW_TILE_SPRITE_COORDINATE_MAPPING_POSITIVE_Y;
 	tileSpriteConfiguration.size = shovelerVector2(2.5, 4.0);
-	ShovelerViewEntity *canvasTileSpriteEntity = shovelerViewAddEntity(view, 14);
-	shovelerViewEntityAddTileSprite(canvasTileSpriteEntity, &tileSpriteConfiguration);
+	ShovelerViewEntity *tileSpriteEntity = shovelerViewAddEntity(view, 14);
+	shovelerViewEntityAddTileSprite(tileSpriteEntity, &tileSpriteConfiguration);
+	shovelerViewEntityAddPosition(tileSpriteEntity, 3.0, 4.0, 0.0);
 
 	ShovelerViewCanvasConfiguration canvasConfiguration;
 	canvasConfiguration.numTileSprites = 1;
@@ -368,8 +370,11 @@ static void updateGame(ShovelerGame *game, double dt)
 	ShovelerViewEntity *lightEntity = shovelerViewGetEntity(view, 5);
 	shovelerViewEntityUpdatePosition(lightEntity, 2.0 * sin(time), 2.0 * cos(time), 0.0);
 
+	ShovelerViewEntity *tileSpriteEntity = shovelerViewGetEntity(view, 14);
+	shovelerViewEntityUpdatePosition(tileSpriteEntity, 3.0 + 2.0 * sin(time), 4.0 + 2.0 * cos(time), 0.0);
+
 	ShovelerViewEntity *tilemapEntity = shovelerViewGetEntity(view, 8);
 	const ShovelerViewTilemapTilesConfiguration *layerConfiguration = shovelerViewEntityGetTilemapTilesConfiguration(tilemapEntity);
-	layerConfiguration->tiles[0].tilesetColumn = (unsigned char) time % 2;
+	layerConfiguration->tiles[0].tilesetColumn = (unsigned char) ((int) time % 2);
 	shovelerViewEntityUpdateTilemapTilesData(tilemapEntity, layerConfiguration->tiles);
 }

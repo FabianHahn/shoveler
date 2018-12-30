@@ -8,11 +8,21 @@
 #include <shoveler/canvas.h>
 #include <shoveler/view.h>
 
+typedef enum {
+	SHOVELER_VIEW_TILE_SPRITE_COORDINATE_MAPPING_POSITIVE_X,
+	SHOVELER_VIEW_TILE_SPRITE_COORDINATE_MAPPING_NEGATIVE_X,
+	SHOVELER_VIEW_TILE_SPRITE_COORDINATE_MAPPING_POSITIVE_Y,
+	SHOVELER_VIEW_TILE_SPRITE_COORDINATE_MAPPING_NEGATIVE_Y,
+	SHOVELER_VIEW_TILE_SPRITE_COORDINATE_MAPPING_POSITIVE_Z,
+	SHOVELER_VIEW_TILE_SPRITE_COORDINATE_MAPPING_NEGATIVE_Z,
+} ShovelerViewTileSpriteCoordinateMappingConfiguration;
+
 typedef struct {
 	long long int tilesetEntityId;
 	unsigned char tilesetColumn;
 	unsigned char tilesetRow;
-	ShovelerVector2 position;
+	ShovelerViewTileSpriteCoordinateMappingConfiguration positionMappingX;
+	ShovelerViewTileSpriteCoordinateMappingConfiguration positionMappingY;
 	ShovelerVector2 size;
 } ShovelerViewTileSpriteConfiguration;
 
