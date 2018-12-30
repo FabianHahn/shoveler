@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
 	game->camera = shovelerCameraPerspectiveCreate(shovelerVector3(0, 0, 1), shovelerVector3(0, 0, -1), shovelerVector3(0, 1, 0), 2.0f * SHOVELER_PI * 50.0f / 360.0f, (float) width / height, 0.01, 1000);
 	shovelerCameraPerspectiveAttachController(game->camera, controller);
 
-	ShovelerChunk *chunk = shovelerChunkCreate(shovelerVector2(0.0f, 0.0f), shovelerVector2(10.0f, 10.0f));
+	ShovelerChunk *chunk = shovelerChunkCreate(shovelerVector2(5.0f, 5.0f), shovelerVector2(10.0f, 10.0f));
 
 	ShovelerImage *tilesImage = shovelerImageCreate(2, 2, 3);
 	shovelerImageClear(tilesImage);

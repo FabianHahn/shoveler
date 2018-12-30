@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
 
 	ShovelerMaterial *canvasMaterial = shovelerMaterialCanvasCreate();
 	shovelerMaterialCanvasSetActive(canvasMaterial, canvas);
-	shovelerMaterialCanvasSetActiveRegion(canvasMaterial, shovelerVector2(0.0f, 0.0f), shovelerVector2(10.0f, 10.0f));
+	shovelerMaterialCanvasSetActiveRegion(canvasMaterial, shovelerVector2(5.0f, 5.0f), shovelerVector2(10.0f, 10.0f));
 	ShovelerDrawable *quad = shovelerDrawableQuadCreate();
 	ShovelerModel *canvasModel = shovelerModelCreate(quad, canvasMaterial);
 	canvasModel->scale = shovelerVector3(0.5, 0.5, 1.0);

@@ -299,7 +299,7 @@ int main(int argc, char *argv[])
 	canvasMaterialModelConfiguration.polygonMode = GL_FILL;
 	ShovelerViewMaterialConfiguration canvasMaterialConfiguration;
 	canvasMaterialConfiguration.type = SHOVELER_VIEW_MATERIAL_TYPE_CANVAS;
-	canvasMaterialConfiguration.canvasRegionPosition = shovelerVector2(0.0f, 0.0f);
+	canvasMaterialConfiguration.canvasRegionPosition = shovelerVector2(5.0f, 5.0f);
 	canvasMaterialConfiguration.canvasRegionSize = shovelerVector2(10.0f, 10.0f);
 	canvasMaterialConfiguration.dataEntityId = 15;
 	ShovelerViewEntity *canvasMaterialEntity = shovelerViewAddEntity(view, 18);
