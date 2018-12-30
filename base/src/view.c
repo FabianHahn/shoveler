@@ -229,9 +229,11 @@ bool shovelerViewComponentActivate(ShovelerViewComponent *component)
 
 			ShovelerViewComponent *reverseDependencyComponent = g_hash_table_lookup(reverseDependencyEntity->components, reverseDependency->componentName);
 			assert(reverseDependencyComponent != NULL);
-			assert(!reverseDependencyComponent->active);
 
-			shovelerViewComponentActivate(reverseDependencyComponent);
+			// An earlier reverse dependency could have already recursively activated the component, so only try to activate if necessary.
+			if(!reverseDependencyComponent->active) {
+				shovelerViewComponentActivate(reverseDependencyComponent);
+			}
 		}
 	}
 
