@@ -17,6 +17,7 @@ typedef struct {
 	ShovelerControllerTiltCallback *controllerTiltCallback;
 	ShovelerControllerMoveCallback *controllerMoveCallback;
 	ShovelerControllerAspectRatioChangeCallback *controllerAspectRatioChangeCallback;
+	bool logPositionChanges;
 } ShovelerCameraPerspective;
 
 ShovelerCamera *shovelerCameraPerspectiveCreate(ShovelerVector3 position, ShovelerVector3 direction, ShovelerVector3 upwards, float fieldOfViewY, float aspectRatio, float nearClippingPlane, float farClippingPlane);

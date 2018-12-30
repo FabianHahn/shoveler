@@ -1,8 +1,10 @@
 #include <assert.h> // assert
 #include <math.h> // tanf
+#include <memory.h> // memcmp
 #include <stdlib.h> // malloc, free
 
 #include "shoveler/camera/perspective.h"
+#include "shoveler/log.h"
 #include "shoveler/types.h"
 
 static void updateView(void *perspectiveCameraPointer);
@@ -33,6 +35,8 @@ ShovelerCamera *shovelerCameraPerspectiveCreate(ShovelerVector3 position, Shovel
 	perspectiveCamera->controllerTiltCallback = NULL;
 	perspectiveCamera->controllerMoveCallback = NULL;
 	perspectiveCamera->controllerAspectRatioChangeCallback = NULL;
+
+	perspectiveCamera->logPositionChanges = false;
 
 	return &perspectiveCamera->camera;
 }
@@ -142,6 +146,10 @@ static void tiltController(ShovelerController *controller, ShovelerVector3 direc
 static void moveController(ShovelerController *controller, ShovelerVector3 position, void *userData)
 {
 	ShovelerCameraPerspective *perspectiveCamera = userData;
+
+	if(perspectiveCamera->logPositionChanges && memcmp(&position, &perspectiveCamera->camera.position, sizeof(ShovelerVector3)) != 0) {
+		shovelerLogInfo("Camera at (%.2f, %.2f, %.2f).", perspectiveCamera->camera.position.values[0], perspectiveCamera->camera.position.values[1], perspectiveCamera->camera.position.values[2]);
+	}
 
 	perspectiveCamera->camera.position = position;
 }
