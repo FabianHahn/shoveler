@@ -258,7 +258,8 @@ int main(int argc, char *argv[])
 	shovelerViewEntityAddCanvas(canvasEntity, &canvasConfiguration);
 
 	ShovelerViewChunkConfiguration chunkConfiguration;
-	chunkConfiguration.position = shovelerVector2(0.0f, 0.0f);
+	chunkConfiguration.positionMappingX = SHOVELER_VIEW_CHUNK_COORDINATE_MAPPING_POSITIVE_X;
+	chunkConfiguration.positionMappingY = SHOVELER_VIEW_CHUNK_COORDINATE_MAPPING_POSITIVE_Y;
 	chunkConfiguration.size = shovelerVector2(10.0f, 10.0f);
 	chunkConfiguration.numLayers = 3;
 	chunkConfiguration.layers = (ShovelerViewChunkLayerConfiguration[]){
@@ -268,6 +269,7 @@ int main(int argc, char *argv[])
 	};
 	ShovelerViewEntity *chunkEntity = shovelerViewAddEntity(view, 16);
 	shovelerViewEntityAddChunk(chunkEntity, &chunkConfiguration);
+	shovelerViewEntityAddPosition(chunkEntity, 5.0, 5.0, 0.0);
 
 	ShovelerViewModelConfiguration tilemapMaterialModelConfiguration;
 	tilemapMaterialModelConfiguration.drawableEntityId = 4;
