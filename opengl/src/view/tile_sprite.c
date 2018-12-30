@@ -19,7 +19,7 @@ static bool activateComponent(ShovelerViewComponent *component, void *componentD
 static void deactivateComponent(ShovelerViewComponent *component, void *componentDataPointer);
 static void freeComponent(ShovelerViewComponent *component, void *componentDataPointer);
 static void positionCallback(ShovelerViewComponent *positionComponent, ShovelerViewComponentCallbackType callbackType, void *componentDataPointer);
-static void setTileSpritePosition(ComponentData *componentData, const ShovelerViewPosition *position);
+static void updatePosition(ComponentData *componentData, const ShovelerViewPosition *position);
 static double mapCoordinate(const ShovelerViewPosition *position, ShovelerViewTileSpriteCoordinateMappingConfiguration mapping);
 
 bool shovelerViewEntityAddTileSprite(ShovelerViewEntity *entity, const ShovelerViewTileSpriteConfiguration *configuration)
@@ -38,6 +38,7 @@ bool shovelerViewEntityAddTileSprite(ShovelerViewEntity *entity, const ShovelerV
 	componentData->configuration.positionMappingY = SHOVELER_VIEW_TILE_SPRITE_COORDINATE_MAPPING_POSITIVE_Y;
 	componentData->configuration.size = shovelerVector2(0.0f, 0.0f);
 	componentData->tileSprite = NULL;
+	componentData->positionCallback = NULL;
 
 	assignConfiguration(&componentData->configuration, configuration);
 
@@ -147,7 +148,7 @@ static bool activateComponent(ShovelerViewComponent *component, void *componentD
 	componentData->tileSprite->tilesetRow = componentData->configuration.tilesetRow;
 	componentData->tileSprite->size = componentData->configuration.size;
 
-	setTileSpritePosition(componentData, shovelerViewEntityGetPosition(component->entity));
+	updatePosition(componentData, shovelerViewEntityGetPosition(component->entity));
 
 	componentData->positionCallback = shovelerViewEntityAddCallback(component->entity, shovelerViewPositionComponentName, &positionCallback, componentData);
 
@@ -171,6 +172,10 @@ static void freeComponent(ShovelerViewComponent *component, void *componentDataP
 
 	free(componentData->tileSprite);
 
+	if(componentData->positionCallback != NULL) {
+		shovelerViewEntityRemoveCallback(component->entity, shovelerViewPositionComponentName, componentData->positionCallback);
+	}
+
 	clearConfiguration(&componentData->configuration);
 	free(componentData);
 }
@@ -179,10 +184,10 @@ static void positionCallback(ShovelerViewComponent *positionComponent, ShovelerV
 {
 	ComponentData *componentData = componentDataPointer;
 
-	setTileSpritePosition(componentData, shovelerViewEntityGetPosition(positionComponent->entity));
+	updatePosition(componentData, shovelerViewEntityGetPosition(positionComponent->entity));
 }
 
-static void setTileSpritePosition(ComponentData *componentData, const ShovelerViewPosition *position)
+static void updatePosition(ComponentData *componentData, const ShovelerViewPosition *position)
 {
 	componentData->tileSprite->position.values[0] = (float) mapCoordinate(position, componentData->configuration.positionMappingX);
 	componentData->tileSprite->position.values[1] = (float) mapCoordinate(position, componentData->configuration.positionMappingY);
