@@ -131,7 +131,7 @@ bool shovelerImagePngWriteFile(ShovelerImage *image, const char *filename)
 
 		for(int x = 0; x < image->width; x++) {
 			for(int c = 0; c < image->channels; c++) {
-				row_pointers[y][image->channels * x + c] = shovelerImageGet(image, x, y, c);
+				row_pointers[y][image->channels * x + c] = shovelerImageGet(image, x, image->height - y - 1, c);
 			}
 		}
 	}
@@ -333,7 +333,7 @@ static ShovelerImage *createImageFromRowPointers(png_uint_32 width, png_uint_32 
 		for(int x = 0; x < width; x++) {
 			unsigned char *ptr = &(row[x * channels]);
 			for(int c = 0; c < channels; c++) {
-				shovelerImageGet(image, x, y, c) = ptr[c];
+				shovelerImageGet(image, x, height - y - 1, c) = ptr[c];
 			}
 		}
 	}
