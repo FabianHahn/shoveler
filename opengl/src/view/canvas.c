@@ -3,7 +3,7 @@
 #include <string.h> // memcpy
 
 #include "shoveler/view/canvas.h"
-#include "shoveler/view/canvas_tile_sprite.h"
+#include "shoveler/view/tile_sprite.h"
 #include "shoveler/log.h"
 
 typedef struct {
@@ -36,7 +36,7 @@ bool shovelerViewEntityAddCanvas(ShovelerViewEntity *entity, const ShovelerViewC
 	assert(component != NULL);
 
 	for(int i = 0; i < componentData->configuration.numTileSprites; i++) {
-		shovelerViewComponentAddDependency(component, componentData->configuration.tileSpriteEntityIds[i], shovelerViewCanvasTileSpriteComponentName);
+		shovelerViewComponentAddDependency(component, componentData->configuration.tileSpriteEntityIds[i], shovelerViewTileSpriteComponentName);
 	}
 
 	shovelerViewComponentActivate(component);
@@ -78,7 +78,7 @@ bool shovelerViewEntityUpdateCanvas(ShovelerViewEntity *entity, ShovelerViewCanv
 	shovelerViewComponentDeactivate(component);
 
 	for(int i = 0; i < componentData->configuration.numTileSprites; i++) {
-		if(!shovelerViewComponentRemoveDependency(component, componentData->configuration.tileSpriteEntityIds[i], shovelerViewCanvasTileSpriteComponentName)) {
+		if(!shovelerViewComponentRemoveDependency(component, componentData->configuration.tileSpriteEntityIds[i], shovelerViewTileSpriteComponentName)) {
 			return false;
 		}
 	}
@@ -86,7 +86,7 @@ bool shovelerViewEntityUpdateCanvas(ShovelerViewEntity *entity, ShovelerViewCanv
 	assignConfiguration(&componentData->configuration, &configuration);
 
 	for(int i = 0; i < componentData->configuration.numTileSprites; i++) {
-		shovelerViewComponentAddDependency(component, componentData->configuration.tileSpriteEntityIds[i], shovelerViewCanvasTileSpriteComponentName);
+		shovelerViewComponentAddDependency(component, componentData->configuration.tileSpriteEntityIds[i], shovelerViewTileSpriteComponentName);
 	}
 
 	shovelerViewComponentActivate(component);
@@ -133,7 +133,7 @@ static bool activateComponent(ShovelerViewComponent *component, void *componentD
 	for(int i = 0; i < componentData->configuration.numTileSprites; i++) {
 		ShovelerViewEntity *tilesetEntity = shovelerViewGetEntity(component->entity->view, componentData->configuration.tileSpriteEntityIds[i]);
 		assert(tilesetEntity != NULL);
-		ShovelerCanvasTileSprite *tileSprite = shovelerViewEntityGetCanvasTileSprite(tilesetEntity);
+		ShovelerCanvasTileSprite *tileSprite = shovelerViewEntityGetTileSprite(tilesetEntity);
 		assert(tileSprite != NULL);
 
 		shovelerCanvasAddTileSprite(componentData->canvas, tileSprite);

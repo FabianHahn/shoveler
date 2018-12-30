@@ -2,24 +2,24 @@
 #include <stdlib.h> // malloc free
 #include <string.h> // memmove
 
-#include "shoveler/view/canvas_tile_sprite.h"
+#include "shoveler/view/tile_sprite.h"
 #include "shoveler/view/tileset.h"
 #include "shoveler/log.h"
 
 typedef struct {
-	ShovelerViewCanvasTileSpriteConfiguration configuration;
+	ShovelerViewTileSpriteConfiguration configuration;
 	ShovelerCanvasTileSprite *tileSprite;
 } ComponentData;
 
-static void assignConfiguration(ShovelerViewCanvasTileSpriteConfiguration *destination, const ShovelerViewCanvasTileSpriteConfiguration *source);
-static void clearConfiguration(ShovelerViewCanvasTileSpriteConfiguration *configuration);
+static void assignConfiguration(ShovelerViewTileSpriteConfiguration *destination, const ShovelerViewTileSpriteConfiguration *source);
+static void clearConfiguration(ShovelerViewTileSpriteConfiguration *configuration);
 static bool activateComponent(ShovelerViewComponent *component, void *componentDataPointer);
 static void deactivateComponent(ShovelerViewComponent *component, void *componentDataPointer);
 static void freeComponent(ShovelerViewComponent *component, void *componentDataPointer);
 
-bool shovelerViewEntityAddCanvasTileSprite(ShovelerViewEntity *entity, const ShovelerViewCanvasTileSpriteConfiguration *configuration)
+bool shovelerViewEntityAddTileSprite(ShovelerViewEntity *entity, const ShovelerViewTileSpriteConfiguration *configuration)
 {
-	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewCanvasTileSpriteComponentName);
+	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTileSpriteComponentName);
 	if(component != NULL) {
 		shovelerLogWarning("Trying to add canvas tile sprite to entity %lld which already has canvas tile sprite, ignoring.", entity->entityId);
 		return false;
@@ -35,7 +35,7 @@ bool shovelerViewEntityAddCanvasTileSprite(ShovelerViewEntity *entity, const Sho
 
 	assignConfiguration(&componentData->configuration, configuration);
 
-	component = shovelerViewEntityAddComponent(entity, shovelerViewCanvasTileSpriteComponentName, componentData, activateComponent, deactivateComponent, freeComponent);
+	component = shovelerViewEntityAddComponent(entity, shovelerViewTileSpriteComponentName, componentData, activateComponent, deactivateComponent, freeComponent);
 	assert(component != NULL);
 
 	shovelerViewComponentAddDependency(component, componentData->configuration.tilesetEntityId, shovelerViewTilesetComponentName);
@@ -44,9 +44,9 @@ bool shovelerViewEntityAddCanvasTileSprite(ShovelerViewEntity *entity, const Sho
 	return true;
 }
 
-ShovelerCanvasTileSprite *shovelerViewEntityGetCanvasTileSprite(ShovelerViewEntity *entity)
+ShovelerCanvasTileSprite *shovelerViewEntityGetTileSprite(ShovelerViewEntity *entity)
 {
-	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewCanvasTileSpriteComponentName);
+	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTileSpriteComponentName);
 	if(component == NULL) {
 		return false;
 	}
@@ -55,9 +55,9 @@ ShovelerCanvasTileSprite *shovelerViewEntityGetCanvasTileSprite(ShovelerViewEnti
 	return componentData->tileSprite;
 }
 
-const ShovelerViewCanvasTileSpriteConfiguration *shovelerViewEntityGetCanvasTileSpriteConfiguration(ShovelerViewEntity *entity)
+const ShovelerViewTileSpriteConfiguration *shovelerViewEntityGetTileSpriteConfiguration(ShovelerViewEntity *entity)
 {
-	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewCanvasTileSpriteComponentName);
+	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTileSpriteComponentName);
 	if(component == NULL) {
 		return false;
 	}
@@ -66,9 +66,9 @@ const ShovelerViewCanvasTileSpriteConfiguration *shovelerViewEntityGetCanvasTile
 	return &componentData->configuration;
 }
 
-bool shovelerViewEntityUpdateCanvasTileSprite(ShovelerViewEntity *entity, const ShovelerViewCanvasTileSpriteConfiguration *configuration)
+bool shovelerViewEntityUpdateTileSprite(ShovelerViewEntity *entity, const ShovelerViewTileSpriteConfiguration *configuration)
 {
-	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewCanvasTileSpriteComponentName);
+	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTileSpriteComponentName);
 	if(component == NULL) {
 		shovelerLogWarning("Trying to update canvas tile sprite of entity %lld which does not have a canvas tile sprite, ignoring.", entity->entityId);
 		return false;
@@ -78,13 +78,13 @@ bool shovelerViewEntityUpdateCanvasTileSprite(ShovelerViewEntity *entity, const 
 
 	shovelerViewComponentDeactivate(component);
 
-	if(!shovelerViewComponentRemoveDependency(component, componentData->configuration.tilesetEntityId, shovelerViewCanvasTileSpriteComponentName)) {
+	if(!shovelerViewComponentRemoveDependency(component, componentData->configuration.tilesetEntityId, shovelerViewTileSpriteComponentName)) {
 		return false;
 	}
 
 	assignConfiguration(&componentData->configuration, configuration);
 
-	shovelerViewComponentAddDependency(component, componentData->configuration.tilesetEntityId, shovelerViewCanvasTileSpriteComponentName);
+	shovelerViewComponentAddDependency(component, componentData->configuration.tilesetEntityId, shovelerViewTileSpriteComponentName);
 
 	shovelerViewComponentActivate(component);
 
@@ -92,18 +92,18 @@ bool shovelerViewEntityUpdateCanvasTileSprite(ShovelerViewEntity *entity, const 
 	return true;
 }
 
-bool shovelerViewEntityRemoveCanvasTileSprite(ShovelerViewEntity *entity)
+bool shovelerViewEntityRemoveTileSprite(ShovelerViewEntity *entity)
 {
-	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewCanvasTileSpriteComponentName);
+	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTileSpriteComponentName);
 	if(component == NULL) {
 		shovelerLogWarning("Trying to remove canvas tile sprite from entity %lld which does not have a canvas tile sprite, ignoring.", entity->entityId);
 		return false;
 	}
 
-	return shovelerViewEntityRemoveComponent(entity, shovelerViewCanvasTileSpriteComponentName);
+	return shovelerViewEntityRemoveComponent(entity, shovelerViewTileSpriteComponentName);
 }
 
-static void assignConfiguration(ShovelerViewCanvasTileSpriteConfiguration *destination, const ShovelerViewCanvasTileSpriteConfiguration *source)
+static void assignConfiguration(ShovelerViewTileSpriteConfiguration *destination, const ShovelerViewTileSpriteConfiguration *source)
 {
 	clearConfiguration(destination);
 
@@ -114,7 +114,7 @@ static void assignConfiguration(ShovelerViewCanvasTileSpriteConfiguration *desti
 	destination->size = source->size;
 }
 
-static void clearConfiguration(ShovelerViewCanvasTileSpriteConfiguration *configuration)
+static void clearConfiguration(ShovelerViewTileSpriteConfiguration *configuration)
 {
 	configuration->tilesetEntityId = 0;
 	configuration->tilesetColumn = 0;

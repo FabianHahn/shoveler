@@ -8,7 +8,6 @@
 #include <shoveler/image/png.h>
 #include <shoveler/resources/image_png.h>
 #include <shoveler/view/canvas.h>
-#include <shoveler/view/canvas_tile_sprite.h>
 #include <shoveler/view/chunk.h>
 #include <shoveler/view/drawable.h>
 #include <shoveler/view/light.h>
@@ -17,6 +16,7 @@
 #include <shoveler/view/position.h>
 #include <shoveler/view/resources.h>
 #include <shoveler/view/texture.h>
+#include <shoveler/view/tile_sprite.h>
 #include <shoveler/view/tilemap.h>
 #include <shoveler/view/tilemap_tiles.h>
 #include <shoveler/view/tileset.h>
@@ -240,14 +240,14 @@ int main(int argc, char *argv[])
 	ShovelerViewEntity *tilemapForegroundEntity = shovelerViewAddEntity(view, 13);
 	shovelerViewEntityAddTilemap(tilemapForegroundEntity, &tilemapForegroundConfiguration);
 
-	ShovelerViewCanvasTileSpriteConfiguration canvasTileSpriteConfiguration;
-	canvasTileSpriteConfiguration.tilesetEntityId = 11;
-	canvasTileSpriteConfiguration.tilesetColumn = 0;
-	canvasTileSpriteConfiguration.tilesetRow = 0;
-	canvasTileSpriteConfiguration.position = shovelerVector2(3.0, 4.0);
-	canvasTileSpriteConfiguration.size = shovelerVector2(2.5, 4.0);
+	ShovelerViewTileSpriteConfiguration tileSpriteConfiguration;
+	tileSpriteConfiguration.tilesetEntityId = 11;
+	tileSpriteConfiguration.tilesetColumn = 0;
+	tileSpriteConfiguration.tilesetRow = 0;
+	tileSpriteConfiguration.position = shovelerVector2(3.0, 4.0);
+	tileSpriteConfiguration.size = shovelerVector2(2.5, 4.0);
 	ShovelerViewEntity *canvasTileSpriteEntity = shovelerViewAddEntity(view, 14);
-	shovelerViewEntityAddCanvasTileSprite(canvasTileSpriteEntity, &canvasTileSpriteConfiguration);
+	shovelerViewEntityAddTileSprite(canvasTileSpriteEntity, &tileSpriteConfiguration);
 
 	ShovelerViewCanvasConfiguration canvasConfiguration;
 	canvasConfiguration.numTileSprites = 1;
