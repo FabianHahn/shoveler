@@ -42,6 +42,9 @@ int main(int argc, char *argv[])
 	game->scene = shovelerSceneCreate();
 
 	ShovelerController *controller = shovelerControllerCreate(game, shovelerVector3(0, 0, 1), shovelerVector3(0, 0, -1), shovelerVector3(0, 1, 0), 2.0f, 0.0005f);
+	controller->lockTiltX = true;
+	controller->lockTiltY = true;
+
 	game->camera = shovelerCameraPerspectiveCreate(shovelerVector3(0, 0, 1), shovelerVector3(0, 0, -1), shovelerVector3(0, 1, 0), 2.0f * SHOVELER_PI * 50.0f / 360.0f, (float) width / height, 0.01, 1000);
 	shovelerCameraPerspectiveAttachController(game->camera, controller);
 
