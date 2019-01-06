@@ -1,6 +1,8 @@
 #ifndef SHOVELER_CONTROLLER_H
 #define SHOVELER_CONTROLLER_H
 
+#include <stdbool.h> // bool
+
 #include <shoveler/game.h>
 #include <shoveler/input.h>
 #include <shoveler/types.h>
@@ -36,6 +38,11 @@ typedef struct ShovelerControllerStruct {
 	ShovelerVector3 up;
 	float moveFactor;
 	float tiltFactor;
+	bool lockMoveX;
+	bool lockMoveY;
+	bool lockMoveZ;
+	bool lockTiltX;
+	bool lockTiltY;
 	double previousCursorX;
 	double previousCursorY;
 	/** set of (ShovelerControllerTiltCallback *) */
