@@ -18,11 +18,15 @@
 #include <shoveler/scene.h>
 #include <shoveler/shader_program.h>
 #include <shoveler/texture.h>
+#include <shoveler/tile_sprite_animation.h>
 #include <shoveler/tileset.h>
 
 static void shovelerSampleInit(ShovelerGame *sampleGame, int width, int height, int samples);
 static void shovelerSampleTerminate();
 static void shovelerSampleUpdate(ShovelerGame *game, double dt);
+
+static ShovelerCanvasTileSprite characterSprite;
+static ShovelerTileSpriteAnimation *animation;
 
 int main(int argc, char *argv[])
 {
@@ -42,7 +46,7 @@ int main(int argc, char *argv[])
 	}
 	game->scene = shovelerSceneCreate();
 
-	ShovelerController *controller = shovelerControllerCreate(game, shovelerVector3(0, 0, 1), shovelerVector3(0, 0, -1), shovelerVector3(0, 1, 0), 2.0f, 0.0005f);
+	ShovelerController *controller = shovelerControllerCreate(game, shovelerVector3(0, 0, 1), shovelerVector3(0, 0, -1), shovelerVector3(0, 1, 0), 0.5f, 0.0005f);
 	controller->lockTiltX = true;
 	controller->lockTiltY = true;
 
@@ -51,36 +55,48 @@ int main(int argc, char *argv[])
 
 	ShovelerCanvas *canvas = shovelerCanvasCreate();
 
-	ShovelerImage *tilesetImage = shovelerImageCreate(2, 2, 3);
+	ShovelerImage *tilesetImage = shovelerImageCreate(2, 2, 4);
 	shovelerImageClear(tilesetImage);
 	shovelerImageGet(tilesetImage, 0, 0, 0) = 255; // red
+	shovelerImageGet(tilesetImage, 0, 0, 3) = 255;
 	shovelerImageGet(tilesetImage, 0, 1, 1) = 255; // green
+	shovelerImageGet(tilesetImage, 0, 1, 3) = 255;
 	shovelerImageGet(tilesetImage, 1, 0, 2) = 255; // blue
-	shovelerImageGet(tilesetImage, 1, 1, 0) = 255;
+	shovelerImageGet(tilesetImage, 1, 0, 3) = 255;
+	shovelerImageGet(tilesetImage, 1, 1, 0) = 255; // white
 	shovelerImageGet(tilesetImage, 1, 1, 1) = 255;
-	shovelerImageGet(tilesetImage, 1, 1, 2) = 255; // white
+	shovelerImageGet(tilesetImage, 1, 1, 2) = 255;
+	shovelerImageGet(tilesetImage, 1, 1, 3) = 255;
 	ShovelerTileset *tileset = shovelerTilesetCreate(tilesetImage, 2, 2, 1);
-	ShovelerTileset *tileset2 = shovelerTilesetCreate(tilesetImage, 1, 1, 1);
+
+	ShovelerImage *animationTilesetImage = shovelerImageCreateAnimationTileset(tilesetImage, 1);
+	ShovelerTileset *animationTileset = shovelerTilesetCreate(animationTilesetImage, 4, 3, 1);
+
+	shovelerImageFree(tilesetImage);
+	shovelerImageFree(animationTilesetImage);
 
 	ShovelerCanvasTileSprite tileSprite;
 	tileSprite.tileset = tileset;
 	tileSprite.tilesetColumn = 1;
 	tileSprite.tilesetRow = 1;
-	tileSprite.position = shovelerVector2(2.0, 3.0);
-	tileSprite.size = shovelerVector2(2.5, 4.0);
+	tileSprite.position = shovelerVector2(0.2f, 0.3f);
+	tileSprite.size = shovelerVector2(0.25f, 0.4f);
 	shovelerCanvasAddTileSprite(canvas, &tileSprite);
 
-	ShovelerCanvasTileSprite tileSprite2;
-	tileSprite2.tileset = tileset2;
-	tileSprite2.tilesetColumn = 0;
-	tileSprite2.tilesetRow = 0;
-	tileSprite2.position = shovelerVector2(5.0, 5.0);
-	tileSprite2.size = shovelerVector2(4.5, 4.5);
-	shovelerCanvasAddTileSprite(canvas, &tileSprite2);
+	characterSprite.tileset = animationTileset;
+	characterSprite.tilesetColumn = 0;
+	characterSprite.tilesetRow = 0;
+	characterSprite.position = shovelerVector2(0.5f, 0.5f);
+	characterSprite.size = shovelerVector2(0.2f, 0.2f);
+	shovelerCanvasAddTileSprite(canvas, &characterSprite);
+
+	animation = shovelerTileSpriteAnimationCreate(&characterSprite, animationTileset);
+	animation->moveAmountThreshold = 0.25f;
+	animation->logDirectionChanges = true;
 
 	ShovelerMaterial *canvasMaterial = shovelerMaterialCanvasCreate();
 	shovelerMaterialCanvasSetActive(canvasMaterial, canvas);
-	shovelerMaterialCanvasSetActiveRegion(canvasMaterial, shovelerVector2(5.0f, 5.0f), shovelerVector2(10.0f, 10.0f));
+	shovelerMaterialCanvasSetActiveRegion(canvasMaterial, shovelerVector2(0.5f, 0.5f), shovelerVector2(1.0f, 1.0f));
 	ShovelerDrawable *quad = shovelerDrawableQuadCreate();
 	ShovelerModel *canvasModel = shovelerModelCreate(quad, canvasMaterial);
 	canvasModel->scale = shovelerVector3(0.5, 0.5, 1.0);
@@ -97,6 +113,9 @@ int main(int argc, char *argv[])
 	}
 	shovelerLogInfo("Exiting main loop, goodbye.");
 
+	shovelerTileSpriteAnimationFree(animation);
+	shovelerTilesetFree(tileset);
+	shovelerTilesetFree(animationTileset);
 	shovelerSceneFree(game->scene);
 	shovelerCameraFree(game->camera);
 	shovelerDrawableFree(quad);
@@ -113,6 +132,15 @@ int main(int argc, char *argv[])
 
 static void shovelerSampleUpdate(ShovelerGame *game, double dt)
 {
-	shovelerControllerUpdate(shovelerCameraPerspectiveGetController(game->camera), dt);
+	ShovelerController *controller = shovelerCameraPerspectiveGetController(game->camera);
+
+	shovelerControllerUpdate(controller, dt);
 	shovelerCameraUpdateView(game->camera);
+
+	float moveAmountX = controller->position.values[0] - characterSprite.position.values[0] + 0.5f;
+	float moveAmountY = controller->position.values[1] - characterSprite.position.values[1] + 0.5f;
+	shovelerTileSpriteAnimationUpdate(animation, shovelerVector2(moveAmountX, moveAmountY));
+
+	characterSprite.position.values[0] = 0.5f + controller->position.values[0];
+	characterSprite.position.values[1] = 0.5f + controller->position.values[1];
 }
