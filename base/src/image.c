@@ -1,6 +1,6 @@
 #include <assert.h> // assert
 #include <stdlib.h> // malloc, free
-#include <string.h> // memset
+#include <string.h> // memcpy, memset
 
 #include "shoveler/image.h"
 
@@ -14,6 +14,128 @@ ShovelerImage *shovelerImageCreate(int width, int height, int channels)
 	image->height = height;
 	image->channels = channels;
 	image->data = malloc(width * height * channels * sizeof(unsigned char));
+	return image;
+}
+
+ShovelerImage *shovelerImageCreateCopy(ShovelerImage *input)
+{
+	ShovelerImage *image = shovelerImageCreate(input->width, input->height, input->channels);
+	memcpy(image->data, input->data, input->width * input->height * input->channels * sizeof(unsigned char));
+	return image;
+}
+
+ShovelerImage *shovelerImageCreateFlippedX(ShovelerImage *input)
+{
+	ShovelerImage *image = shovelerImageCreate(input->width, input->height, input->channels);
+
+	for(int i = 0; i < image->width; i++) {
+		for(int j = 0; j < image->height; j++) {
+			for (int c = 0; c < image->channels; c++) {
+				shovelerImageGet(image, i, j, c) = shovelerImageGet(input, image->width - i - 1, j, c);
+			}
+		}
+	}
+
+	return image;
+}
+
+ShovelerImage *shovelerImageCreateFlippedY(ShovelerImage *input)
+{
+	ShovelerImage *image = shovelerImageCreate(input->width, input->height, input->channels);
+
+	for(int i = 0; i < image->width; i++) {
+		for(int j = 0; j < image->height; j++) {
+			for (int c = 0; c < image->channels; c++) {
+				shovelerImageGet(image, i, j, c) = shovelerImageGet(input, i, image->height - j - 1, c);
+			}
+		}
+	}
+
+	return image;
+}
+
+ShovelerImage *shovelerImageCreateRotatedClockwise(ShovelerImage *input)
+{
+	ShovelerImage *image = shovelerImageCreate(input->height, input->width, input->channels);
+
+	for(int i = 0; i < image->width; i++) {
+		for(int j = 0; j < image->height; j++) {
+			for (int c = 0; c < image->channels; c++) {
+				shovelerImageGet(image, j, image->width - i - 1, c) = shovelerImageGet(input, i, j, c);
+			}
+		}
+	}
+
+	return image;
+}
+
+ShovelerImage *shovelerImageCreateRotatedCounterClockwise(ShovelerImage *input)
+{
+	ShovelerImage *image = shovelerImageCreate(input->height, input->width, input->channels);
+
+	for(int i = 0; i < image->width; i++) {
+		for(int j = 0; j < image->height; j++) {
+			for (int c = 0; c < image->channels; c++) {
+				shovelerImageGet(image, image->height - j - 1, i, c) = shovelerImageGet(input, i, j, c);
+			}
+		}
+	}
+
+	return image;
+}
+
+ShovelerImage *shovelerImageCreateAnimationTileset(ShovelerImage *input, int shiftAmount)
+{
+	assert(input->width == input->height);
+	int size = input->width;
+
+	ShovelerImage *moveImage = shovelerImageCreate(size, size, input->channels);
+	shovelerImageClear(moveImage);
+	shovelerImageAddSubImage(moveImage, shiftAmount, 0, input);
+	ShovelerImage *moveImage2 = shovelerImageCreateFlippedX(moveImage);
+
+	ShovelerImage *image = shovelerImageCreate(4 * size, 3 * size, input->channels);
+	shovelerImageClear(image);
+	shovelerImageAddSubImage(image, 0, 0, input);
+	shovelerImageAddSubImage(image, 0, size, moveImage);
+	shovelerImageAddSubImage(image, 0, 2 * size, moveImage2);
+
+	ShovelerImage *downImage = shovelerImageCreateFlippedY(input);
+	ShovelerImage *downMoveImage = shovelerImageCreateFlippedY(moveImage);
+	ShovelerImage *downMoveImage2 = shovelerImageCreateFlippedY(moveImage2);
+	shovelerImageAddSubImage(image, size, 0, downImage);
+	shovelerImageAddSubImage(image, size, size, downMoveImage);
+	shovelerImageAddSubImage(image, size, 2 * size, downMoveImage2);
+
+	ShovelerImage *leftImage = shovelerImageCreateRotatedCounterClockwise(input);
+	ShovelerImage *leftMoveImage = shovelerImageCreateRotatedCounterClockwise(moveImage);
+	ShovelerImage *leftMoveImage2 = shovelerImageCreateRotatedCounterClockwise(moveImage2);
+	shovelerImageAddSubImage(image, 2 * size, 0, leftImage);
+	shovelerImageAddSubImage(image, 2 * size, size, leftMoveImage);
+	shovelerImageAddSubImage(image, 2 * size, 2 * size, leftMoveImage2);
+
+	ShovelerImage *rightImage = shovelerImageCreateRotatedClockwise(input);
+	ShovelerImage *rightMoveImage = shovelerImageCreateRotatedClockwise(moveImage);
+	ShovelerImage *rightMoveImage2 = shovelerImageCreateRotatedClockwise(moveImage2);
+	shovelerImageAddSubImage(image, 3 * size, 0, rightImage);
+	shovelerImageAddSubImage(image, 3 * size, size, rightMoveImage);
+	shovelerImageAddSubImage(image, 3 * size, 2 * size, rightMoveImage2);
+
+	shovelerImageFree(moveImage);
+	shovelerImageFree(moveImage2);
+
+	shovelerImageFree(downImage);
+	shovelerImageFree(downMoveImage);
+	shovelerImageFree(downMoveImage2);
+
+	shovelerImageFree(leftImage);
+	shovelerImageFree(leftMoveImage);
+	shovelerImageFree(leftMoveImage2);
+
+	shovelerImageFree(rightImage);
+	shovelerImageFree(rightMoveImage);
+	shovelerImageFree(rightMoveImage2);
+
 	return image;
 }
 
@@ -67,13 +189,13 @@ void shovelerImageAddSubImage(ShovelerImage *image, int xOffset, int yOffset, Sh
 
 	for(int i = 0; i < subImage->width; i++) {
 		int imageI = xOffset + i;
-		if(imageI >= 0 && imageI < image->width) {
+		if(imageI < 0 || imageI >= image->width) {
 			continue;
 		}
 
 		for(int j = 0; j < subImage->height; j++) {
 			int imageJ = yOffset + j;
-			if(imageJ >= 0 && imageJ < image->height) {
+			if(imageJ < 0 || imageJ >= image->height) {
 				continue;
 			}
 
