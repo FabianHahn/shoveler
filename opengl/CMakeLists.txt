@@ -48,6 +48,7 @@ set(SHOVELER_OPENGL_SRC
 	src/shader.c
 	src/shader_program.c
 	src/texture.c
+	src/tile_sprite_animation.c
 	src/tilemap.c
 	src/tileset.c
 	src/uniform.c
@@ -107,6 +108,7 @@ set(SHOVELER_OPENGL_SRC
 	include/shoveler/shader.h
 	include/shoveler/shader_program.h
 	include/shoveler/texture.h
+	include/shoveler/tile_sprite_animation.h
 	include/shoveler/tilemap.h
 	include/shoveler/tileset.h
 	include/shoveler/uniform_attachment.h
