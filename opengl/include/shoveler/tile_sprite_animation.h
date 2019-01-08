@@ -16,10 +16,12 @@ typedef struct ShovelerTileSpriteAnimationStruct {
 	ShovelerCanvasTileSprite *tileSprite;
 	ShovelerTileset *tileset;
 	float moveAmountThreshold;
+	int numZeroUpdatesForStopping;
 	float eps;
 	ShovelerTileSpriteAnimationDirection direction;
 	unsigned char frame;
 	float frameMoveAmount;
+	int zeroUpdateCounter;
 	bool logDirectionChanges;
 } ShovelerTileSpriteAnimation;
 

@@ -14,10 +14,12 @@ ShovelerTileSpriteAnimation *shovelerTileSpriteAnimationCreate(ShovelerCanvasTil
 	animation->tileSprite = tileSprite;
 	animation->tileset = tileset;
 	animation->moveAmountThreshold = 0.1f;
+	animation->numZeroUpdatesForStopping = 2;
 	animation->eps = 1.0e-6f;
 	animation->direction = SHOVELER_TILE_SPRITE_ANIMATION_STATE_DOWN;
 	animation->frame = 0;
 	animation->frameMoveAmount = 0.0f;
+	animation->zeroUpdateCounter = 0;
 	animation->logDirectionChanges = false;
 
 	return animation;
@@ -59,13 +61,20 @@ void shovelerTileSpriteAnimationUpdate(ShovelerTileSpriteAnimation *animation, S
 		animation->frame = 1;
 	} else { // we are already moving
 		if(moveMagnitudeX < animation->eps && moveMagnitudeY < animation->eps) {
-			animation->frame = 0;
-			animation->frameMoveAmount = 0.0f;
+			if(animation->zeroUpdateCounter < animation->numZeroUpdatesForStopping) {
+				animation->zeroUpdateCounter++;
+			} else {
+				animation->frame = 0;
+				animation->frameMoveAmount = 0.0f;
+				animation->zeroUpdateCounter = 0;
 
-			if(animation->logDirectionChanges) {
-				shovelerLogInfo("Stopping to move into direction %d.", animation->direction);
+				if (animation->logDirectionChanges) {
+					shovelerLogInfo("Stopping to move into direction %d.", animation->direction);
+				}
 			}
 		} else { // we are still moving
+			animation->zeroUpdateCounter = 0;
+
 			ShovelerTileSpriteAnimationDirection newDirection;
 			if(moveMagnitudeX > moveMagnitudeY) { // move on x axis
 				if(moveX > 0.0f) { // move right
