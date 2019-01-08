@@ -17,6 +17,7 @@
 #include <shoveler/view/resources.h>
 #include <shoveler/view/texture.h>
 #include <shoveler/view/tile_sprite.h>
+#include <shoveler/view/tile_sprite_animation.h>
 #include <shoveler/view/tilemap.h>
 #include <shoveler/view/tilemap_tiles.h>
 #include <shoveler/view/tileset.h>
@@ -140,15 +141,19 @@ int main(int argc, char *argv[])
 	shovelerViewEntityAddLight(lightEntity, lightConfiguration);
 	shovelerViewEntityAddPosition(lightEntity, 0.0, 2.0, 0.0);
 
-	ShovelerImage *image = shovelerImageCreate(2, 2, 3);
+	ShovelerImage *image = shovelerImageCreate(2, 2, 4);
 	shovelerImageClear(image);
-	shovelerImageGet(image, 0, 0, 0) = 255;
-	shovelerImageGet(image, 0, 1, 1) = 255;
-	shovelerImageGet(image, 1, 0, 2) = 255;
+	shovelerImageGet(image, 0, 0, 0) = 255; // red
+	shovelerImageGet(image, 0, 0, 3) = 255;
+	shovelerImageGet(image, 0, 1, 1) = 255; // green
+	shovelerImageGet(image, 0, 1, 3) = 255;
+	shovelerImageGet(image, 1, 0, 2) = 255; // blue
+	shovelerImageGet(image, 1, 0, 3) = 255;
+	shovelerImageGet(image, 1, 1, 0) = 255; // white
 	shovelerImageGet(image, 1, 1, 1) = 255;
 	shovelerImageGet(image, 1, 1, 2) = 255;
+	shovelerImageGet(image, 1, 1, 3) = 255;
 	GString *imageData = getImageData(image);
-	shovelerImageFree(image);
 	ShovelerViewResourceConfiguration imageResourceConfiguration;
 	imageResourceConfiguration.typeId = "image/png";
 	imageResourceConfiguration.buffer = (unsigned char *) imageData->str;
@@ -218,13 +223,30 @@ int main(int argc, char *argv[])
 	ShovelerViewEntity *tilesetMaterialEntity = shovelerViewAddEntity(view, 10);
 	shovelerViewEntityAddTileset(tilesetMaterialEntity, tilesetConfiguration);
 
-	ShovelerViewTilesetConfiguration tileset2Configuration;
-	tileset2Configuration.imageResourceEntityId = 6;
-	tileset2Configuration.columns = 1;
-	tileset2Configuration.rows = 1;
-	tileset2Configuration.padding = 1;
-	ShovelerViewEntity *tileset2MaterialEntity = shovelerViewAddEntity(view, 11);
-	shovelerViewEntityAddTileset(tileset2MaterialEntity, tileset2Configuration);
+	ShovelerImage *animationTilesetImage = shovelerImageCreateAnimationTileset(image, 1);
+	GString *animationTilesetImageData = getImageData(animationTilesetImage);
+	ShovelerViewResourceConfiguration animationTilesetImageResourceConfiguration;
+	animationTilesetImageResourceConfiguration.typeId = "image/png";
+	animationTilesetImageResourceConfiguration.buffer = (unsigned char *) animationTilesetImageData->str;
+	animationTilesetImageResourceConfiguration.bufferSize = animationTilesetImageData->len;
+	ShovelerViewTextureConfiguration animationTilesetTextureConfiguration;
+	animationTilesetTextureConfiguration.imageResourceEntityId = 11;
+	animationTilesetTextureConfiguration.interpolate = true;
+	animationTilesetTextureConfiguration.useMipmaps = true;
+	animationTilesetTextureConfiguration.clamp = true;
+	ShovelerViewTilesetConfiguration animationTilesetConfiguration;
+	animationTilesetConfiguration.imageResourceEntityId = 11;
+	animationTilesetConfiguration.columns = 4;
+	animationTilesetConfiguration.rows = 3;
+	animationTilesetConfiguration.padding = 1;
+	ShovelerViewEntity *animationTilesetEntity = shovelerViewAddEntity(view, 11);
+	shovelerViewEntityAddResource(animationTilesetEntity, animationTilesetImageResourceConfiguration);
+	shovelerViewEntityAddTexture(animationTilesetEntity, animationTilesetTextureConfiguration);
+	shovelerViewEntityAddTileset(animationTilesetEntity, animationTilesetConfiguration);
+	g_string_free(animationTilesetImageData, true);
+
+	shovelerImageFree(image);
+	shovelerImageFree(animationTilesetImage);
 
 	ShovelerViewTilemapConfiguration tilemapBackgroundConfiguration;
 	tilemapBackgroundConfiguration.tilesEntityId = 8;
@@ -246,9 +268,13 @@ int main(int argc, char *argv[])
 	tileSpriteConfiguration.tilesetRow = 0;
 	tileSpriteConfiguration.positionMappingX = SHOVELER_VIEW_TILE_SPRITE_COORDINATE_MAPPING_POSITIVE_X;
 	tileSpriteConfiguration.positionMappingY = SHOVELER_VIEW_TILE_SPRITE_COORDINATE_MAPPING_POSITIVE_Y;
-	tileSpriteConfiguration.size = shovelerVector2(2.5, 4.0);
+	tileSpriteConfiguration.size = shovelerVector2(2.5, 2.5);
+	ShovelerViewTileSpriteAnimationConfiguration tileSpriteAnimationConfiguration;
+	tileSpriteAnimationConfiguration.tileSpriteEntityId = 14;
+	tileSpriteAnimationConfiguration.moveAmountThreshold = 1.0f;
 	ShovelerViewEntity *tileSpriteEntity = shovelerViewAddEntity(view, 14);
 	shovelerViewEntityAddTileSprite(tileSpriteEntity, &tileSpriteConfiguration);
+	shovelerViewEntityAddTileSpriteAnimation(tileSpriteEntity, &tileSpriteAnimationConfiguration);
 	shovelerViewEntityAddPosition(tileSpriteEntity, 3.0, 4.0, 0.0);
 
 	ShovelerViewCanvasConfiguration canvasConfiguration;
