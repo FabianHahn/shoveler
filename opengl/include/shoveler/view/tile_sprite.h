@@ -5,6 +5,7 @@
 
 #include <glib.h>
 
+#include <shoveler/view/position.h>
 #include <shoveler/canvas.h>
 #include <shoveler/view.h>
 
@@ -35,5 +36,7 @@ const ShovelerViewTileSpriteConfiguration *shovelerViewEntityGetTileSpriteConfig
 /** Updates a canvas tile sprite component on an entity, copying the supplied configuration. */
 bool shovelerViewEntityUpdateTileSprite(ShovelerViewEntity *entity, const ShovelerViewTileSpriteConfiguration *configuration);
 bool shovelerViewEntityRemoveTileSprite(ShovelerViewEntity *entity);
+
+double shovelerViewPositionMapTileSpriteCoordinate(const ShovelerViewPosition *position, ShovelerViewTileSpriteCoordinateMappingConfiguration mapping);
 
 #endif

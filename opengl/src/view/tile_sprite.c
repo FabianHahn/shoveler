@@ -20,7 +20,6 @@ static void deactivateComponent(ShovelerViewComponent *component, void *componen
 static void freeComponent(ShovelerViewComponent *component, void *componentDataPointer);
 static void positionCallback(ShovelerViewComponent *positionComponent, ShovelerViewComponentCallbackType callbackType, void *componentDataPointer);
 static void updatePosition(ComponentData *componentData, const ShovelerViewPosition *position);
-static double mapCoordinate(const ShovelerViewPosition *position, ShovelerViewTileSpriteCoordinateMappingConfiguration mapping);
 
 bool shovelerViewEntityAddTileSprite(ShovelerViewEntity *entity, const ShovelerViewTileSpriteConfiguration *configuration)
 {
@@ -111,6 +110,27 @@ bool shovelerViewEntityRemoveTileSprite(ShovelerViewEntity *entity)
 	return shovelerViewEntityRemoveComponent(entity, shovelerViewTileSpriteComponentName);
 }
 
+double shovelerViewPositionMapTileSpriteCoordinate(const ShovelerViewPosition *position, ShovelerViewTileSpriteCoordinateMappingConfiguration mapping)
+{
+	switch(mapping) {
+		case SHOVELER_VIEW_TILE_SPRITE_COORDINATE_MAPPING_POSITIVE_X:
+			return position->x;
+		case SHOVELER_VIEW_TILE_SPRITE_COORDINATE_MAPPING_NEGATIVE_X:
+			return -position->x;
+		case SHOVELER_VIEW_TILE_SPRITE_COORDINATE_MAPPING_POSITIVE_Y:
+			return position->y;
+		case SHOVELER_VIEW_TILE_SPRITE_COORDINATE_MAPPING_NEGATIVE_Y:
+			return -position->y;
+		case SHOVELER_VIEW_TILE_SPRITE_COORDINATE_MAPPING_POSITIVE_Z:
+			return position->z;
+		case SHOVELER_VIEW_TILE_SPRITE_COORDINATE_MAPPING_NEGATIVE_Z:
+			return -position->z;
+		default:
+			shovelerLogError("Unknown coordinate mapping configuration: %d", mapping);
+			return 0.0;
+	}
+}
+
 static void assignConfiguration(ShovelerViewTileSpriteConfiguration *destination, const ShovelerViewTileSpriteConfiguration *source)
 {
 	clearConfiguration(destination);
@@ -189,27 +209,6 @@ static void positionCallback(ShovelerViewComponent *positionComponent, ShovelerV
 
 static void updatePosition(ComponentData *componentData, const ShovelerViewPosition *position)
 {
-	componentData->tileSprite->position.values[0] = (float) mapCoordinate(position, componentData->configuration.positionMappingX);
-	componentData->tileSprite->position.values[1] = (float) mapCoordinate(position, componentData->configuration.positionMappingY);
-}
-
-static double mapCoordinate(const ShovelerViewPosition *position, ShovelerViewTileSpriteCoordinateMappingConfiguration mapping)
-{
-	switch(mapping) {
-		case SHOVELER_VIEW_TILE_SPRITE_COORDINATE_MAPPING_POSITIVE_X:
-			return position->x;
-		case SHOVELER_VIEW_TILE_SPRITE_COORDINATE_MAPPING_NEGATIVE_X:
-			return -position->x;
-		case SHOVELER_VIEW_TILE_SPRITE_COORDINATE_MAPPING_POSITIVE_Y:
-			return position->y;
-		case SHOVELER_VIEW_TILE_SPRITE_COORDINATE_MAPPING_NEGATIVE_Y:
-			return -position->y;
-		case SHOVELER_VIEW_TILE_SPRITE_COORDINATE_MAPPING_POSITIVE_Z:
-			return position->z;
-		case SHOVELER_VIEW_TILE_SPRITE_COORDINATE_MAPPING_NEGATIVE_Z:
-			return -position->z;
-		default:
-			shovelerLogError("Unknown coordinate mapping configuration: %d", mapping);
-			return 0.0;
-	}
+	componentData->tileSprite->position.values[0] = (float) shovelerViewPositionMapTileSpriteCoordinate(position, componentData->configuration.positionMappingX);
+	componentData->tileSprite->position.values[1] = (float) shovelerViewPositionMapTileSpriteCoordinate(position, componentData->configuration.positionMappingY);
 }
