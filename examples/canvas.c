@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
 	characterSprite.size = shovelerVector2(0.2f, 0.2f);
 	shovelerCanvasAddTileSprite(canvas, &characterSprite);
 
-	animation = shovelerTileSpriteAnimationCreate(&characterSprite, animationTileset);
+	animation = shovelerTileSpriteAnimationCreate(&characterSprite, 0.1f);
 	animation->moveAmountThreshold = 0.25f;
 	animation->logDirectionChanges = true;
 

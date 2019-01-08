@@ -5,15 +5,14 @@
 #include "shoveler/log.h"
 #include "shoveler/tile_sprite_animation.h"
 
-ShovelerTileSpriteAnimation *shovelerTileSpriteAnimationCreate(ShovelerCanvasTileSprite *tileSprite, ShovelerTileset *tileset)
+ShovelerTileSpriteAnimation *shovelerTileSpriteAnimationCreate(ShovelerCanvasTileSprite *tileSprite, float moveAmountThreshold)
 {
-	assert(tileset->columns >= 4);
-	assert(tileset->rows >= 3);
+	assert(tileSprite->tileset->columns >= 4);
+	assert(tileSprite->tileset->rows >= 3);
 
 	ShovelerTileSpriteAnimation *animation = malloc(sizeof(ShovelerTileSpriteAnimation));
 	animation->tileSprite = tileSprite;
-	animation->tileset = tileset;
-	animation->moveAmountThreshold = 0.1f;
+	animation->moveAmountThreshold = moveAmountThreshold;
 	animation->numZeroUpdatesForStopping = 2;
 	animation->eps = 1.0e-6f;
 	animation->direction = SHOVELER_TILE_SPRITE_ANIMATION_STATE_DOWN;
@@ -107,7 +106,6 @@ void shovelerTileSpriteAnimationUpdate(ShovelerTileSpriteAnimation *animation, S
 		}
 	}
 
-	animation->tileSprite->tileset = animation->tileset;
 	animation->tileSprite->tilesetColumn = animation->direction;
 	animation->tileSprite->tilesetRow = animation->frame;
 }
