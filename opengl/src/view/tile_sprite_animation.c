@@ -139,6 +139,11 @@ static bool activateComponent(ShovelerViewComponent *component, void *componentD
 	ShovelerCanvasTileSprite *tileSprite = shovelerViewEntityGetTileSprite(tileSpriteEntity);
 	assert(tileSprite != NULL);
 
+	if(tileSprite->tileset->columns < 4 || tileSprite->tileset->rows < 3) {
+		shovelerLogWarning("Failed to activate tile sprite animation of entity %lld because the tileset of dependency tile sprite on entity %lld doesn't have enough columns and rows.", component->entity->entityId, componentData->configuration.tileSpriteEntityId);
+		return false;
+	}
+
 	componentData->animation = shovelerTileSpriteAnimationCreate(tileSprite, componentData->configuration.moveAmountThreshold);
 	componentData->animation->logDirectionChanges = true;
 
