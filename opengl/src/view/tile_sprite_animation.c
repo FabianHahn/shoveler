@@ -158,7 +158,7 @@ static void deactivateComponent(ShovelerViewComponent *component, void *componen
 {
 	ComponentData *componentData = componentDataPointer;
 
-	free(componentData->animation);
+	shovelerTileSpriteAnimationFree(componentData->animation);
 	componentData->animation = NULL;
 
 	shovelerViewEntityRemoveCallback(component->entity, shovelerViewPositionComponentName, componentData->positionCallback);
@@ -169,7 +169,7 @@ static void freeComponent(ShovelerViewComponent *component, void *componentDataP
 {
 	ComponentData *componentData = componentDataPointer;
 
-	free(componentData->animation);
+	shovelerTileSpriteAnimationFree(componentData->animation);
 
 	if(componentData->positionCallback != NULL) {
 		shovelerViewEntityRemoveCallback(component->entity, shovelerViewPositionComponentName, componentData->positionCallback);
