@@ -81,6 +81,10 @@ ShovelerViewComponentCallback *shovelerViewEntityAddCallback(ShovelerViewEntity 
 bool shovelerViewEntityRemoveCallback(ShovelerViewEntity *entity, const char *componentName, ShovelerViewComponentCallback *callback);
 /** Sets a target that is expected to be freed by the caller. */
 bool shovelerViewSetTarget(ShovelerView *view, const char *targetName, void *target);
+/** Creates the view's dependency graph to as a graphviz dot digraph string. */
+GString *shovelerViewCreateDependencyGraph(ShovelerView *view);
+/** Writes the view's dependency graph to a graphviz dot file. */
+bool shovelerViewWriteDependencyGraph(ShovelerView *view, const char *filename);
 void shovelerViewFree(ShovelerView *view);
 
 static inline ShovelerViewEntity *shovelerViewGetEntity(ShovelerView *view, long long int entityId)
