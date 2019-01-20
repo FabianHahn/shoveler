@@ -57,3 +57,28 @@ char *shovelerFileReadString(const char *filename)
 
 	return (char *) contents;
 }
+
+bool shovelerFileWrite(const char *filename, unsigned char *contents, size_t contentsSize)
+{
+	FILE *file = fopen(filename, "wb+");
+	if(file == NULL) {
+		shovelerLogError("Failed to write file to '%s': %s.", filename, strerror(errno));
+		return false;
+	}
+
+	size_t contentsWritten = fwrite(contents, contentsSize, 1, file);
+	if(contentsWritten != 1 || ferror(file)) {
+		shovelerLogError("Error when writing %zu bytes to '%s': %s.", contentsSize, filename, strerror(errno));
+		fclose(file);
+		return false;
+	}
+
+	fclose(file);
+	shovelerLogInfo("Successfully wrote %zu bytes to '%s'.", contentsSize, filename);
+	return true;
+}
+
+bool shovelerFileWriteString(const char *filename, const char *string)
+{
+	return shovelerFileWrite(filename, (unsigned char *) string, strlen(string));
+}
