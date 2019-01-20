@@ -179,6 +179,11 @@ static void keyHandler(ShovelerInput *input, int key, int scancode, int action, 
 		glfwSetWindowShouldClose(input->game->window, GLFW_TRUE);
 	}
 
+	if(key == GLFW_KEY_F9 && action == GLFW_PRESS) {
+		shovelerLogInfo("F9 key pressed, writing view dependency graph.");
+		shovelerViewWriteDependencyGraph(input->game->view, "view_dependencies.dot");
+	}
+
 	if(key == GLFW_KEY_F10 && action == GLFW_PRESS) {
 		shovelerLogInfo("F10 key pressed, toggling scene debug mode.");
 		shovelerSceneToggleDebugMode(input->game->scene);
