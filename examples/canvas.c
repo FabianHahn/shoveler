@@ -10,6 +10,7 @@
 #include <shoveler/constants.h>
 #include <shoveler/controller.h>
 #include <shoveler/framebuffer.h>
+#include <shoveler/game.h>
 #include <shoveler/global.h>
 #include <shoveler/image.h>
 #include <shoveler/input.h>
@@ -30,28 +31,34 @@ static ShovelerTileSpriteAnimation *animation;
 
 int main(int argc, char *argv[])
 {
-	const char *windowTitle = "shoveler";
-	bool fullscreen = false;
-	bool vsync = true;
-	int samples = 4;
-	int width = 640;
-	int height = 480;
+	ShovelerGameWindowSettings windowSettings;
+	windowSettings.windowTitle = "shoveler";
+	windowSettings.fullscreen = false;
+	windowSettings.vsync = true;
+	windowSettings.samples = 4;
+	windowSettings.windowedWidth = 640;
+	windowSettings.windowedHeight = 480;
+
+	ShovelerVector3 position = {0, 0, 1};
+	ShovelerVector3 direction = {0, 0, -1};
+	ShovelerVector3 up = {0, 1, 0};
+	float fov = 2.0f * SHOVELER_PI * 50.0f / 360.0f;
+	float aspectRatio = (float) windowSettings.windowedWidth / windowSettings.windowedHeight;
 
 	shovelerLogInit("shoveler/", SHOVELER_LOG_LEVEL_INFO_UP, stdout);
 	shovelerGlobalInit();
 
-	ShovelerGame *game = shovelerGameCreate(windowTitle, width, height, samples, fullscreen, vsync);
+	ShovelerCamera *camera = shovelerCameraPerspectiveCreate(position, direction, up, fov, aspectRatio, 0.01, 1000);
+
+	ShovelerGame *game = shovelerGameCreate(camera, shovelerSampleUpdate, &windowSettings);
 	if(game == NULL) {
 		return EXIT_FAILURE;
 	}
-	game->scene = shovelerSceneCreate();
 
-	ShovelerController *controller = shovelerControllerCreate(game, shovelerVector3(0, 0, 1), shovelerVector3(0, 0, -1), shovelerVector3(0, 1, 0), 0.5f, 0.0005f);
+	ShovelerController *controller = shovelerControllerCreate(game, position, direction, up, 0.5f, 0.0005f);
 	controller->lockTiltX = true;
 	controller->lockTiltY = true;
-
-	game->camera = shovelerCameraPerspectiveCreate(shovelerVector3(0, 0, 1), shovelerVector3(0, 0, -1), shovelerVector3(0, 1, 0), 2.0f * SHOVELER_PI * 50.0f / 360.0f, (float) width / height, 0.01, 1000);
-	shovelerCameraPerspectiveAttachController(game->camera, controller);
+	shovelerCameraPerspectiveAttachController(camera, controller);
 
 	ShovelerCanvas *canvas = shovelerCanvasCreate();
 
@@ -106,8 +113,6 @@ int main(int argc, char *argv[])
 
 	shovelerOpenGLCheckSuccess();
 
-	game->update = shovelerSampleUpdate;
-
 	while(shovelerGameIsRunning(game)) {
 		shovelerGameRenderFrame(game);
 	}
@@ -116,8 +121,7 @@ int main(int argc, char *argv[])
 	shovelerTileSpriteAnimationFree(animation);
 	shovelerTilesetFree(tileset);
 	shovelerTilesetFree(animationTileset);
-	shovelerSceneFree(game->scene);
-	shovelerCameraFree(game->camera);
+	shovelerCameraFree(camera);
 	shovelerDrawableFree(quad);
 	shovelerMaterialFree(canvasMaterial);
 	shovelerCanvasFree(canvas);

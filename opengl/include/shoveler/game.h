@@ -12,10 +12,20 @@
 #include <shoveler/framebuffer.h>
 #include <shoveler/input.h>
 #include <shoveler/scene.h>
+#include <shoveler/view.h>
 
 struct ShovelerGameStruct;
 
 typedef void (ShovelerGameUpdateCallback)(struct ShovelerGameStruct *game, double dt);
+
+typedef struct {
+	const char *windowTitle;
+	int windowedWidth;
+	int windowedHeight;
+	int samples;
+	bool fullscreen;
+	bool vsync;
+} ShovelerGameWindowSettings;
 
 typedef struct ShovelerGameStruct {
 	int windowedWidth;
@@ -29,13 +39,14 @@ typedef struct ShovelerGameStruct {
 	ShovelerFramebuffer *framebuffer;
 	ShovelerScene *scene;
 	ShovelerCamera *camera;
+	ShovelerView *view;
 	ShovelerGameUpdateCallback *update;
 	double lastFrameTime;
 	double lastFpsPrintTime;
 	int framesSinceLastFpsPrint;
 } ShovelerGame;
 
-ShovelerGame *shovelerGameCreate(const char *windowTitle, int windowedWidth, int windowedHeight, int samples, bool fullscreen, bool vsync);
+ShovelerGame *shovelerGameCreate(ShovelerCamera *camera, ShovelerGameUpdateCallback *update, const ShovelerGameWindowSettings *windowSettings);
 ShovelerGame *shovelerGameGetForWindow(GLFWwindow *window);
 void shovelerGameToggleFullscreen(ShovelerGame *game);
 int shovelerGameRenderFrame(ShovelerGame *game);

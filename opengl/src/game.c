@@ -12,13 +12,13 @@ static void keyHandler(ShovelerInput *input, int key, int scancode, int action, 
 static gint64 elapsedNs(double dt);
 static void printFps(void *gamePointer);
 
-ShovelerGame *shovelerGameCreate(const char *windowTitle, int windowedWidth, int windowedHeight, int samples, bool fullscreen, bool vsync)
+ShovelerGame *shovelerGameCreate(ShovelerCamera *camera, ShovelerGameUpdateCallback *update, const ShovelerGameWindowSettings  *windowSettings)
 {
 	ShovelerGame *game = malloc(sizeof(ShovelerGame));
-	game->windowedWidth = windowedWidth;
-	game->windowedHeight = windowedHeight;
-	game->samples = samples;
-	game->fullscreen = fullscreen;
+	game->windowedWidth = windowSettings->windowedWidth;
+	game->windowedHeight = windowSettings->windowedHeight;
+	game->samples = windowSettings->samples;
+	game->fullscreen = windowSettings->fullscreen;
 	game->updateExecutor = shovelerExecutorCreateDirect();
 
 	// request OpenGL4
@@ -26,10 +26,10 @@ ShovelerGame *shovelerGameCreate(const char *windowTitle, int windowedWidth, int
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 
-	int width = windowedWidth;
-	int height = windowedHeight;
+	int width = windowSettings->windowedWidth;
+	int height = windowSettings->windowedHeight;
 	GLFWmonitor *monitor = NULL;
-	if(fullscreen) {
+	if(windowSettings->fullscreen) {
 		monitor = glfwGetPrimaryMonitor();
 		shovelerLogInfo("Using borderless fullscreen mode on primary monitor '%s'.", glfwGetMonitorName(monitor));
 
@@ -44,7 +44,7 @@ ShovelerGame *shovelerGameCreate(const char *windowTitle, int windowedWidth, int
 		shovelerLogInfo("Using windowed mode.");
 	}
 
-	game->window = glfwCreateWindow(width, height, windowTitle, monitor, NULL);
+	game->window = glfwCreateWindow(width, height, windowSettings->windowTitle, monitor, NULL);
 	if(game->window == NULL) {
 		shovelerLogError("Failed to create glfw window.");
 		free(game);
@@ -60,7 +60,7 @@ ShovelerGame *shovelerGameCreate(const char *windowTitle, int windowedWidth, int
 		return NULL;
 	}
 
-	shovelerLogInfo("Opened glfw window with name '%s', using OpenGL driver version '%s' by '%s' and GLSL version '%s'.", windowTitle, glGetString(GL_VERSION), glGetString(GL_VENDOR), glGetString(GL_SHADING_LANGUAGE_VERSION));
+	shovelerLogInfo("Opened glfw window with name '%s', using OpenGL driver version '%s' by '%s' and GLSL version '%s'.", windowSettings->windowTitle, glGetString(GL_VERSION), glGetString(GL_VENDOR), glGetString(GL_SHADING_LANGUAGE_VERSION));
 
 	if(!shovelerOpenGLCheckSuccess()) {
 		glfwDestroyWindow(game->window);
@@ -78,7 +78,7 @@ ShovelerGame *shovelerGameCreate(const char *windowTitle, int windowedWidth, int
 
 	glEnable(GL_CULL_FACE);
 
-	glfwSwapInterval(vsync ? 1 : 0);
+	glfwSwapInterval(windowSettings->vsync ? 1 : 0);
 
 	if(!shovelerOpenGLCheckSuccess()) {
 		glfwTerminate();
@@ -90,7 +90,11 @@ ShovelerGame *shovelerGameCreate(const char *windowTitle, int windowedWidth, int
 	game->input = shovelerInputCreate(game);
 	shovelerInputAddKeyCallback(game->input, keyHandler, NULL);
 
-	game->framebuffer = shovelerFramebufferCreate(width, height, samples, 4, 8);
+	game->framebuffer = shovelerFramebufferCreate(width, height, windowSettings->samples, 4, 8);
+	game->scene = shovelerSceneCreate();
+	game->camera = camera;
+	game->view = shovelerViewCreate();
+	game->update = update;
 	game->lastFrameTime = glfwGetTime();
 	game->lastFpsPrintTime = game->lastFrameTime;
 	game->framesSinceLastFpsPrint = 0;
@@ -159,6 +163,9 @@ void shovelerGameFree(ShovelerGame *game)
 	shovelerFramebufferFree(game->framebuffer);
 
 	shovelerInputFree(game->input);
+	shovelerViewFree(game->view);
+	shovelerSceneFree(game->scene);
+
 	glfwDestroyWindow(game->window);
 
 	shovelerExecutorFree(game->updateExecutor);
