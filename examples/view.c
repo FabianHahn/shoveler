@@ -315,6 +315,7 @@ int main(int argc, char *argv[])
 	tilemapMaterialConfiguration.type = SHOVELER_VIEW_MATERIAL_TYPE_TILEMAP;
 	tilemapMaterialConfiguration.dataEntityId = 12;
 	ShovelerViewEntity *tilemapMaterialEntity = shovelerViewAddEntity(game->view, 17);
+	shovelerViewEntitySetType(tilemapMaterialEntity, "tilemap");
 	shovelerViewEntityAddModel(tilemapMaterialEntity, tilemapMaterialModelConfiguration);
 	shovelerViewEntityAddMaterial(tilemapMaterialEntity, tilemapMaterialConfiguration);
 	shovelerViewEntityAddPosition(tilemapMaterialEntity, 5.0, 5.0, 7.5);
@@ -335,6 +336,7 @@ int main(int argc, char *argv[])
 	canvasMaterialConfiguration.canvasRegionSize = shovelerVector2(10.0f, 10.0f);
 	canvasMaterialConfiguration.dataEntityId = 15;
 	ShovelerViewEntity *canvasMaterialEntity = shovelerViewAddEntity(game->view, 18);
+	shovelerViewEntitySetType(canvasMaterialEntity, "canvas");
 	shovelerViewEntityAddModel(canvasMaterialEntity, canvasMaterialModelConfiguration);
 	shovelerViewEntityAddMaterial(canvasMaterialEntity, canvasMaterialConfiguration);
 	shovelerViewEntityAddPosition(canvasMaterialEntity, 0.0, 5.0, 7.5);
@@ -353,6 +355,7 @@ int main(int argc, char *argv[])
 	chunkMaterialConfiguration.type = SHOVELER_VIEW_MATERIAL_TYPE_CHUNK;
 	chunkMaterialConfiguration.dataEntityId = 16;
 	ShovelerViewEntity *chunkMaterialEntity = shovelerViewAddEntity(game->view, 19);
+	shovelerViewEntitySetType(chunkMaterialEntity, "chunk");
 	shovelerViewEntityAddModel(chunkMaterialEntity, chunkMaterialModelConfiguration);
 	shovelerViewEntityAddMaterial(chunkMaterialEntity, chunkMaterialConfiguration);
 	shovelerViewEntityAddPosition(chunkMaterialEntity, -5.0, 5.0, 7.5);
