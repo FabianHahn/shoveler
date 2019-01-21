@@ -2,3 +2,6 @@
 build
 cmake-*
 CMakeLists.txt.*
+*.dot
+*.png
+*.svg
