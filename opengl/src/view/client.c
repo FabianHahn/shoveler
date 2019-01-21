@@ -13,15 +13,13 @@
 
 typedef struct {
 	ShovelerViewEntity *entity;
-	double x;
-	double y;
-	double z;
 	ShovelerControllerMoveCallback *moveCallback;
-} ClientComponentData;
+} ComponentData;
 
-static void moveCallback(ShovelerController *controller, ShovelerVector3 position, void *clientComponentDataPointer);
-static bool activateComponent(ShovelerViewComponent *component, void *clientComponentDataPointer);
-static void freeComponent(ShovelerViewComponent *component, void *clientComponentDataPointer);
+static void moveCallback(ShovelerController *controller, ShovelerVector3 position, void *componentDataPointer);
+static bool activateComponent(ShovelerViewComponent *component, void *componentDataPointer);
+static void deactivateComponent(ShovelerViewComponent *component, void *componentDataPointer);
+static void freeComponent(ShovelerViewComponent *component, void *componentDataPointer);
 
 bool shovelerViewEntityAddClient(ShovelerViewEntity *entity)
 {
@@ -33,18 +31,14 @@ bool shovelerViewEntityAddClient(ShovelerViewEntity *entity)
 		return false;
 	}
 
-	ClientComponentData *clientComponentData = malloc(sizeof(ClientComponentData));
-	clientComponentData->entity = entity;
-	clientComponentData->x = 0;
-	clientComponentData->y = 0;
-	clientComponentData->z = 0;
-	clientComponentData->moveCallback = NULL;
+	ComponentData *componentData = malloc(sizeof(ComponentData));
+	componentData->entity = entity;
+	componentData->moveCallback = NULL;
 
-	component = shovelerViewEntityAddComponent(entity, shovelerViewClientComponentName, clientComponentData, activateComponent, NULL, freeComponent);
+	component = shovelerViewEntityAddComponent(entity, shovelerViewClientComponentName, componentData, activateComponent, deactivateComponent, freeComponent);
 	assert(component != NULL);
 
 	shovelerViewComponentAddDependency(component, entity->entityId, shovelerViewPositionComponentName);
-	shovelerViewComponentAddDependency(component, entity->entityId, shovelerViewModelComponentName);
 
 	shovelerViewComponentActivate(component);
 	return true;
@@ -57,12 +51,9 @@ bool shovelerViewEntityDelegateClient(ShovelerViewEntity *entity)
 		shovelerLogWarning("Trying to delegate client on entity %lld which does not have a client, ignoring.", entity->entityId);
 		return false;
 	}
-	ClientComponentData *clientComponentData = component->data;
-
-	ShovelerController *controller = shovelerViewGetController(entity->view);
-	clientComponentData->moveCallback = shovelerControllerAddMoveCallback(controller, moveCallback, clientComponentData);
 
 	shovelerViewComponentDelegate(component);
+	shovelerViewComponentActivate(component);
 	return true;
 }
 
@@ -73,12 +64,8 @@ bool shovelerViewEntityUndelegateClient(ShovelerViewEntity *entity)
 		shovelerLogWarning("Trying to undelegate client on entity %lld which does not have a client, ignoring.", entity->entityId);
 		return false;
 	}
-	ClientComponentData *clientComponentData = component->data;
 
-	ShovelerController *controller = shovelerViewGetController(component->entity->view);
-	shovelerControllerRemoveMoveCallback(controller, clientComponentData->moveCallback);
-	clientComponentData->moveCallback = NULL;
-
+	shovelerViewComponentDeactivate(component);
 	shovelerViewComponentUndelegate(component);
 	return true;
 }
@@ -90,46 +77,65 @@ bool shovelerViewEntityRemoveClient(ShovelerViewEntity *entity)
 		shovelerLogWarning("Trying to remove client from entity %lld which does not have a client, ignoring.", entity->entityId);
 		return false;
 	}
-	ClientComponentData *clientComponentData = component->data;
 
 	return shovelerViewEntityRemoveComponent(entity, shovelerViewClientComponentName);
 }
 
-static void moveCallback(ShovelerController *controller, ShovelerVector3 position, void *clientComponentDataPointer)
+static void moveCallback(ShovelerController *controller, ShovelerVector3 position, void *componentDataPointer)
 {
-	ClientComponentData *clientComponentData = clientComponentDataPointer;
+	ComponentData *componentData = componentDataPointer;
 
-	clientComponentData->x = position.values[0];
-	clientComponentData->y = position.values[1];
-	clientComponentData->z = position.values[2];
-
-	shovelerViewEntityRequestPositionUpdate(clientComponentData->entity, clientComponentData->x, clientComponentData->y, clientComponentData->z);
+	shovelerViewEntityRequestPositionUpdate(componentData->entity, position.values[0], position.values[1], position.values[2]);
 }
 
-static bool activateComponent(ShovelerViewComponent *component, void *clientComponentDataPointer)
-{
-	ClientComponentData *clientComponentData = clientComponentDataPointer;
-
-	ShovelerViewPosition *position = shovelerViewEntityGetPosition(component->entity);
-	clientComponentData->x = position->x;
-	clientComponentData->y = position->y;
-	clientComponentData->z = position->z;
-
-	ShovelerModel *model = shovelerViewEntityGetModel(component->entity);
-	model->visible = false;
-	return true;
-}
-
-static void freeComponent(ShovelerViewComponent *component, void *clientComponentDataPointer)
+static bool activateComponent(ShovelerViewComponent *component, void *componentDataPointer)
 {
 	assert(shovelerViewHasController(component->entity->view));
 
-	ClientComponentData *clientComponentData = clientComponentDataPointer;
+	ComponentData *componentData = componentDataPointer;
 
-	if(clientComponentData->moveCallback != NULL) {
-		ShovelerController *controller = shovelerViewGetController(component->entity->view);
-		shovelerControllerRemoveMoveCallback(controller, clientComponentData->moveCallback);
+	if(component->authoritative) {
+		shovelerLogWarning("Failed to activate client of entity %lld because it is not authoritative.", component->entity->entityId);
+		return false;
 	}
 
-	free(clientComponentData);
+	ShovelerController *controller = shovelerViewGetController(component->entity->view);
+	componentData->moveCallback = shovelerControllerAddMoveCallback(controller, moveCallback, componentData);
+
+	ShovelerModel *model = shovelerViewEntityGetModel(component->entity);
+	if(model != NULL) {
+		model->visible = false;
+	}
+
+	return true;
+}
+
+static void deactivateComponent(ShovelerViewComponent *component, void *componentDataPointer)
+{
+	assert(shovelerViewHasController(component->entity->view));
+
+	ComponentData *componentData = componentDataPointer;
+
+	ShovelerController *controller = shovelerViewGetController(component->entity->view);
+	shovelerControllerRemoveMoveCallback(controller, componentData->moveCallback);
+	componentData->moveCallback = NULL;
+
+	ShovelerModel *model = shovelerViewEntityGetModel(component->entity);
+	if(model != NULL) {
+		model->visible = true;
+	}
+}
+
+static void freeComponent(ShovelerViewComponent *component, void *componentDataPointer)
+{
+	assert(shovelerViewHasController(component->entity->view));
+
+	ComponentData *componentData = componentDataPointer;
+
+	if(componentData->moveCallback != NULL) {
+		ShovelerController *controller = shovelerViewGetController(component->entity->view);
+		shovelerControllerRemoveMoveCallback(controller, componentData->moveCallback);
+	}
+
+	free(componentData);
 }
