@@ -35,6 +35,7 @@ typedef struct {
 typedef struct {
 	ShovelerView *view;
 	long long int entityId;
+	char *type;
 	/** map from string component name to (ShovelerViewComponent *) */
 	/* private */ GHashTable *components;
 	/** map from string component name to (GQueue *) of (ShovelerViewComponentCallback *) */
@@ -66,6 +67,8 @@ typedef struct {
 ShovelerView *shovelerViewCreate();
 ShovelerViewEntity *shovelerViewAddEntity(ShovelerView *view, long long int entityId);
 bool shovelerViewRemoveEntity(ShovelerView *view, long long int entityId);
+/** Sets an entity's type, which is an arbitrary string without semantic meaning. */
+void shovelerViewEntitySetType(ShovelerViewEntity *entity, const char *type);
 ShovelerViewComponent *shovelerViewEntityAddComponent(ShovelerViewEntity *entity, const char *componentName, void *data, ShovelerViewComponentActivateFunction *activate, ShovelerViewComponentDeactivateFunction *deactivate, ShovelerViewComponentFreeFunction *freeFunction);
 void shovelerViewComponentUpdate(ShovelerViewComponent *component);
 void shovelerViewComponentDelegate(ShovelerViewComponent *component);

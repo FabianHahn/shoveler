@@ -33,6 +33,7 @@ ShovelerViewEntity *shovelerViewAddEntity(ShovelerView *view, long long int enti
 	ShovelerViewEntity *entity = malloc(sizeof(ShovelerViewEntity));
 	entity->view = view;
 	entity->entityId = entityId;
+	entity->type = NULL;
 	entity->components = g_hash_table_new_full(&g_str_hash, &g_str_equal, NULL, &freeComponent);
 	entity->callbacks = g_hash_table_new_full(&g_str_hash, &g_str_equal, &free, &freeCallbacks);
 
@@ -67,6 +68,12 @@ bool shovelerViewRemoveEntity(ShovelerView *view, long long int entityId)
 
 	shovelerLogInfo("Removed entity %lld.", entityId);
 	return true;
+}
+
+void shovelerViewEntitySetType(ShovelerViewEntity *entity, const char *type)
+{
+	free(entity->type);
+	entity->type = strdup(type);
 }
 
 ShovelerViewComponent *shovelerViewEntityAddComponent(ShovelerViewEntity *entity, const char *componentName, void *data, ShovelerViewComponentActivateFunction *activate, ShovelerViewComponentDeactivateFunction *deactivate, ShovelerViewComponentFreeFunction *freeFunction)
@@ -361,7 +368,12 @@ GString *shovelerViewCreateDependencyGraph(ShovelerView *view)
 		long long int entityId = *entityIdPointer;
 
 		g_string_append_printf(graph, "	subgraph cluster_entity%lld {\n", entityId);
-		g_string_append_printf(graph, "		label = \"Entity %lld\";\n", entityId);
+
+		if(entity->type != NULL) {
+			g_string_append_printf(graph, "		label = \"%s %lld\";\n", entity->type, entityId);
+		} else {
+			g_string_append_printf(graph, "		label = \"%lld\";\n", entityId);
+		}
 
 		GHashTableIter componentIter;
 		const char *componentName;
@@ -461,6 +473,7 @@ static void freeEntity(void *entityPointer)
 	ShovelerViewEntity *entity = entityPointer;
 	g_hash_table_destroy(entity->components);
 	g_hash_table_destroy(entity->callbacks);
+	free(entity->type);
 	free(entity);
 }
 
