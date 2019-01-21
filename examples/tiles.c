@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	ShovelerController *controller = shovelerControllerCreate(game, position, direction, up, 0.5f, 0.0005f);
+	ShovelerController *controller = shovelerControllerCreate(game->window, game->input, position, direction, up, 0.5f, 0.0005f);
 	controller->lockTiltX = true;
 	controller->lockTiltY = true;
 	shovelerCameraPerspectiveAttachController(camera, controller);

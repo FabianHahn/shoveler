@@ -18,10 +18,11 @@ static void freeTiltCallback(void *tiltCallbackPointer);
 static void freeMoveCallback(void *moveCallbackPointer);
 static void freeAspectRatioChangeCallback(void *aspectRatioCallbackChangePointer);
 
-ShovelerController *shovelerControllerCreate(ShovelerGame *game, ShovelerVector3 position, ShovelerVector3 direction, ShovelerVector3 up, float moveFactor, float tiltFactor)
+ShovelerController *shovelerControllerCreate(GLFWwindow *window, ShovelerInput *input, ShovelerVector3 position, ShovelerVector3 direction, ShovelerVector3 up, float moveFactor, float tiltFactor)
 {
 	ShovelerController *controller = malloc(sizeof(ShovelerController));
-	controller->game = game;
+	controller->window = window;
+	controller->input = input;
 
 	controller->position = position;
 	controller->up = shovelerVector3Normalize(up);
@@ -39,13 +40,13 @@ ShovelerController *shovelerControllerCreate(ShovelerGame *game, ShovelerVector3
 	controller->lockTiltX = false;
 	controller->lockTiltY = false;
 
-	glfwGetCursorPos(game->window, &controller->previousCursorX, &controller->previousCursorY);
+	glfwGetCursorPos(controller->window, &controller->previousCursorX, &controller->previousCursorY);
 
 	controller->tiltCallbacks = g_hash_table_new_full(g_direct_hash, g_direct_equal, freeTiltCallback, NULL);
 	controller->moveCallbacks = g_hash_table_new_full(g_direct_hash, g_direct_equal, freeMoveCallback, NULL);
 	controller->aspectRatioChangeCallbacks = g_hash_table_new_full(g_direct_hash, g_direct_equal, freeAspectRatioChangeCallback, NULL);
 
-	controller->windowSizeCallback = shovelerInputAddWindowSizeCallback(game->input, windowSizeHandler, controller);
+	controller->windowSizeCallback = shovelerInputAddWindowSizeCallback(controller->input, windowSizeHandler, controller);
 
 	return controller;
 }
@@ -97,7 +98,7 @@ bool shovelerControllerRemoveAspectRatioChangeCallback(ShovelerController *contr
 
 void shovelerControllerUpdate(ShovelerController *controller, float dt)
 {
-	if(glfwGetInputMode(controller->game->window, GLFW_CURSOR) != GLFW_CURSOR_DISABLED) {
+	if(glfwGetInputMode(controller->window, GLFW_CURSOR) != GLFW_CURSOR_DISABLED) {
 		return;
 	}
 
@@ -107,7 +108,7 @@ void shovelerControllerUpdate(ShovelerController *controller, float dt)
 
 void shovelerControllerFree(ShovelerController *controller)
 {
-	shovelerInputRemoveWindowSizeCallback(controller->game->input, controller->windowSizeCallback);
+	shovelerInputRemoveWindowSizeCallback(controller->input, controller->windowSizeCallback);
 
 	g_hash_table_destroy(controller->tiltCallbacks);
 	g_hash_table_destroy(controller->moveCallbacks);
@@ -119,31 +120,31 @@ static void updatePosition(ShovelerController *controller, float dt)
 {
 	ShovelerVector3 moveAmount = {0.0f, 0.0f, 0.0f};
 	if(!controller->lockMoveX) {
-		if (glfwGetKey(controller->game->window, GLFW_KEY_A) == GLFW_PRESS || glfwGetKey(controller->game->window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+		if (glfwGetKey(controller->window, GLFW_KEY_A) == GLFW_PRESS || glfwGetKey(controller->window, GLFW_KEY_LEFT) == GLFW_PRESS) {
 			moveAmount.values[0] -= controller->moveFactor * dt;
 		}
 
-		if (glfwGetKey(controller->game->window, GLFW_KEY_D) == GLFW_PRESS || glfwGetKey(controller->game->window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+		if (glfwGetKey(controller->window, GLFW_KEY_D) == GLFW_PRESS || glfwGetKey(controller->window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
 			moveAmount.values[0] += controller->moveFactor * dt;
 		}
 	}
 
 	if(!controller->lockMoveY) {
-		if (glfwGetKey(controller->game->window, GLFW_KEY_SPACE) == GLFW_PRESS || glfwGetKey(controller->game->window, GLFW_KEY_UP) == GLFW_PRESS) {
+		if (glfwGetKey(controller->window, GLFW_KEY_SPACE) == GLFW_PRESS || glfwGetKey(controller->window, GLFW_KEY_UP) == GLFW_PRESS) {
 			moveAmount.values[1] += controller->moveFactor * dt;
 		}
 
-		if (glfwGetKey(controller->game->window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS || glfwGetKey(controller->game->window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+		if (glfwGetKey(controller->window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS || glfwGetKey(controller->window, GLFW_KEY_DOWN) == GLFW_PRESS) {
 			moveAmount.values[1] -= controller->moveFactor * dt;
 		}
 	}
 
 	if(!controller->lockMoveZ) {
-		if (glfwGetKey(controller->game->window, GLFW_KEY_W) == GLFW_PRESS) {
+		if (glfwGetKey(controller->window, GLFW_KEY_W) == GLFW_PRESS) {
 			moveAmount.values[2] += controller->moveFactor * dt;
 		}
 
-		if (glfwGetKey(controller->game->window, GLFW_KEY_S) == GLFW_PRESS) {
+		if (glfwGetKey(controller->window, GLFW_KEY_S) == GLFW_PRESS) {
 			moveAmount.values[2] -= controller->moveFactor * dt;
 		}
 	}
@@ -157,7 +158,7 @@ static void updateTilt(ShovelerController *controller, float dt)
 {
 	double newCursorX;
 	double newCursorY;
-	glfwGetCursorPos(controller->game->window, &newCursorX, &newCursorY);
+	glfwGetCursorPos(controller->window, &newCursorX, &newCursorY);
 
 	double cursorDiffX = newCursorX - controller->previousCursorX;
 	double cursorDiffY = newCursorY - controller->previousCursorY;
