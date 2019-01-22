@@ -12,7 +12,7 @@ static void keyHandler(ShovelerInput *input, int key, int scancode, int action, 
 static gint64 elapsedNs(double dt);
 static void printFps(void *gamePointer);
 
-ShovelerGame *shovelerGameCreate(ShovelerCamera *camera, ShovelerGameUpdateCallback *update, const ShovelerGameWindowSettings  *windowSettings)
+ShovelerGame *shovelerGameCreate(ShovelerCamera *camera, ShovelerGameUpdateCallback *update, const ShovelerGameWindowSettings  *windowSettings, const ShovelerGameControllerSettings *controllerSettings)
 {
 	ShovelerGame *game = malloc(sizeof(ShovelerGame));
 	game->windowedWidth = windowSettings->windowedWidth;
@@ -93,12 +93,16 @@ ShovelerGame *shovelerGameCreate(ShovelerCamera *camera, ShovelerGameUpdateCallb
 	game->framebuffer = shovelerFramebufferCreate(width, height, windowSettings->samples, 4, 8);
 	game->scene = shovelerSceneCreate();
 	game->camera = camera;
+	game->controller = shovelerControllerCreate(game->window, game->input, controllerSettings->position, controllerSettings->direction, controllerSettings->up, controllerSettings->moveFactor, controllerSettings->tiltFactor);
 	game->view = shovelerViewCreate();
 	game->update = update;
 	game->lastFrameTime = glfwGetTime();
 	game->lastFpsPrintTime = game->lastFrameTime;
 	game->framesSinceLastFpsPrint = 0;
 	shovelerExecutorSchedulePeriodic(game->updateExecutor, 1000, 1000, printFps, game);
+
+	shovelerViewSetTarget(game->view, "controller", game->controller);
+	shovelerViewSetTarget(game->view, "scene", game->scene);
 
 	ShovelerGlobalContext *global = shovelerGlobalGetContext();
 	g_hash_table_insert(global->games, game->window, game);
@@ -144,6 +148,7 @@ int shovelerGameRenderFrame(ShovelerGame *game)
 	game->framesSinceLastFpsPrint++;
 
 	shovelerExecutorUpdate(game->updateExecutor, elapsedNs(dt));
+	shovelerControllerUpdate(game->controller, dt);
 	game->update(game, dt);
 
 	int rendered = shovelerSceneRenderFrame(game->scene, game->camera, game->framebuffer, &game->renderState);
@@ -162,8 +167,9 @@ void shovelerGameFree(ShovelerGame *game)
 
 	shovelerFramebufferFree(game->framebuffer);
 
-	shovelerInputFree(game->input);
 	shovelerViewFree(game->view);
+	shovelerControllerFree(game->controller);
+	shovelerInputFree(game->input);
 	shovelerSceneFree(game->scene);
 
 	glfwDestroyWindow(game->window);

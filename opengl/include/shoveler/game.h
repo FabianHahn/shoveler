@@ -8,6 +8,7 @@
 #include <GLFW/glfw3.h>
 
 #include <shoveler/camera.h>
+#include <shoveler/controller.h>
 #include <shoveler/executor.h>
 #include <shoveler/framebuffer.h>
 #include <shoveler/input.h>
@@ -27,6 +28,14 @@ typedef struct {
 	bool vsync;
 } ShovelerGameWindowSettings;
 
+typedef struct {
+	ShovelerVector3 position;
+	ShovelerVector3 direction;
+	ShovelerVector3 up;
+	float moveFactor;
+	float tiltFactor;
+} ShovelerGameControllerSettings;
+
 typedef struct ShovelerGameStruct {
 	int windowedWidth;
 	int windowedHeight;
@@ -39,6 +48,7 @@ typedef struct ShovelerGameStruct {
 	ShovelerFramebuffer *framebuffer;
 	ShovelerScene *scene;
 	ShovelerCamera *camera;
+	ShovelerController *controller;
 	ShovelerView *view;
 	ShovelerGameUpdateCallback *update;
 	double lastFrameTime;
@@ -46,7 +56,7 @@ typedef struct ShovelerGameStruct {
 	int framesSinceLastFpsPrint;
 } ShovelerGame;
 
-ShovelerGame *shovelerGameCreate(ShovelerCamera *camera, ShovelerGameUpdateCallback *update, const ShovelerGameWindowSettings *windowSettings);
+ShovelerGame *shovelerGameCreate(ShovelerCamera *camera, ShovelerGameUpdateCallback *update, const ShovelerGameWindowSettings *windowSettings, const ShovelerGameControllerSettings *controllerSettings);
 ShovelerGame *shovelerGameGetForWindow(GLFWwindow *window);
 void shovelerGameToggleFullscreen(ShovelerGame *game);
 int shovelerGameRenderFrame(ShovelerGame *game);

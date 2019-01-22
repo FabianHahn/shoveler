@@ -22,7 +22,6 @@
 #include <shoveler/tile_sprite_animation.h>
 #include <shoveler/tileset.h>
 
-static void shovelerSampleInit(ShovelerGame *sampleGame, int width, int height, int samples);
 static void shovelerSampleTerminate();
 static void shovelerSampleUpdate(ShovelerGame *game, double dt);
 
@@ -39,26 +38,29 @@ int main(int argc, char *argv[])
 	windowSettings.windowedWidth = 640;
 	windowSettings.windowedHeight = 480;
 
-	ShovelerVector3 position = {0, 0, 1};
-	ShovelerVector3 direction = {0, 0, -1};
-	ShovelerVector3 up = {0, 1, 0};
+	ShovelerGameControllerSettings controllerSettings;
+	controllerSettings.position = shovelerVector3(0, 0, 1);
+	controllerSettings.direction = shovelerVector3(0, 0, -1);
+	controllerSettings.up = shovelerVector3(0, 1, 0);
+	controllerSettings.moveFactor = 0.5f;
+	controllerSettings.tiltFactor = 0.0005f;
+
 	float fov = 2.0f * SHOVELER_PI * 50.0f / 360.0f;
 	float aspectRatio = (float) windowSettings.windowedWidth / windowSettings.windowedHeight;
 
 	shovelerLogInit("shoveler/", SHOVELER_LOG_LEVEL_INFO_UP, stdout);
 	shovelerGlobalInit();
 
-	ShovelerCamera *camera = shovelerCameraPerspectiveCreate(position, direction, up, fov, aspectRatio, 0.01, 1000);
+	ShovelerCamera *camera = shovelerCameraPerspectiveCreate(controllerSettings.position, controllerSettings.direction, controllerSettings.up, fov, aspectRatio, 0.01, 1000);
 
-	ShovelerGame *game = shovelerGameCreate(camera, shovelerSampleUpdate, &windowSettings);
+	ShovelerGame *game = shovelerGameCreate(camera, shovelerSampleUpdate, &windowSettings, &controllerSettings);
 	if(game == NULL) {
 		return EXIT_FAILURE;
 	}
 
-	ShovelerController *controller = shovelerControllerCreate(game->window, game->input, position, direction, up, 0.5f, 0.0005f);
-	controller->lockTiltX = true;
-	controller->lockTiltY = true;
-	shovelerCameraPerspectiveAttachController(camera, controller);
+	game->controller->lockTiltX = true;
+	game->controller->lockTiltY = true;
+	shovelerCameraPerspectiveAttachController(camera, game->controller);
 
 	ShovelerCanvas *canvas = shovelerCanvasCreate();
 
@@ -121,13 +123,12 @@ int main(int argc, char *argv[])
 	shovelerTileSpriteAnimationFree(animation);
 	shovelerTilesetFree(tileset);
 	shovelerTilesetFree(animationTileset);
-	shovelerCameraFree(camera);
 	shovelerDrawableFree(quad);
 	shovelerMaterialFree(canvasMaterial);
 	shovelerCanvasFree(canvas);
-	shovelerControllerFree(controller);
-
+	shovelerCameraPerspectiveDetachController(camera);
 	shovelerGameFree(game);
+	shovelerCameraFree(camera);
 	shovelerGlobalUninit();
 	shovelerLogTerminate();
 

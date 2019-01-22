@@ -47,31 +47,31 @@ int main(int argc, char *argv[])
 	windowSettings.windowedWidth = 640;
 	windowSettings.windowedHeight = 480;
 
-	ShovelerVector3 position = {0, 0, -5};
-	ShovelerVector3 direction = {0, 0, 1};
-	ShovelerVector3 up = {0, 1, 0};
+	ShovelerGameControllerSettings controllerSettings;
+	controllerSettings.position = shovelerVector3(0, 0, -5);
+	controllerSettings.direction = shovelerVector3(0, 0, 1);
+	controllerSettings.up = shovelerVector3(0, 1, 0);
+	controllerSettings.moveFactor = 2.0f;
+	controllerSettings.tiltFactor = 0.0005f;
+
 	float fov = 2.0f * SHOVELER_PI * 50.0f / 360.0f;
 	float aspectRatio = (float) windowSettings.windowedWidth / windowSettings.windowedHeight;
 
 	shovelerLogInit("shoveler/", SHOVELER_LOG_LEVEL_INFO_UP, stdout);
 	shovelerGlobalInit();
 
-	ShovelerCamera *camera = shovelerCameraPerspectiveCreate(position, direction, up, fov, aspectRatio, 0.01, 1000);
+	ShovelerCamera *camera = shovelerCameraPerspectiveCreate(controllerSettings.position, controllerSettings.direction, controllerSettings.up, fov, aspectRatio, 0.01, 1000);
 
-	ShovelerGame *game = shovelerGameCreate(camera, updateGame, &windowSettings);
+	ShovelerGame *game = shovelerGameCreate(camera, updateGame, &windowSettings, &controllerSettings);
 	if(game == NULL) {
 		return EXIT_FAILURE;
 	}
 
-	ShovelerController *controller = shovelerControllerCreate(game->window, game->input, position, direction, up, 0.5f, 0.0005f);
-	shovelerCameraPerspectiveAttachController(camera, controller);
+	shovelerCameraPerspectiveAttachController(camera, game->controller);
 
 	ShovelerResources *resources = shovelerResourcesCreate(NULL, NULL);
 	shovelerResourcesImagePngRegister(resources);
-
-	shovelerViewSetTarget(game->view, "controller", controller);
 	shovelerViewSetResources(game->view, resources);
-	shovelerViewSetTarget(game->view, "scene", game->scene);
 
 	ShovelerViewDrawableConfiguration cubeDrawableConfiguration;
 	cubeDrawableConfiguration.type = SHOVELER_VIEW_DRAWABLE_TYPE_CUBE;
@@ -367,10 +367,10 @@ int main(int argc, char *argv[])
 	}
 	shovelerLogInfo("Exiting main loop, goodbye.");
 
+	shovelerCameraPerspectiveDetachController(camera);
+	shovelerGameFree(game);
 	shovelerResourcesFree(resources);
 	shovelerCameraFree(camera);
-	shovelerControllerFree(controller);
-	shovelerGameFree(game);
 	shovelerGlobalUninit();
 	shovelerLogTerminate();
 
