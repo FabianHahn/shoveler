@@ -24,6 +24,7 @@ ShovelerView *shovelerViewCreate()
 	view->entities = g_hash_table_new_full(g_int64_hash, g_int64_equal, NULL, freeEntity);
 	view->targets = g_hash_table_new_full(&g_str_hash, &g_str_equal, &free, NULL);
 	view->reverseDependencies = g_hash_table_new_full(qualifiedComponentHash, qualifiedComponentEqual, freeQualifiedComponent, freeQualifiedComponents);
+	view->dependencyCallbacks = g_queue_new();
 
 	return view;
 }
@@ -156,6 +157,11 @@ void shovelerViewComponentAddDependency(ShovelerViewComponent *component, long l
 			shovelerViewComponentDeactivate(component);
 		}
 	}
+
+	for(GList *iter = component->entity->view->dependencyCallbacks->head; iter != NULL; iter = iter->next) {
+		ShovelerViewDependencyCallback *callback = iter->data;
+		callback->function(component->entity->view, dependencySource, dependencyTarget, true, callback->userData);
+	}
 }
 
 bool shovelerViewComponentRemoveDependency(ShovelerViewComponent *component, long long int dependencyEntityId, const char *dependencyComponentName)
@@ -178,6 +184,16 @@ bool shovelerViewComponentRemoveDependency(ShovelerViewComponent *component, lon
 	}
 
 	shovelerLogInfo("Removed component dependency on component '%s' of entity %lld from component '%s' of entity %lld.", dependencyTarget.componentName, dependencyEntityId, component->name, component->entity->entityId);
+
+	ShovelerViewQualifiedComponent dependencySource;
+	dependencySource.entityId = component->entity->entityId;
+	dependencySource.componentName = component->name;
+
+	for(GList *iter = component->entity->view->dependencyCallbacks->head; iter != NULL; iter = iter->next) {
+		ShovelerViewDependencyCallback *callback = iter->data;
+		callback->function(component->entity->view, &dependencySource, &dependencyTarget, false, callback->userData);
+	}
+
 	free(dependencyTarget.componentName);
 	return true;
 }
@@ -408,8 +424,29 @@ bool shovelerViewWriteDependencyGraph(ShovelerView *view, const char *filename)
 	return success;
 }
 
+ShovelerViewDependencyCallback *shovelerViewAddDependencyCallback(ShovelerView *view, ShovelerViewDependencyCallbackFunction *function, void *userData)
+{
+	ShovelerViewDependencyCallback *callback = malloc(sizeof(ShovelerViewDependencyCallback));
+	callback->function = function;
+	callback->userData = userData;
+	g_queue_push_tail(view->dependencyCallbacks, callback);
+
+	return callback;
+}
+
+bool shovelerViewRemoveDependencyCallback(ShovelerView *view, ShovelerViewDependencyCallback *callback)
+{
+	if(!g_queue_remove(view->dependencyCallbacks, callback)) {
+		return false;
+	}
+
+	free(callback);
+	return true;
+}
+
 void shovelerViewFree(ShovelerView *view)
 {
+	g_queue_free_full(view->dependencyCallbacks, free);
 	g_hash_table_destroy(view->entities);
 	g_hash_table_destroy(view->targets);
 	g_hash_table_destroy(view->reverseDependencies);

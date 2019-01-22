@@ -14,6 +14,8 @@ typedef struct {
 	/* private */ GHashTable *targets;
 	/** map from target (ShovelerViewQualifiedComponent *) to list of (ShovelerViewQualifiedComponent *) */
 	/* private */ GHashTable *reverseDependencies;
+	/** list of (ShovelerViewDependencyCallback *) */
+	/* private */ GQueue *dependencyCallbacks;
 } ShovelerView;
 
 typedef enum {
@@ -64,6 +66,13 @@ typedef struct {
 	char *componentName;
 } ShovelerViewQualifiedComponent;
 
+typedef void (ShovelerViewDependencyCallbackFunction)(ShovelerView *view, const ShovelerViewQualifiedComponent *dependencySource, const ShovelerViewQualifiedComponent *dependencyTarget, bool added, void *userData);
+
+typedef struct {
+	ShovelerViewDependencyCallbackFunction *function;
+	void *userData;
+} ShovelerViewDependencyCallback;
+
 ShovelerView *shovelerViewCreate();
 ShovelerViewEntity *shovelerViewAddEntity(ShovelerView *view, long long int entityId);
 bool shovelerViewRemoveEntity(ShovelerView *view, long long int entityId);
@@ -88,6 +97,8 @@ bool shovelerViewSetTarget(ShovelerView *view, const char *targetName, void *tar
 GString *shovelerViewCreateDependencyGraph(ShovelerView *view);
 /** Writes the view's dependency graph to a graphviz dot file. */
 bool shovelerViewWriteDependencyGraph(ShovelerView *view, const char *filename);
+ShovelerViewDependencyCallback *shovelerViewAddDependencyCallback(ShovelerView *view, ShovelerViewDependencyCallbackFunction *function, void *userData);
+bool shovelerViewRemoveDependencyCallback(ShovelerView *view, ShovelerViewDependencyCallback *callback);
 void shovelerViewFree(ShovelerView *view);
 
 static inline ShovelerViewEntity *shovelerViewGetEntity(ShovelerView *view, long long int entityId)
