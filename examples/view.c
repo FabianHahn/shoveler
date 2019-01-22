@@ -395,7 +395,6 @@ static GString *getImageData(ShovelerImage *image)
 
 static void updateGame(ShovelerGame *game, double dt)
 {
-	shovelerControllerUpdate(shovelerCameraPerspectiveGetController(game->camera), dt);
 	shovelerCameraUpdateView(game->camera);
 
 	time += dt;

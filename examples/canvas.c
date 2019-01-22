@@ -139,7 +139,6 @@ static void shovelerSampleUpdate(ShovelerGame *game, double dt)
 {
 	ShovelerController *controller = shovelerCameraPerspectiveGetController(game->camera);
 
-	shovelerControllerUpdate(controller, dt);
 	shovelerCameraUpdateView(game->camera);
 
 	float moveAmountX = controller->position.values[0] - characterSprite.position.values[0] + 0.5f;

@@ -159,6 +159,5 @@ int main(int argc, char *argv[])
 
 static void shovelerSampleUpdate(ShovelerGame *game, double dt)
 {
-	shovelerControllerUpdate(shovelerCameraPerspectiveGetController(game->camera), dt);
 	shovelerCameraUpdateView(game->camera);
 }
