@@ -3,6 +3,15 @@
 
 #include <math.h> // sqrtf
 
+typedef enum {
+	SHOVELER_COORDINATE_MAPPING_POSITIVE_X,
+	SHOVELER_COORDINATE_MAPPING_NEGATIVE_X,
+	SHOVELER_COORDINATE_MAPPING_POSITIVE_Y,
+	SHOVELER_COORDINATE_MAPPING_NEGATIVE_Y,
+	SHOVELER_COORDINATE_MAPPING_POSITIVE_Z,
+	SHOVELER_COORDINATE_MAPPING_NEGATIVE_Z,
+} ShovelerCoordinateMapping;
+
 typedef struct {
 	float values[2];
 } ShovelerVector2;
@@ -307,5 +316,22 @@ static inline ShovelerMatrix shovelerMatrixCreateRotation(ShovelerVector3 axis, 
 	return rotation;
 }
 
+static inline float shovelerCoordinateMap(ShovelerVector3 coordinates, ShovelerCoordinateMapping mapping)
+{
+	switch(mapping) {
+		case SHOVELER_COORDINATE_MAPPING_POSITIVE_X:
+			return coordinates.values[0];
+		case SHOVELER_COORDINATE_MAPPING_NEGATIVE_X:
+			return -coordinates.values[0];
+		case SHOVELER_COORDINATE_MAPPING_POSITIVE_Y:
+			return coordinates.values[1];
+		case SHOVELER_COORDINATE_MAPPING_NEGATIVE_Y:
+			return -coordinates.values[1];
+		case SHOVELER_COORDINATE_MAPPING_POSITIVE_Z:
+			return coordinates.values[2];
+		case SHOVELER_COORDINATE_MAPPING_NEGATIVE_Z:
+			return -coordinates.values[2];
+	}
+}
 
 #endif

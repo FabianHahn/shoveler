@@ -6,12 +6,13 @@
 #include "shoveler/view/tile_sprite.h"
 #include "shoveler/view/tile_sprite_animation.h"
 #include "shoveler/log.h"
+#include "shoveler/types.h"
 
 typedef struct {
 	ShovelerViewTileSpriteAnimationConfiguration configuration;
 	ShovelerTileSpriteAnimation *animation;
-	ShovelerViewTileSpriteCoordinateMappingConfiguration positionMappingX;
-	ShovelerViewTileSpriteCoordinateMappingConfiguration positionMappingY;
+	ShovelerCoordinateMapping positionMappingX;
+	ShovelerCoordinateMapping positionMappingY;
 	float previousPositionX;
 	float previousPositionY;
 	ShovelerViewComponentCallback *positionCallback;
@@ -37,8 +38,8 @@ bool shovelerViewEntityAddTileSpriteAnimation(ShovelerViewEntity *entity, const 
 	componentData->configuration.tileSpriteEntityId = 0;
 	componentData->configuration.moveAmountThreshold = 0.0f;
 	componentData->animation = NULL;
-	componentData->positionMappingX = SHOVELER_VIEW_TILE_SPRITE_COORDINATE_MAPPING_POSITIVE_X;
-	componentData->positionMappingY = SHOVELER_VIEW_TILE_SPRITE_COORDINATE_MAPPING_POSITIVE_Y;
+	componentData->positionMappingX = SHOVELER_COORDINATE_MAPPING_POSITIVE_X;
+	componentData->positionMappingY = SHOVELER_COORDINATE_MAPPING_POSITIVE_Y;
 	componentData->previousPositionX = 0.0f;
 	componentData->previousPositionY = 0.0f;
 	componentData->positionCallback = NULL;
@@ -151,8 +152,9 @@ static bool activateComponent(ShovelerViewComponent *component, void *componentD
 	componentData->positionMappingY = tileSpriteConfiguration->positionMappingY;
 
 	const ShovelerViewPosition *position = shovelerViewEntityGetPosition(component->entity);
-	componentData->previousPositionX = (float) shovelerViewPositionMapTileSpriteCoordinate(position, componentData->positionMappingX);
-	componentData->previousPositionX = (float) shovelerViewPositionMapTileSpriteCoordinate(position, componentData->positionMappingY);
+	ShovelerVector3 positionCoordinates = shovelerVector3((float) position->x, (float) position->y, (float) position->z);
+	componentData->previousPositionX = shovelerCoordinateMap(positionCoordinates, componentData->positionMappingX);
+	componentData->previousPositionX = shovelerCoordinateMap(positionCoordinates, componentData->positionMappingY);
 
 	componentData->positionCallback = shovelerViewEntityAddCallback(component->entity, shovelerViewPositionComponentName, &positionCallback, componentData);
 
@@ -193,8 +195,9 @@ static void positionCallback(ShovelerViewComponent *positionComponent, ShovelerV
 
 static void updatePosition(ComponentData *componentData, const ShovelerViewPosition *position)
 {
-	float positionX = (float) shovelerViewPositionMapTileSpriteCoordinate(position, componentData->positionMappingX);
-	float positionY = (float) shovelerViewPositionMapTileSpriteCoordinate(position, componentData->positionMappingY);
+	ShovelerVector3 positionCoordinates = shovelerVector3((float) position->x, (float) position->y, (float) position->z);
+	float positionX = shovelerCoordinateMap(positionCoordinates, componentData->positionMappingX);
+	float positionY = shovelerCoordinateMap(positionCoordinates, componentData->positionMappingY);
 
 	float moveAmountX = positionX - componentData->previousPositionX;
 	float moveAmountY = positionY - componentData->previousPositionY;

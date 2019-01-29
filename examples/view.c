@@ -270,8 +270,8 @@ int main(int argc, char *argv[])
 	tileSpriteConfiguration.tilesetEntityId = 11;
 	tileSpriteConfiguration.tilesetColumn = 0;
 	tileSpriteConfiguration.tilesetRow = 0;
-	tileSpriteConfiguration.positionMappingX = SHOVELER_VIEW_TILE_SPRITE_COORDINATE_MAPPING_POSITIVE_X;
-	tileSpriteConfiguration.positionMappingY = SHOVELER_VIEW_TILE_SPRITE_COORDINATE_MAPPING_POSITIVE_Y;
+	tileSpriteConfiguration.positionMappingX = SHOVELER_COORDINATE_MAPPING_POSITIVE_X;
+	tileSpriteConfiguration.positionMappingY = SHOVELER_COORDINATE_MAPPING_POSITIVE_Y;
 	tileSpriteConfiguration.size = shovelerVector2(2.5, 2.5);
 	ShovelerViewTileSpriteAnimationConfiguration tileSpriteAnimationConfiguration;
 	tileSpriteAnimationConfiguration.tileSpriteEntityId = 14;
@@ -288,8 +288,8 @@ int main(int argc, char *argv[])
 	shovelerViewEntityAddCanvas(canvasEntity, &canvasConfiguration);
 
 	ShovelerViewChunkConfiguration chunkConfiguration;
-	chunkConfiguration.positionMappingX = SHOVELER_VIEW_CHUNK_COORDINATE_MAPPING_POSITIVE_X;
-	chunkConfiguration.positionMappingY = SHOVELER_VIEW_CHUNK_COORDINATE_MAPPING_POSITIVE_Y;
+	chunkConfiguration.positionMappingX = SHOVELER_COORDINATE_MAPPING_POSITIVE_X;
+	chunkConfiguration.positionMappingY = SHOVELER_COORDINATE_MAPPING_POSITIVE_Y;
 	chunkConfiguration.size = shovelerVector2(10.0f, 10.0f);
 	chunkConfiguration.numLayers = 3;
 	chunkConfiguration.layers = (ShovelerViewChunkLayerConfiguration[]){

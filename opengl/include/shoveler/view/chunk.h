@@ -9,15 +9,7 @@
 #include <shoveler/chunk.h>
 #include <shoveler/tileset.h>
 #include <shoveler/view.h>
-
-typedef enum {
-	SHOVELER_VIEW_CHUNK_COORDINATE_MAPPING_POSITIVE_X,
-	SHOVELER_VIEW_CHUNK_COORDINATE_MAPPING_NEGATIVE_X,
-	SHOVELER_VIEW_CHUNK_COORDINATE_MAPPING_POSITIVE_Y,
-	SHOVELER_VIEW_CHUNK_COORDINATE_MAPPING_NEGATIVE_Y,
-	SHOVELER_VIEW_CHUNK_COORDINATE_MAPPING_POSITIVE_Z,
-	SHOVELER_VIEW_CHUNK_COORDINATE_MAPPING_NEGATIVE_Z,
-} ShovelerViewChunkCoordinateMappingConfiguration;
+#include <shoveler/types.h>
 
 typedef struct {
 	ShovelerChunkLayerType type;
@@ -25,8 +17,8 @@ typedef struct {
 } ShovelerViewChunkLayerConfiguration;
 
 typedef struct {
-	ShovelerViewChunkCoordinateMappingConfiguration positionMappingX;
-	ShovelerViewChunkCoordinateMappingConfiguration positionMappingY;
+	ShovelerCoordinateMapping positionMappingX;
+	ShovelerCoordinateMapping positionMappingY;
 	ShovelerVector2 size;
 	int numLayers;
 	ShovelerViewChunkLayerConfiguration *layers;

@@ -8,22 +8,14 @@
 #include <shoveler/view/position.h>
 #include <shoveler/canvas.h>
 #include <shoveler/view.h>
-
-typedef enum {
-	SHOVELER_VIEW_TILE_SPRITE_COORDINATE_MAPPING_POSITIVE_X,
-	SHOVELER_VIEW_TILE_SPRITE_COORDINATE_MAPPING_NEGATIVE_X,
-	SHOVELER_VIEW_TILE_SPRITE_COORDINATE_MAPPING_POSITIVE_Y,
-	SHOVELER_VIEW_TILE_SPRITE_COORDINATE_MAPPING_NEGATIVE_Y,
-	SHOVELER_VIEW_TILE_SPRITE_COORDINATE_MAPPING_POSITIVE_Z,
-	SHOVELER_VIEW_TILE_SPRITE_COORDINATE_MAPPING_NEGATIVE_Z,
-} ShovelerViewTileSpriteCoordinateMappingConfiguration;
+#include <shoveler/types.h>
 
 typedef struct {
 	long long int tilesetEntityId;
 	unsigned char tilesetColumn;
 	unsigned char tilesetRow;
-	ShovelerViewTileSpriteCoordinateMappingConfiguration positionMappingX;
-	ShovelerViewTileSpriteCoordinateMappingConfiguration positionMappingY;
+	ShovelerCoordinateMapping positionMappingX;
+	ShovelerCoordinateMapping positionMappingY;
 	ShovelerVector2 size;
 } ShovelerViewTileSpriteConfiguration;
 
@@ -36,7 +28,5 @@ const ShovelerViewTileSpriteConfiguration *shovelerViewEntityGetTileSpriteConfig
 /** Updates a canvas tile sprite component on an entity, copying the supplied configuration. */
 bool shovelerViewEntityUpdateTileSprite(ShovelerViewEntity *entity, const ShovelerViewTileSpriteConfiguration *configuration);
 bool shovelerViewEntityRemoveTileSprite(ShovelerViewEntity *entity);
-
-double shovelerViewPositionMapTileSpriteCoordinate(const ShovelerViewPosition *position, ShovelerViewTileSpriteCoordinateMappingConfiguration mapping);
 
 #endif

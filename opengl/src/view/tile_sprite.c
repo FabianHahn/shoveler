@@ -33,8 +33,8 @@ bool shovelerViewEntityAddTileSprite(ShovelerViewEntity *entity, const ShovelerV
 	componentData->configuration.tilesetEntityId = 0;
 	componentData->configuration.tilesetColumn = 0;
 	componentData->configuration.tilesetRow = 0;
-	componentData->configuration.positionMappingX = SHOVELER_VIEW_TILE_SPRITE_COORDINATE_MAPPING_POSITIVE_X;
-	componentData->configuration.positionMappingY = SHOVELER_VIEW_TILE_SPRITE_COORDINATE_MAPPING_POSITIVE_Y;
+	componentData->configuration.positionMappingX = SHOVELER_COORDINATE_MAPPING_POSITIVE_X;
+	componentData->configuration.positionMappingY = SHOVELER_COORDINATE_MAPPING_POSITIVE_Y;
 	componentData->configuration.size = shovelerVector2(0.0f, 0.0f);
 	componentData->tileSprite = NULL;
 	componentData->positionCallback = NULL;
@@ -110,27 +110,6 @@ bool shovelerViewEntityRemoveTileSprite(ShovelerViewEntity *entity)
 	return shovelerViewEntityRemoveComponent(entity, shovelerViewTileSpriteComponentName);
 }
 
-double shovelerViewPositionMapTileSpriteCoordinate(const ShovelerViewPosition *position, ShovelerViewTileSpriteCoordinateMappingConfiguration mapping)
-{
-	switch(mapping) {
-		case SHOVELER_VIEW_TILE_SPRITE_COORDINATE_MAPPING_POSITIVE_X:
-			return position->x;
-		case SHOVELER_VIEW_TILE_SPRITE_COORDINATE_MAPPING_NEGATIVE_X:
-			return -position->x;
-		case SHOVELER_VIEW_TILE_SPRITE_COORDINATE_MAPPING_POSITIVE_Y:
-			return position->y;
-		case SHOVELER_VIEW_TILE_SPRITE_COORDINATE_MAPPING_NEGATIVE_Y:
-			return -position->y;
-		case SHOVELER_VIEW_TILE_SPRITE_COORDINATE_MAPPING_POSITIVE_Z:
-			return position->z;
-		case SHOVELER_VIEW_TILE_SPRITE_COORDINATE_MAPPING_NEGATIVE_Z:
-			return -position->z;
-		default:
-			shovelerLogError("Unknown coordinate mapping configuration: %d", mapping);
-			return 0.0;
-	}
-}
-
 static void assignConfiguration(ShovelerViewTileSpriteConfiguration *destination, const ShovelerViewTileSpriteConfiguration *source)
 {
 	clearConfiguration(destination);
@@ -148,8 +127,8 @@ static void clearConfiguration(ShovelerViewTileSpriteConfiguration *configuratio
 	configuration->tilesetEntityId = 0;
 	configuration->tilesetColumn = 0;
 	configuration->tilesetRow = 0;
-	configuration->positionMappingX = SHOVELER_VIEW_TILE_SPRITE_COORDINATE_MAPPING_POSITIVE_X;
-	configuration->positionMappingY = SHOVELER_VIEW_TILE_SPRITE_COORDINATE_MAPPING_POSITIVE_Y;
+	configuration->positionMappingX = SHOVELER_COORDINATE_MAPPING_POSITIVE_X;
+	configuration->positionMappingY = SHOVELER_COORDINATE_MAPPING_POSITIVE_Y;
 	configuration->size = shovelerVector2(0.0f, 0.0f);
 }
 
@@ -209,6 +188,8 @@ static void positionCallback(ShovelerViewComponent *positionComponent, ShovelerV
 
 static void updatePosition(ComponentData *componentData, const ShovelerViewPosition *position)
 {
-	componentData->tileSprite->position.values[0] = (float) shovelerViewPositionMapTileSpriteCoordinate(position, componentData->configuration.positionMappingX);
-	componentData->tileSprite->position.values[1] = (float) shovelerViewPositionMapTileSpriteCoordinate(position, componentData->configuration.positionMappingY);
+	ShovelerVector3 positionCoordinates = shovelerVector3((float) position->x, (float) position->y, (float) position->z);
+
+	componentData->tileSprite->position.values[0] = shovelerCoordinateMap(positionCoordinates, componentData->configuration.positionMappingX);
+	componentData->tileSprite->position.values[1] = shovelerCoordinateMap(positionCoordinates, componentData->configuration.positionMappingY);
 }
