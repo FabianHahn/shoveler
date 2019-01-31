@@ -9,6 +9,8 @@
 #include <shoveler/resources/image_png.h>
 #include <shoveler/view/canvas.h>
 #include <shoveler/view/chunk.h>
+#include <shoveler/view/client.h>
+#include <shoveler/view/controller.h>
 #include <shoveler/view/drawable.h>
 #include <shoveler/view/light.h>
 #include <shoveler/view/material.h>
@@ -36,6 +38,7 @@ static double time = 0.0;
 
 static GString *getImageData(ShovelerImage *image);
 static void updateGame(ShovelerGame *game, double dt);
+static void requestPositionUpdate(ShovelerViewComponent *component, double x, double y, double z, void *userData);
 
 int main(int argc, char *argv[])
 {
@@ -360,6 +363,16 @@ int main(int argc, char *argv[])
 	shovelerViewEntityAddMaterial(chunkMaterialEntity, chunkMaterialConfiguration);
 	shovelerViewEntityAddPosition(chunkMaterialEntity, -5.0, 5.0, 7.5);
 
+	ShovelerViewClientConfiguration clientConfiguration;
+	clientConfiguration.positionEntityId = 20;
+	clientConfiguration.modelEntityId = 0;
+	ShovelerViewEntity *clientEntity = shovelerViewAddEntity(game->view, 20);
+	shovelerViewEntitySetType(clientEntity, "client");
+	shovelerViewEntityAddPosition(clientEntity, 0.0, 0.0, 0.0);
+	shovelerViewEntityAddClient(clientEntity, &clientConfiguration);
+	shovelerViewEntityDelegatePosition(clientEntity, requestPositionUpdate, NULL);
+	shovelerViewEntityDelegateClient(clientEntity);
+
 	shovelerOpenGLCheckSuccess();
 
 	while(shovelerGameIsRunning(game)) {
@@ -408,4 +421,9 @@ static void updateGame(ShovelerGame *game, double dt)
 	const ShovelerViewTilemapTilesConfiguration *layerConfiguration = shovelerViewEntityGetTilemapTilesConfiguration(tilemapEntity);
 	layerConfiguration->tiles[0].tilesetColumn = (unsigned char) ((int) time % 2);
 	shovelerViewEntityUpdateTilemapTilesData(tilemapEntity, layerConfiguration->tiles);
+}
+
+static void requestPositionUpdate(ShovelerViewComponent *component, double x, double y, double z, void *userData)
+{
+	shovelerLogInfo("Position updated to (%.2f, %.2f, %.2f).", x, y, z);
 }
