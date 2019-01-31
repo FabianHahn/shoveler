@@ -74,7 +74,12 @@ bool shovelerViewRemoveEntity(ShovelerView *view, long long int entityId)
 void shovelerViewEntitySetType(ShovelerViewEntity *entity, const char *type)
 {
 	free(entity->type);
-	entity->type = strdup(type);
+
+	if(type != NULL) {
+		entity->type = strdup(type);
+	} else {
+		entity->type = NULL;
+	}
 }
 
 ShovelerViewComponent *shovelerViewEntityAddComponent(ShovelerViewEntity *entity, const char *componentName, void *data, ShovelerViewComponentActivateFunction *activate, ShovelerViewComponentDeactivateFunction *deactivate, ShovelerViewComponentFreeFunction *freeFunction)
