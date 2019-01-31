@@ -169,7 +169,7 @@ static bool activateComponent(ShovelerViewComponent *component, void *componentD
 
 	ComponentData *componentData = componentDataPointer;
 
-	if(component->authoritative) {
+	if(!component->authoritative) {
 		shovelerLogWarning("Failed to activate client of entity %lld because it is not authoritative.", component->entity->entityId);
 		return false;
 	}
