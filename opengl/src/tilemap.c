@@ -13,6 +13,7 @@ ShovelerTilemap *shovelerTilemapCreate(ShovelerTexture *tiles)
 	ShovelerTilemap *tilemap = malloc(sizeof(ShovelerTilemap));
 	tilemap->tiles = tiles;
 	tilemap->tilesets = g_queue_new();
+	return tilemap;
 }
 
 int shovelerTilemapAddTileset(ShovelerTilemap *tilemap, ShovelerTileset *tileset)
