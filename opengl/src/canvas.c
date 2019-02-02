@@ -12,6 +12,7 @@ ShovelerCanvas *shovelerCanvasCreate()
 {
 	ShovelerCanvas *canvas = malloc(sizeof(ShovelerCanvas));
 	canvas->tileSprites = g_queue_new();
+	return canvas;
 }
 
 int shovelerCanvasAddTileSprite(ShovelerCanvas *canvas, const ShovelerCanvasTileSprite *tileSprite)
