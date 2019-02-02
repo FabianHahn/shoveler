@@ -8,8 +8,10 @@ set(SHOVELER_BASE_SRC
 	src/compression.c
 	src/executor.c
 	src/file.c
+	src/frustum.c
 	src/image.c
 	src/log.c
+	src/projection.c
 	src/resources.c
 	src/view.c
 	include/shoveler/image/png.h
@@ -22,9 +24,11 @@ set(SHOVELER_BASE_SRC
 	include/shoveler/constants.h
 	include/shoveler/executor.h
 	include/shoveler/file.h
+	include/shoveler/frustum.h
 	include/shoveler/hash.h
 	include/shoveler/image.h
 	include/shoveler/log.h
+	include/shoveler/projection.h
 	include/shoveler/resources.h
 	include/shoveler/types.h
 	include/shoveler/view.h
@@ -37,6 +41,7 @@ set(SHOVELER_BASE_TEST_SRC
 	src/color_test.cpp
 	src/compression_test.cpp
 	src/executor_test.cpp
+	src/projection_test.cpp
 	src/resources_test.cpp
 	src/test.cpp
 	src/types_test.cpp
