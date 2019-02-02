@@ -21,10 +21,10 @@ ShovelerCamera *shovelerCameraPerspectiveCreate(const ShovelerReferenceFrame *fr
 	perspectiveCamera->direction = shovelerVector3Normalize(frame->direction);
 	perspectiveCamera->upwards = shovelerVector3Normalize(frame->up);
 
-	updateView(perspectiveCamera);
-
 	perspectiveCamera->projection = *projection;
 	shovelerProjectionPerspectiveComputeTransformation(&perspectiveCamera->projection, &perspectiveCamera->camera.projection);
+
+	updateView(perspectiveCamera);
 
 	perspectiveCamera->controller = NULL;
 	perspectiveCamera->controllerTiltCallback = NULL;
@@ -76,6 +76,8 @@ static void updateView(void *perspectiveCameraPointer)
 	frame.direction = perspectiveCamera->direction;
 	frame.up = perspectiveCamera->upwards;
 	shovelerMatrixCreateLookIntoDirectionTransformation(&frame, &perspectiveCamera->camera.view);
+
+	shovelerProjectionPerspectiveComputeFrustum(&perspectiveCamera->projection, &frame, &perspectiveCamera->camera.frustum);
 }
 
 static void freePerspectiveCamera(void *perspectiveCameraPointer)

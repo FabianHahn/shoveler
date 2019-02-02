@@ -5,6 +5,20 @@
 void shovelerCameraInit(ShovelerCamera *camera, ShovelerVector3 position, void *data, ShovelerCameraUpdateViewFunction *updateView, ShovelerCameraFreeDataFunction *freeData)
 {
 	camera->position = position;
+	camera->frustum.nearBottomLeft = shovelerVector3(-1.0f, -1.0f, -1.0f);
+	camera->frustum.nearBottomRight = shovelerVector3(1.0f, -1.0f, -1.0f);
+	camera->frustum.nearTopRight = shovelerVector3(1.0f, 1.0f, -1.0f);
+	camera->frustum.nearTopLeft = shovelerVector3(-1.0f, 1.0f, -1.0f);
+	camera->frustum.farBottomLeft = shovelerVector3(-1.0f, -1.0f, 1.0f);
+	camera->frustum.farBottomRight = shovelerVector3(1.0f, -1.0f, 1.0f);
+	camera->frustum.farTopRight = shovelerVector3(1.0f, 1.0f, 1.0f);
+	camera->frustum.farTopLeft = shovelerVector3(-1.0f, 1.0f, 1.0f);
+	camera->frustum.near = shovelerPlane(shovelerVector3(0.0f, 0.0f, -1.0f), 1.0f);
+	camera->frustum.far = shovelerPlane(shovelerVector3(0.0f, 0.0f, 1.0f), 1.0f);
+	camera->frustum.left = shovelerPlane(shovelerVector3(-1.0f, 0.0f, 0.0f), 1.0f);
+	camera->frustum.bottom = shovelerPlane(shovelerVector3(0.0f, -1.0f, 0.0f), 1.0f);
+	camera->frustum.right = shovelerPlane(shovelerVector3(1.0f, 0.0f, 0.0f), 1.0f);
+	camera->frustum.top = shovelerPlane(shovelerVector3(0.0f, 1.0f, 0.0f), 1.0f);
 	camera->view = shovelerMatrixIdentity;
 	camera->projection = shovelerMatrixIdentity;
 	camera->uniforms = shovelerUniformMapCreate();
