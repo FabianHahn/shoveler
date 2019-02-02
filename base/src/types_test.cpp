@@ -44,7 +44,17 @@ static std::ostream& operator<<(std::ostream& stream, const T& v) {
 static ShovelerVector2 testVector2 = {1, 2};
 static ShovelerVector3 testVector3 = {1, 2, 3};
 static ShovelerVector4 testVector4 = {1, 2, 3, 4};
-static ShovelerMatrix testMatrix = {
+static ShovelerMatrix testMatrix2 = {
+	 1,  2,  3,  0,
+	 5,  6,  7,  0,
+	 0,  0,  1,  0,
+	 0,  0,  0,  1};
+static ShovelerMatrix testMatrix3 = {
+	 1,  2,  3,  4,
+	 5,  6,  7,  8,
+	 9, 10, 11, 12,
+	 0,  0,  0,  1};
+static ShovelerMatrix testMatrix4 = {
 	 1,  2,  3,  4,
 	 5,  6,  7,  8,
 	 9, 10, 11, 12,
@@ -95,19 +105,19 @@ TEST(vector, normalize)
 
 TEST(matrix, transpose)
 {
-	ShovelerMatrix result = shovelerMatrixTranspose(testMatrix);
+	ShovelerMatrix result = shovelerMatrixTranspose(testMatrix4);
 
 	for(int i = 0; i < 4; i++) {
 		for(int j = 0; j < 4; j++) {
-			ASSERT_EQ(shovelerMatrixGet(result, i, j), shovelerMatrixGet(testMatrix, j, i)) << "transposed matrix element at (" << i << ", " << j << ") must match original element at (" << j << ", " << i << ")";
+			ASSERT_EQ(shovelerMatrixGet(result, i, j), shovelerMatrixGet(testMatrix4, j, i)) << "transposed matrix element at (" << i << ", " << j << ") must match original element at (" << j << ", " << i << ")";
 		}
 	}
 }
 
 TEST(matrix, transposeTwice)
 {
-	ShovelerMatrix result = shovelerMatrixTranspose(shovelerMatrixTranspose(testMatrix));
-	ASSERT_EQ(result, testMatrix);
+	ShovelerMatrix result = shovelerMatrixTranspose(shovelerMatrixTranspose(testMatrix4));
+	ASSERT_EQ(result, testMatrix4);
 }
 
 TEST(matrix, multiply)
@@ -118,47 +128,47 @@ TEST(matrix, multiply)
 		314, 356, 398, 440,
 		426, 484, 542, 600};
 
-	ShovelerMatrix result = shovelerMatrixMultiply(testMatrix, testMatrix);
+	ShovelerMatrix result = shovelerMatrixMultiply(testMatrix4, testMatrix4);
 	ASSERT_EQ(result, solution);
 }
 
 TEST(matrix, multiplyZeroLeft)
 {
-	ShovelerMatrix result = shovelerMatrixMultiply(shovelerMatrixZero, testMatrix);
+	ShovelerMatrix result = shovelerMatrixMultiply(shovelerMatrixZero, testMatrix4);
 	ASSERT_EQ(result, shovelerMatrixZero);
 }
 
 TEST(matrix, multiplyZeroRight)
 {
-	ShovelerMatrix result = shovelerMatrixMultiply(testMatrix, shovelerMatrixZero);
+	ShovelerMatrix result = shovelerMatrixMultiply(testMatrix4, shovelerMatrixZero);
 	ASSERT_EQ(result, shovelerMatrixZero);
 }
 
 TEST(matrix, multiplyIdentityLeft)
 {
-	ShovelerMatrix result = shovelerMatrixMultiply(shovelerMatrixIdentity, testMatrix);
-	ASSERT_EQ(result, testMatrix);
+	ShovelerMatrix result = shovelerMatrixMultiply(shovelerMatrixIdentity, testMatrix4);
+	ASSERT_EQ(result, testMatrix4);
 }
 
 TEST(matrix, multiplyIdentityRight)
 {
-	ShovelerMatrix result = shovelerMatrixMultiply(testMatrix, shovelerMatrixIdentity);
-	ASSERT_EQ(result, testMatrix);
+	ShovelerMatrix result = shovelerMatrixMultiply(testMatrix4, shovelerMatrixIdentity);
+	ASSERT_EQ(result, testMatrix4);
 }
 
 TEST(matrix, multiplyVector2)
 {
-	static ShovelerVector2 solution = {5, 17};
+	static ShovelerVector2 solution = {8, 24};
 
-	ShovelerVector2 result = shovelerMatrixMultiplyVector2(testMatrix, testVector2);
+	ShovelerVector2 result = shovelerMatrixMultiplyVector2(testMatrix2, testVector2);
 	ASSERT_EQ(result, solution);
 }
 
 TEST(matrix, multiplyVector3)
 {
-	static ShovelerVector3 solution = {14, 38, 62};
+	static ShovelerVector3 solution = {18, 46, 74};
 
-	ShovelerVector3 result = shovelerMatrixMultiplyVector3(testMatrix, testVector3);
+	ShovelerVector3 result = shovelerMatrixMultiplyVector3(testMatrix3, testVector3);
 	ASSERT_EQ(result, solution);
 }
 
@@ -166,6 +176,6 @@ TEST(matrix, multiplyVector4)
 {
 	static ShovelerVector4 solution = {30, 70, 110, 150};
 
-	ShovelerVector4 result = shovelerMatrixMultiplyVector4(testMatrix, testVector4);
+	ShovelerVector4 result = shovelerMatrixMultiplyVector4(testMatrix4, testVector4);
 	ASSERT_EQ(result, solution);
 }

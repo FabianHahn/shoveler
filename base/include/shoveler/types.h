@@ -177,23 +177,6 @@ static inline ShovelerMatrix shovelerMatrixMultiply(ShovelerMatrix A, ShovelerMa
 	return C;
 }
 
-static inline ShovelerVector2 shovelerMatrixMultiplyVector2(ShovelerMatrix A, ShovelerVector2 b)
-{
-	ShovelerVector2 c;
-	c.values[0] = shovelerMatrixGet(A, 0, 0) * b.values[0] + shovelerMatrixGet(A, 0, 1) * b.values[1];
-	c.values[1] = shovelerMatrixGet(A, 1, 0) * b.values[0] + shovelerMatrixGet(A, 1, 1) * b.values[1];
-	return c;
-}
-
-static inline ShovelerVector3 shovelerMatrixMultiplyVector3(ShovelerMatrix A, ShovelerVector3 b)
-{
-	ShovelerVector3 c;
-	c.values[0] = shovelerMatrixGet(A, 0, 0) * b.values[0] + shovelerMatrixGet(A, 0, 1) * b.values[1] + shovelerMatrixGet(A, 0, 2) * b.values[2];
-	c.values[1] = shovelerMatrixGet(A, 1, 0) * b.values[0] + shovelerMatrixGet(A, 1, 1) * b.values[1] + shovelerMatrixGet(A, 1, 2) * b.values[2];
-	c.values[2] = shovelerMatrixGet(A, 2, 0) * b.values[0] + shovelerMatrixGet(A, 2, 1) * b.values[1] + shovelerMatrixGet(A, 2, 2) * b.values[2];
-	return c;
-}
-
 static inline ShovelerVector4 shovelerMatrixMultiplyVector4(ShovelerMatrix A, ShovelerVector4 b)
 {
 	ShovelerVector4 c;
@@ -202,6 +185,22 @@ static inline ShovelerVector4 shovelerMatrixMultiplyVector4(ShovelerMatrix A, Sh
 	c.values[2] = shovelerMatrixGet(A, 2, 0) * b.values[0] + shovelerMatrixGet(A, 2, 1) * b.values[1] + shovelerMatrixGet(A, 2, 2) * b.values[2] + shovelerMatrixGet(A, 2, 3) * b.values[3];
 	c.values[3] = shovelerMatrixGet(A, 3, 0) * b.values[0] + shovelerMatrixGet(A, 3, 1) * b.values[1] + shovelerMatrixGet(A, 3, 2) * b.values[2] + shovelerMatrixGet(A, 3, 3) * b.values[3];
 	return c;
+}
+
+static inline ShovelerVector3 shovelerMatrixMultiplyVector3(ShovelerMatrix A, ShovelerVector3 b)
+{
+	ShovelerVector4 b4 = shovelerVector4(b.values[0], b.values[1], b.values[2], 1.0f);
+	ShovelerVector4 c4 = shovelerMatrixMultiplyVector4(A, b4);
+
+	return shovelerVector3(c4.values[0] / c4.values[3], c4.values[1] / c4.values[3], c4.values[2] / c4.values[3]);
+}
+
+static inline ShovelerVector2 shovelerMatrixMultiplyVector2(ShovelerMatrix A, ShovelerVector2 b)
+{
+	ShovelerVector3 b3 = shovelerVector3(b.values[0], b.values[1], 1.0f);
+	ShovelerVector3 c3 = shovelerMatrixMultiplyVector3(A, b3);
+
+	return shovelerVector2(c3.values[0] / c3.values[2], c3.values[1] / c3.values[2]);
 }
 
 static inline ShovelerVector3 shovelerVector3Cross(ShovelerVector3 a, ShovelerVector3 b)
