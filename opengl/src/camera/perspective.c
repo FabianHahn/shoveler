@@ -99,11 +99,11 @@ static ShovelerMatrix computePerspectiveTransformation(float fieldOfViewY, float
 	ShovelerMatrix perspective = shovelerMatrixZero;
 
 	float f = 1.0f / tanf(fieldOfViewY / 2.0f);
-	ShovelerMatrixGet(perspective, 0, 0) = f / apsectRatio;
-	ShovelerMatrixGet(perspective, 1, 1) = f;
-	ShovelerMatrixGet(perspective, 2, 2) = (nearClippingPlane + farClippingPlane) / (nearClippingPlane - farClippingPlane);
-	ShovelerMatrixGet(perspective, 2, 3) = (2.0f * farClippingPlane * nearClippingPlane) / (nearClippingPlane - farClippingPlane);
-	ShovelerMatrixGet(perspective, 3, 2) = -1.0f;
+	shovelerMatrixGet(perspective, 0, 0) = f / apsectRatio;
+	shovelerMatrixGet(perspective, 1, 1) = f;
+	shovelerMatrixGet(perspective, 2, 2) = (nearClippingPlane + farClippingPlane) / (nearClippingPlane - farClippingPlane);
+	shovelerMatrixGet(perspective, 2, 3) = (2.0f * farClippingPlane * nearClippingPlane) / (nearClippingPlane - farClippingPlane);
+	shovelerMatrixGet(perspective, 3, 2) = -1.0f;
 
 	return perspective;
 }
@@ -115,21 +115,21 @@ static ShovelerMatrix computeLookIntoDirectionTransformation(ShovelerVector3 pos
 
 	// Construct basis transform to camera coordinates
 	ShovelerMatrix basis = shovelerMatrixIdentity;
-	ShovelerMatrixGet(basis, 0, 0) = side.values[0];
-	ShovelerMatrixGet(basis, 0, 1) = side.values[1];
-	ShovelerMatrixGet(basis, 0, 2) = side.values[2];
-	ShovelerMatrixGet(basis, 1, 0) = upwards.values[0];
-	ShovelerMatrixGet(basis, 1, 1) = upwards.values[1];
-	ShovelerMatrixGet(basis, 1, 2) = upwards.values[2];
-	ShovelerMatrixGet(basis, 2, 0) = -direction.values[0];
-	ShovelerMatrixGet(basis, 2, 1) = -direction.values[1];
-	ShovelerMatrixGet(basis, 2, 2) = -direction.values[2];
+	shovelerMatrixGet(basis, 0, 0) = side.values[0];
+	shovelerMatrixGet(basis, 0, 1) = side.values[1];
+	shovelerMatrixGet(basis, 0, 2) = side.values[2];
+	shovelerMatrixGet(basis, 1, 0) = upwards.values[0];
+	shovelerMatrixGet(basis, 1, 1) = upwards.values[1];
+	shovelerMatrixGet(basis, 1, 2) = upwards.values[2];
+	shovelerMatrixGet(basis, 2, 0) = -direction.values[0];
+	shovelerMatrixGet(basis, 2, 1) = -direction.values[1];
+	shovelerMatrixGet(basis, 2, 2) = -direction.values[2];
 
 	// Construct shift matrix to camera position
 	ShovelerMatrix shift = shovelerMatrixIdentity;
-	ShovelerMatrixGet(shift, 0, 3) = -position.values[0];
-	ShovelerMatrixGet(shift, 1, 3) = -position.values[1];
-	ShovelerMatrixGet(shift, 2, 3) = -position.values[2];
+	shovelerMatrixGet(shift, 0, 3) = -position.values[0];
+	shovelerMatrixGet(shift, 1, 3) = -position.values[1];
+	shovelerMatrixGet(shift, 2, 3) = -position.values[2];
 
 	// Create look into direction matrix
 	return shovelerMatrixMultiply(basis, shift);

@@ -99,7 +99,7 @@ TEST(matrix, transpose)
 
 	for(int i = 0; i < 4; i++) {
 		for(int j = 0; j < 4; j++) {
-			ASSERT_EQ(ShovelerMatrixGet(result, i, j), ShovelerMatrixGet(testMatrix, j, i)) << "transposed matrix element at (" << i << ", " << j << ") must match original element at (" << j << ", " << i << ")";
+			ASSERT_EQ(shovelerMatrixGet(result, i, j), shovelerMatrixGet(testMatrix, j, i)) << "transposed matrix element at (" << i << ", " << j << ") must match original element at (" << j << ", " << i << ")";
 		}
 	}
 }

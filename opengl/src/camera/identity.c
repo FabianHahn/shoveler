@@ -21,9 +21,9 @@ static void updateView(void *identityCameraPointer)
 {
 	ShovelerCameraIdentity *identityCamera = identityCameraPointer;
 
-	ShovelerMatrixGet(identityCamera->camera.view, 0, 3) = -identityCamera->camera.position.values[0];
-	ShovelerMatrixGet(identityCamera->camera.view, 1, 3) = -identityCamera->camera.position.values[1];
-	ShovelerMatrixGet(identityCamera->camera.view, 2, 3) = -identityCamera->camera.position.values[2];
+	shovelerMatrixGet(identityCamera->camera.view, 0, 3) = -identityCamera->camera.position.values[0];
+	shovelerMatrixGet(identityCamera->camera.view, 1, 3) = -identityCamera->camera.position.values[1];
+	shovelerMatrixGet(identityCamera->camera.view, 2, 3) = -identityCamera->camera.position.values[2];
 }
 
 static void freeIdentityCamera(void *identityCameraPointer)

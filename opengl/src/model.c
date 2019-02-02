@@ -36,9 +36,9 @@ ShovelerModel *shovelerModelCreate(ShovelerDrawable *drawable, ShovelerMaterial 
 void shovelerModelUpdateTransformation(ShovelerModel *model)
 {
 	ShovelerMatrix translation = shovelerMatrixIdentity;
-	ShovelerMatrixGet(translation, 0, 3) = model->translation.values[0];
-	ShovelerMatrixGet(translation, 1, 3) = model->translation.values[1];
-	ShovelerMatrixGet(translation, 2, 3) = model->translation.values[2];
+	shovelerMatrixGet(translation, 0, 3) = model->translation.values[0];
+	shovelerMatrixGet(translation, 1, 3) = model->translation.values[1];
+	shovelerMatrixGet(translation, 2, 3) = model->translation.values[2];
 
 	ShovelerMatrix rotationX = shovelerMatrixCreateRotationX(model->rotation.values[0]);
 	ShovelerMatrix rotationY = shovelerMatrixCreateRotationY(model->rotation.values[1]);
@@ -46,14 +46,14 @@ void shovelerModelUpdateTransformation(ShovelerModel *model)
 	ShovelerMatrix rotation = shovelerMatrixMultiply(rotationX, shovelerMatrixMultiply(rotationY, rotationZ));
 
 	ShovelerMatrix scale = shovelerMatrixIdentity;
-	ShovelerMatrixGet(scale, 0, 0) = model->scale.values[0];
-	ShovelerMatrixGet(scale, 1, 1) = model->scale.values[1];
-	ShovelerMatrixGet(scale, 2, 2) = model->scale.values[2];
+	shovelerMatrixGet(scale, 0, 0) = model->scale.values[0];
+	shovelerMatrixGet(scale, 1, 1) = model->scale.values[1];
+	shovelerMatrixGet(scale, 2, 2) = model->scale.values[2];
 
 	ShovelerMatrix scaleInverse = shovelerMatrixIdentity;
-	ShovelerMatrixGet(scaleInverse, 0, 0) = 1.0f / model->scale.values[0];
-	ShovelerMatrixGet(scaleInverse, 1, 1) = 1.0f / model->scale.values[1];
-	ShovelerMatrixGet(scaleInverse, 2, 2) = 1.0f / model->scale.values[2];
+	shovelerMatrixGet(scaleInverse, 0, 0) = 1.0f / model->scale.values[0];
+	shovelerMatrixGet(scaleInverse, 1, 1) = 1.0f / model->scale.values[1];
+	shovelerMatrixGet(scaleInverse, 2, 2) = 1.0f / model->scale.values[2];
 
 	model->transformation = shovelerMatrixMultiply(translation, shovelerMatrixMultiply(rotation, scale));
 	model->normalTransformation = shovelerMatrixMultiply(rotation, scaleInverse);

@@ -46,8 +46,8 @@ static ShovelerMatrix shovelerMatrix(
 	return m;
 }
 
-#define ShovelerMatrixGet(MATRIX, ROW, COL) MATRIX.values[ROW * 4 + COL]
-#define ShovelerMatrixSet(MATRIX, ROW, COL, VALUE) ShovelerMatrixGet(MATRIX, ROW, COL) = VALUE
+#define shovelerMatrixGet(MATRIX, ROW, COL) (MATRIX).values[(ROW) * 4 + (COL)]
+#define shovelerMatrixSet(MATRIX, ROW, COL, VALUE) shovelerMatrixGet(MATRIX, ROW, COL) = VALUE
 
 static ShovelerMatrix shovelerMatrixZero = {
 		0, 0, 0, 0,
@@ -64,25 +64,25 @@ static ShovelerMatrix shovelerMatrixIdentity = {
 static inline ShovelerMatrix shovelerMatrixTranspose(ShovelerMatrix A)
 {
 	ShovelerMatrix AT;
-	ShovelerMatrixSet(AT, 0, 0, ShovelerMatrixGet(A, 0, 0));
-	ShovelerMatrixSet(AT, 0, 1, ShovelerMatrixGet(A, 1, 0));
-	ShovelerMatrixSet(AT, 0, 2, ShovelerMatrixGet(A, 2, 0));
-	ShovelerMatrixSet(AT, 0, 3, ShovelerMatrixGet(A, 3, 0));
+	shovelerMatrixSet(AT, 0, 0, shovelerMatrixGet(A, 0, 0));
+	shovelerMatrixSet(AT, 0, 1, shovelerMatrixGet(A, 1, 0));
+	shovelerMatrixSet(AT, 0, 2, shovelerMatrixGet(A, 2, 0));
+	shovelerMatrixSet(AT, 0, 3, shovelerMatrixGet(A, 3, 0));
 
-	ShovelerMatrixSet(AT, 1, 0, ShovelerMatrixGet(A, 0, 1));
-	ShovelerMatrixSet(AT, 1, 1, ShovelerMatrixGet(A, 1, 1));
-	ShovelerMatrixSet(AT, 1, 2, ShovelerMatrixGet(A, 2, 1));
-	ShovelerMatrixSet(AT, 1, 3, ShovelerMatrixGet(A, 3, 1));
+	shovelerMatrixSet(AT, 1, 0, shovelerMatrixGet(A, 0, 1));
+	shovelerMatrixSet(AT, 1, 1, shovelerMatrixGet(A, 1, 1));
+	shovelerMatrixSet(AT, 1, 2, shovelerMatrixGet(A, 2, 1));
+	shovelerMatrixSet(AT, 1, 3, shovelerMatrixGet(A, 3, 1));
 
-	ShovelerMatrixSet(AT, 2, 0, ShovelerMatrixGet(A, 0, 2));
-	ShovelerMatrixSet(AT, 2, 1, ShovelerMatrixGet(A, 1, 2));
-	ShovelerMatrixSet(AT, 2, 2, ShovelerMatrixGet(A, 2, 2));
-	ShovelerMatrixSet(AT, 2, 3, ShovelerMatrixGet(A, 3, 2));
+	shovelerMatrixSet(AT, 2, 0, shovelerMatrixGet(A, 0, 2));
+	shovelerMatrixSet(AT, 2, 1, shovelerMatrixGet(A, 1, 2));
+	shovelerMatrixSet(AT, 2, 2, shovelerMatrixGet(A, 2, 2));
+	shovelerMatrixSet(AT, 2, 3, shovelerMatrixGet(A, 3, 2));
 
-	ShovelerMatrixSet(AT, 3, 0, ShovelerMatrixGet(A, 0, 3));
-	ShovelerMatrixSet(AT, 3, 1, ShovelerMatrixGet(A, 1, 3));
-	ShovelerMatrixSet(AT, 3, 2, ShovelerMatrixGet(A, 2, 3));
-	ShovelerMatrixSet(AT, 3, 3, ShovelerMatrixGet(A, 3, 3));
+	shovelerMatrixSet(AT, 3, 0, shovelerMatrixGet(A, 0, 3));
+	shovelerMatrixSet(AT, 3, 1, shovelerMatrixGet(A, 1, 3));
+	shovelerMatrixSet(AT, 3, 2, shovelerMatrixGet(A, 2, 3));
+	shovelerMatrixSet(AT, 3, 3, shovelerMatrixGet(A, 3, 3));
 
 	return AT;
 }
@@ -90,89 +90,89 @@ static inline ShovelerMatrix shovelerMatrixTranspose(ShovelerMatrix A)
 static inline ShovelerMatrix shovelerMatrixMultiply(ShovelerMatrix A, ShovelerMatrix B)
 {
 	ShovelerMatrix C;
-	ShovelerMatrixSet(C, 0, 0,
-		ShovelerMatrixGet(A, 0, 0) * ShovelerMatrixGet(B, 0, 0) +
-		ShovelerMatrixGet(A, 0, 1) * ShovelerMatrixGet(B, 1, 0) +
-		ShovelerMatrixGet(A, 0, 2) * ShovelerMatrixGet(B, 2, 0) +
-		ShovelerMatrixGet(A, 0, 3) * ShovelerMatrixGet(B, 3, 0));
-	ShovelerMatrixSet(C, 0, 1,
-		ShovelerMatrixGet(A, 0, 0) * ShovelerMatrixGet(B, 0, 1) +
-		ShovelerMatrixGet(A, 0, 1) * ShovelerMatrixGet(B, 1, 1) +
-		ShovelerMatrixGet(A, 0, 2) * ShovelerMatrixGet(B, 2, 1) +
-		ShovelerMatrixGet(A, 0, 3) * ShovelerMatrixGet(B, 3, 1));
-	ShovelerMatrixSet(C, 0, 2,
-		ShovelerMatrixGet(A, 0, 0) * ShovelerMatrixGet(B, 0, 2) +
-		ShovelerMatrixGet(A, 0, 1) * ShovelerMatrixGet(B, 1, 2) +
-		ShovelerMatrixGet(A, 0, 2) * ShovelerMatrixGet(B, 2, 2) +
-		ShovelerMatrixGet(A, 0, 3) * ShovelerMatrixGet(B, 3, 2));
-	ShovelerMatrixSet(C, 0, 3,
-		ShovelerMatrixGet(A, 0, 0) * ShovelerMatrixGet(B, 0, 3) +
-		ShovelerMatrixGet(A, 0, 1) * ShovelerMatrixGet(B, 1, 3) +
-		ShovelerMatrixGet(A, 0, 2) * ShovelerMatrixGet(B, 2, 3) +
-		ShovelerMatrixGet(A, 0, 3) * ShovelerMatrixGet(B, 3, 3));
+	shovelerMatrixSet(C, 0, 0,
+		shovelerMatrixGet(A, 0, 0) * shovelerMatrixGet(B, 0, 0) +
+		shovelerMatrixGet(A, 0, 1) * shovelerMatrixGet(B, 1, 0) +
+		shovelerMatrixGet(A, 0, 2) * shovelerMatrixGet(B, 2, 0) +
+		shovelerMatrixGet(A, 0, 3) * shovelerMatrixGet(B, 3, 0));
+	shovelerMatrixSet(C, 0, 1,
+		shovelerMatrixGet(A, 0, 0) * shovelerMatrixGet(B, 0, 1) +
+		shovelerMatrixGet(A, 0, 1) * shovelerMatrixGet(B, 1, 1) +
+		shovelerMatrixGet(A, 0, 2) * shovelerMatrixGet(B, 2, 1) +
+		shovelerMatrixGet(A, 0, 3) * shovelerMatrixGet(B, 3, 1));
+	shovelerMatrixSet(C, 0, 2,
+		shovelerMatrixGet(A, 0, 0) * shovelerMatrixGet(B, 0, 2) +
+		shovelerMatrixGet(A, 0, 1) * shovelerMatrixGet(B, 1, 2) +
+		shovelerMatrixGet(A, 0, 2) * shovelerMatrixGet(B, 2, 2) +
+		shovelerMatrixGet(A, 0, 3) * shovelerMatrixGet(B, 3, 2));
+	shovelerMatrixSet(C, 0, 3,
+		shovelerMatrixGet(A, 0, 0) * shovelerMatrixGet(B, 0, 3) +
+		shovelerMatrixGet(A, 0, 1) * shovelerMatrixGet(B, 1, 3) +
+		shovelerMatrixGet(A, 0, 2) * shovelerMatrixGet(B, 2, 3) +
+		shovelerMatrixGet(A, 0, 3) * shovelerMatrixGet(B, 3, 3));
 
-	ShovelerMatrixSet(C, 1, 0,
-		ShovelerMatrixGet(A, 1, 0) * ShovelerMatrixGet(B, 0, 0) +
-		ShovelerMatrixGet(A, 1, 1) * ShovelerMatrixGet(B, 1, 0) +
-		ShovelerMatrixGet(A, 1, 2) * ShovelerMatrixGet(B, 2, 0) +
-		ShovelerMatrixGet(A, 1, 3) * ShovelerMatrixGet(B, 3, 0));
-	ShovelerMatrixSet(C, 1, 1,
-		ShovelerMatrixGet(A, 1, 0) * ShovelerMatrixGet(B, 0, 1) +
-		ShovelerMatrixGet(A, 1, 1) * ShovelerMatrixGet(B, 1, 1) +
-		ShovelerMatrixGet(A, 1, 2) * ShovelerMatrixGet(B, 2, 1) +
-		ShovelerMatrixGet(A, 1, 3) * ShovelerMatrixGet(B, 3, 1));
-	ShovelerMatrixSet(C, 1, 2,
-		ShovelerMatrixGet(A, 1, 0) * ShovelerMatrixGet(B, 0, 2) +
-		ShovelerMatrixGet(A, 1, 1) * ShovelerMatrixGet(B, 1, 2) +
-		ShovelerMatrixGet(A, 1, 2) * ShovelerMatrixGet(B, 2, 2) +
-		ShovelerMatrixGet(A, 1, 3) * ShovelerMatrixGet(B, 3, 2));
-	ShovelerMatrixSet(C, 1, 3,
-		ShovelerMatrixGet(A, 1, 0) * ShovelerMatrixGet(B, 0, 3) +
-		ShovelerMatrixGet(A, 1, 1) * ShovelerMatrixGet(B, 1, 3) +
-		ShovelerMatrixGet(A, 1, 2) * ShovelerMatrixGet(B, 2, 3) +
-		ShovelerMatrixGet(A, 1, 3) * ShovelerMatrixGet(B, 3, 3));
+	shovelerMatrixSet(C, 1, 0,
+		shovelerMatrixGet(A, 1, 0) * shovelerMatrixGet(B, 0, 0) +
+		shovelerMatrixGet(A, 1, 1) * shovelerMatrixGet(B, 1, 0) +
+		shovelerMatrixGet(A, 1, 2) * shovelerMatrixGet(B, 2, 0) +
+		shovelerMatrixGet(A, 1, 3) * shovelerMatrixGet(B, 3, 0));
+	shovelerMatrixSet(C, 1, 1,
+		shovelerMatrixGet(A, 1, 0) * shovelerMatrixGet(B, 0, 1) +
+		shovelerMatrixGet(A, 1, 1) * shovelerMatrixGet(B, 1, 1) +
+		shovelerMatrixGet(A, 1, 2) * shovelerMatrixGet(B, 2, 1) +
+		shovelerMatrixGet(A, 1, 3) * shovelerMatrixGet(B, 3, 1));
+	shovelerMatrixSet(C, 1, 2,
+		shovelerMatrixGet(A, 1, 0) * shovelerMatrixGet(B, 0, 2) +
+		shovelerMatrixGet(A, 1, 1) * shovelerMatrixGet(B, 1, 2) +
+		shovelerMatrixGet(A, 1, 2) * shovelerMatrixGet(B, 2, 2) +
+		shovelerMatrixGet(A, 1, 3) * shovelerMatrixGet(B, 3, 2));
+	shovelerMatrixSet(C, 1, 3,
+		shovelerMatrixGet(A, 1, 0) * shovelerMatrixGet(B, 0, 3) +
+		shovelerMatrixGet(A, 1, 1) * shovelerMatrixGet(B, 1, 3) +
+		shovelerMatrixGet(A, 1, 2) * shovelerMatrixGet(B, 2, 3) +
+		shovelerMatrixGet(A, 1, 3) * shovelerMatrixGet(B, 3, 3));
 
-	ShovelerMatrixSet(C, 2, 0,
-		ShovelerMatrixGet(A, 2, 0) * ShovelerMatrixGet(B, 0, 0) +
-		ShovelerMatrixGet(A, 2, 1) * ShovelerMatrixGet(B, 1, 0) +
-		ShovelerMatrixGet(A, 2, 2) * ShovelerMatrixGet(B, 2, 0) +
-		ShovelerMatrixGet(A, 2, 3) * ShovelerMatrixGet(B, 3, 0));
-	ShovelerMatrixSet(C, 2, 1,
-		ShovelerMatrixGet(A, 2, 0) * ShovelerMatrixGet(B, 0, 1) +
-		ShovelerMatrixGet(A, 2, 1) * ShovelerMatrixGet(B, 1, 1) +
-		ShovelerMatrixGet(A, 2, 2) * ShovelerMatrixGet(B, 2, 1) +
-		ShovelerMatrixGet(A, 2, 3) * ShovelerMatrixGet(B, 3, 1));
-	ShovelerMatrixSet(C, 2, 2,
-		ShovelerMatrixGet(A, 2, 0) * ShovelerMatrixGet(B, 0, 2) +
-		ShovelerMatrixGet(A, 2, 1) * ShovelerMatrixGet(B, 1, 2) +
-		ShovelerMatrixGet(A, 2, 2) * ShovelerMatrixGet(B, 2, 2) +
-		ShovelerMatrixGet(A, 2, 3) * ShovelerMatrixGet(B, 3, 2));
-	ShovelerMatrixSet(C, 2, 3,
-		ShovelerMatrixGet(A, 2, 0) * ShovelerMatrixGet(B, 0, 3) +
-		ShovelerMatrixGet(A, 2, 1) * ShovelerMatrixGet(B, 1, 3) +
-		ShovelerMatrixGet(A, 2, 2) * ShovelerMatrixGet(B, 2, 3) +
-		ShovelerMatrixGet(A, 2, 3) * ShovelerMatrixGet(B, 3, 3));
+	shovelerMatrixSet(C, 2, 0,
+		shovelerMatrixGet(A, 2, 0) * shovelerMatrixGet(B, 0, 0) +
+		shovelerMatrixGet(A, 2, 1) * shovelerMatrixGet(B, 1, 0) +
+		shovelerMatrixGet(A, 2, 2) * shovelerMatrixGet(B, 2, 0) +
+		shovelerMatrixGet(A, 2, 3) * shovelerMatrixGet(B, 3, 0));
+	shovelerMatrixSet(C, 2, 1,
+		shovelerMatrixGet(A, 2, 0) * shovelerMatrixGet(B, 0, 1) +
+		shovelerMatrixGet(A, 2, 1) * shovelerMatrixGet(B, 1, 1) +
+		shovelerMatrixGet(A, 2, 2) * shovelerMatrixGet(B, 2, 1) +
+		shovelerMatrixGet(A, 2, 3) * shovelerMatrixGet(B, 3, 1));
+	shovelerMatrixSet(C, 2, 2,
+		shovelerMatrixGet(A, 2, 0) * shovelerMatrixGet(B, 0, 2) +
+		shovelerMatrixGet(A, 2, 1) * shovelerMatrixGet(B, 1, 2) +
+		shovelerMatrixGet(A, 2, 2) * shovelerMatrixGet(B, 2, 2) +
+		shovelerMatrixGet(A, 2, 3) * shovelerMatrixGet(B, 3, 2));
+	shovelerMatrixSet(C, 2, 3,
+		shovelerMatrixGet(A, 2, 0) * shovelerMatrixGet(B, 0, 3) +
+		shovelerMatrixGet(A, 2, 1) * shovelerMatrixGet(B, 1, 3) +
+		shovelerMatrixGet(A, 2, 2) * shovelerMatrixGet(B, 2, 3) +
+		shovelerMatrixGet(A, 2, 3) * shovelerMatrixGet(B, 3, 3));
 
-	ShovelerMatrixSet(C, 3, 0,
-		ShovelerMatrixGet(A, 3, 0) * ShovelerMatrixGet(B, 0, 0) +
-		ShovelerMatrixGet(A, 3, 1) * ShovelerMatrixGet(B, 1, 0) +
-		ShovelerMatrixGet(A, 3, 2) * ShovelerMatrixGet(B, 2, 0) +
-		ShovelerMatrixGet(A, 3, 3) * ShovelerMatrixGet(B, 3, 0));
-	ShovelerMatrixSet(C, 3, 1,
-		ShovelerMatrixGet(A, 3, 0) * ShovelerMatrixGet(B, 0, 1) +
-		ShovelerMatrixGet(A, 3, 1) * ShovelerMatrixGet(B, 1, 1) +
-		ShovelerMatrixGet(A, 3, 2) * ShovelerMatrixGet(B, 2, 1) +
-		ShovelerMatrixGet(A, 3, 3) * ShovelerMatrixGet(B, 3, 1));
-	ShovelerMatrixSet(C, 3, 2,
-		ShovelerMatrixGet(A, 3, 0) * ShovelerMatrixGet(B, 0, 2) +
-		ShovelerMatrixGet(A, 3, 1) * ShovelerMatrixGet(B, 1, 2) +
-		ShovelerMatrixGet(A, 3, 2) * ShovelerMatrixGet(B, 2, 2) +
-		ShovelerMatrixGet(A, 3, 3) * ShovelerMatrixGet(B, 3, 2));
-	ShovelerMatrixSet(C, 3, 3,
-		ShovelerMatrixGet(A, 3, 0) * ShovelerMatrixGet(B, 0, 3) +
-		ShovelerMatrixGet(A, 3, 1) * ShovelerMatrixGet(B, 1, 3) +
-		ShovelerMatrixGet(A, 3, 2) * ShovelerMatrixGet(B, 2, 3) +
-		ShovelerMatrixGet(A, 3, 3) * ShovelerMatrixGet(B, 3, 3));
+	shovelerMatrixSet(C, 3, 0,
+		shovelerMatrixGet(A, 3, 0) * shovelerMatrixGet(B, 0, 0) +
+		shovelerMatrixGet(A, 3, 1) * shovelerMatrixGet(B, 1, 0) +
+		shovelerMatrixGet(A, 3, 2) * shovelerMatrixGet(B, 2, 0) +
+		shovelerMatrixGet(A, 3, 3) * shovelerMatrixGet(B, 3, 0));
+	shovelerMatrixSet(C, 3, 1,
+		shovelerMatrixGet(A, 3, 0) * shovelerMatrixGet(B, 0, 1) +
+		shovelerMatrixGet(A, 3, 1) * shovelerMatrixGet(B, 1, 1) +
+		shovelerMatrixGet(A, 3, 2) * shovelerMatrixGet(B, 2, 1) +
+		shovelerMatrixGet(A, 3, 3) * shovelerMatrixGet(B, 3, 1));
+	shovelerMatrixSet(C, 3, 2,
+		shovelerMatrixGet(A, 3, 0) * shovelerMatrixGet(B, 0, 2) +
+		shovelerMatrixGet(A, 3, 1) * shovelerMatrixGet(B, 1, 2) +
+		shovelerMatrixGet(A, 3, 2) * shovelerMatrixGet(B, 2, 2) +
+		shovelerMatrixGet(A, 3, 3) * shovelerMatrixGet(B, 3, 2));
+	shovelerMatrixSet(C, 3, 3,
+		shovelerMatrixGet(A, 3, 0) * shovelerMatrixGet(B, 0, 3) +
+		shovelerMatrixGet(A, 3, 1) * shovelerMatrixGet(B, 1, 3) +
+		shovelerMatrixGet(A, 3, 2) * shovelerMatrixGet(B, 2, 3) +
+		shovelerMatrixGet(A, 3, 3) * shovelerMatrixGet(B, 3, 3));
 
 	return C;
 }
@@ -180,27 +180,27 @@ static inline ShovelerMatrix shovelerMatrixMultiply(ShovelerMatrix A, ShovelerMa
 static inline ShovelerVector2 shovelerMatrixMultiplyVector2(ShovelerMatrix A, ShovelerVector2 b)
 {
 	ShovelerVector2 c;
-	c.values[0] = ShovelerMatrixGet(A, 0, 0) * b.values[0] + ShovelerMatrixGet(A, 0, 1) * b.values[1];
-	c.values[1] = ShovelerMatrixGet(A, 1, 0) * b.values[0] + ShovelerMatrixGet(A, 1, 1) * b.values[1];
+	c.values[0] = shovelerMatrixGet(A, 0, 0) * b.values[0] + shovelerMatrixGet(A, 0, 1) * b.values[1];
+	c.values[1] = shovelerMatrixGet(A, 1, 0) * b.values[0] + shovelerMatrixGet(A, 1, 1) * b.values[1];
 	return c;
 }
 
 static inline ShovelerVector3 shovelerMatrixMultiplyVector3(ShovelerMatrix A, ShovelerVector3 b)
 {
 	ShovelerVector3 c;
-	c.values[0] = ShovelerMatrixGet(A, 0, 0) * b.values[0] + ShovelerMatrixGet(A, 0, 1) * b.values[1] + ShovelerMatrixGet(A, 0, 2) * b.values[2];
-	c.values[1] = ShovelerMatrixGet(A, 1, 0) * b.values[0] + ShovelerMatrixGet(A, 1, 1) * b.values[1] + ShovelerMatrixGet(A, 1, 2) * b.values[2];
-	c.values[2] = ShovelerMatrixGet(A, 2, 0) * b.values[0] + ShovelerMatrixGet(A, 2, 1) * b.values[1] + ShovelerMatrixGet(A, 2, 2) * b.values[2];
+	c.values[0] = shovelerMatrixGet(A, 0, 0) * b.values[0] + shovelerMatrixGet(A, 0, 1) * b.values[1] + shovelerMatrixGet(A, 0, 2) * b.values[2];
+	c.values[1] = shovelerMatrixGet(A, 1, 0) * b.values[0] + shovelerMatrixGet(A, 1, 1) * b.values[1] + shovelerMatrixGet(A, 1, 2) * b.values[2];
+	c.values[2] = shovelerMatrixGet(A, 2, 0) * b.values[0] + shovelerMatrixGet(A, 2, 1) * b.values[1] + shovelerMatrixGet(A, 2, 2) * b.values[2];
 	return c;
 }
 
 static inline ShovelerVector4 shovelerMatrixMultiplyVector4(ShovelerMatrix A, ShovelerVector4 b)
 {
 	ShovelerVector4 c;
-	c.values[0] = ShovelerMatrixGet(A, 0, 0) * b.values[0] + ShovelerMatrixGet(A, 0, 1) * b.values[1] + ShovelerMatrixGet(A, 0, 2) * b.values[2] + ShovelerMatrixGet(A, 0, 3) * b.values[3];
-	c.values[1] = ShovelerMatrixGet(A, 1, 0) * b.values[0] + ShovelerMatrixGet(A, 1, 1) * b.values[1] + ShovelerMatrixGet(A, 1, 2) * b.values[2] + ShovelerMatrixGet(A, 1, 3) * b.values[3];
-	c.values[2] = ShovelerMatrixGet(A, 2, 0) * b.values[0] + ShovelerMatrixGet(A, 2, 1) * b.values[1] + ShovelerMatrixGet(A, 2, 2) * b.values[2] + ShovelerMatrixGet(A, 2, 3) * b.values[3];
-	c.values[3] = ShovelerMatrixGet(A, 3, 0) * b.values[0] + ShovelerMatrixGet(A, 3, 1) * b.values[1] + ShovelerMatrixGet(A, 3, 2) * b.values[2] + ShovelerMatrixGet(A, 3, 3) * b.values[3];
+	c.values[0] = shovelerMatrixGet(A, 0, 0) * b.values[0] + shovelerMatrixGet(A, 0, 1) * b.values[1] + shovelerMatrixGet(A, 0, 2) * b.values[2] + shovelerMatrixGet(A, 0, 3) * b.values[3];
+	c.values[1] = shovelerMatrixGet(A, 1, 0) * b.values[0] + shovelerMatrixGet(A, 1, 1) * b.values[1] + shovelerMatrixGet(A, 1, 2) * b.values[2] + shovelerMatrixGet(A, 1, 3) * b.values[3];
+	c.values[2] = shovelerMatrixGet(A, 2, 0) * b.values[0] + shovelerMatrixGet(A, 2, 1) * b.values[1] + shovelerMatrixGet(A, 2, 2) * b.values[2] + shovelerMatrixGet(A, 2, 3) * b.values[3];
+	c.values[3] = shovelerMatrixGet(A, 3, 0) * b.values[0] + shovelerMatrixGet(A, 3, 1) * b.values[1] + shovelerMatrixGet(A, 3, 2) * b.values[2] + shovelerMatrixGet(A, 3, 3) * b.values[3];
 	return c;
 }
 
@@ -244,10 +244,10 @@ static inline ShovelerMatrix shovelerMatrixCreateRotationX(float angle)
 	float c = cosf(angle);
 	float s = sinf(angle);
 
-	ShovelerMatrixGet(rotation, 1, 1) = c;
-	ShovelerMatrixGet(rotation, 1, 2) = s;
-	ShovelerMatrixGet(rotation, 2, 1) = -s;
-	ShovelerMatrixGet(rotation, 2, 2) = c;
+	shovelerMatrixGet(rotation, 1, 1) = c;
+	shovelerMatrixGet(rotation, 1, 2) = s;
+	shovelerMatrixGet(rotation, 2, 1) = -s;
+	shovelerMatrixGet(rotation, 2, 2) = c;
 
 	return rotation;
 }
@@ -259,10 +259,10 @@ static inline ShovelerMatrix shovelerMatrixCreateRotationY(float angle)
 	float c = cosf(angle);
 	float s = sinf(angle);
 
-	ShovelerMatrixGet(rotation, 0, 0) = c;
-	ShovelerMatrixGet(rotation, 0, 2) = -s;
-	ShovelerMatrixGet(rotation, 2, 0) = s;
-	ShovelerMatrixGet(rotation, 2, 2) = c;
+	shovelerMatrixGet(rotation, 0, 0) = c;
+	shovelerMatrixGet(rotation, 0, 2) = -s;
+	shovelerMatrixGet(rotation, 2, 0) = s;
+	shovelerMatrixGet(rotation, 2, 2) = c;
 
 	return rotation;
 }
@@ -274,10 +274,10 @@ static inline ShovelerMatrix shovelerMatrixCreateRotationZ(float angle)
 	float c = cosf(angle);
 	float s = sinf(angle);
 
-	ShovelerMatrixGet(rotation, 0, 0) = c;
-	ShovelerMatrixGet(rotation, 0, 1) = s;
-	ShovelerMatrixGet(rotation, 1, 0) = -s;
-	ShovelerMatrixGet(rotation, 1, 1) = c;
+	shovelerMatrixGet(rotation, 0, 0) = c;
+	shovelerMatrixGet(rotation, 0, 1) = s;
+	shovelerMatrixGet(rotation, 1, 0) = -s;
+	shovelerMatrixGet(rotation, 1, 1) = c;
 
 	return rotation;
 }
@@ -303,15 +303,15 @@ static inline ShovelerMatrix shovelerMatrixCreateRotation(ShovelerVector3 axis, 
 	float zxC = z * xC;
 
 	ShovelerMatrix rotation = shovelerMatrixIdentity;
-	ShovelerMatrixGet(rotation, 0, 1) = xyC - zs;
-	ShovelerMatrixGet(rotation, 0, 0) = x * xC + c;
-	ShovelerMatrixGet(rotation, 0, 2) = zxC + ys;
-	ShovelerMatrixGet(rotation, 1, 0) = xyC + zs;
-	ShovelerMatrixGet(rotation, 1, 1) = y * yC + c;
-	ShovelerMatrixGet(rotation, 1, 2) = yzC - xs;
-	ShovelerMatrixGet(rotation, 2, 0) = zxC - ys;
-	ShovelerMatrixGet(rotation, 2, 1) = yzC + xs;
-	ShovelerMatrixGet(rotation, 2, 2) = z * zC + c;
+	shovelerMatrixGet(rotation, 0, 1) = xyC - zs;
+	shovelerMatrixGet(rotation, 0, 0) = x * xC + c;
+	shovelerMatrixGet(rotation, 0, 2) = zxC + ys;
+	shovelerMatrixGet(rotation, 1, 0) = xyC + zs;
+	shovelerMatrixGet(rotation, 1, 1) = y * yC + c;
+	shovelerMatrixGet(rotation, 1, 2) = yzC - xs;
+	shovelerMatrixGet(rotation, 2, 0) = zxC - ys;
+	shovelerMatrixGet(rotation, 2, 1) = yzC + xs;
+	shovelerMatrixGet(rotation, 2, 2) = z * zC + c;
 
 	return rotation;
 }
