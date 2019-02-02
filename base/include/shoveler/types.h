@@ -28,11 +28,22 @@ typedef struct {
 	float values[16];
 } ShovelerMatrix;
 
-static ShovelerVector2 shovelerVector2(float x, float y) { ShovelerVector2 v = {x, y}; return v; }
-static ShovelerVector3 shovelerVector3(float x, float y, float z) { ShovelerVector3 v = {x, y, z}; return v; }
-static ShovelerVector4 shovelerVector4(float x, float y, float z, float w) { ShovelerVector4 v = {x, y, z, w}; return v; }
+typedef struct {
+	ShovelerVector3 normal;
+	float offset;
+} ShovelerPlane;
 
-static ShovelerMatrix shovelerMatrix(
+typedef struct {
+	ShovelerVector3 position;
+	ShovelerVector3 direction;
+	ShovelerVector3 up;
+} ShovelerReferenceFrame;
+
+static inline ShovelerVector2 shovelerVector2(float x, float y) { ShovelerVector2 v = {x, y}; return v; }
+static inline ShovelerVector3 shovelerVector3(float x, float y, float z) { ShovelerVector3 v = {x, y, z}; return v; }
+static inline ShovelerVector4 shovelerVector4(float x, float y, float z, float w) { ShovelerVector4 v = {x, y, z, w}; return v; }
+
+static inline ShovelerMatrix shovelerMatrix(
 	float a11, float a12, float a13, float a14,
 	float a21, float a22, float a23, float a24,
 	float a31, float a32, float a33, float a34,
@@ -44,6 +55,18 @@ static ShovelerMatrix shovelerMatrix(
 		a31, a32, a33, a34,
 		a41, a42, a43, a44};
 	return m;
+}
+
+static inline ShovelerPlane shovelerPlane(ShovelerVector3 normal, float offset)
+{
+	ShovelerPlane plane = {normal, offset};
+	return plane;
+}
+
+static inline ShovelerReferenceFrame shovelerReferenceFrame(ShovelerVector3 position, ShovelerVector3 direction, ShovelerVector3 up)
+{
+	ShovelerReferenceFrame frame = {position, direction, up};
+	return frame;
 }
 
 #define shovelerMatrixGet(MATRIX, ROW, COL) (MATRIX).values[(ROW) * 4 + (COL)]
@@ -313,6 +336,39 @@ static inline ShovelerMatrix shovelerMatrixCreateRotation(ShovelerVector3 axis, 
 	shovelerMatrixGet(rotation, 2, 2) = z * zC + c;
 
 	return rotation;
+}
+
+static inline void shovelerMatrixCreateLookIntoDirectionTransformation(const ShovelerReferenceFrame *frame, ShovelerMatrix *outputTransformation)
+{
+	// Construct camera coordinate system basis
+	ShovelerVector3 right = shovelerVector3Cross(frame->direction, frame->up);
+
+	// Construct basis transform to camera coordinates
+	ShovelerMatrix basis = shovelerMatrixIdentity;
+	shovelerMatrixGet(basis, 0, 0) = right.values[0];
+	shovelerMatrixGet(basis, 0, 1) = right.values[1];
+	shovelerMatrixGet(basis, 0, 2) = right.values[2];
+	shovelerMatrixGet(basis, 1, 0) = frame->up.values[0];
+	shovelerMatrixGet(basis, 1, 1) = frame->up.values[1];
+	shovelerMatrixGet(basis, 1, 2) = frame->up.values[2];
+	shovelerMatrixGet(basis, 2, 0) = -frame->direction.values[0];
+	shovelerMatrixGet(basis, 2, 1) = -frame->direction.values[1];
+	shovelerMatrixGet(basis, 2, 2) = -frame->direction.values[2];
+
+	// Construct shift matrix to camera position
+	ShovelerMatrix shift = shovelerMatrixIdentity;
+	shovelerMatrixGet(shift, 0, 3) = -frame->position.values[0];
+	shovelerMatrixGet(shift, 1, 3) = -frame->position.values[1];
+	shovelerMatrixGet(shift, 2, 3) = -frame->position.values[2];
+
+	// Create look into direction matrix
+	*outputTransformation = shovelerMatrixMultiply(basis, shift);
+}
+
+static inline float shovelerPlaneVectorDistance(ShovelerPlane plane, ShovelerVector3 point)
+{
+	ShovelerVector3 planeOriginToPoint = shovelerVector3LinearCombination(1.0f, point, -plane.offset, plane.normal);
+	return shovelerVector3Dot(planeOriginToPoint, plane.normal);
 }
 
 static inline float shovelerCoordinateMap(ShovelerVector3 coordinates, ShovelerCoordinateMapping mapping)
