@@ -26,27 +26,38 @@ static std::ostream& operator<<(std::ostream& stream, const ShovelerVector3& v) 
 	return stream << "(" << v.values[0] << ", " << v.values[1] << ", " << v.values[2] << ")";
 }
 
-TEST(projection, computeFrustum)
-{
+class ShovelerFrustumTest : public ::testing::Test {
+public:
+	virtual void SetUp()
+	{
+		projection.fieldOfViewY = 2.0f * SHOVELER_PI * 50.0f / 360.0f;
+		projection.aspectRatio = 640.0f / 480.0f;
+		projection.nearClippingPlane = 1.0f;
+		projection.farClippingPlane = 10.0f;
+
+		frame.position = shovelerVector3(0, 0, -5);
+		frame.direction = shovelerVector3(0, 0, 1);
+		frame.up = shovelerVector3(0, 1, 0);
+
+		shovelerProjectionPerspectiveComputeFrustum(&projection, &frame, &frustum);
+	}
+
+	virtual void TearDown()
+	{
+	}
+
 	ShovelerProjectionPerspective projection;
-	projection.fieldOfViewY = 2.0f * SHOVELER_PI * 50.0f / 360.0f;
-	projection.aspectRatio = 640.0f / 480.0f;
-	projection.nearClippingPlane = 1.0f;
-	projection.farClippingPlane = 10.0f;
-
 	ShovelerReferenceFrame frame;
-	frame.position = shovelerVector3(0, 0, -5);
-	frame.direction = shovelerVector3(0, 0, 1);
-	frame.up = shovelerVector3(0, 1, 0);
+	ShovelerFrustum frustum;
+};
 
+TEST_F(ShovelerFrustumTest, computeFrustum)
+{
 	ShovelerMatrix projectionTransformation;
 	shovelerProjectionPerspectiveComputeTransformation(&projection, &projectionTransformation);
 
 	ShovelerMatrix viewTransformation;
 	shovelerMatrixCreateLookIntoDirectionTransformation(&frame, &viewTransformation);
-
-	ShovelerFrustum frustum;
-	shovelerProjectionPerspectiveComputeFrustum(&projection, &frame, &frustum);
 
 	ShovelerMatrix projectionView = shovelerMatrixMultiply(projectionTransformation, viewTransformation);
 
@@ -73,4 +84,37 @@ TEST(projection, computeFrustum)
 	ASSERT_TRUE(shovelerPlaneVectorDistance(frustum.bottom, shovelerVector3(0.0f, -5.0f, 0.0f)) > 0.0f);
 	ASSERT_TRUE(shovelerPlaneVectorDistance(frustum.right, shovelerVector3(-5.0f, 0.0f, 0.0f)) > 0.0f);
 	ASSERT_TRUE(shovelerPlaneVectorDistance(frustum.top, shovelerVector3(0.0f, 5.0f, 0.0f)) > 0.0f);
+}
+
+TEST_F(ShovelerFrustumTest, intersectFrustumWithFrustumSelf)
+{
+	ASSERT_TRUE(shovelerFrustumIntersectFrustum(&frustum, &frustum));
+}
+
+TEST_F(ShovelerFrustumTest, intersectFrustumWithFrustumPositive)
+{
+	ShovelerReferenceFrame otherFrame;
+	otherFrame.position = shovelerVector3(0, 0, 5);
+	otherFrame.direction = shovelerVector3(0, 0, -1);
+	otherFrame.up = shovelerVector3(0, -1, 0);
+
+	ShovelerFrustum otherFrustum;
+	shovelerProjectionPerspectiveComputeFrustum(&projection, &otherFrame, &otherFrustum);
+
+	ASSERT_TRUE(shovelerFrustumIntersectFrustum(&frustum, &otherFrustum));
+	ASSERT_TRUE(shovelerFrustumIntersectFrustum(&otherFrustum, &frustum));
+}
+
+TEST_F(ShovelerFrustumTest, intersectFrustumWithFrustumNegative)
+{
+	ShovelerReferenceFrame otherFrame;
+	otherFrame.position = shovelerVector3(0, 0, 11);
+	otherFrame.direction = shovelerVector3(0, 0, 1);
+	otherFrame.up = shovelerVector3(0, -1, 0);
+
+	ShovelerFrustum otherFrustum;
+	shovelerProjectionPerspectiveComputeFrustum(&projection, &otherFrame, &otherFrustum);
+
+	ASSERT_FALSE(shovelerFrustumIntersectFrustum(&frustum, &otherFrustum));
+	ASSERT_FALSE(shovelerFrustumIntersectFrustum(&otherFrustum, &frustum));
 }

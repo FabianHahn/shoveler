@@ -1,6 +1,8 @@
 #ifndef SHOVELER_FRUSTUM_H
 #define SHOVELER_FRUSTUM_H
 
+#include <stdbool.h>
+
 #include <shoveler/types.h>
 
 typedef struct {
@@ -19,5 +21,8 @@ typedef struct {
 	ShovelerPlane right;
 	ShovelerPlane top;
 } ShovelerFrustum;
+
+/** Returns true if the passed frustums intersect. */
+bool shovelerFrustumIntersectFrustum(const ShovelerFrustum *frustum, const ShovelerFrustum *otherFrustum);
 
 #endif

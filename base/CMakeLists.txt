@@ -41,7 +41,7 @@ set(SHOVELER_BASE_TEST_SRC
 	src/color_test.cpp
 	src/compression_test.cpp
 	src/executor_test.cpp
-	src/projection_test.cpp
+	src/frustum_test.cpp
 	src/resources_test.cpp
 	src/test.cpp
 	src/types_test.cpp
