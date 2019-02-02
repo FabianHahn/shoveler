@@ -96,6 +96,10 @@ static int renderSpotLight(void *spotlightPointer, ShovelerScene *scene, Shovele
 {
 	ShovelerLightSpot *spotlight = (ShovelerLightSpot *) spotlightPointer;
 
+	if(!shovelerFrustumIntersectFrustum(&camera->frustum, &spotlight->camera->frustum)) {
+		return 0;
+	}
+
 	int rendered = 0;
 
 	// render depth map
