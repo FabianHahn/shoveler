@@ -33,31 +33,31 @@ void shovelerProjectionPerspectiveComputeFrustum(const ShovelerProjectionPerspec
 	float halfWidthFar = halfHeightFar * projection->aspectRatio;
 
 	ShovelerVector3 nearBottomCenter = shovelerVector3LinearCombination(1.0, nearCenter, -halfHeightNear, frame->up);
-	outputFrustum->nearBottomLeft = shovelerVector3LinearCombination(1.0, nearBottomCenter, -halfWidthNear, right);
-	outputFrustum->nearBottomRight = shovelerVector3LinearCombination(1.0, nearBottomCenter, halfWidthNear, right);
+	outputFrustum->nearBottomLeftVertex = shovelerVector3LinearCombination(1.0, nearBottomCenter, -halfWidthNear, right);
+	outputFrustum->nearBottomRightVertex = shovelerVector3LinearCombination(1.0, nearBottomCenter, halfWidthNear, right);
 
 	ShovelerVector3 nearTopCenter = shovelerVector3LinearCombination(1.0, nearCenter, halfHeightNear, frame->up);
-	outputFrustum->nearTopLeft = shovelerVector3LinearCombination(1.0, nearTopCenter, -halfWidthNear, right);
-	outputFrustum->nearTopRight = shovelerVector3LinearCombination(1.0, nearTopCenter, halfWidthNear, right);
+	outputFrustum->nearTopLeftVertex = shovelerVector3LinearCombination(1.0, nearTopCenter, -halfWidthNear, right);
+	outputFrustum->nearTopRightVertex = shovelerVector3LinearCombination(1.0, nearTopCenter, halfWidthNear, right);
 
 	ShovelerVector3 farBottomCenter = shovelerVector3LinearCombination(1.0, farCenter, -halfHeightFar, frame->up);
-	outputFrustum->farBottomLeft = shovelerVector3LinearCombination(1.0, farBottomCenter, -halfWidthFar, right);
-	outputFrustum->farBottomRight = shovelerVector3LinearCombination(1.0, farBottomCenter, halfWidthFar, right);
+	outputFrustum->farBottomLeftVertex = shovelerVector3LinearCombination(1.0, farBottomCenter, -halfWidthFar, right);
+	outputFrustum->farBottomRightVertex = shovelerVector3LinearCombination(1.0, farBottomCenter, halfWidthFar, right);
 
 	ShovelerVector3 farTopCenter = shovelerVector3LinearCombination(1.0, farCenter, halfHeightFar, frame->up);
-	outputFrustum->farTopLeft = shovelerVector3LinearCombination(1.0, farTopCenter, -halfWidthFar, right);
-	outputFrustum->farTopRight = shovelerVector3LinearCombination(1.0, farTopCenter, halfWidthFar, right);
+	outputFrustum->farTopLeftVertex = shovelerVector3LinearCombination(1.0, farTopCenter, -halfWidthFar, right);
+	outputFrustum->farTopRightVertex = shovelerVector3LinearCombination(1.0, farTopCenter, halfWidthFar, right);
 
-	outputFrustum->near.normal = shovelerVector3LinearCombination(-1.0f, frame->direction, 0.0f, frame->direction);
-	outputFrustum->near.offset = shovelerVector3Dot(outputFrustum->near.normal, nearCenter);
+	outputFrustum->nearPlane.normal = shovelerVector3LinearCombination(-1.0f, frame->direction, 0.0f, frame->direction);
+	outputFrustum->nearPlane.offset = shovelerVector3Dot(outputFrustum->nearPlane.normal, nearCenter);
 
-	outputFrustum->far.normal = frame->direction;
-	outputFrustum->far.offset = shovelerVector3Dot(outputFrustum->far.normal, farCenter);
+	outputFrustum->farPlane.normal = frame->direction;
+	outputFrustum->farPlane.offset = shovelerVector3Dot(outputFrustum->farPlane.normal, farCenter);
 
-	computePlane(outputFrustum->nearBottomLeft, outputFrustum->farBottomLeft, outputFrustum->farTopLeft, &outputFrustum->left);
-	computePlane(outputFrustum->nearBottomRight, outputFrustum->farBottomRight, outputFrustum->farBottomLeft, &outputFrustum->bottom);
-	computePlane(outputFrustum->nearTopRight, outputFrustum->farTopRight, outputFrustum->farBottomRight, &outputFrustum->right);
-	computePlane(outputFrustum->nearTopLeft, outputFrustum->farTopLeft, outputFrustum->farTopRight, &outputFrustum->top);
+	computePlane(outputFrustum->nearBottomLeftVertex, outputFrustum->farBottomLeftVertex, outputFrustum->farTopLeftVertex, &outputFrustum->leftPlane);
+	computePlane(outputFrustum->nearBottomRightVertex, outputFrustum->farBottomRightVertex, outputFrustum->farBottomLeftVertex, &outputFrustum->bottomPlane);
+	computePlane(outputFrustum->nearTopRightVertex, outputFrustum->farTopRightVertex, outputFrustum->farBottomRightVertex, &outputFrustum->rightPlane);
+	computePlane(outputFrustum->nearTopLeftVertex, outputFrustum->farTopLeftVertex, outputFrustum->farTopRightVertex, &outputFrustum->topPlane);
 }
 
 static void computePlane(ShovelerVector3 p0, ShovelerVector3 p1, ShovelerVector3 p2, ShovelerPlane *outputPlane)

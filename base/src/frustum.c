@@ -6,41 +6,41 @@ static const float eps = 1e-6f;
 bool shovelerFrustumIntersectFrustum(const ShovelerFrustum *frustum, const ShovelerFrustum *otherFrustum)
 {
 	ShovelerPlane frustumPlanes[] = {
-		frustum->near,
-		frustum->far,
-		frustum->left,
-		frustum->bottom,
-		frustum->right,
-		frustum->top,
+		frustum->nearPlane,
+		frustum->farPlane,
+		frustum->leftPlane,
+		frustum->bottomPlane,
+		frustum->rightPlane,
+		frustum->topPlane,
 	};
 	ShovelerPlane otherFrustumPlanes[] = {
-		otherFrustum->near,
-		otherFrustum->far,
-		otherFrustum->left,
-		otherFrustum->bottom,
-		otherFrustum->right,
-		otherFrustum->top,
+		otherFrustum->nearPlane,
+		otherFrustum->farPlane,
+		otherFrustum->leftPlane,
+		otherFrustum->bottomPlane,
+		otherFrustum->rightPlane,
+		otherFrustum->topPlane,
 	};
 
 	ShovelerVector3 frustumVertices[] = {
-		frustum->nearBottomLeft,
-		frustum->nearBottomRight,
-		frustum->nearTopRight,
-		frustum->nearTopLeft,
-		frustum->farBottomLeft,
-		frustum->farBottomRight,
-		frustum->farTopRight,
-		frustum->farTopLeft,
+		frustum->nearBottomLeftVertex,
+		frustum->nearBottomRightVertex,
+		frustum->nearTopRightVertex,
+		frustum->nearTopLeftVertex,
+		frustum->farBottomLeftVertex,
+		frustum->farBottomRightVertex,
+		frustum->farTopRightVertex,
+		frustum->farTopLeftVertex,
 	};
 	ShovelerVector3 otherFrustumVertices[] = {
-		otherFrustum->nearBottomLeft,
-		otherFrustum->nearBottomRight,
-		otherFrustum->nearTopRight,
-		otherFrustum->nearTopLeft,
-		otherFrustum->farBottomLeft,
-		otherFrustum->farBottomRight,
-		otherFrustum->farTopRight,
-		otherFrustum->farTopLeft,
+		otherFrustum->nearBottomLeftVertex,
+		otherFrustum->nearBottomRightVertex,
+		otherFrustum->nearTopRightVertex,
+		otherFrustum->nearTopLeftVertex,
+		otherFrustum->farBottomLeftVertex,
+		otherFrustum->farBottomRightVertex,
+		otherFrustum->farTopRightVertex,
+		otherFrustum->farTopLeftVertex,
 	};
 
 	// Test if vertices of other frustum lie within frustum

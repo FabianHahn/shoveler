@@ -61,29 +61,29 @@ TEST_F(ShovelerFrustumTest, computeFrustum)
 
 	ShovelerMatrix projectionView = shovelerMatrixMultiply(projectionTransformation, viewTransformation);
 
-	ASSERT_EQ(shovelerMatrixMultiplyVector3(projectionView, frustum.nearBottomLeft), shovelerVector3(-1.0f, -1.0f, -1.0f));
-	ASSERT_EQ(shovelerMatrixMultiplyVector3(projectionView, frustum.nearBottomRight), shovelerVector3(1.0f, -1.0f, -1.0f));
-	ASSERT_EQ(shovelerMatrixMultiplyVector3(projectionView, frustum.nearTopRight), shovelerVector3(1.0f, 1.0f, -1.0f));
-	ASSERT_EQ(shovelerMatrixMultiplyVector3(projectionView, frustum.nearTopLeft), shovelerVector3(-1.0f, 1.0f, -1.0f));
-	ASSERT_EQ(shovelerMatrixMultiplyVector3(projectionView, frustum.farBottomLeft), shovelerVector3(-1.0f, -1.0f, 1.0f));
-	ASSERT_EQ(shovelerMatrixMultiplyVector3(projectionView, frustum.farBottomRight), shovelerVector3(1.0f, -1.0f, 1.0f));
-	ASSERT_EQ(shovelerMatrixMultiplyVector3(projectionView, frustum.farTopRight), shovelerVector3(1.0f, 1.0f, 1.0f));
-	ASSERT_EQ(shovelerMatrixMultiplyVector3(projectionView, frustum.farTopLeft), shovelerVector3(-1.0f, 1.0f, 1.0f));
+	ASSERT_EQ(shovelerMatrixMultiplyVector3(projectionView, frustum.nearBottomLeftVertex), shovelerVector3(-1.0f, -1.0f, -1.0f));
+	ASSERT_EQ(shovelerMatrixMultiplyVector3(projectionView, frustum.nearBottomRightVertex), shovelerVector3(1.0f, -1.0f, -1.0f));
+	ASSERT_EQ(shovelerMatrixMultiplyVector3(projectionView, frustum.nearTopRightVertex), shovelerVector3(1.0f, 1.0f, -1.0f));
+	ASSERT_EQ(shovelerMatrixMultiplyVector3(projectionView, frustum.nearTopLeftVertex), shovelerVector3(-1.0f, 1.0f, -1.0f));
+	ASSERT_EQ(shovelerMatrixMultiplyVector3(projectionView, frustum.farBottomLeftVertex), shovelerVector3(-1.0f, -1.0f, 1.0f));
+	ASSERT_EQ(shovelerMatrixMultiplyVector3(projectionView, frustum.farBottomRightVertex), shovelerVector3(1.0f, -1.0f, 1.0f));
+	ASSERT_EQ(shovelerMatrixMultiplyVector3(projectionView, frustum.farTopRightVertex), shovelerVector3(1.0f, 1.0f, 1.0f));
+	ASSERT_EQ(shovelerMatrixMultiplyVector3(projectionView, frustum.farTopLeftVertex), shovelerVector3(-1.0f, 1.0f, 1.0f));
 
 	ShovelerVector3 origin = shovelerVector3(0.0f, 0.0f, 0.0f);
-	ASSERT_TRUE(shovelerPlaneVectorDistance(frustum.near, origin) < 0.0f);
-	ASSERT_TRUE(shovelerPlaneVectorDistance(frustum.far, origin) < 0.0f);
-	ASSERT_TRUE(shovelerPlaneVectorDistance(frustum.left, origin) < 0.0f);
-	ASSERT_TRUE(shovelerPlaneVectorDistance(frustum.bottom, origin) < 0.0f);
-	ASSERT_TRUE(shovelerPlaneVectorDistance(frustum.right, origin) < 0.0f);
-	ASSERT_TRUE(shovelerPlaneVectorDistance(frustum.top, origin) < 0.0f);
+	ASSERT_TRUE(shovelerPlaneVectorDistance(frustum.nearPlane, origin) < 0.0f);
+	ASSERT_TRUE(shovelerPlaneVectorDistance(frustum.farPlane, origin) < 0.0f);
+	ASSERT_TRUE(shovelerPlaneVectorDistance(frustum.leftPlane, origin) < 0.0f);
+	ASSERT_TRUE(shovelerPlaneVectorDistance(frustum.bottomPlane, origin) < 0.0f);
+	ASSERT_TRUE(shovelerPlaneVectorDistance(frustum.rightPlane, origin) < 0.0f);
+	ASSERT_TRUE(shovelerPlaneVectorDistance(frustum.topPlane, origin) < 0.0f);
 
-	ASSERT_TRUE(shovelerPlaneVectorDistance(frustum.near, shovelerVector3(0.0f, 0.0f, -10.0f)) > 0.0f);
-	ASSERT_TRUE(shovelerPlaneVectorDistance(frustum.far, shovelerVector3(0.0f, 0.0f, 10.0f)) > 0.0f);
-	ASSERT_TRUE(shovelerPlaneVectorDistance(frustum.left, shovelerVector3(5.0f, 0.0f, 0.0f)) > 0.0f);
-	ASSERT_TRUE(shovelerPlaneVectorDistance(frustum.bottom, shovelerVector3(0.0f, -5.0f, 0.0f)) > 0.0f);
-	ASSERT_TRUE(shovelerPlaneVectorDistance(frustum.right, shovelerVector3(-5.0f, 0.0f, 0.0f)) > 0.0f);
-	ASSERT_TRUE(shovelerPlaneVectorDistance(frustum.top, shovelerVector3(0.0f, 5.0f, 0.0f)) > 0.0f);
+	ASSERT_TRUE(shovelerPlaneVectorDistance(frustum.nearPlane, shovelerVector3(0.0f, 0.0f, -10.0f)) > 0.0f);
+	ASSERT_TRUE(shovelerPlaneVectorDistance(frustum.farPlane, shovelerVector3(0.0f, 0.0f, 10.0f)) > 0.0f);
+	ASSERT_TRUE(shovelerPlaneVectorDistance(frustum.leftPlane, shovelerVector3(5.0f, 0.0f, 0.0f)) > 0.0f);
+	ASSERT_TRUE(shovelerPlaneVectorDistance(frustum.bottomPlane, shovelerVector3(0.0f, -5.0f, 0.0f)) > 0.0f);
+	ASSERT_TRUE(shovelerPlaneVectorDistance(frustum.rightPlane, shovelerVector3(-5.0f, 0.0f, 0.0f)) > 0.0f);
+	ASSERT_TRUE(shovelerPlaneVectorDistance(frustum.topPlane, shovelerVector3(0.0f, 5.0f, 0.0f)) > 0.0f);
 }
 
 TEST_F(ShovelerFrustumTest, intersectFrustumWithFrustumSelf)

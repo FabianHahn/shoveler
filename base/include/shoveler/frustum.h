@@ -6,20 +6,20 @@
 #include <shoveler/types.h>
 
 typedef struct {
-	ShovelerVector3 nearBottomLeft;
-	ShovelerVector3 nearBottomRight;
-	ShovelerVector3 nearTopRight;
-	ShovelerVector3 nearTopLeft;
-	ShovelerVector3 farBottomLeft;
-	ShovelerVector3 farBottomRight;
-	ShovelerVector3 farTopRight;
-	ShovelerVector3 farTopLeft;
-	ShovelerPlane near;
-	ShovelerPlane far;
-	ShovelerPlane left;
-	ShovelerPlane bottom;
-	ShovelerPlane right;
-	ShovelerPlane top;
+	ShovelerVector3 nearBottomLeftVertex;
+	ShovelerVector3 nearBottomRightVertex;
+	ShovelerVector3 nearTopRightVertex;
+	ShovelerVector3 nearTopLeftVertex;
+	ShovelerVector3 farBottomLeftVertex;
+	ShovelerVector3 farBottomRightVertex;
+	ShovelerVector3 farTopRightVertex;
+	ShovelerVector3 farTopLeftVertex;
+	ShovelerPlane nearPlane;
+	ShovelerPlane farPlane;
+	ShovelerPlane leftPlane;
+	ShovelerPlane bottomPlane;
+	ShovelerPlane rightPlane;
+	ShovelerPlane topPlane;
 } ShovelerFrustum;
 
 /** Returns true if the passed frustums intersect. */

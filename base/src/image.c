@@ -5,7 +5,7 @@
 #include "shoveler/image.h"
 
 static int getBorderDistance(int width, int height, int i, int j);
-static int min(int a, int b);
+static int minInt(int a, int b);
 
 ShovelerImage *shovelerImageCreate(int width, int height, int channels)
 {
@@ -222,10 +222,10 @@ static int getBorderDistance(int width, int height, int i, int j)
 	int xHigh = width - 1 - i;
 	int yLow = j;
 	int yHigh = height - 1 - j;
-	return min(xLow, min(xHigh, min(yLow, yHigh)));
+	return minInt(xLow, minInt(xHigh, minInt(yLow, yHigh)));
 }
 
-static int min(int a, int b)
+static int minInt(int a, int b)
 {
 	if(a < b) {
 		return a;
