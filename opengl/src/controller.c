@@ -18,18 +18,18 @@ static void freeTiltCallback(void *tiltCallbackPointer);
 static void freeMoveCallback(void *moveCallbackPointer);
 static void freeAspectRatioChangeCallback(void *aspectRatioCallbackChangePointer);
 
-ShovelerController *shovelerControllerCreate(GLFWwindow *window, ShovelerInput *input, ShovelerVector3 position, ShovelerVector3 direction, ShovelerVector3 up, float moveFactor, float tiltFactor)
+ShovelerController *shovelerControllerCreate(GLFWwindow *window, ShovelerInput *input, const ShovelerReferenceFrame *frame, float moveFactor, float tiltFactor)
 {
 	ShovelerController *controller = malloc(sizeof(ShovelerController));
 	controller->window = window;
 	controller->input = input;
 
-	controller->position = position;
-	controller->up = shovelerVector3Normalize(up);
-	controller->direction = shovelerVector3Normalize(direction);
+	controller->frame.position = frame->position;
+	controller->frame.direction = shovelerVector3Normalize(frame->direction);
+	controller->up = shovelerVector3Normalize(frame->up);
 
-	ShovelerVector3 right = shovelerVector3Normalize(shovelerVector3Cross(controller->direction, controller->up));
-	controller->upwards = shovelerVector3Cross(right, controller->direction);
+	ShovelerVector3 right = shovelerVector3Normalize(shovelerVector3Cross(controller->frame.direction, controller->up));
+	controller->frame.up = shovelerVector3Cross(right, controller->frame.direction);
 
 	controller->moveFactor = moveFactor;
 	controller->tiltFactor = tiltFactor;
@@ -179,13 +179,13 @@ static void updateTilt(ShovelerController *controller, float dt)
 
 static void shiftPosition(ShovelerController *controller, ShovelerVector3 moveAmount)
 {
-	ShovelerVector3 right = shovelerVector3Cross(controller->direction, controller->upwards);
+	ShovelerVector3 right = shovelerVector3Cross(controller->frame.direction, controller->frame.up);
 
-	controller->position = shovelerVector3LinearCombination(1.0, controller->position, moveAmount.values[2], controller->direction);
-	controller->position = shovelerVector3LinearCombination(1.0, controller->position, moveAmount.values[0], right);
-	controller->position = shovelerVector3LinearCombination(1.0, controller->position, moveAmount.values[1], controller->upwards);
+	controller->frame.position = shovelerVector3LinearCombination(1.0, controller->frame.position, moveAmount.values[2], controller->frame.direction);
+	controller->frame.position = shovelerVector3LinearCombination(1.0, controller->frame.position, moveAmount.values[0], right);
+	controller->frame.position = shovelerVector3LinearCombination(1.0, controller->frame.position, moveAmount.values[1], controller->frame.up);
 
-	triggerMove(controller, controller->position);
+	triggerMove(controller, controller->frame.position);
 }
 
 static void shiftOrientation(ShovelerController *controller, ShovelerVector2 tiltAmount)
@@ -194,24 +194,24 @@ static void shiftOrientation(ShovelerController *controller, ShovelerVector2 til
 	ShovelerMatrix rotationX = shovelerMatrixCreateRotation(controller->up, tiltAmount.values[0]);
 	ShovelerMatrix normalRotationX = shovelerMatrixTranspose(rotationX);
 
-	controller->direction = shovelerVector3Normalize(shovelerMatrixMultiplyVector3(normalRotationX, controller->direction));
+	controller->frame.direction = shovelerVector3Normalize(shovelerMatrixMultiplyVector3(normalRotationX, controller->frame.direction));
 
-	ShovelerVector3 right = shovelerVector3Normalize(shovelerVector3Cross(controller->direction, controller->up));
-	controller->upwards = shovelerVector3Cross(right, controller->direction);
+	ShovelerVector3 right = shovelerVector3Normalize(shovelerVector3Cross(controller->frame.direction, controller->up));
+	controller->frame.up = shovelerVector3Cross(right, controller->frame.direction);
 
 	// Rotate camera in y direction
 	ShovelerMatrix rotationY = shovelerMatrixCreateRotation(right, tiltAmount.values[1]);
 	ShovelerMatrix normalRotationY = shovelerMatrixTranspose(rotationY);
 
-	ShovelerVector3 newDirection = shovelerVector3Normalize(shovelerMatrixMultiplyVector3(normalRotationY, controller->direction));
-	ShovelerVector3 newUpwards = shovelerVector3Cross(right, newDirection);
+	ShovelerVector3 newDirection = shovelerVector3Normalize(shovelerMatrixMultiplyVector3(normalRotationY, controller->frame.direction));
+	ShovelerVector3 newFrameUp = shovelerVector3Cross(right, newDirection);
 
-	if(shovelerVector3Dot(controller->up, newUpwards) > 0.0f) { // only update if we're not flipping upside down
-		controller->direction = newDirection;
-		controller->upwards = newUpwards;
+	if(shovelerVector3Dot(controller->up, newFrameUp) > 0.0f) { // only update if we're not flipping upside down
+		controller->frame.direction = newDirection;
+		controller->frame.up = newFrameUp;
 	}
 
-	triggerTilt(controller, controller->direction, controller->upwards);
+	triggerTilt(controller, controller->frame.direction, controller->frame.up);
 }
 
 static void windowSizeHandler(ShovelerInput *input, int width, int height, void *controllerPointer)

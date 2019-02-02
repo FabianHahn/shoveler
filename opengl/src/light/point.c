@@ -5,7 +5,9 @@
 #include "shoveler/light/spot.h"
 #include "shoveler/constants.h"
 #include "shoveler/light.h"
+#include "shoveler/projection.h"
 #include "shoveler/scene.h"
+#include "shoveler/types.h"
 
 typedef struct {
 	ShovelerLight light;
@@ -29,12 +31,25 @@ ShovelerLight *shovelerLightPointCreate(ShovelerVector3 position, int width, int
 	pointlight->light.uniforms = shovelerUniformMapCreate();
 	pointlight->shared = shovelerLightSpotSharedCreate(width, height, samples, ambientFactor, exponentialFactor, color);
 
-	ShovelerCamera *forwardCamera = shovelerCameraPerspectiveCreate(position, (ShovelerVector3){0.0f, 0.0f, 1.0f}, (ShovelerVector3){0.0f, 1.0f, 0.0f}, SHOVELER_PI / 2.0f, 1.0f, 1, 100);
-	ShovelerCamera *backwardCamera = shovelerCameraPerspectiveCreate(position, (ShovelerVector3){0.0f, 0.0f, -1.0f}, (ShovelerVector3){0.0f, 1.0f, 0.0f}, SHOVELER_PI / 2.0f, 1.0f, 1, 100);
-	ShovelerCamera *leftCamera = shovelerCameraPerspectiveCreate(position, (ShovelerVector3){1.0f, 0.0f, 0.0f}, (ShovelerVector3){0.0f, 1.0f, 0.0f}, SHOVELER_PI / 2.0f, 1.0f, 1, 100);
-	ShovelerCamera *rightCamera = shovelerCameraPerspectiveCreate(position, (ShovelerVector3){-1.0f, 0.0f, 0.0f}, (ShovelerVector3){0.0f, 1.0f, 0.0f}, SHOVELER_PI / 2.0f, 1.0f, 1, 100);
-	ShovelerCamera *upCamera = shovelerCameraPerspectiveCreate(position, (ShovelerVector3){0.0f, 1.0f, 0.0f}, (ShovelerVector3){0.0f, 0.0f, -1.0f}, SHOVELER_PI / 2.0f, 1.0f, 1, 100);
-	ShovelerCamera *downCamera = shovelerCameraPerspectiveCreate(position, (ShovelerVector3){0.0f, -1.0f, 0.0f}, (ShovelerVector3){0.0f, 0.0f, 1.0f}, SHOVELER_PI / 2.0f, 1.0f, 1, 100);
+	ShovelerProjectionPerspective projection;
+	projection.fieldOfViewY = SHOVELER_PI / 2.0f;
+	projection.aspectRatio = 1.0f;
+	projection.nearClippingPlane = 1.0f;
+	projection.farClippingPlane = 100.0f;
+
+	ShovelerReferenceFrame forwardFrame = shovelerReferenceFrame(position, shovelerVector3(0.0f, 0.0f, 1.0f), shovelerVector3(0.0f, 1.0f, 0.0f));
+	ShovelerReferenceFrame backwardFrame = shovelerReferenceFrame(position, shovelerVector3(0.0f, 0.0f, -1.0f), shovelerVector3(0.0f, 1.0f, 0.0f));
+	ShovelerReferenceFrame leftFrame = shovelerReferenceFrame(position, shovelerVector3(1.0f, 0.0f, 0.0f), shovelerVector3(0.0f, 1.0f, 0.0f));
+	ShovelerReferenceFrame rightFrame = shovelerReferenceFrame(position, shovelerVector3(-1.0f, 0.0f, 0.0f), shovelerVector3(0.0f, 1.0f, 0.0f));
+	ShovelerReferenceFrame upFrame = shovelerReferenceFrame(position, shovelerVector3(0.0f, 1.0f, 0.0f), shovelerVector3(0.0f, 0.0f, -1.0f));
+	ShovelerReferenceFrame downFrame = shovelerReferenceFrame(position, shovelerVector3(0.0f, -1.0f, 0.0f), shovelerVector3(0.0f, 0.0f, 1.0f));
+	
+	ShovelerCamera *forwardCamera = shovelerCameraPerspectiveCreate(&forwardFrame, &projection);
+	ShovelerCamera *backwardCamera = shovelerCameraPerspectiveCreate(&backwardFrame, &projection);
+	ShovelerCamera *leftCamera = shovelerCameraPerspectiveCreate(&leftFrame, &projection);
+	ShovelerCamera *rightCamera = shovelerCameraPerspectiveCreate(&rightFrame, &projection);
+	ShovelerCamera *upCamera = shovelerCameraPerspectiveCreate(&upFrame, &projection);
+	ShovelerCamera *downCamera = shovelerCameraPerspectiveCreate(&downFrame, &projection);
 
 	pointlight->spotlights[0] = shovelerLightSpotCreateWithShared(forwardCamera, pointlight->shared, false);
 	pointlight->spotlights[1] = shovelerLightSpotCreateWithShared(backwardCamera, pointlight->shared, false);

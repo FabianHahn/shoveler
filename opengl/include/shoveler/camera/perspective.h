@@ -3,16 +3,14 @@
 
 #include <shoveler/camera.h>
 #include <shoveler/controller.h>
+#include <shoveler/projection.h>
 #include <shoveler/types.h>
 
 typedef struct {
 	ShovelerCamera camera;
 	ShovelerVector3 direction;
 	ShovelerVector3 upwards;
-	float fieldOfViewY;
-	float aspectRatio;
-	float nearClippingPlane;
-	float farClippingPlane;
+	ShovelerProjectionPerspective projection;
 	ShovelerController *controller;
 	ShovelerControllerTiltCallback *controllerTiltCallback;
 	ShovelerControllerMoveCallback *controllerMoveCallback;
@@ -20,7 +18,8 @@ typedef struct {
 	bool logPositionChanges;
 } ShovelerCameraPerspective;
 
-ShovelerCamera *shovelerCameraPerspectiveCreate(ShovelerVector3 position, ShovelerVector3 direction, ShovelerVector3 upwards, float fieldOfViewY, float aspectRatio, float nearClippingPlane, float farClippingPlane);
+/** Creates a perspective camera from a reference frame and a perspective projection, copying both. */
+ShovelerCamera *shovelerCameraPerspectiveCreate(const ShovelerReferenceFrame *frame, const ShovelerProjectionPerspective *projection);
 void shovelerCameraPerspectiveAttachController(ShovelerCamera *camera, ShovelerController *controller);
 ShovelerController *shovelerCameraPerspectiveGetController(ShovelerCamera *camera);
 void shovelerCameraPerspectiveDetachController(ShovelerCamera *camera);

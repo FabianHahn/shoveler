@@ -93,7 +93,7 @@ ShovelerGame *shovelerGameCreate(ShovelerCamera *camera, ShovelerGameUpdateCallb
 	game->framebuffer = shovelerFramebufferCreate(width, height, windowSettings->samples, 4, 8);
 	game->scene = shovelerSceneCreate();
 	game->camera = camera;
-	game->controller = shovelerControllerCreate(game->window, game->input, controllerSettings->position, controllerSettings->direction, controllerSettings->up, controllerSettings->moveFactor, controllerSettings->tiltFactor);
+	game->controller = shovelerControllerCreate(game->window, game->input, &controllerSettings->frame, controllerSettings->moveFactor, controllerSettings->tiltFactor);
 	game->view = shovelerViewCreate();
 	game->update = update;
 	game->lastFrameTime = glfwGetTime();

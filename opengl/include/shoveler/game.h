@@ -29,9 +29,7 @@ typedef struct {
 } ShovelerGameWindowSettings;
 
 typedef struct {
-	ShovelerVector3 position;
-	ShovelerVector3 direction;
-	ShovelerVector3 up;
+	ShovelerReferenceFrame frame;
 	float moveFactor;
 	float tiltFactor;
 } ShovelerGameControllerSettings;

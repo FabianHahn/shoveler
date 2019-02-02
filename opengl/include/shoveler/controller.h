@@ -34,9 +34,9 @@ typedef struct {
 typedef struct ShovelerControllerStruct {
 	GLFWwindow *window;
 	ShovelerInput *input;
-	ShovelerVector3 position;
-	ShovelerVector3 direction;
-	ShovelerVector3 upwards;
+	/** normalized current reference frame of the controller */
+	ShovelerReferenceFrame frame;
+	/** static "up direction vector", which is potentially different from the current frame's up direction */
 	ShovelerVector3 up;
 	float moveFactor;
 	float tiltFactor;
@@ -56,7 +56,8 @@ typedef struct ShovelerControllerStruct {
 	ShovelerInputWindowSizeCallback *windowSizeCallback;
 } ShovelerController;
 
-ShovelerController *shovelerControllerCreate(GLFWwindow *window, ShovelerInput *input, ShovelerVector3 position, ShovelerVector3 direction, ShovelerVector3 up, float moveFactor, float tiltFactor);
+/** Create a controller using a window and an input system from an initial reference frame that is copied. */
+ShovelerController *shovelerControllerCreate(GLFWwindow *window, ShovelerInput *input, const ShovelerReferenceFrame *frame, float moveFactor, float tiltFactor);
 ShovelerControllerTiltCallback *shovelerControllerAddTiltCallback(ShovelerController *controller, ShovelerControllerTiltCallbackFunction *callbackFunction, void *userData);
 bool shovelerControllerRemoveTiltCallback(ShovelerController *controller, ShovelerControllerTiltCallback *tiltCallback);
 ShovelerControllerMoveCallback *shovelerControllerAddMoveCallback(ShovelerController *controller, ShovelerControllerMoveCallbackFunction *callbackFunction, void *userData);

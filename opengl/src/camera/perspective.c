@@ -10,26 +10,21 @@
 static void updateView(void *perspectiveCameraPointer);
 static void freePerspectiveCamera(void *perspectiveCameraPointer);
 static ShovelerCameraPerspective *getPerspectiveCamera(ShovelerCamera *camera);
-static ShovelerMatrix computePerspectiveTransformation(float fovy, float ar, float znear, float zfar);
-static ShovelerMatrix computeLookIntoDirectionTransformation(ShovelerVector3 position, ShovelerVector3 direction, ShovelerVector3 up);
 static void tiltController(ShovelerController *controller, ShovelerVector3 direction, ShovelerVector3 upwards, void *userData);
 static void moveController(ShovelerController *controller, ShovelerVector3 position, void *userData);
 static void aspectRatioChangeController(ShovelerController *controller, float aspectRatio, void *userData);
 
-ShovelerCamera *shovelerCameraPerspectiveCreate(ShovelerVector3 position, ShovelerVector3 direction, ShovelerVector3 upwards, float fieldOfViewY, float aspectRatio, float nearClippingPlane, float farClippingPlane)
+ShovelerCamera *shovelerCameraPerspectiveCreate(const ShovelerReferenceFrame *frame, const ShovelerProjectionPerspective *projection)
 {
 	ShovelerCameraPerspective *perspectiveCamera = malloc(sizeof(ShovelerCameraPerspective));
-	shovelerCameraInit(&perspectiveCamera->camera, position, perspectiveCamera, updateView, freePerspectiveCamera);
-	perspectiveCamera->direction = shovelerVector3Normalize(direction);
-	perspectiveCamera->upwards = shovelerVector3Normalize(upwards);
+	shovelerCameraInit(&perspectiveCamera->camera, frame->position, perspectiveCamera, updateView, freePerspectiveCamera);
+	perspectiveCamera->direction = shovelerVector3Normalize(frame->direction);
+	perspectiveCamera->upwards = shovelerVector3Normalize(frame->up);
 
 	updateView(perspectiveCamera);
 
-	perspectiveCamera->fieldOfViewY = fieldOfViewY;
-	perspectiveCamera->aspectRatio = aspectRatio;
-	perspectiveCamera->nearClippingPlane = nearClippingPlane;
-	perspectiveCamera->farClippingPlane = farClippingPlane;
-	perspectiveCamera->camera.projection = computePerspectiveTransformation(perspectiveCamera->fieldOfViewY, perspectiveCamera->aspectRatio, perspectiveCamera->nearClippingPlane, perspectiveCamera->farClippingPlane);
+	perspectiveCamera->projection = *projection;
+	shovelerProjectionPerspectiveComputeTransformation(&perspectiveCamera->projection, &perspectiveCamera->camera.projection);
 
 	perspectiveCamera->controller = NULL;
 	perspectiveCamera->controllerTiltCallback = NULL;
@@ -75,7 +70,12 @@ void shovelerCameraPerspectiveDetachController(ShovelerCamera *camera)
 static void updateView(void *perspectiveCameraPointer)
 {
 	ShovelerCameraPerspective *perspectiveCamera = perspectiveCameraPointer;
-	perspectiveCamera->camera.view = computeLookIntoDirectionTransformation(perspectiveCamera->camera.position, perspectiveCamera->direction, perspectiveCamera->upwards);
+
+	ShovelerReferenceFrame frame;
+	frame.position = perspectiveCamera->camera.position;
+	frame.direction = perspectiveCamera->direction;
+	frame.up = perspectiveCamera->upwards;
+	shovelerMatrixCreateLookIntoDirectionTransformation(&frame, &perspectiveCamera->camera.view);
 }
 
 static void freePerspectiveCamera(void *perspectiveCameraPointer)
@@ -92,47 +92,6 @@ static void freePerspectiveCamera(void *perspectiveCameraPointer)
 static ShovelerCameraPerspective *getPerspectiveCamera(ShovelerCamera *camera)
 {
 	return camera->data;
-}
-
-static ShovelerMatrix computePerspectiveTransformation(float fieldOfViewY, float apsectRatio, float nearClippingPlane, float farClippingPlane)
-{
-	ShovelerMatrix perspective = shovelerMatrixZero;
-
-	float f = 1.0f / tanf(fieldOfViewY / 2.0f);
-	shovelerMatrixGet(perspective, 0, 0) = f / apsectRatio;
-	shovelerMatrixGet(perspective, 1, 1) = f;
-	shovelerMatrixGet(perspective, 2, 2) = (nearClippingPlane + farClippingPlane) / (nearClippingPlane - farClippingPlane);
-	shovelerMatrixGet(perspective, 2, 3) = (2.0f * farClippingPlane * nearClippingPlane) / (nearClippingPlane - farClippingPlane);
-	shovelerMatrixGet(perspective, 3, 2) = -1.0f;
-
-	return perspective;
-}
-
-static ShovelerMatrix computeLookIntoDirectionTransformation(ShovelerVector3 position, ShovelerVector3 direction, ShovelerVector3 upwards)
-{
-	// Construct camera coordinate system basis
-	ShovelerVector3 side = shovelerVector3Cross(direction, upwards);
-
-	// Construct basis transform to camera coordinates
-	ShovelerMatrix basis = shovelerMatrixIdentity;
-	shovelerMatrixGet(basis, 0, 0) = side.values[0];
-	shovelerMatrixGet(basis, 0, 1) = side.values[1];
-	shovelerMatrixGet(basis, 0, 2) = side.values[2];
-	shovelerMatrixGet(basis, 1, 0) = upwards.values[0];
-	shovelerMatrixGet(basis, 1, 1) = upwards.values[1];
-	shovelerMatrixGet(basis, 1, 2) = upwards.values[2];
-	shovelerMatrixGet(basis, 2, 0) = -direction.values[0];
-	shovelerMatrixGet(basis, 2, 1) = -direction.values[1];
-	shovelerMatrixGet(basis, 2, 2) = -direction.values[2];
-
-	// Construct shift matrix to camera position
-	ShovelerMatrix shift = shovelerMatrixIdentity;
-	shovelerMatrixGet(shift, 0, 3) = -position.values[0];
-	shovelerMatrixGet(shift, 1, 3) = -position.values[1];
-	shovelerMatrixGet(shift, 2, 3) = -position.values[2];
-
-	// Create look into direction matrix
-	return shovelerMatrixMultiply(basis, shift);
 }
 
 static void tiltController(ShovelerController *controller, ShovelerVector3 direction, ShovelerVector3 upwards, void *userData)
@@ -158,8 +117,8 @@ static void aspectRatioChangeController(ShovelerController *controller, float as
 {
 	ShovelerCameraPerspective *perspectiveCamera = userData;
 
-	if (aspectRatio != perspectiveCamera->aspectRatio) {
-		perspectiveCamera->aspectRatio = aspectRatio;
-		perspectiveCamera->camera.projection = computePerspectiveTransformation(perspectiveCamera->fieldOfViewY, perspectiveCamera->aspectRatio, perspectiveCamera->nearClippingPlane, perspectiveCamera->farClippingPlane);
+	if (aspectRatio != perspectiveCamera->projection.aspectRatio) {
+		perspectiveCamera->projection.aspectRatio = aspectRatio;
+		shovelerProjectionPerspectiveComputeTransformation(&perspectiveCamera->projection, &perspectiveCamera->camera.projection);
 	}
 }

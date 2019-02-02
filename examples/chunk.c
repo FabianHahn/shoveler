@@ -38,19 +38,22 @@ int main(int argc, char *argv[])
 	windowSettings.windowedHeight = 480;
 
 	ShovelerGameControllerSettings controllerSettings;
-	controllerSettings.position = shovelerVector3(0, 0, 1);
-	controllerSettings.direction = shovelerVector3(0, 0, -1);
-	controllerSettings.up = shovelerVector3(0, 1, 0);
+	controllerSettings.frame.position = shovelerVector3(0, 0, 1);
+	controllerSettings.frame.direction = shovelerVector3(0, 0, -1);
+	controllerSettings.frame.up = shovelerVector3(0, 1, 0);
 	controllerSettings.moveFactor = 0.5f;
 	controllerSettings.tiltFactor = 0.0005f;
 
-	float fov = 2.0f * SHOVELER_PI * 50.0f / 360.0f;
-	float aspectRatio = (float) windowSettings.windowedWidth / windowSettings.windowedHeight;
+	ShovelerProjectionPerspective projection;
+	projection.fieldOfViewY = 2.0f * SHOVELER_PI * 50.0f / 360.0f;
+	projection.aspectRatio = (float) windowSettings.windowedWidth / windowSettings.windowedHeight;
+	projection.nearClippingPlane = 0.01;
+	projection.farClippingPlane = 1000;
 
 	shovelerLogInit("shoveler/", SHOVELER_LOG_LEVEL_INFO_UP, stdout);
 	shovelerGlobalInit();
 
-	ShovelerCamera *camera = shovelerCameraPerspectiveCreate(controllerSettings.position, controllerSettings.direction, controllerSettings.up, fov, aspectRatio, 0.01, 1000);
+	ShovelerCamera *camera = shovelerCameraPerspectiveCreate(&controllerSettings.frame, &projection);
 
 	ShovelerGame *game = shovelerGameCreate(camera, shovelerSampleUpdate, &windowSettings, &controllerSettings);
 	if(game == NULL) {
