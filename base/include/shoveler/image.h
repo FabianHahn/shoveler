@@ -23,6 +23,6 @@ void shovelerImageAddFrame(ShovelerImage *image, int size, ShovelerColor color);
 void shovelerImageAddSubImage(ShovelerImage *image, int xOffset, int yOffset, ShovelerImage *subImage);
 void shovelerImageFree(ShovelerImage *image);
 
-#define shovelerImageGet(image, x, y, c) image->data[(y) * image->width * image->channels + (x) * image->channels + (c)]
+#define shovelerImageGet(image, x, y, c) (image)->data[(y) * (image)->width * (image)->channels + (x) * (image)->channels + (c)]
 
 #endif

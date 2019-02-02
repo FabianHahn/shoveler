@@ -63,7 +63,7 @@ TEST_F(ShovelerImagePngTest, writeReadMemory)
 	bool written = shovelerImagePngWriteFile(testImage, testFilename);
 	ASSERT_TRUE(written) << "png should be written successfully";
 
-	std::ifstream file(testFilename);
+	std::ifstream file(testFilename, std::ios::binary);
 	std::stringstream stream;
 	stream << file.rdbuf();
 	std::string contents(stream.str());

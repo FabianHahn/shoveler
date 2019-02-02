@@ -24,6 +24,26 @@ static bool operator==(const ShovelerImage& a, const ShovelerImage& b)
 		&& memcmp(a.data, b.data, a.width * a.height * a.channels * sizeof(unsigned char)) == 0;
 }
 
+static std::ostream& operator<<(std::ostream& stream, const ShovelerImage& image)
+{
+	stream << "image with dimensions (" << image.width << ", " << image.height << ") and " << image.channels << " channels:" << std::endl;
+
+	for(int i = 0; i < image.width; i++) {
+		for(int j = 0; j < image.height; j++) {
+			stream << "\t(";
+			for(int c = 0; c < image.channels; c++) {
+				stream << (int) shovelerImageGet(&image, i, j, c);
+				if(c != image.channels - 1) {
+					stream << ", ";
+				}
+			}
+			stream << ")" << std::endl;
+		}
+	}
+
+	return stream;
+}
+
 static bool operator!=(const ShovelerImage& a, const ShovelerImage& b)
 {
 	return !(a == b);
@@ -40,6 +60,7 @@ public:
 		shovelerImageGet(testImage, 0, 0, 0) = 255;
 		shovelerImageGet(testImage, 0, 1, 1) = 255;
 		shovelerImageGet(testImage, 1, 0, 2) = 255;
+		shovelerImageGet(testImage, 1, 1, 0) = 255;
 		shovelerImageGet(testImage, 1, 1, 1) = 255;
 		shovelerImageGet(testImage, 1, 1, 2) = 255;
 
