@@ -9,16 +9,11 @@
 
 #include <gtest/gtest.h>
 
+#include "image_testing.h"
+
 extern "C" {
 #include "shoveler/image/png.h"
 #include "shoveler/image.h"
-}
-
-static bool operator==(const ShovelerImage& a, const ShovelerImage& b) {
-	return a.width == b.width
-		&& a.height == b.height
-		&& a.channels == b.channels
-		&& memcmp(a.data, b.data, a.width * a.height * a.channels * sizeof(unsigned char)) == 0;
 }
 
 class ShovelerImagePngTest : public ::testing::Test {

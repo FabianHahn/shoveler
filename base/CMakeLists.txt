@@ -42,6 +42,8 @@ set(SHOVELER_BASE_TEST_SRC
 	src/compression_test.cpp
 	src/executor_test.cpp
 	src/frustum_test.cpp
+	src/image_testing.cpp
+	src/image_testing.h
 	src/resources_test.cpp
 	src/test.cpp
 	src/types_test.cpp
@@ -71,6 +73,10 @@ endif()
 
 if(SHOVELER_BUILD_TESTS)
 	add_executable(shoveler_base_test ${SHOVELER_BASE_TEST_SRC})
+
+	target_include_directories(shoveler_base_test
+		PRIVATE src)
+
 	target_link_libraries(shoveler_base_test shoveler_base gtest)
 	set_property(TARGET shoveler_base_test PROPERTY CXX_STANDARD 11)
 	add_test(shoveler_base shoveler_base_test)
