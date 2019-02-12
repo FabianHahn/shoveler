@@ -2,6 +2,7 @@
 #define SHOVELER_TYPES_H
 
 #include <math.h> // sqrtf
+#include <stdbool.h> // bool
 
 typedef enum {
 	SHOVELER_COORDINATE_MAPPING_POSITIVE_X,
@@ -39,6 +40,16 @@ typedef struct {
 	ShovelerVector3 up;
 } ShovelerReferenceFrame;
 
+typedef struct {
+	ShovelerVector2 min;
+	ShovelerVector2 max;
+} ShovelerBoundingBox2;
+
+typedef struct {
+	ShovelerVector3 min;
+	ShovelerVector3 max;
+} ShovelerBoundingBox3;
+
 static inline ShovelerVector2 shovelerVector2(float x, float y) { ShovelerVector2 v = {x, y}; return v; }
 static inline ShovelerVector3 shovelerVector3(float x, float y, float z) { ShovelerVector3 v = {x, y, z}; return v; }
 static inline ShovelerVector4 shovelerVector4(float x, float y, float z, float w) { ShovelerVector4 v = {x, y, z, w}; return v; }
@@ -67,6 +78,18 @@ static inline ShovelerReferenceFrame shovelerReferenceFrame(ShovelerVector3 posi
 {
 	ShovelerReferenceFrame frame = {position, direction, up};
 	return frame;
+}
+
+static inline ShovelerBoundingBox2 shovelerBoundingBox2(ShovelerVector2 min, ShovelerVector2 max)
+{
+	ShovelerBoundingBox2 box = {min, max};
+	return box;
+}
+
+static inline ShovelerBoundingBox3 shovelerBoundingBox3(ShovelerVector3 min, ShovelerVector3 max)
+{
+	ShovelerBoundingBox3 box = {min, max};
+	return box;
 }
 
 #define shovelerMatrixGet(MATRIX, ROW, COL) (MATRIX).values[(ROW) * 4 + (COL)]
@@ -250,6 +273,14 @@ static inline ShovelerVector3 shovelerVector3Normalize(ShovelerVector3 a)
 	return an;
 }
 
+static inline ShovelerVector2 shovelerVector2LinearCombination(float alpha, ShovelerVector2 a, float beta, ShovelerVector2 b)
+{
+	ShovelerVector2 c;
+	c.values[0] = alpha * a.values[0] + beta * b.values[0];
+	c.values[1] = alpha * a.values[1] + beta * b.values[1];
+	return c;
+}
+
 static inline ShovelerVector3 shovelerVector3LinearCombination(float alpha, ShovelerVector3 a, float beta, ShovelerVector3 b)
 {
 	ShovelerVector3 c;
@@ -369,6 +400,56 @@ static inline float shovelerPlaneVectorDistance(ShovelerPlane plane, ShovelerVec
 {
 	ShovelerVector3 planeOriginToPoint = shovelerVector3LinearCombination(1.0f, point, -plane.offset, plane.normal);
 	return shovelerVector3Dot(planeOriginToPoint, plane.normal);
+}
+
+static inline bool shovelerBoundingBox2Intersect(const ShovelerBoundingBox2 *first, const ShovelerBoundingBox2 *second)
+{
+	if(first->max.values[0] <= second->min.values[0]) {
+		return false;
+	}
+
+	if(first->max.values[1] <= second->min.values[1]) {
+		return false;
+	}
+
+	if(first->min.values[0] >= second->max.values[0]) {
+		return false;
+	}
+
+	if(first->min.values[1] >= second->max.values[1]) {
+		return false;
+	}
+
+	return true;
+}
+
+static inline bool shovelerBoundingBox3Intersect(const ShovelerBoundingBox3 *first, const ShovelerBoundingBox3 *second)
+{
+	if(first->max.values[0] <= second->min.values[0]) {
+		return false;
+	}
+
+	if(first->max.values[1] <= second->min.values[1]) {
+		return false;
+	}
+
+	if(first->max.values[2] <= second->min.values[2]) {
+		return false;
+	}
+
+	if(first->min.values[0] >= second->max.values[0]) {
+		return false;
+	}
+
+	if(first->min.values[1] >= second->max.values[1]) {
+		return false;
+	}
+
+	if(first->min.values[2] >= second->max.values[2]) {
+		return false;
+	}
+
+	return true;
 }
 
 static inline float shovelerCoordinateMap(ShovelerVector3 coordinates, ShovelerCoordinateMapping mapping)
