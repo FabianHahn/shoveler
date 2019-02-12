@@ -3,6 +3,7 @@
 #include <string.h> // memcpy
 
 #include "shoveler/view/canvas.h"
+#include "shoveler/view/colliders.h"
 #include "shoveler/view/tile_sprite.h"
 #include "shoveler/log.h"
 
@@ -126,9 +127,12 @@ static void clearConfiguration(ShovelerViewCanvasConfiguration *configuration)
 
 static bool activateComponent(ShovelerViewComponent *component, void *componentDataPointer)
 {
+	assert(shovelerViewHasColliders(component->entity->view));
+
 	ComponentData *componentData = componentDataPointer;
 
-	componentData->canvas = shovelerCanvasCreate();
+	ShovelerColliders *colliders = shovelerViewGetColliders(component->entity->view);
+	componentData->canvas = shovelerCanvasCreate(colliders);
 
 	for(int i = 0; i < componentData->configuration.numTileSprites; i++) {
 		ShovelerViewEntity *tilesetEntity = shovelerViewGetEntity(component->entity->view, componentData->configuration.tileSpriteEntityIds[i]);

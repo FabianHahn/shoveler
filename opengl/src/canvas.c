@@ -8,17 +8,32 @@
 #include "shoveler/light.h"
 #include "shoveler/log.h"
 
-ShovelerCanvas *shovelerCanvasCreate()
+ShovelerCanvas *shovelerCanvasCreate(ShovelerColliders *colliders)
 {
 	ShovelerCanvas *canvas = malloc(sizeof(ShovelerCanvas));
+	canvas->colliders = colliders;
 	canvas->tileSprites = g_queue_new();
 	return canvas;
 }
 
-int shovelerCanvasAddTileSprite(ShovelerCanvas *canvas, const ShovelerCanvasTileSprite *tileSprite)
+int shovelerCanvasAddTileSprite(ShovelerCanvas *canvas, ShovelerCanvasTileSprite *tileSprite)
 {
 	g_queue_push_tail(canvas->tileSprites, (gpointer) tileSprite);
 	return g_queue_get_length(canvas->tileSprites) - 1;
+}
+
+bool shovelerCanvasMoveTileSprite(ShovelerCanvas *canvas, ShovelerCanvasTileSprite *tileSprite, ShovelerVector2 targetPosition)
+{
+	ShovelerBoundingBox2 targetBoundingBox = shovelerBoundingBox2(
+		shovelerVector2LinearCombination(1.0f, targetPosition, -0.5f, tileSprite->size),
+		shovelerVector2LinearCombination(1.0f, targetPosition, 0.5f, tileSprite->size));
+
+	if(shovelerCollidersIntersect2(canvas->colliders, &targetBoundingBox) != NULL) {
+		return false;
+	}
+
+	tileSprite->position = targetPosition;
+	return true;
 }
 
 bool shovelerCanvasRender(ShovelerCanvas *canvas, ShovelerMaterial *tileSpriteMaterial, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerRenderState *renderState)

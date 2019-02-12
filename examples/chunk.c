@@ -85,7 +85,8 @@ int main(int argc, char *argv[])
 	ShovelerTilemap *tilemap = shovelerTilemapCreate(tilesTexture);
 	shovelerChunkAddTilemapLayer(chunk, tilemap);
 
-	ShovelerCanvas *canvas = shovelerCanvasCreate();
+	ShovelerColliders *colliders = shovelerCollidersCreate();
+	ShovelerCanvas *canvas = shovelerCanvasCreate(colliders);
 	shovelerChunkAddCanvasLayer(chunk, canvas);
 
 	ShovelerImage *borderTilesImage = shovelerImageCreate(1, 1, 3);
@@ -148,6 +149,7 @@ int main(int argc, char *argv[])
 	shovelerMaterialFree(chunkMaterial);
 	shovelerChunkFree(chunk);
 	shovelerCanvasFree(canvas);
+	shovelerCollidersFree(colliders);
 	shovelerTilemapFree(tilemap);
 	shovelerTilesetFree(tileset);
 	shovelerTilesetFree(tileset2);

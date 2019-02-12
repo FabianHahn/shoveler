@@ -65,7 +65,8 @@ int main(int argc, char *argv[])
 	game->controller->lockTiltY = true;
 	shovelerCameraPerspectiveAttachController(camera, game->controller);
 
-	ShovelerCanvas *canvas = shovelerCanvasCreate();
+	ShovelerColliders *colliders = shovelerCollidersCreate();
+	ShovelerCanvas *canvas = shovelerCanvasCreate(colliders);
 
 	ShovelerImage *tilesetImage = shovelerImageCreate(2, 2, 4);
 	shovelerImageClear(tilesetImage);
@@ -129,6 +130,7 @@ int main(int argc, char *argv[])
 	shovelerDrawableFree(quad);
 	shovelerMaterialFree(canvasMaterial);
 	shovelerCanvasFree(canvas);
+	shovelerCollidersFree(colliders);
 	shovelerCameraPerspectiveDetachController(camera);
 	shovelerGameFree(game);
 	shovelerCameraFree(camera);
