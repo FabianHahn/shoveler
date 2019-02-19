@@ -1,4 +1,5 @@
 set(SHOVELER_BASE_SRC
+	src/collider/tilemap.c
 	src/image/png.c
 	src/image/ppm.c
 	src/resources/image_png.c
@@ -16,6 +17,7 @@ set(SHOVELER_BASE_SRC
 	src/resources.c
 	src/view.c
 	include/shoveler/collider/box.h
+	include/shoveler/collider/tilemap.h
 	include/shoveler/image/png.h
 	include/shoveler/image/ppm.h
 	include/shoveler/resources/image_png.h
@@ -39,6 +41,7 @@ set(SHOVELER_BASE_SRC
 )
 
 set(SHOVELER_BASE_TEST_SRC
+	src/collider/tilemap_test.cpp
 	src/image/png_test.cpp
 	src/resources/image_png_test.cpp
 	src/view/resources_test.cpp
