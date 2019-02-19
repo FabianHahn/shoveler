@@ -14,6 +14,7 @@ set(SHOVELER_BASE_SRC
 	src/log.c
 	src/projection.c
 	src/resources.c
+	src/tile_colliders.c
 	src/view.c
 	include/shoveler/image/png.h
 	include/shoveler/image/ppm.h
@@ -32,6 +33,7 @@ set(SHOVELER_BASE_SRC
 	include/shoveler/log.h
 	include/shoveler/projection.h
 	include/shoveler/resources.h
+	include/shoveler/tile_colliders.h
 	include/shoveler/types.h
 	include/shoveler/view.h
 )
