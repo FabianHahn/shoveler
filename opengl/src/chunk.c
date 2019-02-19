@@ -5,6 +5,7 @@
 #include "shoveler/camera.h"
 #include "shoveler/canvas.h"
 #include "shoveler/chunk.h"
+#include "shoveler/collider.h"
 #include "shoveler/model.h"
 #include "shoveler/light.h"
 #include "shoveler/log.h"
@@ -15,6 +16,7 @@ ShovelerChunk *shovelerChunkCreate(ShovelerVector2 position, ShovelerVector2 siz
 	chunk->position = position;
 	chunk->size = size;
 	chunk->layers = g_queue_new();
+	chunk->colliders = g_queue_new();
 
 	return chunk;
 }
@@ -37,6 +39,25 @@ int shovelerChunkAddTilemapLayer(ShovelerChunk *chunk, ShovelerTilemap *tilemap)
 
 	g_queue_push_tail(chunk->layers, layer);
 	return g_queue_get_length(chunk->layers) - 1;
+}
+
+int shovelerChunkAddCollider(ShovelerChunk *chunk, ShovelerCollider2 *collider)
+{
+	g_queue_push_tail(chunk->colliders, collider);
+	return g_queue_get_length(chunk->colliders) - 1;
+}
+
+ShovelerCollider2 *shovelerChunkIntersectColliders(ShovelerChunk *chunk, const ShovelerBoundingBox2 *object)
+{
+	for(GList *iter = chunk->colliders->head; iter != NULL; iter = iter->next) {
+		ShovelerCollider2 *collider = iter->data;
+
+		if(shovelerCollider2Intersect(collider, object)) {
+			return collider;
+		}
+	}
+
+	return false;
 }
 
 bool shovelerChunkRender(ShovelerChunk *chunk, ShovelerMaterial *canvasMaterial, ShovelerMaterial *tilemapMaterial, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerRenderState *renderState)
@@ -77,5 +98,6 @@ void shovelerChunkFree(ShovelerChunk *chunk)
 	}
 
 	g_queue_free_full(chunk->layers, free);
+	g_queue_free(chunk->colliders);
 	free(chunk);
 }

@@ -6,12 +6,14 @@
 #include <glib.h>
 
 #include <shoveler/canvas.h>
+#include <shoveler/collider.h>
 #include <shoveler/material.h>
 #include <shoveler/scene.h>
 #include <shoveler/tilemap.h>
 #include <shoveler/types.h>
 
 struct ShovelerCameraStruct; // forward declaration: camera.h
+struct ShovelerCollider2Struct; // forward declaration: collider.h
 struct ShovelerLightStruct; // forward declaration: light.h
 struct ShovelerMaterialStruct; // forward declaration: material.h
 struct ShovelerModelStruct; // forward declaration: model.h
@@ -36,13 +38,18 @@ typedef struct {
 	ShovelerVector2 size;
 	/** list of (ShovelerChunkLayer *) */
 	GQueue *layers;
+	/** list of (ShovelerCollider2 *) */
+	GQueue *colliders;
 } ShovelerChunk;
 
 ShovelerChunk *shovelerChunkCreate(ShovelerVector2 position, ShovelerVector2 size);
 /** Adds a canvas layer to the chunk, not taking ownership of it. */
 int shovelerChunkAddCanvasLayer(ShovelerChunk *chunk, ShovelerCanvas *canvas);
-/** Adds a layer of tile sprites to the canvas, not taking ownership over the passed tilemap. */
+/** Adds a layer of tile sprites to the chunk, not taking ownership over the passed tilemap. */
 int shovelerChunkAddTilemapLayer(ShovelerChunk *chunk, ShovelerTilemap *tilemap);
+/** Adds a collider to the chunk, not taking ownership over it. */
+int shovelerChunkAddCollider(ShovelerChunk *chunk, struct ShovelerCollider2Struct *collider);
+struct ShovelerCollider2Struct *shovelerChunkIntersectColliders(ShovelerChunk *chunk, const ShovelerBoundingBox2 *object);
 bool shovelerChunkRender(ShovelerChunk *chunk, struct ShovelerMaterialStruct *canvasMaterial, struct ShovelerMaterialStruct *tilemapMaterial, ShovelerScene *scene, struct ShovelerCameraStruct *camera, struct ShovelerLightStruct *light, struct ShovelerModelStruct *model, ShovelerRenderState *renderState);
 void shovelerChunkFree(ShovelerChunk *chunk);
 
