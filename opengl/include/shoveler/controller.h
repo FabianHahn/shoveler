@@ -8,7 +8,8 @@
 #include <shoveler/input.h>
 #include <shoveler/types.h>
 
-struct ShovelerControllerStruct; // forward declaration
+struct ShovelerCollidersStruct; // forward declaration: colliders.h
+struct ShovelerControllerStruct; // forward declaration: below
 
 typedef void (ShovelerControllerTiltCallbackFunction)(struct ShovelerControllerStruct *controller, ShovelerVector3 direction, ShovelerVector3 upwards, void *userData);
 
@@ -34,6 +35,7 @@ typedef struct {
 typedef struct ShovelerControllerStruct {
 	GLFWwindow *window;
 	ShovelerInput *input;
+	struct ShovelerCollidersStruct *colliders;
 	/** normalized current reference frame of the controller */
 	ShovelerReferenceFrame frame;
 	/** static "up direction vector", which is potentially different from the current frame's up direction */
@@ -57,7 +59,7 @@ typedef struct ShovelerControllerStruct {
 } ShovelerController;
 
 /** Create a controller using a window and an input system from an initial reference frame that is copied. */
-ShovelerController *shovelerControllerCreate(GLFWwindow *window, ShovelerInput *input, const ShovelerReferenceFrame *frame, float moveFactor, float tiltFactor);
+ShovelerController *shovelerControllerCreate(GLFWwindow *window, ShovelerInput *input, struct ShovelerCollidersStruct *colliders, const ShovelerReferenceFrame *frame, float moveFactor, float tiltFactor);
 ShovelerControllerTiltCallback *shovelerControllerAddTiltCallback(ShovelerController *controller, ShovelerControllerTiltCallbackFunction *callbackFunction, void *userData);
 bool shovelerControllerRemoveTiltCallback(ShovelerController *controller, ShovelerControllerTiltCallback *tiltCallback);
 ShovelerControllerMoveCallback *shovelerControllerAddMoveCallback(ShovelerController *controller, ShovelerControllerMoveCallbackFunction *callbackFunction, void *userData);

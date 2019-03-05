@@ -16,6 +16,7 @@
 #include <shoveler/scene.h>
 #include <shoveler/view.h>
 
+struct ShovelerCollidersStruct;
 struct ShovelerGameStruct;
 struct ShovelerShaderCacheStruct; // forward declaration: shader_cache.h
 
@@ -54,6 +55,7 @@ typedef struct ShovelerGameStruct {
 	struct ShovelerShaderCacheStruct *shaderCache;
 	ShovelerScene *scene;
 	ShovelerCamera *camera;
+	struct ShovelerCollidersStruct *colliders;
 	ShovelerController *controller;
 	ShovelerView *view;
 	ShovelerGameUpdateCallback *update;

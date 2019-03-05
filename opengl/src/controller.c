@@ -3,6 +3,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include "shoveler/colliders.h"
 #include "shoveler/controller.h"
 #include "shoveler/input.h"
 
@@ -18,11 +19,12 @@ static void freeTiltCallback(void *tiltCallbackPointer);
 static void freeMoveCallback(void *moveCallbackPointer);
 static void freeAspectRatioChangeCallback(void *aspectRatioCallbackChangePointer);
 
-ShovelerController *shovelerControllerCreate(GLFWwindow *window, ShovelerInput *input, const ShovelerReferenceFrame *frame, float moveFactor, float tiltFactor)
+ShovelerController *shovelerControllerCreate(GLFWwindow *window, ShovelerInput *input, ShovelerColliders *colliders, const ShovelerReferenceFrame *frame, float moveFactor, float tiltFactor)
 {
 	ShovelerController *controller = malloc(sizeof(ShovelerController));
 	controller->window = window;
 	controller->input = input;
+	controller->colliders = colliders;
 
 	controller->frame.position = frame->position;
 	controller->frame.direction = shovelerVector3Normalize(frame->direction);

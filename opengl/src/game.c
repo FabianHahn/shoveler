@@ -4,7 +4,9 @@
 #include <shoveler/game.h>
 
 #include "shoveler/camera/perspective.h"
+#include "shoveler/view/colliders.h"
 #include "shoveler/view/shader_cache.h"
+#include "shoveler/colliders.h"
 #include "shoveler/game.h"
 #include "shoveler/global.h"
 #include "shoveler/input.h"
@@ -98,7 +100,8 @@ ShovelerGame *shovelerGameCreate(ShovelerGameUpdateCallback *update, const Shove
 	game->shaderCache = shovelerShaderCacheCreate();
 	game->scene = shovelerSceneCreate(game->shaderCache);
 	game->camera = shovelerCameraPerspectiveCreate(game->shaderCache, &cameraSettings->frame, &cameraSettings->projection);
-	game->controller = shovelerControllerCreate(game->window, game->input, &controllerSettings->frame, controllerSettings->moveFactor, controllerSettings->tiltFactor);
+	game->colliders = shovelerCollidersCreate();
+	game->controller = shovelerControllerCreate(game->window, game->input, game->colliders, &controllerSettings->frame, controllerSettings->moveFactor, controllerSettings->tiltFactor);
 	game->view = shovelerViewCreate();
 	game->update = update;
 	game->lastFrameTime = glfwGetTime();
@@ -108,6 +111,7 @@ ShovelerGame *shovelerGameCreate(ShovelerGameUpdateCallback *update, const Shove
 
 	shovelerCameraPerspectiveAttachController(game->camera, game->controller);
 
+	shovelerViewSetColliders(game->view, game->colliders);
 	shovelerViewSetTarget(game->view, "controller", game->controller);
 	shovelerViewSetTarget(game->view, "scene", game->scene);
 	shovelerViewSetShaderCache(game->view, game->shaderCache);
@@ -179,6 +183,7 @@ void shovelerGameFree(ShovelerGame *game)
 
 	shovelerViewFree(game->view);
 	shovelerControllerFree(game->controller);
+	shovelerCollidersFree(game->colliders);
 	shovelerInputFree(game->input);
 	shovelerSceneFree(game->scene);
 	shovelerCameraFree(game->camera);
