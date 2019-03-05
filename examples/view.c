@@ -10,7 +10,6 @@
 #include <shoveler/view/canvas.h>
 #include <shoveler/view/chunk.h>
 #include <shoveler/view/client.h>
-#include <shoveler/view/colliders.h>
 #include <shoveler/view/controller.h>
 #include <shoveler/view/drawable.h>
 #include <shoveler/view/light.h>
@@ -80,9 +79,6 @@ int main(int argc, char *argv[])
 	ShovelerResources *resources = shovelerResourcesCreate(NULL, NULL);
 	shovelerResourcesImagePngRegister(resources);
 	shovelerViewSetResources(game->view, resources);
-
-	ShovelerColliders *colliders = shovelerCollidersCreate();
-	shovelerViewSetColliders(game->view, colliders);
 
 	ShovelerViewDrawableConfiguration cubeDrawableConfiguration;
 	cubeDrawableConfiguration.type = SHOVELER_VIEW_DRAWABLE_TYPE_CUBE;
@@ -390,7 +386,6 @@ int main(int argc, char *argv[])
 
 	shovelerCameraPerspectiveDetachController(camera);
 	shovelerGameFree(game);
-	shovelerCollidersFree(colliders);
 	shovelerResourcesFree(resources);
 	shovelerCameraFree(camera);
 	shovelerGlobalUninit();

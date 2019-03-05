@@ -15,6 +15,7 @@
 #include <shoveler/scene.h>
 #include <shoveler/view.h>
 
+struct ShovelerCollidersStruct;
 struct ShovelerGameStruct;
 
 typedef void (ShovelerGameUpdateCallback)(struct ShovelerGameStruct *game, double dt);
@@ -46,6 +47,7 @@ typedef struct ShovelerGameStruct {
 	ShovelerFramebuffer *framebuffer;
 	ShovelerScene *scene;
 	ShovelerCamera *camera;
+	struct ShovelerCollidersStruct *colliders;
 	ShovelerController *controller;
 	ShovelerView *view;
 	ShovelerGameUpdateCallback *update;
