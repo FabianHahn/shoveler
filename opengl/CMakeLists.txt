@@ -47,6 +47,7 @@ set(SHOVELER_OPENGL_SRC
 	src/sampler.c
 	src/scene.c
 	src/shader.c
+	src/shader_cache.c
 	src/shader_program.c
 	src/texture.c
 	src/tile_sprite_animation.c
@@ -108,6 +109,7 @@ set(SHOVELER_OPENGL_SRC
 	include/shoveler/sampler.h
 	include/shoveler/scene.h
 	include/shoveler/shader.h
+	include/shoveler/shader_cache.h
 	include/shoveler/shader_program.h
 	include/shoveler/texture.h
 	include/shoveler/tile_sprite_animation.h

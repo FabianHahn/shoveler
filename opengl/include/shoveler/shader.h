@@ -15,7 +15,7 @@ struct ShovelerModelStruct; // forward declaration: model.h
 struct ShovelerSceneStruct; // forward declaration: scene.h
 struct ShovelerShaderStruct; // forward declaration: shader.h
 
-typedef struct {
+typedef struct ShovelerShaderKeyStruct {
 	struct ShovelerSceneStruct *scene;
 	struct ShovelerCameraStruct *camera;
 	struct ShovelerLightStruct *light;
