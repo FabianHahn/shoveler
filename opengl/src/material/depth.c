@@ -1,4 +1,5 @@
 #include "shoveler/material/depth.h"
+#include "shoveler/shader_cache.h"
 #include "shoveler/shader_program.h"
 
 static const char *vertexShaderSource =
@@ -26,10 +27,10 @@ static const char *fragmentShaderSource =
 		"	fragmentDepth = vec4(gl_FragCoord.z);\n"
 		"}\n";
 
-ShovelerMaterial *shovelerMaterialDepthCreate()
+ShovelerMaterial *shovelerMaterialDepthCreate(ShovelerShaderCache *shaderCache)
 {
 	GLuint vertexShaderObject = shovelerShaderProgramCompileFromString(vertexShaderSource, GL_VERTEX_SHADER);
 	GLuint fragmentShaderObject = shovelerShaderProgramCompileFromString(fragmentShaderSource, GL_FRAGMENT_SHADER);
 	GLuint program = shovelerShaderProgramLink(vertexShaderObject, 0, fragmentShaderObject, true);
-	return shovelerMaterialCreate(program);
+	return shovelerMaterialCreate(shaderCache, program);
 }

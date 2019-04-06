@@ -10,7 +10,10 @@
 #include <shoveler/scene.h>
 #include <shoveler/types.h>
 
+struct ShovelerShaderCacheStruct; // forward declaration: shader_cache.h
+
 typedef struct {
+	struct ShovelerShaderCacheStruct *shaderCache;
 	ShovelerSampler *shadowMapSampler;
 	ShovelerFramebuffer *depthFramebuffer;
 	ShovelerMaterial *depthMaterial;
@@ -21,13 +24,13 @@ typedef struct {
 	ShovelerVector3 color;
 } ShovelerLightSpotShared;
 
-ShovelerLightSpotShared *shovelerLightSpotSharedCreate(int width, int height, GLsizei samples, float ambientFactor, float exponentialFactor, ShovelerVector3 color);
+ShovelerLightSpotShared *shovelerLightSpotSharedCreate(struct ShovelerShaderCacheStruct *shaderCache, int width, int height, GLsizei samples, float ambientFactor, float exponentialFactor, ShovelerVector3 color);
 ShovelerLight *shovelerLightSpotCreateWithShared(ShovelerCamera *camera, ShovelerLightSpotShared *shared, bool managedShared);
 void shovelerLightSpotSharedFree(ShovelerLightSpotShared *shared);
 
-static inline ShovelerLight *shovelerLightSpotCreate(ShovelerCamera *camera, int width, int height, GLsizei samples, float ambientFactor, float exponentialFactor, ShovelerVector3 color)
+static inline ShovelerLight *shovelerLightSpotCreate(struct ShovelerShaderCacheStruct *shaderCache, ShovelerCamera *camera, int width, int height, GLsizei samples, float ambientFactor, float exponentialFactor, ShovelerVector3 color)
 {
-	ShovelerLightSpotShared *shared = shovelerLightSpotSharedCreate(width, height, samples, ambientFactor, exponentialFactor, color);
+	ShovelerLightSpotShared *shared = shovelerLightSpotSharedCreate(shaderCache, width, height, samples, ambientFactor, exponentialFactor, color);
 	return shovelerLightSpotCreateWithShared(camera, shared, true);
 }
 

@@ -6,6 +6,7 @@
 #include "shoveler/model.h"
 #include "shoveler/scene.h"
 #include "shoveler/shader.h"
+#include "shoveler/shader_cache.h"
 
 typedef enum {
 	RENDER_MODE_OCCLUDED,
@@ -19,15 +20,15 @@ static void freeLight(void *lightPointer);
 static void freeModel(void *modelPointer);
 static void freeShader(void *shaderPointer);
 
-ShovelerScene *shovelerSceneCreate()
+ShovelerScene *shovelerSceneCreate(ShovelerShaderCache *shaderCache)
 {
 	ShovelerScene *scene = malloc(sizeof(ShovelerScene));
+	scene->shaderCache = shaderCache;
 	scene->uniforms = shovelerUniformMapCreate();
-	scene->depthMaterial = shovelerMaterialDepthCreate();
+	scene->depthMaterial = shovelerMaterialDepthCreate(shaderCache);
 	scene->debugMode = 0;
 	scene->lights = g_hash_table_new_full(g_direct_hash, g_direct_equal, freeLight, NULL);
 	scene->models = g_hash_table_new_full(g_direct_hash, g_direct_equal, freeModel, NULL);
-	scene->shaderCache = g_hash_table_new_full(shovelerShaderKeyHash, shovelerShaderKeyEqual, NULL, freeShader);
 
 	shovelerUniformMapInsert(scene->uniforms, "sceneDebugMode", shovelerUniformCreateIntPointer(&scene->debugMode));
 
@@ -50,7 +51,6 @@ bool shovelerSceneAddLight(ShovelerScene *scene, ShovelerLight *light)
 
 bool shovelerSceneRemoveLight(ShovelerScene *scene, ShovelerLight *light)
 {
-	// TODO: cleanup shader cache entries
 	return g_hash_table_remove(scene->lights, light);
 }
 
@@ -61,7 +61,6 @@ bool shovelerSceneAddModel(ShovelerScene *scene, ShovelerModel *model)
 
 bool shovelerSceneRemoveModel(ShovelerScene *scene, ShovelerModel *model)
 {
-	// TODO: cleanup shader cache entries
 	return g_hash_table_remove(scene->models, model);
 }
 
@@ -133,7 +132,7 @@ ShovelerShader *shovelerSceneGenerateShader(ShovelerScene *scene, ShovelerCamera
 {
 	ShovelerShaderKey shaderKey = {scene, camera, light, model, material, userData};
 
-	ShovelerShader *shader = g_hash_table_lookup(scene->shaderCache, &shaderKey);
+	ShovelerShader *shader = shovelerShaderCacheLookup(scene->shaderCache, &shaderKey);
 	if(shader == NULL) {
 		shader = shovelerShaderCreate(shaderKey, material);
 
@@ -157,14 +156,11 @@ ShovelerShader *shovelerSceneGenerateShader(ShovelerScene *scene, ShovelerCamera
 			cameraAttached = shovelerUniformMapAttach(camera->uniforms, shader);
 		}
 
-		int sceneAttached = 0;
-		if(scene != NULL) {
-			sceneAttached = shovelerUniformMapAttach(scene->uniforms, shader);
-		}
+		int sceneAttached = shovelerUniformMapAttach(scene->uniforms, shader);
 
 		shovelerLogInfo("Generated shader for program %d with %d scene %p, %d camera %p, %d light %p, %d model %p, and %d material %p uniforms.", material->program, sceneAttached, scene, cameraAttached, camera, lightAttached, light, modelAttached, model, materialAttached, material);
 
-		g_hash_table_insert(scene->shaderCache, &shader->key, shader);
+		shovelerShaderCacheInsert(scene->shaderCache, shader);
 	}
 
 	return shader;
@@ -172,7 +168,8 @@ ShovelerShader *shovelerSceneGenerateShader(ShovelerScene *scene, ShovelerCamera
 
 void shovelerSceneFree(ShovelerScene *scene)
 {
-	g_hash_table_destroy(scene->shaderCache);
+	shovelerShaderCacheInvalidateScene(scene->shaderCache, scene);
+
 	g_hash_table_destroy(scene->models);
 	g_hash_table_destroy(scene->lights);
 	shovelerMaterialFree(scene->depthMaterial);

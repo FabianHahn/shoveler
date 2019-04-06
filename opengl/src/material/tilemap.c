@@ -11,6 +11,7 @@
 #include "shoveler/model.h"
 #include "shoveler/scene.h"
 #include "shoveler/shader.h"
+#include "shoveler/shader_cache.h"
 #include "shoveler/shader_program.h"
 
 static const char *vertexShaderSource =
@@ -135,14 +136,14 @@ typedef struct {
 static bool render(ShovelerMaterial *material, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerRenderState *renderState);
 static void freeTilemap(ShovelerMaterial *material);
 
-ShovelerMaterial *shovelerMaterialTilemapCreate()
+ShovelerMaterial *shovelerMaterialTilemapCreate(ShovelerShaderCache *shaderCache)
 {
 	GLuint vertexShaderObject = shovelerShaderProgramCompileFromString(vertexShaderSource, GL_VERTEX_SHADER);
 	GLuint fragmentShaderObject = shovelerShaderProgramCompileFromString(fragmentShaderSource, GL_FRAGMENT_SHADER);
 	GLuint program = shovelerShaderProgramLink(vertexShaderObject, 0, fragmentShaderObject, true);
 
 	MaterialData *materialData = malloc(sizeof(MaterialData));
-	materialData->material = shovelerMaterialCreate(program);
+	materialData->material = shovelerMaterialCreate(shaderCache, program);
 	materialData->material->data = materialData;
 	materialData->material->render = render;
 	materialData->material->freeData = freeTilemap;

@@ -1,6 +1,7 @@
 #include <stdlib.h> // malloc, free
 
 #include "shoveler/material/depth_texture_gaussian_filter.h"
+#include "shoveler/shader_cache.h"
 #include "shoveler/shader_program.h"
 
 typedef struct {
@@ -69,13 +70,13 @@ static const char *fragmentShaderSource =
 		"	}\n"
 		"}\n";
 
-ShovelerMaterial *shovelerMaterialDepthTextureGaussianFilterGaussianFilterCreate(ShovelerTexture **texturePointer, ShovelerSampler **samplerPointer, int width, int height)
+ShovelerMaterial *shovelerMaterialDepthTextureGaussianFilterGaussianFilterCreate(ShovelerShaderCache *shaderCache, ShovelerTexture **texturePointer, ShovelerSampler **samplerPointer, int width, int height)
 {
 	GLuint vertexShaderObject = shovelerShaderProgramCompileFromString(vertexShaderSource, GL_VERTEX_SHADER);
 	GLuint fragmentShaderObject = shovelerShaderProgramCompileFromString(fragmentShaderSource, GL_FRAGMENT_SHADER);
 	GLuint program = shovelerShaderProgramLink(vertexShaderObject, 0, fragmentShaderObject, true);
 
-	ShovelerMaterial *material = shovelerMaterialCreate(program);
+	ShovelerMaterial *material = shovelerMaterialCreate(shaderCache, program);
 
 	ShovelerMaterialDepthTextureGaussianFilterData *materialDepthTextureGaussianFilterData = malloc(sizeof(ShovelerMaterialDepthTextureGaussianFilterData));
 	material->freeData = freeMaterialDepthTextureGaussianFilterData;

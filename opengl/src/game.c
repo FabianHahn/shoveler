@@ -1,20 +1,22 @@
 #include <stdlib.h> // malloc, free
 
 #include <glad/glad.h>
+#include <shoveler/game.h>
 
+#include "shoveler/camera/perspective.h"
+#include "shoveler/view/shader_cache.h"
 #include "shoveler/game.h"
 #include "shoveler/global.h"
 #include "shoveler/input.h"
 #include "shoveler/opengl.h"
 #include "shoveler/scene.h"
 #include "shoveler/shader_cache.h"
-#include "shoveler/view/shader_cache.h"
 
 static void keyHandler(ShovelerInput *input, int key, int scancode, int action, int mods, void *unused);
 static gint64 elapsedNs(double dt);
 static void printFps(void *gamePointer);
 
-ShovelerGame *shovelerGameCreate(ShovelerCamera *camera, ShovelerGameUpdateCallback *update, const ShovelerGameWindowSettings  *windowSettings, const ShovelerGameControllerSettings *controllerSettings)
+ShovelerGame *shovelerGameCreate(ShovelerGameUpdateCallback *update, const ShovelerGameWindowSettings *windowSettings, const ShovelerGameCameraSettings *cameraSettings, const ShovelerGameControllerSettings *controllerSettings)
 {
 	ShovelerGame *game = malloc(sizeof(ShovelerGame));
 	game->windowedWidth = windowSettings->windowedWidth;
@@ -94,8 +96,8 @@ ShovelerGame *shovelerGameCreate(ShovelerCamera *camera, ShovelerGameUpdateCallb
 
 	game->framebuffer = shovelerFramebufferCreate(width, height, windowSettings->samples, 4, 8);
 	game->shaderCache = shovelerShaderCacheCreate();
-	game->scene = shovelerSceneCreate();
-	game->camera = camera;
+	game->scene = shovelerSceneCreate(game->shaderCache);
+	game->camera = shovelerCameraPerspectiveCreate(game->shaderCache, &cameraSettings->frame, &cameraSettings->projection);
 	game->controller = shovelerControllerCreate(game->window, game->input, &controllerSettings->frame, controllerSettings->moveFactor, controllerSettings->tiltFactor);
 	game->view = shovelerViewCreate();
 	game->update = update;
@@ -103,6 +105,8 @@ ShovelerGame *shovelerGameCreate(ShovelerCamera *camera, ShovelerGameUpdateCallb
 	game->lastFpsPrintTime = game->lastFrameTime;
 	game->framesSinceLastFpsPrint = 0;
 	shovelerExecutorSchedulePeriodic(game->updateExecutor, 1000, 1000, printFps, game);
+
+	shovelerCameraPerspectiveAttachController(game->camera, game->controller);
 
 	shovelerViewSetTarget(game->view, "controller", game->controller);
 	shovelerViewSetTarget(game->view, "scene", game->scene);
@@ -169,12 +173,15 @@ void shovelerGameFree(ShovelerGame *game)
 	ShovelerGlobalContext *global = shovelerGlobalGetContext();
 	g_hash_table_remove(global->games, game->window);
 
+	shovelerCameraPerspectiveDetachController(game->camera);
+
 	shovelerFramebufferFree(game->framebuffer);
 
 	shovelerViewFree(game->view);
 	shovelerControllerFree(game->controller);
 	shovelerInputFree(game->input);
 	shovelerSceneFree(game->scene);
+	shovelerCameraFree(game->camera);
 	shovelerShaderCacheFree(game->shaderCache);
 
 	glfwDestroyWindow(game->window);

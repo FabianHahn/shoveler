@@ -3,7 +3,9 @@
 
 #include <shoveler/light/spot.h>
 
-ShovelerLight *shovelerLightPointCreate(ShovelerVector3 position, int width, int height, GLsizei samples, float ambientFactor, float exponentialFactor, ShovelerVector3 color);
+struct ShovelerShaderCacheStruct; // forward declaration: shader_cache.h
+
+ShovelerLight *shovelerLightPointCreate(struct ShovelerShaderCacheStruct *shaderCache, ShovelerVector3 position, int width, int height, GLsizei samples, float ambientFactor, float exponentialFactor, ShovelerVector3 color);
 ShovelerLightSpotShared *shovelerLightPointGetShared(ShovelerLight *light);
 
 #endif

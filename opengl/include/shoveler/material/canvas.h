@@ -7,7 +7,9 @@
 #include <shoveler/material.h>
 #include <shoveler/types.h>
 
-ShovelerMaterial *shovelerMaterialCanvasCreate();
+struct ShovelerShaderCacheStruct; // forward declaration: shader_cache.h
+
+ShovelerMaterial *shovelerMaterialCanvasCreate(struct ShovelerShaderCacheStruct *shaderCache);
 void shovelerMaterialCanvasSetActive(ShovelerMaterial *material, ShovelerCanvas *canvas);
 void shovelerMaterialCanvasSetActiveRegion(ShovelerMaterial *material, ShovelerVector2 position, ShovelerVector2 size);
 ShovelerMaterial *shovelerMaterialCanvasGetTileSpriteMaterial(ShovelerMaterial *material);

@@ -5,12 +5,14 @@
 #include "shoveler/material.h"
 #include "shoveler/model.h"
 #include "shoveler/opengl.h"
+#include "shoveler/shader_cache.h"
 #include "shoveler/types.h"
 #include "shoveler/uniform.h"
 
 ShovelerModel *shovelerModelCreate(ShovelerDrawable *drawable, ShovelerMaterial *material)
 {
 	ShovelerModel *model = malloc(sizeof(ShovelerModel));
+	model->shaderCache = material->shaderCache;
 	model->drawable = drawable;
 	model->material = material;
 	model->translation = shovelerVector3(0, 0, 0);
@@ -76,6 +78,8 @@ void shovelerModelFree(ShovelerModel *model)
 	if(model == NULL) {
 		return;
 	}
+
+	shovelerShaderCacheInvalidateModel(model->shaderCache, model);
 
 	shovelerUniformMapFree(model->uniforms);
 	free(model);

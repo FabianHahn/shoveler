@@ -6,7 +6,9 @@
 #include <shoveler/chunk.h>
 #include <shoveler/material.h>
 
-ShovelerMaterial *shovelerMaterialChunkCreate();
+struct ShovelerShaderCacheStruct; // forward declaration: shader_cache.h
+
+ShovelerMaterial *shovelerMaterialChunkCreate(struct ShovelerShaderCacheStruct *shaderCache);
 void shovelerMaterialChunkSetActive(ShovelerMaterial *material, ShovelerChunk *chunk);
 
 #endif

@@ -8,6 +8,7 @@
 #include "shoveler/log.h"
 #include "shoveler/model.h"
 #include "shoveler/scene.h"
+#include "shoveler/shader_cache.h"
 
 typedef struct {
 	ShovelerMaterial *material;
@@ -19,15 +20,15 @@ typedef struct {
 static bool render(ShovelerMaterial *material, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerRenderState *renderState);
 static void freeMaterialData(ShovelerMaterial *material);
 
-ShovelerMaterial *shovelerMaterialChunkCreate()
+ShovelerMaterial *shovelerMaterialChunkCreate(ShovelerShaderCache *shaderCache)
 {
 	MaterialData *materialData = malloc(sizeof(MaterialData));
-	materialData->material = shovelerMaterialCreateUnmanaged(0);
+	materialData->material = shovelerMaterialCreateUnmanaged(shaderCache, 0);
 	materialData->material->data = materialData;
 	materialData->material->render = render;
 	materialData->material->freeData = freeMaterialData;
-	materialData->canvasMaterial = shovelerMaterialCanvasCreate();
-	materialData->tilemapMaterial = shovelerMaterialTilemapCreate();
+	materialData->canvasMaterial = shovelerMaterialCanvasCreate(shaderCache);
+	materialData->tilemapMaterial = shovelerMaterialTilemapCreate(shaderCache);
 	materialData->activeChunk = NULL;
 
 	return materialData->material;
@@ -54,6 +55,7 @@ static bool render(ShovelerMaterial *material, ShovelerScene *scene, ShovelerCam
 static void freeMaterialData(ShovelerMaterial *material)
 {
 	MaterialData *materialData = material->data;
+
 	shovelerMaterialFree(materialData->canvasMaterial);
 	shovelerMaterialFree(materialData->tilemapMaterial);
 	free(materialData);

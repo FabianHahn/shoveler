@@ -3,6 +3,8 @@
 
 #include <shoveler/material.h>
 
-ShovelerMaterial *shovelerMaterialParticleCreate(ShovelerVector3 color);
+struct ShovelerShaderCacheStruct; // forward declaration: shader_cache.h
+
+ShovelerMaterial *shovelerMaterialParticleCreate(struct ShovelerShaderCacheStruct *shaderCache, ShovelerVector3 color);
 
 #endif

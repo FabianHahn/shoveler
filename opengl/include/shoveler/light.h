@@ -9,12 +9,15 @@
 #include <shoveler/scene.h>
 #include <shoveler/types.h>
 
+struct ShovelerShaderCacheStruct; // forward declaration: shader_cache.h
+
 typedef void (ShovelerLightUpdatePositionFunction)(void *data, ShovelerVector3 position);
 typedef ShovelerVector3 (ShovelerLightGetPositionFunction)(void *data);
 typedef int (ShovelerLightRenderFunction)(void *data, ShovelerScene *scene, ShovelerCamera *camera, ShovelerFramebuffer *framebuffer, ShovelerSceneRenderPassOptions renderPassOptions, ShovelerRenderState *renderState);
 typedef void (ShovelerLightFreeDataFunction)(void *data);
 
 typedef struct ShovelerLightStruct {
+	struct ShovelerShaderCacheStruct *shaderCache;
 	ShovelerUniformMap *uniforms;
 	void *data;
 	ShovelerLightUpdatePositionFunction *updatePosition;

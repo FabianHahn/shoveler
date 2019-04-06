@@ -4,6 +4,8 @@
 #include <shoveler/material.h>
 #include <shoveler/types.h>
 
-ShovelerMaterial *shovelerMaterialColorCreate(ShovelerVector3 color);
+struct ShovelerShaderCacheStruct; // forward declaration: shader_cache.h
+
+ShovelerMaterial *shovelerMaterialColorCreate(struct ShovelerShaderCacheStruct *shaderCache, ShovelerVector3 color);
 
 #endif

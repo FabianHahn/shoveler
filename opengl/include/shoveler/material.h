@@ -16,12 +16,14 @@ struct ShovelerLightStruct; // forward declaration: light.h
 struct ShovelerMaterialStruct;
 struct ShovelerModelStruct; // forward declaration: model.h
 struct ShovelerShaderStruct; // forward declaration: shader.h
+struct ShovelerShaderCacheStruct; // forward declaration: shader_cache.h
 
 typedef bool (ShovelerMaterialRenderFunction)(struct ShovelerMaterialStruct *material, ShovelerScene *scene, struct ShovelerCameraStruct *camera, struct ShovelerLightStruct *light, struct ShovelerModelStruct *model, ShovelerRenderState *renderState);
 typedef int (ShovelerMaterialAttachUniformsFunction)(struct ShovelerMaterialStruct *material, struct ShovelerShaderStruct *shader, void *userData);
 typedef void (ShovelerMaterialFreeDataFunction)(struct ShovelerMaterialStruct *material);
 
 typedef struct ShovelerMaterialStruct {
+	struct ShovelerShaderCacheStruct *shaderCache;
 	bool manageProgram;
 	GLuint program;
 	/** do not access directly - use shovelerMaterialAttachUniforms instead */
@@ -35,9 +37,9 @@ typedef struct ShovelerMaterialStruct {
 } ShovelerMaterial;
 
 /** Creates a material from a program that is then owned by the object. */
-ShovelerMaterial *shovelerMaterialCreate(GLuint program);
+ShovelerMaterial *shovelerMaterialCreate(struct ShovelerShaderCacheStruct *shaderCache, GLuint program);
 /** Creates a material from a program without owning it. */
-ShovelerMaterial *shovelerMaterialCreateUnmanaged(GLuint program);
+ShovelerMaterial *shovelerMaterialCreateUnmanaged(struct ShovelerShaderCacheStruct *shaderCache, GLuint program);
 void shovelerMaterialFree(ShovelerMaterial *material);
 
 static inline bool shovelerMaterialRender(ShovelerMaterial *material, ShovelerScene *scene, struct ShovelerCameraStruct *camera, struct ShovelerLightStruct *light, struct ShovelerModelStruct *model, ShovelerRenderState *renderState)

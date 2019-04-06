@@ -6,6 +6,8 @@
 #include <shoveler/projection.h>
 #include <shoveler/types.h>
 
+struct ShovelerShaderCacheStruct; // forward declaration: shader_cache.h
+
 typedef struct {
 	ShovelerCamera camera;
 	ShovelerVector3 direction;
@@ -19,7 +21,7 @@ typedef struct {
 } ShovelerCameraPerspective;
 
 /** Creates a perspective camera from a reference frame and a perspective projection, copying both. */
-ShovelerCamera *shovelerCameraPerspectiveCreate(const ShovelerReferenceFrame *frame, const ShovelerProjectionPerspective *projection);
+ShovelerCamera *shovelerCameraPerspectiveCreate(struct ShovelerShaderCacheStruct *shaderCache, const ShovelerReferenceFrame *frame, const ShovelerProjectionPerspective *projection);
 void shovelerCameraPerspectiveAttachController(ShovelerCamera *camera, ShovelerController *controller);
 ShovelerController *shovelerCameraPerspectiveGetController(ShovelerCamera *camera);
 void shovelerCameraPerspectiveDetachController(ShovelerCamera *camera);

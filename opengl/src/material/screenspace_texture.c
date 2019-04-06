@@ -1,6 +1,7 @@
 #include <stdlib.h> // malloc, free
 
 #include "shoveler/material/screenspace_texture.h"
+#include "shoveler/shader_cache.h"
 #include "shoveler/shader_program.h"
 
 typedef struct {
@@ -56,13 +57,13 @@ static const char *fragmentShaderSource =
 		"	fragmentColor = color;\n"
 		"}\n";
 
-ShovelerMaterial *shovelerMaterialScreenspaceTextureCreate(ShovelerTexture *texture, bool manageTexture, bool depthTexture, ShovelerSampler *sampler, bool manageSampler)
+ShovelerMaterial *shovelerMaterialScreenspaceTextureCreate(ShovelerShaderCache *shaderCache, ShovelerTexture *texture, bool manageTexture, bool depthTexture, ShovelerSampler *sampler, bool manageSampler)
 {
 	GLuint vertexShaderObject = shovelerShaderProgramCompileFromString(vertexShaderSource, GL_VERTEX_SHADER);
 	GLuint fragmentShaderObject = shovelerShaderProgramCompileFromString(fragmentShaderSource, GL_FRAGMENT_SHADER);
 	GLuint program = shovelerShaderProgramLink(vertexShaderObject, 0, fragmentShaderObject, true);
 
-	ShovelerMaterial *material = shovelerMaterialCreate(program);
+	ShovelerMaterial *material = shovelerMaterialCreate(shaderCache, program);
 
 	ShovelerMaterialScreenspaceTextureData *materialScreenspaceTextureData = malloc(sizeof(ShovelerMaterialScreenspaceTextureData));
 	materialScreenspaceTextureData->texture = texture;

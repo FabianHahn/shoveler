@@ -5,6 +5,7 @@
 
 #include "shoveler/camera/perspective.h"
 #include "shoveler/log.h"
+#include "shoveler/shader_cache.h"
 #include "shoveler/types.h"
 
 static void updateView(void *perspectiveCameraPointer);
@@ -14,10 +15,10 @@ static void tiltController(ShovelerController *controller, ShovelerVector3 direc
 static void moveController(ShovelerController *controller, ShovelerVector3 position, void *userData);
 static void aspectRatioChangeController(ShovelerController *controller, float aspectRatio, void *userData);
 
-ShovelerCamera *shovelerCameraPerspectiveCreate(const ShovelerReferenceFrame *frame, const ShovelerProjectionPerspective *projection)
+ShovelerCamera *shovelerCameraPerspectiveCreate(ShovelerShaderCache *shaderCache, const ShovelerReferenceFrame *frame, const ShovelerProjectionPerspective *projection)
 {
 	ShovelerCameraPerspective *perspectiveCamera = malloc(sizeof(ShovelerCameraPerspective));
-	shovelerCameraInit(&perspectiveCamera->camera, frame->position, perspectiveCamera, updateView, freePerspectiveCamera);
+	shovelerCameraInit(&perspectiveCamera->camera, shaderCache, frame->position, perspectiveCamera, updateView, freePerspectiveCamera);
 	perspectiveCamera->direction = shovelerVector3Normalize(frame->direction);
 	perspectiveCamera->upwards = shovelerVector3Normalize(frame->up);
 

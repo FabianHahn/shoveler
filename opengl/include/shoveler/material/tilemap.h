@@ -6,7 +6,9 @@
 #include <shoveler/tilemap.h>
 #include <shoveler/tileset.h>
 
-ShovelerMaterial *shovelerMaterialTilemapCreate();
+struct ShovelerShaderCacheStruct; // forward declaration: shader_cache.h
+
+ShovelerMaterial *shovelerMaterialTilemapCreate(struct ShovelerShaderCacheStruct *shaderCache);
 void shovelerMaterialTilemapSetActive(ShovelerMaterial *tilemapMaterial, ShovelerTilemap *tilemap);
 void shovelerMaterialTilemapSetActiveTiles(ShovelerMaterial *tilemapMaterial, ShovelerTexture *tiles);
 void shovelerMaterialTilemapSetActiveTileset(ShovelerMaterial *tilemapMaterial, int tilesetId, ShovelerTileset *tileset);

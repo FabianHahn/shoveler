@@ -38,32 +38,30 @@ int main(int argc, char *argv[])
 	windowSettings.windowedWidth = 640;
 	windowSettings.windowedHeight = 480;
 
+	ShovelerGameCameraSettings cameraSettings;
+	cameraSettings.frame.position = shovelerVector3(0, 0, 1);
+	cameraSettings.frame.direction = shovelerVector3(0, 0, -1);
+	cameraSettings.frame.up = shovelerVector3(0, 1, 0);
+	cameraSettings.projection.fieldOfViewY = 2.0f * SHOVELER_PI * 50.0f / 360.0f;
+	cameraSettings.projection.aspectRatio = (float) windowSettings.windowedWidth / windowSettings.windowedHeight;
+	cameraSettings.projection.nearClippingPlane = 0.01;
+	cameraSettings.projection.farClippingPlane = 1000;
+
 	ShovelerGameControllerSettings controllerSettings;
-	controllerSettings.frame.position = shovelerVector3(0, 0, 1);
-	controllerSettings.frame.direction = shovelerVector3(0, 0, -1);
-	controllerSettings.frame.up = shovelerVector3(0, 1, 0);
+	controllerSettings.frame = cameraSettings.frame;
 	controllerSettings.moveFactor = 0.5f;
 	controllerSettings.tiltFactor = 0.0005f;
-
-	ShovelerProjectionPerspective projection;
-	projection.fieldOfViewY = 2.0f * SHOVELER_PI * 50.0f / 360.0f;
-	projection.aspectRatio = (float) windowSettings.windowedWidth / windowSettings.windowedHeight;
-	projection.nearClippingPlane = 0.01;
-	projection.farClippingPlane = 1000;
 
 	shovelerLogInit("shoveler/", SHOVELER_LOG_LEVEL_INFO_UP, stdout);
 	shovelerGlobalInit();
 
-	ShovelerCamera *camera = shovelerCameraPerspectiveCreate(&controllerSettings.frame, &projection);
-
-	ShovelerGame *game = shovelerGameCreate(camera, shovelerSampleUpdate, &windowSettings, &controllerSettings);
+	ShovelerGame *game = shovelerGameCreate(shovelerSampleUpdate, &windowSettings, &cameraSettings, &controllerSettings);
 	if(game == NULL) {
 		return EXIT_FAILURE;
 	}
 
 	game->controller->lockTiltX = true;
 	game->controller->lockTiltY = true;
-	shovelerCameraPerspectiveAttachController(camera, game->controller);
 
 	ShovelerCanvas *canvas = shovelerCanvasCreate();
 
@@ -106,7 +104,7 @@ int main(int argc, char *argv[])
 	animation->moveAmountThreshold = 0.25f;
 	animation->logDirectionChanges = true;
 
-	ShovelerMaterial *canvasMaterial = shovelerMaterialCanvasCreate();
+	ShovelerMaterial *canvasMaterial = shovelerMaterialCanvasCreate(game->shaderCache);
 	shovelerMaterialCanvasSetActive(canvasMaterial, canvas);
 	shovelerMaterialCanvasSetActiveRegion(canvasMaterial, shovelerVector2(0.5f, 0.5f), shovelerVector2(1.0f, 1.0f));
 	ShovelerDrawable *quad = shovelerDrawableQuadCreate();
@@ -129,9 +127,7 @@ int main(int argc, char *argv[])
 	shovelerDrawableFree(quad);
 	shovelerMaterialFree(canvasMaterial);
 	shovelerCanvasFree(canvas);
-	shovelerCameraPerspectiveDetachController(camera);
 	shovelerGameFree(game);
-	shovelerCameraFree(camera);
 	shovelerGlobalUninit();
 	shovelerLogTerminate();
 

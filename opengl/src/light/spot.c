@@ -1,10 +1,12 @@
 #include <stdlib.h> // malloc, free
+#include <shoveler/light/spot.h>
 
 #include "shoveler/camera/identity.h"
 #include "shoveler/filter/depth_texture_gaussian.h"
 #include "shoveler/light/spot.h"
 #include "shoveler/material/depth.h"
 #include "shoveler/scene.h"
+#include "shoveler/shader_cache.h"
 
 typedef struct {
 	ShovelerLight light;
@@ -18,12 +20,13 @@ static ShovelerVector3 getPosition(void *spotlightPointer);
 static int renderSpotLight(void *spotlightPointer, ShovelerScene *scene, ShovelerCamera *camera, ShovelerFramebuffer *framebuffer, ShovelerSceneRenderPassOptions renderPassOptions, ShovelerRenderState *renderState);
 static void freeSpotLight(void *spotlightPointer);
 
-ShovelerLightSpotShared *shovelerLightSpotSharedCreate(int width, int height, GLsizei samples, float ambientFactor, float exponentialFactor, ShovelerVector3 color) {
+ShovelerLightSpotShared *shovelerLightSpotSharedCreate(ShovelerShaderCache *shaderCache, int width, int height, GLsizei samples, float ambientFactor, float exponentialFactor, ShovelerVector3 color) {
 	ShovelerLightSpotShared *shared = malloc(sizeof(ShovelerLightSpotShared));
+	shared->shaderCache = shaderCache;
 	shared->shadowMapSampler = shovelerSamplerCreate(true, true, true);
 	shared->depthFramebuffer = shovelerFramebufferCreateDepthOnly(width, height, samples);
-	shared->depthMaterial = shovelerMaterialDepthCreate();
-	shared->depthFilter = shovelerFilterDepthTextureGaussianCreate(width, height, samples, exponentialFactor);
+	shared->depthMaterial = shovelerMaterialDepthCreate(shaderCache);
+	shared->depthFilter = shovelerFilterDepthTextureGaussianCreate(shaderCache, width, height, samples, exponentialFactor);
 	shared->depthRenderPassOptions.overrideMaterial = shared->depthMaterial;
 	shared->depthRenderPassOptions.emitters = false;
 	shared->depthRenderPassOptions.screenspace = false;
@@ -43,6 +46,7 @@ ShovelerLightSpotShared *shovelerLightSpotSharedCreate(int width, int height, GL
 ShovelerLight *shovelerLightSpotCreateWithShared(ShovelerCamera *camera, ShovelerLightSpotShared *shared, bool managedShared)
 {
 	ShovelerLightSpot *spotlight = malloc(sizeof(ShovelerLightSpot));
+	spotlight->light.shaderCache = shared->shaderCache;
 	spotlight->light.data = spotlight;
 	spotlight->light.updatePosition = updatePosition;
 	spotlight->light.getPosition = getPosition;
@@ -125,6 +129,8 @@ static void freeSpotLight(void *spotlightPointer)
 	if(spotlight == NULL) {
 		return;
 	}
+
+	shovelerShaderCacheInvalidateLight(spotlight->light.shaderCache, &spotlight->light);
 
 	shovelerCameraFree(spotlight->camera);
 	shovelerUniformMapFree(spotlight->light.uniforms);

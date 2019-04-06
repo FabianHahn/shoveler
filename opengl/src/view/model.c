@@ -12,6 +12,7 @@
 #include "shoveler/view/model.h"
 #include "shoveler/view/position.h"
 #include "shoveler/view/scene.h"
+#include "shoveler/view/shader_cache.h"
 #include "shoveler/log.h"
 #include "shoveler/model.h"
 #include "shoveler/view.h"
@@ -317,6 +318,10 @@ static void deactivateComponent(ShovelerViewComponent *component, void *modelCom
 {
 	ModelComponentData *modelComponentData = modelComponentDataPointer;
 	assert(shovelerViewHasScene(component->entity->view));
+	assert(shovelerViewHasShaderCache(component->entity->view));
+
+	ShovelerShaderCache *shaderCache = shovelerViewGetShaderCache(component->entity->view);
+	shovelerShaderCacheInvalidateModel(shaderCache, modelComponentData->model);
 
 	ShovelerScene *scene = shovelerViewGetScene(component->entity->view);
 	shovelerSceneRemoveModel(scene, modelComponentData->model);

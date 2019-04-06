@@ -1,10 +1,12 @@
 #include <assert.h> // assert
 #include <stdlib.h> // malloc free
+#include <shoveler/view.h>
 
 #include "shoveler/light/point.h"
 #include "shoveler/view/light.h"
 #include "shoveler/view/position.h"
 #include "shoveler/view/scene.h"
+#include "shoveler/view/shader_cache.h"
 #include "shoveler/light.h"
 #include "shoveler/log.h"
 #include "shoveler/scene.h"
@@ -103,6 +105,7 @@ static bool activateComponent(ShovelerViewComponent *component, void *lightCompo
 {
 	LightComponentData *lightComponentData = lightComponentDataPointer;
 	assert(shovelerViewHasScene(component->entity->view));
+	assert(shovelerViewHasShaderCache(component->entity->view));
 
 	ShovelerViewPosition *position = shovelerViewEntityGetPosition(component->entity);
 
@@ -110,9 +113,10 @@ static bool activateComponent(ShovelerViewComponent *component, void *lightCompo
 		case SHOVELER_VIEW_LIGHT_TYPE_SPOT:
 			shovelerLogWarning("Trying to create light with unsupported spot type, ignoring.");
 			return false;
-		case SHOVELER_VIEW_LIGHT_TYPE_POINT:
-			lightComponentData->light = shovelerLightPointCreate(shovelerVector3(position->x, position->y, position->z), lightComponentData->configuration.width, lightComponentData->configuration.height, lightComponentData->configuration.samples, lightComponentData->configuration.ambientFactor, lightComponentData->configuration.exponentialFactor, lightComponentData->configuration.color);
-			break;
+		case SHOVELER_VIEW_LIGHT_TYPE_POINT: {
+			ShovelerShaderCache *shaderCache = shovelerViewGetShaderCache(component->entity->view);
+			lightComponentData->light = shovelerLightPointCreate(shaderCache, shovelerVector3(position->x, position->y, position->z), lightComponentData->configuration.width, lightComponentData->configuration.height, lightComponentData->configuration.samples, lightComponentData->configuration.ambientFactor, lightComponentData->configuration.exponentialFactor, lightComponentData->configuration.color);
+		} break;
 		default:
 			shovelerLogWarning("Trying to create light with unknown light type %d, ignoring.", lightComponentData->configuration.type);
 			return false;
@@ -129,6 +133,10 @@ static void deactivateComponent(ShovelerViewComponent *component, void *lightCom
 {
 	LightComponentData *lightComponentData = lightComponentDataPointer;
 	assert(shovelerViewHasScene(component->entity->view));
+	assert(shovelerViewHasShaderCache(component->entity->view));
+
+	ShovelerShaderCache *shaderCache = shovelerViewGetShaderCache(component->entity->view);
+	shovelerShaderCacheInvalidateLight(shaderCache, lightComponentData->light);
 
 	ShovelerScene *scene = shovelerViewGetScene(component->entity->view);
 	shovelerSceneRemoveLight(scene, lightComponentData->light);

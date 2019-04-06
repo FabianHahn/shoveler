@@ -15,14 +15,15 @@
 struct ShovelerLightStruct; // forward declaration: light.h
 struct ShovelerMaterialStruct; // forward declaration: material.h
 struct ShovelerModelStruct; // forward declaration: model.h
+struct ShovelerShaderCacheStruct; // forward declaration: shader_cache.h
 
 typedef struct ShovelerSceneStruct {
+	struct ShovelerShaderCacheStruct *shaderCache;
 	ShovelerUniformMap *uniforms;
 	struct ShovelerMaterialStruct *depthMaterial;
 	/* private */ int debugMode;
 	GHashTable *lights;
 	GHashTable *models;
-	GHashTable *shaderCache;
 } ShovelerScene;
 
 typedef struct {
@@ -33,7 +34,7 @@ typedef struct {
 	ShovelerRenderState renderState;
 } ShovelerSceneRenderPassOptions;
 
-ShovelerScene *shovelerSceneCreate();
+ShovelerScene *shovelerSceneCreate(struct ShovelerShaderCacheStruct *shaderCache);
 void shovelerSceneToggleDebugMode(ShovelerScene *scene);
 bool shovelerSceneAddLight(ShovelerScene *scene, struct ShovelerLightStruct *light);
 bool shovelerSceneRemoveLight(ShovelerScene *scene, struct ShovelerLightStruct *light);

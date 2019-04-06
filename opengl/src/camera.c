@@ -1,9 +1,11 @@
 #include <stdlib.h> // malloc, free
 
 #include "shoveler/camera.h"
+#include "shoveler/shader_cache.h"
 
-void shovelerCameraInit(ShovelerCamera *camera, ShovelerVector3 position, void *data, ShovelerCameraUpdateViewFunction *updateView, ShovelerCameraFreeDataFunction *freeData)
+void shovelerCameraInit(ShovelerCamera *camera, ShovelerShaderCache *shaderCache, ShovelerVector3 position, void *data, ShovelerCameraUpdateViewFunction *updateView, ShovelerCameraFreeDataFunction *freeData)
 {
+	camera->shaderCache = shaderCache;
 	camera->position = position;
 	camera->frustum.nearBottomLeftVertex = shovelerVector3(-1.0f, -1.0f, -1.0f);
 	camera->frustum.nearBottomRightVertex = shovelerVector3(1.0f, -1.0f, -1.0f);
@@ -39,6 +41,8 @@ void shovelerCameraFree(ShovelerCamera *camera)
 	if(camera == NULL) {
 		return;
 	}
+
+	shovelerShaderCacheInvalidateCamera(camera->shaderCache, camera);
 
 	shovelerUniformMapFree(camera->uniforms);
 	camera->freeData(camera->data);

@@ -10,9 +10,11 @@
 #include "shoveler/model.h"
 #include "shoveler/sampler.h"
 #include "shoveler/scene.h"
+#include "shoveler/shader_cache.h"
 
 typedef struct {
 	ShovelerFilter filter;
+	ShovelerShaderCache *shaderCache;
 	ShovelerSampler *filterSampler;
 	ShovelerCamera *filterCamera;
 	ShovelerFramebuffer *filterXFramebuffer;
@@ -29,7 +31,7 @@ typedef struct {
 static int filterDepthTextureGaussian(ShovelerFilter *filter, ShovelerRenderState *renderState);
 static void freeDepthTextureGaussian(void *data);
 
-ShovelerFilter *shovelerFilterDepthTextureGaussianCreate(int width, int height, GLsizei samples, float exponentialFactor)
+ShovelerFilter *shovelerFilterDepthTextureGaussianCreate(ShovelerShaderCache *shaderCache, int width, int height, GLsizei samples, float exponentialFactor)
 {
 	DepthTextureGaussianFilter *depthTextureGaussianFilter = malloc(sizeof(DepthTextureGaussianFilter));
 	depthTextureGaussianFilter->filter.inputTexture = NULL;
@@ -37,20 +39,22 @@ ShovelerFilter *shovelerFilterDepthTextureGaussianCreate(int width, int height, 
 	depthTextureGaussianFilter->filter.filterTexture = filterDepthTextureGaussian;
 	depthTextureGaussianFilter->filter.freeData = freeDepthTextureGaussian;
 
+	depthTextureGaussianFilter->shaderCache = shaderCache;
 	depthTextureGaussianFilter->filterSampler = shovelerSamplerCreate(false, false, true);
-	depthTextureGaussianFilter->filterCamera = shovelerCameraIdentityCreate();
+	depthTextureGaussianFilter->filterCamera = shovelerCameraIdentityCreate(shaderCache);
 
 	depthTextureGaussianFilter->filterXFramebuffer = shovelerFramebufferCreateColorOnly(width, height, samples, 1, 32);
 	depthTextureGaussianFilter->filterYFramebuffer = shovelerFramebufferCreateColorOnly(width, height, samples, 1, 32);
 
-	depthTextureGaussianFilter->filterXMaterial = shovelerMaterialDepthTextureGaussianFilterGaussianFilterCreate(&depthTextureGaussianFilter->filter.inputTexture, &depthTextureGaussianFilter->filterSampler, width, height);
+	depthTextureGaussianFilter->filterXMaterial = shovelerMaterialDepthTextureGaussianFilterGaussianFilterCreate(shaderCache, &depthTextureGaussianFilter->filter.inputTexture, &depthTextureGaussianFilter->filterSampler, width, height);
 	shovelerMaterialDepthTextureGaussianFilterEnableExponentialLifting(depthTextureGaussianFilter->filterXMaterial, exponentialFactor);
-	depthTextureGaussianFilter->filterYMaterial = shovelerMaterialDepthTextureGaussianFilterGaussianFilterCreate(&depthTextureGaussianFilter->filterXFramebuffer->renderTarget, &depthTextureGaussianFilter->filterSampler, width, height);
+	depthTextureGaussianFilter->filterYMaterial = shovelerMaterialDepthTextureGaussianFilterGaussianFilterCreate(shaderCache, &depthTextureGaussianFilter->filterXFramebuffer->renderTarget, &depthTextureGaussianFilter->filterSampler, width, height);
 	shovelerMaterialDepthTextureGaussianFilterSetDirection(depthTextureGaussianFilter->filterYMaterial, false, true);
 	depthTextureGaussianFilter->filter.outputTexture = depthTextureGaussianFilter->filterYFramebuffer->renderTarget;
 
 	depthTextureGaussianFilter->filterQuad = shovelerDrawableQuadCreate();
-	depthTextureGaussianFilter->filterModel = shovelerModelCreate(depthTextureGaussianFilter->filterQuad, NULL);
+	depthTextureGaussianFilter->filterScene = shovelerSceneCreate(shaderCache);
+	depthTextureGaussianFilter->filterModel = shovelerModelCreate(depthTextureGaussianFilter->filterQuad, depthTextureGaussianFilter->filterScene->depthMaterial);
 	depthTextureGaussianFilter->filterModel->screenspace = true;
 	depthTextureGaussianFilter->filterModel->translation.values[0] = -1.0f;
 	depthTextureGaussianFilter->filterModel->translation.values[1] = -1.0f;
@@ -58,7 +62,6 @@ ShovelerFilter *shovelerFilterDepthTextureGaussianCreate(int width, int height, 
 	depthTextureGaussianFilter->filterModel->scale.values[1] = 2.0f;
 	shovelerModelUpdateTransformation(depthTextureGaussianFilter->filterModel);
 
-	depthTextureGaussianFilter->filterScene = shovelerSceneCreate();
 	depthTextureGaussianFilter->filterSceneRenderPassOptions.overrideMaterial = NULL;
 	depthTextureGaussianFilter->filterSceneRenderPassOptions.emitters = false;
 	depthTextureGaussianFilter->filterSceneRenderPassOptions.screenspace = true;
@@ -104,6 +107,9 @@ static int filterDepthTextureGaussian(ShovelerFilter *filter, ShovelerRenderStat
 static void freeDepthTextureGaussian(void *data)
 {
 	DepthTextureGaussianFilter *depthTextureGaussianFilter = (DepthTextureGaussianFilter *) data;
+
+	shovelerShaderCacheInvalidateCamera(depthTextureGaussianFilter->shaderCache, depthTextureGaussianFilter->filterCamera);
+
 	shovelerSceneFree(depthTextureGaussianFilter->filterScene);
 	shovelerDrawableFree(depthTextureGaussianFilter->filterQuad);
 	shovelerMaterialFree(depthTextureGaussianFilter->filterYMaterial);

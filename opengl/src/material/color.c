@@ -1,4 +1,5 @@
 #include "shoveler/material/depth.h"
+#include "shoveler/shader_cache.h"
 #include "shoveler/shader_program.h"
 
 static const char *vertexShaderSource =
@@ -91,13 +92,13 @@ static const char *fragmentShaderSource =
 		"	fragmentColor = vec4(clamp(lightAmbientFactor * color + exponentialShadowFactor * diffuseFactor * color * lightColor + exponentialShadowFactor * specularFactor * lightColor, 0.0, 1.0), 1.0);\n"
 		"}\n";
 
-ShovelerMaterial *shovelerMaterialColorCreate(ShovelerVector3 color)
+ShovelerMaterial *shovelerMaterialColorCreate(ShovelerShaderCache *shaderCache, ShovelerVector3 color)
 {
 	GLuint vertexShaderObject = shovelerShaderProgramCompileFromString(vertexShaderSource, GL_VERTEX_SHADER);
 	GLuint fragmentShaderObject = shovelerShaderProgramCompileFromString(fragmentShaderSource, GL_FRAGMENT_SHADER);
 	GLuint program = shovelerShaderProgramLink(vertexShaderObject, 0, fragmentShaderObject, true);
 
-	ShovelerMaterial *material = shovelerMaterialCreate(program);
+	ShovelerMaterial *material = shovelerMaterialCreate(shaderCache, program);
 
 	shovelerUniformMapInsert(material->uniforms, "color", shovelerUniformCreateVector3(color));
 

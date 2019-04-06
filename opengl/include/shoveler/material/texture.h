@@ -5,6 +5,8 @@
 #include <shoveler/sampler.h>
 #include <shoveler/texture.h>
 
-ShovelerMaterial *shovelerMaterialTextureCreate(ShovelerTexture *texture, bool manageTexture, ShovelerSampler *sampler, bool manageSampler);
+struct ShovelerShaderCacheStruct; // forward declaration: shader_cache.h
+
+ShovelerMaterial *shovelerMaterialTextureCreate(struct ShovelerShaderCacheStruct *shaderCache, ShovelerTexture *texture, bool manageTexture, ShovelerSampler *sampler, bool manageSampler);
 
 #endif

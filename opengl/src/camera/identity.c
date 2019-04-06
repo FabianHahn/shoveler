@@ -1,6 +1,7 @@
 #include <stdlib.h> // malloc, free
 
 #include "shoveler/camera/perspective.h"
+#include "shoveler/shader_cache.h"
 #include "shoveler/types.h"
 
 typedef struct {
@@ -10,10 +11,10 @@ typedef struct {
 static void updateView(void *identityCameraPointer);
 static void freeIdentityCamera(void *identityCameraPointer);
 
-ShovelerCamera *shovelerCameraIdentityCreate()
+ShovelerCamera *shovelerCameraIdentityCreate(ShovelerShaderCache *shaderCache)
 {
 	ShovelerCameraIdentity *identityCamera = malloc(sizeof(ShovelerCameraIdentity));
-	shovelerCameraInit(&identityCamera->camera, (ShovelerVector3){0, 0, 0}, identityCamera, updateView, freeIdentityCamera);
+	shovelerCameraInit(&identityCamera->camera, shaderCache, (ShovelerVector3){0, 0, 0}, identityCamera, updateView, freeIdentityCamera);
 	return &identityCamera->camera;
 }
 

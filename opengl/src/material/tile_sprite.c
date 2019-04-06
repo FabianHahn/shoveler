@@ -1,6 +1,7 @@
 #include <stdlib.h> // malloc, free
 
 #include "shoveler/material/tile_sprite.h"
+#include "shoveler/shader_cache.h"
 #include "shoveler/shader_program.h"
 #include "shoveler/types.h"
 
@@ -115,14 +116,14 @@ typedef struct {
 
 static void freeMaterialData(ShovelerMaterial *material);
 
-ShovelerMaterial *shovelerMaterialTileSpriteCreate()
+ShovelerMaterial *shovelerMaterialTileSpriteCreate(ShovelerShaderCache *shaderCache)
 {
 	GLuint vertexShaderObject = shovelerShaderProgramCompileFromString(vertexShaderSource, GL_VERTEX_SHADER);
 	GLuint fragmentShaderObject = shovelerShaderProgramCompileFromString(fragmentShaderSource, GL_FRAGMENT_SHADER);
 	GLuint program = shovelerShaderProgramLink(vertexShaderObject, 0, fragmentShaderObject, true);
 
 	MaterialData *materialData = malloc(sizeof(MaterialData));
-	materialData->material = shovelerMaterialCreate(program);
+	materialData->material = shovelerMaterialCreate(shaderCache, program);
 	materialData->material->data = materialData;
 	materialData->material->freeData = freeMaterialData;
 	materialData->activeSpriteTilesetColumn = 0;

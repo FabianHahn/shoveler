@@ -3,6 +3,8 @@
 
 #include <shoveler/filter.h>
 
-ShovelerFilter *shovelerFilterDepthTextureGaussianCreate(int width, int height, GLsizei samples, float exponentialFactor);
+struct ShovelerShaderCacheStruct; // forward declaration: shader_cache.h
+
+ShovelerFilter *shovelerFilterDepthTextureGaussianCreate(struct ShovelerShaderCacheStruct *shaderCache, int width, int height, GLsizei samples, float exponentialFactor);
 
 #endif

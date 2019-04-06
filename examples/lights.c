@@ -54,35 +54,32 @@ int main(int argc, char *argv[])
 	windowSettings.windowedWidth = 640;
 	windowSettings.windowedHeight = 480;
 
+	ShovelerGameCameraSettings cameraSettings;
+	cameraSettings.frame.position = shovelerVector3(0, 0, -5);
+	cameraSettings.frame.direction = shovelerVector3(0, 0, 1);
+	cameraSettings.frame.up = shovelerVector3(0, 1, 0);
+	cameraSettings.projection.fieldOfViewY = 2.0f * SHOVELER_PI * 50.0f / 360.0f;
+	cameraSettings.projection.aspectRatio = (float) windowSettings.windowedWidth / windowSettings.windowedHeight;
+	cameraSettings.projection.nearClippingPlane = 0.01;
+	cameraSettings.projection.farClippingPlane = 1000;
+
 	ShovelerGameControllerSettings controllerSettings;
-	controllerSettings.frame.position = shovelerVector3(0, 0, -5);
-	controllerSettings.frame.direction = shovelerVector3(0, 0, 1);
-	controllerSettings.frame.up = shovelerVector3(0, 1, 0);
+	controllerSettings.frame = cameraSettings.frame;
 	controllerSettings.moveFactor = 2.0f;
 	controllerSettings.tiltFactor = 0.0005f;
-
-	ShovelerProjectionPerspective projection;
-	projection.fieldOfViewY = 2.0f * SHOVELER_PI * 50.0f / 360.0f;
-	projection.aspectRatio = (float) windowSettings.windowedWidth / windowSettings.windowedHeight;
-	projection.nearClippingPlane = 0.01;
-	projection.farClippingPlane = 1000;
 
 	shovelerLogInit("shoveler/", SHOVELER_LOG_LEVEL_INFO_UP, stdout);
 	shovelerGlobalInit();
 
-	ShovelerCamera *camera = shovelerCameraPerspectiveCreate(&controllerSettings.frame, &projection);
-
-	ShovelerGame *game = shovelerGameCreate(camera, shovelerSampleUpdate, &windowSettings, &controllerSettings);
+	ShovelerGame *game = shovelerGameCreate(shovelerSampleUpdate, &windowSettings, &cameraSettings, &controllerSettings);
 	if(game == NULL) {
 		return EXIT_FAILURE;
 	}
 
-	shovelerCameraPerspectiveAttachController(camera, game->controller);
-
 	nearestNeighborSampler = shovelerSamplerCreate(false, true, true);
 	interpolatingSampler = shovelerSamplerCreate(true, true, true);
 
-	colorMaterial = shovelerMaterialColorCreate((ShovelerVector3){0.7, 0.7, 0.7});
+	colorMaterial = shovelerMaterialColorCreate(game->shaderCache, (ShovelerVector3){0.7, 0.7, 0.7});
 
 	ShovelerImage *image = shovelerImageCreate(2, 2, 3);
 	shovelerImageClear(image);
@@ -94,7 +91,7 @@ int main(int argc, char *argv[])
 	shovelerImageGet(image, 1, 1, 2) = 255;
 	ShovelerTexture *texture = shovelerTextureCreate2d(image, true);
 	shovelerTextureUpdate(texture);
-	textureMaterial = shovelerMaterialTextureCreate(texture, true, nearestNeighborSampler, false);
+	textureMaterial = shovelerMaterialTextureCreate(game->shaderCache, texture, true, nearestNeighborSampler, false);
 
 	shovelerOpenGLCheckSuccess();
 
@@ -168,14 +165,14 @@ int main(int argc, char *argv[])
 	shovelerModelUpdateTransformation(rightCubeModel);
 	shovelerSceneAddModel(game->scene, rightCubeModel);
 
-	ShovelerLight *pointlight = shovelerLightPointCreate((ShovelerVector3){0, 0, 0}, 1024, 1024, 1, 0.0f, 80.0f, (ShovelerVector3){1.0f, 1.0f, 1.0f});
+	ShovelerLight *pointlight = shovelerLightPointCreate(game->shaderCache, (ShovelerVector3){0, 0, 0}, 1024, 1024, 1, 0.0f, 80.0f, (ShovelerVector3){1.0f, 1.0f, 1.0f});
 	shovelerSceneAddLight(game->scene, pointlight);
 
-	ShovelerLight *pointlight2 = shovelerLightPointCreate((ShovelerVector3){-8, -8, -8}, 1024, 1024, 1, 0.0f, 80.0f, (ShovelerVector3){0.1f, 0.1f, 0.1f});
+	ShovelerLight *pointlight2 = shovelerLightPointCreate(game->shaderCache, (ShovelerVector3){-8, -8, -8}, 1024, 1024, 1, 0.0f, 80.0f, (ShovelerVector3){0.1f, 0.1f, 0.1f});
 	shovelerSceneAddLight(game->scene, pointlight2);
 
 	point = shovelerDrawablePointCreate();
-	particleMaterial = shovelerMaterialParticleCreate((ShovelerVector3){1.0f, 1.0f, 1.0f});
+	particleMaterial = shovelerMaterialParticleCreate(game->shaderCache, (ShovelerVector3){1.0f, 1.0f, 1.0f});
 	ShovelerModel *pointlightModel = shovelerModelCreate(point, particleMaterial);
 	pointlightModel->scale = (ShovelerVector3){0.5f, 0.5f, 0};
 	pointlightModel->castsShadow = false;
@@ -191,7 +188,7 @@ int main(int argc, char *argv[])
 	shovelerModelUpdateTransformation(pointlightModel2);
 	shovelerSceneAddModel(game->scene, pointlightModel2);
 
-	screenspaceTextureMaterial = shovelerMaterialScreenspaceTextureCreate(shovelerLightPointGetShared(pointlight)->depthFramebuffer->depthTarget, false, true, nearestNeighborSampler, false);
+	screenspaceTextureMaterial = shovelerMaterialScreenspaceTextureCreate(game->shaderCache, shovelerLightPointGetShared(pointlight)->depthFramebuffer->depthTarget, false, true, nearestNeighborSampler, false);
 	ShovelerModel *screenQuadModel = shovelerModelCreate(quad, screenspaceTextureMaterial);
 	screenQuadModel->screenspace = true;
 	screenQuadModel->translation.values[0] = -1.0;
@@ -208,10 +205,8 @@ int main(int argc, char *argv[])
 	}
 	shovelerLogInfo("Exiting main loop, goodbye.");
 
-	shovelerCameraPerspectiveDetachController(camera);
-	shovelerGameFree(game);
-	shovelerCameraFree(camera);
 	shovelerSampleTerminate();
+	shovelerGameFree(game);
 	shovelerGlobalUninit();
 	shovelerLogTerminate();
 

@@ -10,8 +10,10 @@
 #include <shoveler/uniform_map.h>
 
 struct ShovelerMaterialStruct; // forward declaration: material.h
+struct ShovelerShaderCacheStruct; // forward declaration: shader_cache.h
 
 typedef struct ShovelerModelStruct {
+	struct ShovelerShaderCacheStruct *shaderCache;
 	ShovelerDrawable *drawable;
 	struct ShovelerMaterialStruct *material;
 	ShovelerVector3 translation;
