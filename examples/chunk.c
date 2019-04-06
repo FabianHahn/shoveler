@@ -149,8 +149,12 @@ int main(int argc, char *argv[])
 	shovelerChunkFree(chunk);
 	shovelerCanvasFree(canvas);
 	shovelerTilemapFree(tilemap);
+	shovelerTextureFree(tilesTexture);
+	shovelerTilemapFree(borderTilemap);
+	shovelerTextureFree(borderTilesTexture);
 	shovelerTilesetFree(tileset);
 	shovelerTilesetFree(tileset2);
+	shovelerTilesetFree(borderTileset);
 	shovelerCameraPerspectiveDetachController(camera);
 	shovelerGameFree(game);
 	shovelerCameraFree(camera);
