@@ -4,7 +4,7 @@
 #include "shoveler/image.h"
 #include "shoveler/tileset.h"
 
-ShovelerTileset *shovelerTilesetCreate(ShovelerImage *image, unsigned char columns, unsigned char rows, unsigned char padding)
+ShovelerTileset *shovelerTilesetCreate(const ShovelerImage *image, unsigned char columns, unsigned char rows, unsigned char padding)
 {
 	assert(image->width % columns == 0);
 	assert(image->height % rows == 0);

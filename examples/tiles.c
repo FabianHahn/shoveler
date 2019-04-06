@@ -69,11 +69,6 @@ int main(int argc, char *argv[])
 	shovelerImageGet(tilesetImage, 1, 1, 1) = 255;
 	shovelerImageGet(tilesetImage, 1, 1, 2) = 255; // white
 
-	ShovelerImage *borderTilesetImage = shovelerImageCreate(20, 20, 4);
-	shovelerImageClear(borderTilesetImage);
-	shovelerImageSet(borderTilesetImage, shovelerColor(255, 200, 255), 0);
-	shovelerImageAddFrame(borderTilesetImage, 3, shovelerColor(255, 200, 255));
-
 	ShovelerImage *tilesImage = shovelerImageCreate(2, 2, 3);
 	shovelerImageClear(tilesImage);
 	shovelerImageGet(tilesImage, 0, 0, 0) = 0;
@@ -96,6 +91,7 @@ int main(int argc, char *argv[])
 	shovelerTilemapAddTileset(tilemap, tileset);
 	ShovelerTileset *tileset2 = shovelerTilesetCreate(tilesetImage, 1, 1, 1);
 	shovelerTilemapAddTileset(tilemap, tileset2);
+	shovelerImageFree(tilesetImage);
 
 	ShovelerMaterial *tilemapMaterial = shovelerMaterialTilemapCreate();
 	shovelerMaterialTilemapSetActive(tilemapMaterial, tilemap);
@@ -114,6 +110,10 @@ int main(int argc, char *argv[])
 	}
 	shovelerLogInfo("Exiting main loop, goodbye.");
 
+	shovelerTilemapFree(tilemap);
+	shovelerTilesetFree(tileset);
+	shovelerTilesetFree(tileset2);
+	shovelerTextureFree(tiles);
 	shovelerDrawableFree(quad);
 	shovelerMaterialFree(tilemapMaterial);
 	shovelerCameraPerspectiveDetachController(camera);

@@ -13,7 +13,8 @@ typedef struct {
 	ShovelerSampler *sampler;
 } ShovelerTileset;
 
-ShovelerTileset *shovelerTilesetCreate(ShovelerImage *image, unsigned char columns, unsigned char rows, unsigned char padding);
+/** Creates a tileset from an existing image, with the caller retaining ownership over the passed image. */
+ShovelerTileset *shovelerTilesetCreate(const ShovelerImage *image, unsigned char columns, unsigned char rows, unsigned char padding);
 void shovelerTilesetFree(ShovelerTileset *tileset);
 
 #endif
