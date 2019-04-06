@@ -120,6 +120,11 @@ set(SHOVELER_OPENGL_SRC
 	include/shoveler/uniform_map.h
 )
 
+set(SHOVELER_OPENGL_TEST_SRC
+	src/shader_cache_test.cpp
+	src/test.cpp
+)
+
 add_library(shoveler_opengl ${SHOVELER_OPENGL_SRC})
 set_property(TARGET shoveler_opengl PROPERTY C_STANDARD 99)
 
@@ -129,3 +134,14 @@ target_include_directories(shoveler_opengl
     PRIVATE src)
 
 target_link_libraries(shoveler_opengl shoveler_base glad glfw)
+
+if(SHOVELER_BUILD_TESTS)
+	add_executable(shoveler_opengl_test ${SHOVELER_OPENGL_TEST_SRC})
+
+	target_include_directories(shoveler_opengl_test
+		PRIVATE src)
+
+	target_link_libraries(shoveler_opengl_test shoveler_opengl gtest)
+	set_property(TARGET shoveler_opengl_test PROPERTY CXX_STANDARD 11)
+	add_test(shoveler_opengl shoveler_opengl_test)
+endif()
