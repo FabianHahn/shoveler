@@ -7,6 +7,8 @@
 #include "shoveler/input.h"
 #include "shoveler/opengl.h"
 #include "shoveler/scene.h"
+#include "shoveler/shader_cache.h"
+#include "shoveler/view/shader_cache.h"
 
 static void keyHandler(ShovelerInput *input, int key, int scancode, int action, int mods, void *unused);
 static gint64 elapsedNs(double dt);
@@ -91,6 +93,7 @@ ShovelerGame *shovelerGameCreate(ShovelerCamera *camera, ShovelerGameUpdateCallb
 	shovelerInputAddKeyCallback(game->input, keyHandler, NULL);
 
 	game->framebuffer = shovelerFramebufferCreate(width, height, windowSettings->samples, 4, 8);
+	game->shaderCache = shovelerShaderCacheCreate();
 	game->scene = shovelerSceneCreate();
 	game->camera = camera;
 	game->controller = shovelerControllerCreate(game->window, game->input, &controllerSettings->frame, controllerSettings->moveFactor, controllerSettings->tiltFactor);
@@ -103,6 +106,7 @@ ShovelerGame *shovelerGameCreate(ShovelerCamera *camera, ShovelerGameUpdateCallb
 
 	shovelerViewSetTarget(game->view, "controller", game->controller);
 	shovelerViewSetTarget(game->view, "scene", game->scene);
+	shovelerViewSetShaderCache(game->view, game->shaderCache);
 
 	ShovelerGlobalContext *global = shovelerGlobalGetContext();
 	g_hash_table_insert(global->games, game->window, game);
@@ -171,6 +175,7 @@ void shovelerGameFree(ShovelerGame *game)
 	shovelerControllerFree(game->controller);
 	shovelerInputFree(game->input);
 	shovelerSceneFree(game->scene);
+	shovelerShaderCacheFree(game->shaderCache);
 
 	glfwDestroyWindow(game->window);
 

@@ -85,6 +85,7 @@ set(SHOVELER_OPENGL_SRC
 	include/shoveler/view/material.h
 	include/shoveler/view/model.h
 	include/shoveler/view/scene.h
+	include/shoveler/view/shader_cache.h
 	include/shoveler/view/texture.h
 	include/shoveler/view/tile_sprite.h
 	include/shoveler/view/tile_sprite_animation.h
