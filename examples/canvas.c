@@ -51,6 +51,8 @@ int main(int argc, char *argv[])
 	controllerSettings.frame = cameraSettings.frame;
 	controllerSettings.moveFactor = 0.5f;
 	controllerSettings.tiltFactor = 0.0005f;
+	controllerSettings.boundingBoxSize2 = 0.0f;
+	controllerSettings.boundingBoxSize3 = 0.0f;
 
 	shovelerLogInit("shoveler/", SHOVELER_LOG_LEVEL_INFO_UP, stdout);
 	shovelerGlobalInit();

@@ -40,6 +40,8 @@ typedef struct {
 	ShovelerReferenceFrame frame;
 	float moveFactor;
 	float tiltFactor;
+	float boundingBoxSize2;
+	float boundingBoxSize3;
 } ShovelerGameControllerSettings;
 
 typedef struct ShovelerGameStruct {

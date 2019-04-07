@@ -3,9 +3,12 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include "shoveler/collider.h"
 #include "shoveler/colliders.h"
 #include "shoveler/controller.h"
+#include "shoveler/log.h"
 #include "shoveler/input.h"
+#include "shoveler/types.h"
 
 static void updatePosition(ShovelerController *controller, float dt);
 static void updateTilt(ShovelerController *controller, float dt);
@@ -19,7 +22,7 @@ static void freeTiltCallback(void *tiltCallbackPointer);
 static void freeMoveCallback(void *moveCallbackPointer);
 static void freeAspectRatioChangeCallback(void *aspectRatioCallbackChangePointer);
 
-ShovelerController *shovelerControllerCreate(GLFWwindow *window, ShovelerInput *input, ShovelerColliders *colliders, const ShovelerReferenceFrame *frame, float moveFactor, float tiltFactor)
+ShovelerController *shovelerControllerCreate(GLFWwindow *window, ShovelerInput *input, ShovelerColliders *colliders, const ShovelerReferenceFrame *frame, float moveFactor, float tiltFactor, float boundingBoxSize2, float boundingBoxSize3)
 {
 	ShovelerController *controller = malloc(sizeof(ShovelerController));
 	controller->window = window;
@@ -35,6 +38,9 @@ ShovelerController *shovelerControllerCreate(GLFWwindow *window, ShovelerInput *
 
 	controller->moveFactor = moveFactor;
 	controller->tiltFactor = tiltFactor;
+
+	controller->boundingBoxSize2 = boundingBoxSize2;
+	controller->boundingBoxSize3 = boundingBoxSize3;
 
 	controller->lockMoveX = false;
 	controller->lockMoveY = false;
@@ -183,10 +189,40 @@ static void shiftPosition(ShovelerController *controller, ShovelerVector3 moveAm
 {
 	ShovelerVector3 right = shovelerVector3Cross(controller->frame.direction, controller->frame.up);
 
-	controller->frame.position = shovelerVector3LinearCombination(1.0, controller->frame.position, moveAmount.values[2], controller->frame.direction);
-	controller->frame.position = shovelerVector3LinearCombination(1.0, controller->frame.position, moveAmount.values[0], right);
-	controller->frame.position = shovelerVector3LinearCombination(1.0, controller->frame.position, moveAmount.values[1], controller->frame.up);
+	ShovelerVector3 targetPosition;
+	targetPosition = shovelerVector3LinearCombination(1.0, controller->frame.position, moveAmount.values[2], controller->frame.direction);
+	targetPosition = shovelerVector3LinearCombination(1.0, targetPosition, moveAmount.values[0], right);
+	targetPosition = shovelerVector3LinearCombination(1.0, targetPosition, moveAmount.values[1], controller->frame.up);
 
+	// check for 2d collisions
+	if(controller->boundingBoxSize2 > 0.0f) {
+		ShovelerVector2 targetPosition2 = shovelerVector2(targetPosition.values[0], targetPosition.values[1]);
+
+		ShovelerBoundingBox2 targetBoundingBox2 = shovelerBoundingBox2(
+				shovelerVector2LinearCombination(1.0, targetPosition2, -0.5f * controller->boundingBoxSize2, shovelerVector2(1.0f, 1.0f)),
+				shovelerVector2LinearCombination(1.0, targetPosition2, 0.5f * controller->boundingBoxSize2, shovelerVector2(1.0f, 1.0f)));
+
+		ShovelerCollider2 *collider = shovelerCollidersIntersect2(controller->colliders, &targetBoundingBox2);
+		if(collider != NULL) {
+			shovelerLogInfo("Bumping into 2d collider %p at (%.2f, %.2f), aborting position shift.", collider, targetPosition2.values[0], targetPosition2.values[1]);
+			return;
+		}
+	}
+
+	// check for 3d collisions
+	if(controller->boundingBoxSize3 > 0.0f) {
+		ShovelerBoundingBox3 targetBoundingBox3 = shovelerBoundingBox3(
+				shovelerVector3LinearCombination(1.0, targetPosition, -0.5f * controller->boundingBoxSize3, shovelerVector3(1.0f, 1.0f, 1.0f)),
+				shovelerVector3LinearCombination(1.0, targetPosition, 0.5f * controller->boundingBoxSize3, shovelerVector3(1.0f, 1.0f, 1.0f)));
+
+		ShovelerCollider3 *collider = shovelerCollidersIntersect3(controller->colliders, &targetBoundingBox3);
+		if(collider != NULL) {
+			shovelerLogInfo("Bumping into 3d collider %p at (%.2f, %.2f, %.2f), aborting position shift.", collider, targetPosition.values[0], targetPosition.values[1], targetPosition.values[2]);
+			return;
+		}
+	}
+
+	controller->frame.position = targetPosition;
 	triggerMove(controller, controller->frame.position);
 }
 

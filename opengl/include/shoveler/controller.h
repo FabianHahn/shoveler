@@ -42,6 +42,8 @@ typedef struct ShovelerControllerStruct {
 	ShovelerVector3 up;
 	float moveFactor;
 	float tiltFactor;
+	float boundingBoxSize2;
+	float boundingBoxSize3;
 	bool lockMoveX;
 	bool lockMoveY;
 	bool lockMoveZ;
@@ -59,7 +61,7 @@ typedef struct ShovelerControllerStruct {
 } ShovelerController;
 
 /** Create a controller using a window and an input system from an initial reference frame that is copied. */
-ShovelerController *shovelerControllerCreate(GLFWwindow *window, ShovelerInput *input, struct ShovelerCollidersStruct *colliders, const ShovelerReferenceFrame *frame, float moveFactor, float tiltFactor);
+ShovelerController *shovelerControllerCreate(GLFWwindow *window, ShovelerInput *input, struct ShovelerCollidersStruct *colliders, const ShovelerReferenceFrame *frame, float moveFactor, float tiltFactor, float boundingBoxSize2, float boundingBoxSize3);
 ShovelerControllerTiltCallback *shovelerControllerAddTiltCallback(ShovelerController *controller, ShovelerControllerTiltCallbackFunction *callbackFunction, void *userData);
 bool shovelerControllerRemoveTiltCallback(ShovelerController *controller, ShovelerControllerTiltCallback *tiltCallback);
 ShovelerControllerMoveCallback *shovelerControllerAddMoveCallback(ShovelerController *controller, ShovelerControllerMoveCallbackFunction *callbackFunction, void *userData);
