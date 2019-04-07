@@ -4,6 +4,7 @@ set(SHOVELER_BASE_SRC
 	src/resources/image_png.c
 	src/view/position.c
 	src/view/resources.c
+	src/colliders.c
 	src/color.c
 	src/compression.c
 	src/executor.c
@@ -21,6 +22,7 @@ set(SHOVELER_BASE_SRC
 	include/shoveler/view/position.h
 	include/shoveler/view/resources.h
 	include/shoveler/collider.h
+	include/shoveler/colliders.h
 	include/shoveler/color.h
 	include/shoveler/compression.h
 	include/shoveler/constants.h
@@ -40,6 +42,7 @@ set(SHOVELER_BASE_TEST_SRC
 	src/image/png_test.cpp
 	src/resources/image_png_test.cpp
 	src/view/resources_test.cpp
+	src/colliders_test.cpp
 	src/color_test.cpp
 	src/compression_test.cpp
 	src/executor_test.cpp
