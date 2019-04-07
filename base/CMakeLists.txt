@@ -14,6 +14,7 @@ set(SHOVELER_BASE_SRC
 	src/projection.c
 	src/resources.c
 	src/view.c
+	include/shoveler/collider/box.h
 	include/shoveler/image/png.h
 	include/shoveler/image/ppm.h
 	include/shoveler/resources/image_png.h
