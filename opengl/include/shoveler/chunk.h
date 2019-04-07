@@ -33,7 +33,7 @@ typedef struct {
 	ShovelerChunkLayerValue value;
 } ShovelerChunkLayer;
 
-typedef struct {
+typedef struct ShovelerChunkStruct {
 	ShovelerVector2 position;
 	ShovelerVector2 size;
 	/** list of (ShovelerChunkLayer *) */
