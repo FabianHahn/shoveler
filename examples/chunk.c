@@ -5,10 +5,13 @@
 #include <GLFW/glfw3.h>
 
 #include <shoveler/camera/perspective.h>
+#include <shoveler/collider/chunk.h>
+#include <shoveler/collider/tilemap.h>
 #include <shoveler/drawable/quad.h>
 #include <shoveler/material/chunk.h>
 #include <shoveler/canvas.h>
 #include <shoveler/chunk.h>
+#include <shoveler/colliders.h>
 #include <shoveler/constants.h>
 #include <shoveler/controller.h>
 #include <shoveler/framebuffer.h>
@@ -22,10 +25,15 @@
 #include <shoveler/shader_program.h>
 #include <shoveler/texture.h>
 #include <shoveler/tilemap.h>
+#include <shoveler/tile_sprite_animation.h>
 #include <shoveler/tileset.h>
+#include <shoveler/types.h>
 
 static void shovelerSampleTerminate();
 static void shovelerSampleUpdate(ShovelerGame *game, double dt);
+
+static ShovelerCanvasTileSprite characterSprite;
+static ShovelerTileSpriteAnimation *animation;
 
 int main(int argc, char *argv[])
 {
@@ -38,7 +46,7 @@ int main(int argc, char *argv[])
 	windowSettings.windowedHeight = 480;
 
 	ShovelerGameCameraSettings cameraSettings;
-	cameraSettings.frame.position = shovelerVector3(0, 0, 1);
+	cameraSettings.frame.position = shovelerVector3(0, 0, 10);
 	cameraSettings.frame.direction = shovelerVector3(0, 0, -1);
 	cameraSettings.frame.up = shovelerVector3(0, 1, 0);
 	cameraSettings.projection.fieldOfViewY = 2.0f * SHOVELER_PI * 50.0f / 360.0f;
@@ -48,9 +56,9 @@ int main(int argc, char *argv[])
 
 	ShovelerGameControllerSettings controllerSettings;
 	controllerSettings.frame = cameraSettings.frame;
-	controllerSettings.moveFactor = 0.5f;
+	controllerSettings.moveFactor = 5.0f;
 	controllerSettings.tiltFactor = 0.0005f;
-	controllerSettings.boundingBoxSize2 = 0.0f;
+	controllerSettings.boundingBoxSize2 = 0.5f;
 	controllerSettings.boundingBoxSize3 = 0.0f;
 
 	shovelerLogInit("shoveler/", SHOVELER_LOG_LEVEL_INFO_UP, stdout);
@@ -64,7 +72,9 @@ int main(int argc, char *argv[])
 	game->controller->lockTiltX = true;
 	game->controller->lockTiltY = true;
 
-	ShovelerChunk *chunk = shovelerChunkCreate(shovelerVector2(5.0f, 5.0f), shovelerVector2(10.0f, 10.0f));
+	ShovelerChunk *chunk = shovelerChunkCreate(shovelerVector2(0.0f, 0.0f), shovelerVector2(10.0f, 10.0f));
+	ShovelerCollider2 *chunkCollider = shovelerColliderChunkCreate(chunk);
+	shovelerCollidersAddCollider2(game->colliders, chunkCollider);
 
 	ShovelerImage *tilesImage = shovelerImageCreate(2, 2, 3);
 	shovelerImageClear(tilesImage);
@@ -110,7 +120,12 @@ int main(int argc, char *argv[])
 	shovelerTilemapAddTileset(tilemap, tileset);
 	ShovelerTileset *tileset2 = shovelerTilesetCreate(tilesetImage, 1, 1, 1);
 	shovelerTilemapAddTileset(tilemap, tileset2);
+
+	ShovelerImage *animationTilesetImage = shovelerImageCreateAnimationTileset(tilesetImage, 1);
+	ShovelerTileset *animationTileset = shovelerTilesetCreate(animationTilesetImage, 4, 3, 1);
+
 	shovelerImageFree(tilesetImage);
+	shovelerImageFree(animationTilesetImage);
 
 	ShovelerImage *borderTilesetImage = shovelerImageCreate(20, 20, 4);
 	shovelerImageClear(borderTilesetImage);
@@ -124,15 +139,30 @@ int main(int argc, char *argv[])
 	tileSprite.tileset = tileset;
 	tileSprite.tilesetColumn = 1;
 	tileSprite.tilesetRow = 0;
-	tileSprite.position = shovelerVector2(3.5, 3.5);
-	tileSprite.size = shovelerVector2(5.0, 5.0);
+	tileSprite.position = shovelerVector2(-1.5f, -1.5f);
+	tileSprite.size = shovelerVector2(5.0f, 5.0f);
 	shovelerCanvasAddTileSprite(canvas, &tileSprite);
+
+	characterSprite.tileset = animationTileset;
+	characterSprite.tilesetColumn = 0;
+	characterSprite.tilesetRow = 0;
+	characterSprite.position = shovelerVector2(0.0f, 0.0f);
+	characterSprite.size = shovelerVector2(1.0f, 1.0f);
+	shovelerCanvasAddTileSprite(canvas, &characterSprite);
+
+	animation = shovelerTileSpriteAnimationCreate(&characterSprite, 0.1f);
+	animation->moveAmountThreshold = 0.25f;
+	animation->logDirectionChanges = true;
+
+	ShovelerCollider2 *tilemapCollider = shovelerColliderTilemapCreate(chunkCollider->boundingBox, 4, 4);
+	shovelerColliderTilemapEnableTile(tilemapCollider, 3, 3);
+	shovelerChunkAddCollider(chunk, tilemapCollider);
 
 	ShovelerMaterial *chunkMaterial = shovelerMaterialChunkCreate(game->shaderCache);
 	shovelerMaterialChunkSetActive(chunkMaterial, chunk);
 	ShovelerDrawable *quad = shovelerDrawableQuadCreate();
 	ShovelerModel *chunkModel = shovelerModelCreate(quad, chunkMaterial);
-	chunkModel->scale = shovelerVector3(0.5, 0.5, 1.0);
+	chunkModel->scale = shovelerVector3(5.0, 5.0, 1.0);
 	chunkModel->screenspace = true;
 	shovelerModelUpdateTransformation(chunkModel);
 	shovelerSceneAddModel(game->scene, chunkModel);
@@ -147,6 +177,8 @@ int main(int argc, char *argv[])
 	shovelerDrawableFree(quad);
 	shovelerMaterialFree(chunkMaterial);
 	shovelerChunkFree(chunk);
+	shovelerCollider2Free(tilemapCollider);
+	shovelerCollider2Free(chunkCollider);
 	shovelerCanvasFree(canvas);
 	shovelerTilemapFree(tilemap);
 	shovelerTextureFree(tilesTexture);
@@ -164,5 +196,17 @@ int main(int argc, char *argv[])
 
 static void shovelerSampleUpdate(ShovelerGame *game, double dt)
 {
+	ShovelerController *controller = shovelerCameraPerspectiveGetController(game->camera);
+
 	shovelerCameraUpdateView(game->camera);
+
+	float characterWorldX = characterSprite.position.values[0];
+	float characterWorldY = characterSprite.position.values[1];
+
+	float moveAmountX = controller->frame.position.values[0] - characterWorldX;
+	float moveAmountY = controller->frame.position.values[1] - characterWorldY;
+	shovelerTileSpriteAnimationUpdate(animation, shovelerVector2(moveAmountX, moveAmountY));
+
+	characterSprite.position.values[0] = controller->frame.position.values[0];
+	characterSprite.position.values[1] = controller->frame.position.values[1];
 }
