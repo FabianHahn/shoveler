@@ -5,7 +5,7 @@
 #include <shoveler/sampler.h>
 #include <shoveler/texture.h>
 
-typedef struct {
+typedef struct ShovelerTilesetStruct {
 	unsigned char columns;
 	unsigned char rows;
 	unsigned char padding;

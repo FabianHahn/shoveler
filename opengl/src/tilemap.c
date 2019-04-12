@@ -1,4 +1,5 @@
 #include <stdlib.h> // malloc, free
+#include <string.h> // memmove
 
 #include "shoveler/material/tilemap.h"
 #include "shoveler/camera.h"
@@ -6,13 +7,19 @@
 #include "shoveler/log.h"
 #include "shoveler/material.h"
 #include "shoveler/model.h"
+#include "shoveler/render_state.h"
+#include "shoveler/scene.h"
+#include "shoveler/texture.h"
 #include "shoveler/tilemap.h"
+#include "shoveler/tileset.h"
 
-ShovelerTilemap *shovelerTilemapCreate(ShovelerTexture *tiles)
+ShovelerTilemap *shovelerTilemapCreate(ShovelerTexture *tiles, const bool *collidingTiles)
 {
 	ShovelerTilemap *tilemap = malloc(sizeof(ShovelerTilemap));
 	tilemap->tiles = tiles;
 	tilemap->tilesets = g_queue_new();
+	tilemap->collidingTiles = collidingTiles;
+
 	return tilemap;
 }
 

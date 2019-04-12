@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
 	shovelerImageGet(tilesImage, 1, 1, 2) = 2; // full tileset
 	ShovelerTexture *tilesTexture = shovelerTextureCreate2d(tilesImage, true);
 	shovelerTextureUpdate(tilesTexture);
-	ShovelerTilemap *tilemap = shovelerTilemapCreate(tilesTexture);
+	ShovelerTilemap *tilemap = shovelerTilemapCreate(tilesTexture, NULL);
 	shovelerChunkAddTilemapLayer(chunk, tilemap);
 
 	ShovelerCanvas *canvas = shovelerCanvasCreate();
@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
 	shovelerImageGet(borderTilesImage, 0, 0, 2) = 1; // full tileset
 	ShovelerTexture *borderTilesTexture = shovelerTextureCreate2d(borderTilesImage, true);
 	shovelerTextureUpdate(borderTilesTexture);
-	ShovelerTilemap *borderTilemap = shovelerTilemapCreate(borderTilesTexture);
+	ShovelerTilemap *borderTilemap = shovelerTilemapCreate(borderTilesTexture, NULL);
 	shovelerChunkAddTilemapLayer(chunk, borderTilemap);
 
 	ShovelerImage *tilesetImage = shovelerImageCreate(2, 2, 3);

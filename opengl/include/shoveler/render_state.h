@@ -5,7 +5,7 @@
 
 #include <glad/glad.h>
 
-typedef struct {
+typedef struct ShovelerRenderStateStruct {
 	bool blend;
 	GLenum blendSourceFactor;
 	GLenum blendDestinationFactor;

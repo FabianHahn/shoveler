@@ -7,7 +7,7 @@
 
 #include <glad/glad.h>
 
-typedef struct {
+typedef struct ShovelerTextureStruct {
 	ShovelerImage *image;
 	bool manageImage;
 	GLuint target;

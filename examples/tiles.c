@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
 	ShovelerTexture *tiles = shovelerTextureCreate2d(tilesImage, true);
 	shovelerTextureUpdate(tiles);
 
-	ShovelerTilemap *tilemap = shovelerTilemapCreate(tiles);
+	ShovelerTilemap *tilemap = shovelerTilemapCreate(tiles, NULL);
 	ShovelerTileset *tileset = shovelerTilesetCreate(tilesetImage, 2, 2, 1);
 	shovelerTilemapAddTileset(tilemap, tileset);
 	ShovelerTileset *tileset2 = shovelerTilesetCreate(tilesetImage, 1, 1, 1);

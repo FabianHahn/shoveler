@@ -1,7 +1,6 @@
 #include <assert.h> // assert
 #include <stdlib.h> // malloc free
 #include <string.h> // memcpy
-#include <shoveler/view/tilemap.h>
 
 #include "shoveler/view/tilemap.h"
 #include "shoveler/view/tilemap_tiles.h"
@@ -147,7 +146,7 @@ static bool activateComponent(ShovelerViewComponent *component, void *componentD
 	assert(layerEntity != NULL);
 	ShovelerTexture *tiles = shovelerViewEntityGetTilemapTiles(layerEntity);
 
-	componentData->tilemap = shovelerTilemapCreate(tiles);
+	componentData->tilemap = shovelerTilemapCreate(tiles, NULL);
 
 	for(int i = 0; i < componentData->configuration.numTilesets; i++) {
 		ShovelerViewEntity *tilesetEntity = shovelerViewGetEntity(component->entity->view, componentData->configuration.tilesetEntityIds[i]);
