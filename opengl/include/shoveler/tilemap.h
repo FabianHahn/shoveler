@@ -3,6 +3,8 @@
 
 #include <glib.h>
 
+#include <shoveler/types.h>
+
 struct ShovelerCameraStruct; // forward declaration: camera.h
 struct ShovelerLightStruct; // forward declaration: light.h
 struct ShovelerMaterialStruct; // forward declaration: material.h
@@ -26,6 +28,7 @@ typedef struct ShovelerTilemapStruct {
 ShovelerTilemap *shovelerTilemapCreate(struct ShovelerTextureStruct *tiles, const bool *collidingTiles);
 /** Adds a tileset to the tilemap, returning its index. */
 int shovelerTilemapAddTileset(ShovelerTilemap *tilemap, struct ShovelerTilesetStruct *tileset);
+bool shovelerTilemapIntersect(ShovelerTilemap *tilemap, const ShovelerBoundingBox2 *boundingBox, const ShovelerBoundingBox2 *object);
 bool shovelerTilemapRender(ShovelerTilemap *tilemap, struct ShovelerMaterialStruct *material, struct ShovelerSceneStruct *scene, struct ShovelerCameraStruct *camera, struct ShovelerLightStruct *light, struct ShovelerModelStruct *model, struct ShovelerRenderStateStruct *renderState);
 void shovelerTilemapFree(ShovelerTilemap *tilemap);
 

@@ -6,7 +6,6 @@
 
 #include <shoveler/camera/perspective.h>
 #include <shoveler/collider/chunk.h>
-#include <shoveler/collider/tilemap.h>
 #include <shoveler/drawable/quad.h>
 #include <shoveler/material/chunk.h>
 #include <shoveler/canvas.h>
@@ -92,7 +91,8 @@ int main(int argc, char *argv[])
 	shovelerImageGet(tilesImage, 1, 1, 2) = 2; // full tileset
 	ShovelerTexture *tilesTexture = shovelerTextureCreate2d(tilesImage, true);
 	shovelerTextureUpdate(tilesTexture);
-	ShovelerTilemap *tilemap = shovelerTilemapCreate(tilesTexture, NULL);
+	bool collidingTiles[4] = {false, false, false, true};
+	ShovelerTilemap *tilemap = shovelerTilemapCreate(tilesTexture, collidingTiles);
 	shovelerChunkAddTilemapLayer(chunk, tilemap);
 
 	ShovelerCanvas *canvas = shovelerCanvasCreate();
@@ -154,10 +154,6 @@ int main(int argc, char *argv[])
 	animation->moveAmountThreshold = 0.25f;
 	animation->logDirectionChanges = true;
 
-	ShovelerCollider2 *tilemapCollider = shovelerColliderTilemapCreate(chunkCollider->boundingBox, 4, 4);
-	shovelerColliderTilemapEnableTile(tilemapCollider, 3, 3);
-	shovelerChunkAddCollider(chunk, tilemapCollider);
-
 	ShovelerMaterial *chunkMaterial = shovelerMaterialChunkCreate(game->shaderCache);
 	shovelerMaterialChunkSetActive(chunkMaterial, chunk);
 	ShovelerDrawable *quad = shovelerDrawableQuadCreate();
@@ -177,7 +173,6 @@ int main(int argc, char *argv[])
 	shovelerDrawableFree(quad);
 	shovelerMaterialFree(chunkMaterial);
 	shovelerChunkFree(chunk);
-	shovelerCollider2Free(tilemapCollider);
 	shovelerCollider2Free(chunkCollider);
 	shovelerCanvasFree(canvas);
 	shovelerTilemapFree(tilemap);

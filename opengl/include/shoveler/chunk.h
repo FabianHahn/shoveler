@@ -36,10 +36,9 @@ typedef struct {
 typedef struct ShovelerChunkStruct {
 	ShovelerVector2 position;
 	ShovelerVector2 size;
+	ShovelerBoundingBox2 boundingBox;
 	/** list of (ShovelerChunkLayer *) */
 	GQueue *layers;
-	/** list of (ShovelerCollider2 *) */
-	GQueue *colliders;
 } ShovelerChunk;
 
 ShovelerChunk *shovelerChunkCreate(ShovelerVector2 position, ShovelerVector2 size);
@@ -47,9 +46,7 @@ ShovelerChunk *shovelerChunkCreate(ShovelerVector2 position, ShovelerVector2 siz
 int shovelerChunkAddCanvasLayer(ShovelerChunk *chunk, ShovelerCanvas *canvas);
 /** Adds a layer of tile sprites to the chunk, not taking ownership over the passed tilemap. */
 int shovelerChunkAddTilemapLayer(ShovelerChunk *chunk, ShovelerTilemap *tilemap);
-/** Adds a collider to the chunk, not taking ownership over it. */
-int shovelerChunkAddCollider(ShovelerChunk *chunk, struct ShovelerCollider2Struct *collider);
-struct ShovelerCollider2Struct *shovelerChunkIntersectColliders(ShovelerChunk *chunk, const ShovelerBoundingBox2 *object);
+bool shovelerChunkIntersect(ShovelerChunk *chunk, const ShovelerBoundingBox2 *object);
 bool shovelerChunkRender(ShovelerChunk *chunk, struct ShovelerMaterialStruct *canvasMaterial, struct ShovelerMaterialStruct *tilemapMaterial, ShovelerScene *scene, struct ShovelerCameraStruct *camera, struct ShovelerLightStruct *light, struct ShovelerModelStruct *model, ShovelerRenderState *renderState);
 void shovelerChunkFree(ShovelerChunk *chunk);
 

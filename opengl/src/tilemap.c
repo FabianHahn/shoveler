@@ -29,6 +29,38 @@ int shovelerTilemapAddTileset(ShovelerTilemap *tilemap, ShovelerTileset *tileset
 	return g_queue_get_length(tilemap->tilesets); // start with one since zero is blank
 }
 
+bool shovelerTilemapIntersect(ShovelerTilemap *tilemap, const ShovelerBoundingBox2 *boundingBox, const ShovelerBoundingBox2 *object) {
+	ShovelerVector2 size = shovelerVector2LinearCombination(1.0f, boundingBox->max, -1.0f, boundingBox->min);
+
+	int numColumns = tilemap->tiles->image->width;
+	int numRows = tilemap->tiles->image->height;
+
+	float columnStride = size.values[0] / numColumns;
+	float rowStride = size.values[1] / numRows;
+
+	for(unsigned int row = 0; row < numRows; row++) {
+		unsigned int rowIndex = row * numRows;
+		float rowCoordinate = boundingBox->min.values[1] + row * rowStride;
+
+		for(unsigned int column = 0; column < numColumns; column++) {
+			if(!tilemap->collidingTiles[rowIndex + column]) {
+				continue;
+			}
+
+			float columnCoordinate = boundingBox->min.values[0] + column * columnStride;
+
+			ShovelerBoundingBox2 tileBoundingBox = shovelerBoundingBox2(
+					shovelerVector2(columnCoordinate, rowCoordinate),
+					shovelerVector2(columnCoordinate + columnStride, rowCoordinate + rowStride));
+			if(shovelerBoundingBox2Intersect(object, &tileBoundingBox)) {
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
 bool shovelerTilemapRender(ShovelerTilemap *tilemap, ShovelerMaterial *material, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerRenderState *renderState)
 {
 	// since we are only changing uniform pointer values per per tileset, we can reuse the same shader for all of them
