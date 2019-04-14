@@ -12,6 +12,7 @@ typedef struct {
 	unsigned char tilesetColumn;
 	unsigned char tilesetRow;
 	unsigned char tilesetId;
+	bool colliding;
 } ShovelerViewTilemapTilesTileConfiguration;
 
 typedef struct {
@@ -21,8 +22,8 @@ typedef struct {
 	 */
 	bool isImageResourceEntityDefinition;
 	long long int imageResourceEntityId;
-	int numColumns;
-	int numRows;
+	unsigned int numColumns;
+	unsigned int numRows;
 	/** Array of tiles, where tile (column, row) is at position [row * numColumns + column] */
 	ShovelerViewTilemapTilesTileConfiguration *tiles;
 } ShovelerViewTilemapTilesConfiguration;
@@ -32,6 +33,7 @@ static const char *shovelerViewTilemapTilesComponentName = "tilemap_tiles";
 /** Adds a tilemap tiles component to an entity, copying the supplied configuration. */
 bool shovelerViewEntityAddTilemapTiles(ShovelerViewEntity *entity, const ShovelerViewTilemapTilesConfiguration *configuration);
 ShovelerTexture *shovelerViewEntityGetTilemapTiles(ShovelerViewEntity *entity);
+bool *shovelerViewEntityGetTilemapCollidingTiles(ShovelerViewEntity *entity);
 const ShovelerViewTilemapTilesConfiguration *shovelerViewEntityGetTilemapTilesConfiguration(ShovelerViewEntity *entity);
 /** Updates a tilemap tiles component on an entity, copying the supplied configuration. */
 bool shovelerViewEntityUpdateTilemapTiles(ShovelerViewEntity *entity, const ShovelerViewTilemapTilesConfiguration *configuration);

@@ -9,6 +9,7 @@
 typedef struct {
 	ShovelerViewTilemapTilesConfiguration configuration;
 	ShovelerTexture *texture;
+	bool *collidingTiles;
 } ComponentData;
 
 static void assignConfiguration(ShovelerViewTilemapTilesConfiguration *destination, const ShovelerViewTilemapTilesConfiguration *source);
@@ -33,6 +34,7 @@ bool shovelerViewEntityAddTilemapTiles(ShovelerViewEntity *entity, const Shovele
 	componentData->configuration.numRows = 0;
 	componentData->configuration.tiles = NULL;
 	componentData->texture = NULL;
+	componentData->collidingTiles = NULL;
 
 	assignConfiguration(&componentData->configuration, configuration);
 
@@ -56,6 +58,17 @@ ShovelerTexture *shovelerViewEntityGetTilemapTiles(ShovelerViewEntity *entity)
 
 	ComponentData *componentData = component->data;
 	return componentData->texture;
+}
+
+bool *shovelerViewEntityGetTilemapCollidingTiles(ShovelerViewEntity *entity)
+{
+	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTilemapTilesComponentName);
+	if(component == NULL) {
+		return false;
+	}
+
+	ComponentData *componentData = component->data;
+	return componentData->collidingTiles;
 }
 
 const ShovelerViewTilemapTilesConfiguration *shovelerViewEntityGetTilemapTilesConfiguration(ShovelerViewEntity *entity)
@@ -173,9 +186,12 @@ static bool activateComponent(ShovelerViewComponent *component, void *componentD
 
 		componentData->texture = shovelerTextureCreate2d(image, false);
 		shovelerTextureUpdate(componentData->texture);
+
+		componentData->collidingTiles = NULL;
 	} else {
 		ShovelerImage *tilemapImage = shovelerImageCreate(componentData->configuration.numColumns, componentData->configuration.numRows, 3);
 		componentData->texture = shovelerTextureCreate2d(tilemapImage, true);
+		componentData->collidingTiles = malloc(tilemapImage->width * tilemapImage->height * sizeof(bool));
 		updateTiles(componentData);
 	}
 
@@ -188,6 +204,9 @@ static void deactivateComponent(ShovelerViewComponent *component, void *componen
 
 	shovelerTextureFree(componentData->texture);
 	componentData->texture = NULL;
+
+	free(componentData->collidingTiles);
+	componentData->collidingTiles = NULL;
 }
 
 static void freeComponent(ShovelerViewComponent *component, void *componentDataPointer)
@@ -195,6 +214,8 @@ static void freeComponent(ShovelerViewComponent *component, void *componentDataP
 	ComponentData *componentData = componentDataPointer;
 
 	shovelerTextureFree(componentData->texture);
+
+	free(componentData->collidingTiles);
 
 	clearConfiguration(&componentData->configuration);
 	free(componentData);
@@ -205,12 +226,18 @@ static void updateTiles(ComponentData *componentData)
 	assert(componentData->texture != NULL);
 	ShovelerImage *tilemapImage = componentData->texture->image;
 
-	for(int column = 0; column < componentData->configuration.numColumns; ++column) {
-		for(int row = 0; row < componentData->configuration.numRows; ++row) {
-			ShovelerViewTilemapTilesTileConfiguration tileConfiguration = componentData->configuration.tiles[row * componentData->configuration.numColumns + column];
+	for(unsigned int row = 0; row < componentData->configuration.numRows; ++row) {
+		unsigned int rowIndex = row * componentData->configuration.numColumns;
+		for(unsigned int column = 0; column < componentData->configuration.numColumns; ++column) {
+			unsigned int columnIndex = rowIndex + column;
+
+			ShovelerViewTilemapTilesTileConfiguration tileConfiguration = componentData->configuration.tiles[columnIndex];
+
 			shovelerImageGet(tilemapImage, column, row, 0) = tileConfiguration.tilesetColumn;
 			shovelerImageGet(tilemapImage, column, row, 1) = tileConfiguration.tilesetRow;
 			shovelerImageGet(tilemapImage, column, row, 2) = tileConfiguration.tilesetId;
+
+			componentData->collidingTiles[columnIndex] = tileConfiguration.colliding;
 		}
 	}
 

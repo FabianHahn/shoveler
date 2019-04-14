@@ -188,15 +188,19 @@ int main(int argc, char *argv[])
 	layerTiles[0].tilesetColumn = 0;
 	layerTiles[0].tilesetRow = 0;
 	layerTiles[0].tilesetId = 1; // red
+	layerTiles[0].colliding = false;
 	layerTiles[1].tilesetColumn = 0;
 	layerTiles[1].tilesetRow = 1;
 	layerTiles[1].tilesetId = 1; // green
+	layerTiles[1].colliding = false;
 	layerTiles[2].tilesetColumn = 0;
 	layerTiles[2].tilesetRow = 0;
 	layerTiles[2].tilesetId = 1; // red
+	layerTiles[2].colliding = false;
 	layerTiles[3].tilesetColumn = 0;
 	layerTiles[3].tilesetRow = 0;
 	layerTiles[3].tilesetId = 2; // full tileset
+	layerTiles[3].colliding = false;
 	ShovelerViewTilemapTilesConfiguration layerConfiguration;
 	layerConfiguration.isImageResourceEntityDefinition = false;
 	layerConfiguration.imageResourceEntityId = 0;

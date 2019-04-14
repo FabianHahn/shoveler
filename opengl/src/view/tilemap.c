@@ -142,11 +142,12 @@ static bool activateComponent(ShovelerViewComponent *component, void *componentD
 {
 	ComponentData *componentData = componentDataPointer;
 
-	ShovelerViewEntity *layerEntity = shovelerViewGetEntity(component->entity->view, componentData->configuration.tilesEntityId);
-	assert(layerEntity != NULL);
-	ShovelerTexture *tiles = shovelerViewEntityGetTilemapTiles(layerEntity);
+	ShovelerViewEntity *tilemapEntity = shovelerViewGetEntity(component->entity->view, componentData->configuration.tilesEntityId);
+	assert(tilemapEntity != NULL);
+	ShovelerTexture *tiles = shovelerViewEntityGetTilemapTiles(tilemapEntity);
+	bool *collidingTiles = shovelerViewEntityGetTilemapCollidingTiles(tilemapEntity);
 
-	componentData->tilemap = shovelerTilemapCreate(tiles, NULL);
+	componentData->tilemap = shovelerTilemapCreate(tiles, collidingTiles);
 
 	for(int i = 0; i < componentData->configuration.numTilesets; i++) {
 		ShovelerViewEntity *tilesetEntity = shovelerViewGetEntity(component->entity->view, componentData->configuration.tilesetEntityIds[i]);
