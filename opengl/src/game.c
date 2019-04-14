@@ -101,7 +101,7 @@ ShovelerGame *shovelerGameCreate(ShovelerGameUpdateCallback *update, const Shove
 	game->scene = shovelerSceneCreate(game->shaderCache);
 	game->camera = shovelerCameraPerspectiveCreate(game->shaderCache, &cameraSettings->frame, &cameraSettings->projection);
 	game->colliders = shovelerCollidersCreate();
-	game->controller = shovelerControllerCreate(game->window, game->input, game->colliders, &controllerSettings->frame, controllerSettings->moveFactor, controllerSettings->tiltFactor, controllerSettings->boundingBoxSize2, controllerSettings->boundingBoxSize2);
+	game->controller = shovelerControllerCreate(game->window, game->input, game->colliders, &controllerSettings->frame, controllerSettings->moveFactor, controllerSettings->tiltFactor, controllerSettings->boundingBoxSize2, controllerSettings->boundingBoxSize3);
 	game->view = shovelerViewCreate();
 	game->update = update;
 	game->lastFrameTime = glfwGetTime();
