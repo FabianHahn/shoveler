@@ -30,6 +30,10 @@ int shovelerTilemapAddTileset(ShovelerTilemap *tilemap, ShovelerTileset *tileset
 }
 
 bool shovelerTilemapIntersect(ShovelerTilemap *tilemap, const ShovelerBoundingBox2 *boundingBox, const ShovelerBoundingBox2 *object) {
+	if(tilemap->collidingTiles == NULL) {
+		return false;
+	}
+
 	ShovelerVector2 size = shovelerVector2LinearCombination(1.0f, boundingBox->max, -1.0f, boundingBox->min);
 
 	int numColumns = tilemap->tiles->image->width;
