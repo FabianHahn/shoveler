@@ -52,7 +52,6 @@ bool shovelerViewEntityAddClient(ShovelerViewEntity *entity, const ShovelerViewC
 		shovelerViewComponentAddDependency(component, componentData->configuration.modelEntityId, shovelerViewModelComponentName);
 	}
 
-	shovelerViewComponentActivate(component);
 	return true;
 }
 

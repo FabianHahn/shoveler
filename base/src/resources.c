@@ -97,7 +97,7 @@ bool shovelerResourcesSet(ShovelerResources *resources, const char *typeId, cons
 		return false;
 	}
 
-	shovelerLogInfo("Loaded resource '%s' of type '%s'.", resourceId, typeId);
+	shovelerLogTrace("Loaded resource '%s' of type '%s'.", resourceId, typeId);
 	return true;
 }
 

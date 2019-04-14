@@ -158,7 +158,7 @@ ShovelerShader *shovelerSceneGenerateShader(ShovelerScene *scene, ShovelerCamera
 
 		int sceneAttached = shovelerUniformMapAttach(scene->uniforms, shader);
 
-		shovelerLogInfo("Generated shader for program %d with %d scene %p, %d camera %p, %d light %p, %d model %p, and %d material %p uniforms.", material->program, sceneAttached, scene, cameraAttached, camera, lightAttached, light, modelAttached, model, materialAttached, material);
+		shovelerLogTrace("Generated shader for program %d with %d scene %p, %d camera %p, %d light %p, %d model %p, and %d material %p uniforms.", material->program, sceneAttached, scene, cameraAttached, camera, lightAttached, light, modelAttached, model, materialAttached, material);
 
 		shovelerShaderCacheInsert(scene->shaderCache, shader);
 	}

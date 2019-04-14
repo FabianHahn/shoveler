@@ -146,7 +146,6 @@ static bool activateComponent(ShovelerViewComponent *component, void *componentD
 	}
 
 	componentData->animation = shovelerTileSpriteAnimationCreate(tileSprite, componentData->configuration.moveAmountThreshold);
-	componentData->animation->logDirectionChanges = true;
 
 	componentData->positionMappingX = tileSpriteConfiguration->positionMappingX;
 	componentData->positionMappingY = tileSpriteConfiguration->positionMappingY;

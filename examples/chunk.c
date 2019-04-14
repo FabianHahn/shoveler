@@ -152,7 +152,6 @@ int main(int argc, char *argv[])
 
 	animation = shovelerTileSpriteAnimationCreate(&characterSprite, 0.1f);
 	animation->moveAmountThreshold = 0.25f;
-	animation->logDirectionChanges = true;
 
 	ShovelerMaterial *chunkMaterial = shovelerMaterialChunkCreate(game->shaderCache);
 	shovelerMaterialChunkSetActive(chunkMaterial, chunk);
