@@ -301,6 +301,7 @@ int main(int argc, char *argv[])
 	chunkConfiguration.positionMappingX = SHOVELER_COORDINATE_MAPPING_POSITIVE_X;
 	chunkConfiguration.positionMappingY = SHOVELER_COORDINATE_MAPPING_POSITIVE_Y;
 	chunkConfiguration.size = shovelerVector2(10.0f, 10.0f);
+	chunkConfiguration.collider = false;
 	chunkConfiguration.numLayers = 3;
 	chunkConfiguration.layers = (ShovelerViewChunkLayerConfiguration[]){
 		{SHOVELER_CHUNK_LAYER_TYPE_TILEMAP, 12},

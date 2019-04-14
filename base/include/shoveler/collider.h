@@ -42,6 +42,10 @@ static inline ShovelerCollider2 *shovelerCollider2Intersect(ShovelerCollider2 *c
 
 static inline void shovelerCollider2Free(ShovelerCollider2 *collider)
 {
+	if(collider == NULL) {
+		return;
+	}
+
 	if(collider->freeData != NULL) {
 		collider->freeData(collider);
 	}
@@ -60,6 +64,10 @@ static inline ShovelerCollider3 *shovelerCollider3Intersect(ShovelerCollider3 *c
 
 static inline void shovelerCollider3Free(ShovelerCollider3 *collider)
 {
+	if(collider == NULL) {
+		return;
+	}
+
 	if(collider->freeData != NULL) {
 		collider->freeData(collider);
 	}

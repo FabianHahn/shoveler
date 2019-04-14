@@ -20,6 +20,7 @@ typedef struct {
 	ShovelerCoordinateMapping positionMappingX;
 	ShovelerCoordinateMapping positionMappingY;
 	ShovelerVector2 size;
+	bool collider;
 	int numLayers;
 	ShovelerViewChunkLayerConfiguration *layers;
 } ShovelerViewChunkConfiguration;

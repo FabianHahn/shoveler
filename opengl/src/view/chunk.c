@@ -2,15 +2,19 @@
 #include <stdlib.h> // malloc free
 #include <string.h> // memcpy
 
+#include "shoveler/collider/chunk.h"
 #include "shoveler/view/canvas.h"
 #include "shoveler/view/chunk.h"
+#include "shoveler/view/colliders.h"
 #include "shoveler/view/position.h"
 #include "shoveler/view/tilemap.h"
+#include "shoveler/colliders.h"
 #include "shoveler/log.h"
 
 typedef struct {
 	ShovelerViewChunkConfiguration configuration;
 	ShovelerChunk *chunk;
+	ShovelerCollider2 *collider;
 	ShovelerViewComponentCallback *positionCallback;
 } ComponentData;
 
@@ -36,9 +40,11 @@ bool shovelerViewEntityAddChunk(ShovelerViewEntity *entity, const ShovelerViewCh
 	componentData->configuration.positionMappingX = SHOVELER_COORDINATE_MAPPING_POSITIVE_X;
 	componentData->configuration.positionMappingY = SHOVELER_COORDINATE_MAPPING_POSITIVE_Y;
 	componentData->configuration.size = shovelerVector2(0.0f, 0.0f);
+	componentData->configuration.collider = false;
 	componentData->configuration.numLayers = 0;
 	componentData->configuration.layers = NULL;
 	componentData->chunk = NULL;
+	componentData->collider = NULL;
 	componentData->positionCallback = NULL;
 
 	assignConfiguration(&componentData->configuration, configuration);
@@ -129,6 +135,7 @@ static void assignConfiguration(ShovelerViewChunkConfiguration *destination, con
 	destination->positionMappingX = source->positionMappingX;
 	destination->positionMappingY = source->positionMappingY;
 	destination->size = source->size;
+	destination->collider = source->collider;
 	destination->numLayers = source->numLayers;
 	destination->layers = malloc(destination->numLayers * sizeof(ShovelerViewChunkLayerConfiguration));
 	memcpy(destination->layers, source->layers, destination->numLayers * sizeof(ShovelerViewChunkLayerConfiguration));
@@ -136,6 +143,11 @@ static void assignConfiguration(ShovelerViewChunkConfiguration *destination, con
 
 static void clearConfiguration(ShovelerViewChunkConfiguration *configuration)
 {
+	configuration->positionMappingX = SHOVELER_COORDINATE_MAPPING_POSITIVE_X;
+	configuration->positionMappingY = SHOVELER_COORDINATE_MAPPING_POSITIVE_Y;
+	configuration->size = shovelerVector2(0.0f, 0.0f);
+	configuration->collider = false;
+
 	if(configuration->numLayers > 0) {
 		free(configuration->layers);
 		configuration->layers = NULL;
@@ -145,6 +157,7 @@ static void clearConfiguration(ShovelerViewChunkConfiguration *configuration)
 
 static bool activateComponent(ShovelerViewComponent *component, void *componentDataPointer)
 {
+	assert(shovelerViewHasColliders(component->entity->view));
 	ComponentData *componentData = componentDataPointer;
 
 	componentData->chunk = shovelerChunkCreate(shovelerVector2(0.0f, 0.0f), componentData->configuration.size);
@@ -177,12 +190,28 @@ static bool activateComponent(ShovelerViewComponent *component, void *componentD
 
 	updatePosition(componentData, shovelerViewEntityGetPosition(component->entity));
 
+	if(componentData->configuration.collider) {
+		ShovelerColliders *colliders = shovelerViewGetColliders(component->entity->view);
+
+		componentData->collider = shovelerColliderChunkCreate(componentData->chunk);
+		shovelerCollidersAddCollider2(colliders, componentData->collider);
+	}
+
 	return true;
 }
 
 static void deactivateComponent(ShovelerViewComponent *component, void *componentDataPointer)
 {
+	assert(shovelerViewHasColliders(component->entity->view));
 	ComponentData *componentData = componentDataPointer;
+
+	if(componentData->configuration.collider) {
+		ShovelerColliders *colliders = shovelerViewGetColliders(component->entity->view);
+		shovelerCollidersRemoveCollider2(colliders, componentData->collider);
+
+		shovelerCollider2Free(componentData->collider);
+		componentData->collider = NULL;
+	}
 
 	shovelerChunkFree(componentData->chunk);
 	componentData->chunk = NULL;
@@ -193,7 +222,10 @@ static void freeComponent(ShovelerViewComponent *component, void *componentDataP
 	ComponentData *componentData = componentDataPointer;
 
 	clearConfiguration(&componentData->configuration);
+
 	shovelerChunkFree(componentData->chunk);
+	shovelerCollider2Free(componentData->collider);
+
 	free(componentData);
 }
 
