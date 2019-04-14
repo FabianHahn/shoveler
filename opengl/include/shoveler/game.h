@@ -64,6 +64,13 @@ typedef struct ShovelerGameStruct {
 	double lastFrameTime;
 	double lastFpsPrintTime;
 	int framesSinceLastFpsPrint;
+	struct {
+		unsigned int numEntities;
+		unsigned int numComponents;
+		unsigned int numComponentDependencies;
+		unsigned int numActiveComponents;
+		unsigned int numDelegatedComponents;
+	} lastViewCounters;
 } ShovelerGame;
 
 ShovelerGame *shovelerGameCreate(ShovelerGameUpdateCallback *update, const ShovelerGameWindowSettings *windowSettings, const ShovelerGameCameraSettings *cameraSettings, const ShovelerGameControllerSettings *controllerSettings);

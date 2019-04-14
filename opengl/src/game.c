@@ -1,7 +1,6 @@
 #include <stdlib.h> // malloc, free
 
 #include <glad/glad.h>
-#include <shoveler/game.h>
 
 #include "shoveler/camera/perspective.h"
 #include "shoveler/view/colliders.h"
@@ -17,6 +16,7 @@
 static void keyHandler(ShovelerInput *input, int key, int scancode, int action, int mods, void *unused);
 static gint64 elapsedNs(double dt);
 static void printFps(void *gamePointer);
+static void updateViewCounters(ShovelerGame *game);
 
 ShovelerGame *shovelerGameCreate(ShovelerGameUpdateCallback *update, const ShovelerGameWindowSettings *windowSettings, const ShovelerGameCameraSettings *cameraSettings, const ShovelerGameControllerSettings *controllerSettings)
 {
@@ -107,6 +107,12 @@ ShovelerGame *shovelerGameCreate(ShovelerGameUpdateCallback *update, const Shove
 	game->lastFrameTime = glfwGetTime();
 	game->lastFpsPrintTime = game->lastFrameTime;
 	game->framesSinceLastFpsPrint = 0;
+	game->lastViewCounters.numEntities = 0;
+	game->lastViewCounters.numComponents = 0;
+	game->lastViewCounters.numComponentDependencies = 0;
+	game->lastViewCounters.numActiveComponents = 0;
+	game->lastViewCounters.numDelegatedComponents = 0;
+
 	shovelerExecutorSchedulePeriodic(game->updateExecutor, 1000, 1000, printFps, game);
 
 	shovelerCameraPerspectiveAttachController(game->camera, game->controller);
@@ -162,6 +168,8 @@ int shovelerGameRenderFrame(ShovelerGame *game)
 	shovelerExecutorUpdate(game->updateExecutor, elapsedNs(dt));
 	shovelerControllerUpdate(game->controller, dt);
 	game->update(game, dt);
+
+	updateViewCounters(game);
 
 	int rendered = shovelerSceneRenderFrame(game->scene, game->camera, game->framebuffer, &game->renderState);
 	shovelerFramebufferBlitToDefault(game->framebuffer);
@@ -234,4 +242,28 @@ static void printFps(void *gamePointer)
 
 	game->lastFpsPrintTime = now;
 	game->framesSinceLastFpsPrint = 0;
+}
+
+static void updateViewCounters(ShovelerGame *game)
+{
+	bool viewCountersChanged = game->lastViewCounters.numEntities != game->view->numEntities
+		|| game->lastViewCounters.numComponents != game->view->numComponents
+		|| game->lastViewCounters.numComponentDependencies != game->view->numComponentDependencies
+		|| game->lastViewCounters.numActiveComponents != game->view->numActiveComponents
+		|| game->lastViewCounters.numDelegatedComponents != game->view->numDelegatedComponents;
+
+	if(viewCountersChanged) {
+		game->lastViewCounters.numEntities = game->view->numEntities;
+		game->lastViewCounters.numComponents = game->view->numComponents;
+		game->lastViewCounters.numComponentDependencies = game->view->numComponentDependencies;
+		game->lastViewCounters.numActiveComponents = game->view->numActiveComponents;
+		game->lastViewCounters.numDelegatedComponents = game->view->numDelegatedComponents;
+
+		shovelerLogInfo("View changed: %u entities, %u components (%u dependencies, %u active, %u delegated).",
+			game->lastViewCounters.numEntities,
+			game->lastViewCounters.numComponents,
+			game->lastViewCounters.numComponentDependencies,
+			game->lastViewCounters.numActiveComponents,
+			game->lastViewCounters.numDelegatedComponents);
+	}
 }
