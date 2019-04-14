@@ -204,7 +204,7 @@ static void shiftPosition(ShovelerController *controller, ShovelerVector3 moveAm
 
 		ShovelerCollider2 *collider = shovelerCollidersIntersect2(controller->colliders, &targetBoundingBox2);
 		if(collider != NULL) {
-			shovelerLogInfo("Bumping into 2d collider %p at (%.2f, %.2f), aborting position shift.", collider, targetPosition2.values[0], targetPosition2.values[1]);
+			shovelerLogTrace("Bumping into 2d collider %p at (%.2f, %.2f), aborting position shift.", collider, targetPosition2.values[0], targetPosition2.values[1]);
 			return;
 		}
 	}
@@ -217,7 +217,7 @@ static void shiftPosition(ShovelerController *controller, ShovelerVector3 moveAm
 
 		ShovelerCollider3 *collider = shovelerCollidersIntersect3(controller->colliders, &targetBoundingBox3);
 		if(collider != NULL) {
-			shovelerLogInfo("Bumping into 3d collider %p at (%.2f, %.2f, %.2f), aborting position shift.", collider, targetPosition.values[0], targetPosition.values[1], targetPosition.values[2]);
+			shovelerLogTrace("Bumping into 3d collider %p at (%.2f, %.2f, %.2f), aborting position shift.", collider, targetPosition.values[0], targetPosition.values[1], targetPosition.values[2]);
 			return;
 		}
 	}
