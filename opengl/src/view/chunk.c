@@ -15,7 +15,6 @@ typedef struct {
 	ShovelerViewChunkConfiguration configuration;
 	ShovelerChunk *chunk;
 	ShovelerCollider2 *collider;
-	ShovelerViewComponentCallback *positionCallback;
 } ComponentData;
 
 static void assignConfiguration(ShovelerViewChunkConfiguration *destination, const ShovelerViewChunkConfiguration *source);
@@ -24,9 +23,7 @@ static bool activateComponent(ShovelerViewComponent *component, void *componentD
 static void deactivateComponent(ShovelerViewComponent *component, void *componentDataPointer);
 static void freeComponent(ShovelerViewComponent *component, void *componentDataPointer);
 static void positionCallback(ShovelerViewComponent *positionComponent, ShovelerViewComponentCallbackType callbackType, void *componentDataPointer);
-static void updatePosition(ComponentData *componentData, const ShovelerViewPosition *position);
 static const char *layerTypeToComponentName(ShovelerChunkLayerType type);
-static double mapCoordinate(const ShovelerViewPosition *position, ShovelerCoordinateMapping mapping);
 
 bool shovelerViewEntityAddChunk(ShovelerViewEntity *entity, const ShovelerViewChunkConfiguration *configuration)
 {
@@ -45,7 +42,6 @@ bool shovelerViewEntityAddChunk(ShovelerViewEntity *entity, const ShovelerViewCh
 	componentData->configuration.layers = NULL;
 	componentData->chunk = NULL;
 	componentData->collider = NULL;
-	componentData->positionCallback = NULL;
 
 	assignConfiguration(&componentData->configuration, configuration);
 
@@ -160,7 +156,14 @@ static bool activateComponent(ShovelerViewComponent *component, void *componentD
 	assert(shovelerViewHasColliders(component->entity->view));
 	ComponentData *componentData = componentDataPointer;
 
-	componentData->chunk = shovelerChunkCreate(shovelerVector2(0.0f, 0.0f), componentData->configuration.size);
+	ShovelerViewPosition *position = shovelerViewEntityGetPosition(component->entity);
+	assert(position != NULL);
+	ShovelerVector3 positionCoordinates = shovelerVector3((float) position->x, (float) position->y, (float) position->z);
+	ShovelerVector2 chunkPosition = shovelerVector2(
+		shovelerCoordinateMap(positionCoordinates, componentData->configuration.positionMappingX),
+		shovelerCoordinateMap(positionCoordinates, componentData->configuration.positionMappingY));
+
+	componentData->chunk = shovelerChunkCreate(chunkPosition, componentData->configuration.size);
 
 	for(int i = 0; i < componentData->configuration.numLayers; i++) {
 		const ShovelerViewChunkLayerConfiguration *layerConfiguration = &componentData->configuration.layers[i];
@@ -187,8 +190,6 @@ static bool activateComponent(ShovelerViewComponent *component, void *componentD
 				return false;
 		}
 	}
-
-	updatePosition(componentData, shovelerViewEntityGetPosition(component->entity));
 
 	if(componentData->configuration.collider) {
 		ShovelerColliders *colliders = shovelerViewGetColliders(component->entity->view);
@@ -227,21 +228,6 @@ static void freeComponent(ShovelerViewComponent *component, void *componentDataP
 	shovelerCollider2Free(componentData->collider);
 
 	free(componentData);
-}
-
-static void positionCallback(ShovelerViewComponent *positionComponent, ShovelerViewComponentCallbackType callbackType, void *componentDataPointer)
-{
-	ComponentData *componentData = componentDataPointer;
-
-	updatePosition(componentData, shovelerViewEntityGetPosition(positionComponent->entity));
-}
-
-static void updatePosition(ComponentData *componentData, const ShovelerViewPosition *position)
-{
-	ShovelerVector3 positionCoordinates = shovelerVector3((float) position->x, (float) position->y, (float) position->z);
-
-	componentData->chunk->position.values[0] = shovelerCoordinateMap(positionCoordinates, componentData->configuration.positionMappingX);
-	componentData->chunk->position.values[1] = shovelerCoordinateMap(positionCoordinates, componentData->configuration.positionMappingY);
 }
 
 static const char *layerTypeToComponentName(ShovelerChunkLayerType type)
