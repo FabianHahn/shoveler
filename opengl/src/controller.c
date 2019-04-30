@@ -14,6 +14,7 @@ static void updatePosition(ShovelerController *controller, float dt);
 static void updateTilt(ShovelerController *controller, float dt);
 static void shiftOrientation(ShovelerController *controller, ShovelerVector2 tiltAmount);
 static void shiftPosition(ShovelerController *controller, ShovelerVector3 moveAmount);
+static bool tryMoveDirection(ShovelerController *controller, ShovelerVector3 right, float moveAmountRight, float moveAmountUp, float moveAmountForward);
 static void windowSizeHandler(ShovelerInput *input, int width, int height, void *controllerPointer);
 static void triggerTilt(ShovelerController *controller, ShovelerVector3 direction, ShovelerVector3 orientation);
 static void triggerMove(ShovelerController *controller, ShovelerVector3 moveAmount);
@@ -128,31 +129,31 @@ static void updatePosition(ShovelerController *controller, float dt)
 {
 	ShovelerVector3 moveAmount = {0.0f, 0.0f, 0.0f};
 	if(!controller->lockMoveX) {
-		if (glfwGetKey(controller->window, GLFW_KEY_A) == GLFW_PRESS || glfwGetKey(controller->window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+		if(glfwGetKey(controller->window, GLFW_KEY_A) == GLFW_PRESS || glfwGetKey(controller->window, GLFW_KEY_LEFT) == GLFW_PRESS) {
 			moveAmount.values[0] -= controller->moveFactor * dt;
 		}
 
-		if (glfwGetKey(controller->window, GLFW_KEY_D) == GLFW_PRESS || glfwGetKey(controller->window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+		if(glfwGetKey(controller->window, GLFW_KEY_D) == GLFW_PRESS || glfwGetKey(controller->window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
 			moveAmount.values[0] += controller->moveFactor * dt;
 		}
 	}
 
 	if(!controller->lockMoveY) {
-		if (glfwGetKey(controller->window, GLFW_KEY_SPACE) == GLFW_PRESS || glfwGetKey(controller->window, GLFW_KEY_UP) == GLFW_PRESS) {
+		if(glfwGetKey(controller->window, GLFW_KEY_SPACE) == GLFW_PRESS || glfwGetKey(controller->window, GLFW_KEY_UP) == GLFW_PRESS) {
 			moveAmount.values[1] += controller->moveFactor * dt;
 		}
 
-		if (glfwGetKey(controller->window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS || glfwGetKey(controller->window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+		if(glfwGetKey(controller->window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS || glfwGetKey(controller->window, GLFW_KEY_DOWN) == GLFW_PRESS) {
 			moveAmount.values[1] -= controller->moveFactor * dt;
 		}
 	}
 
 	if(!controller->lockMoveZ) {
-		if (glfwGetKey(controller->window, GLFW_KEY_W) == GLFW_PRESS) {
+		if(glfwGetKey(controller->window, GLFW_KEY_W) == GLFW_PRESS) {
 			moveAmount.values[2] += controller->moveFactor * dt;
 		}
 
-		if (glfwGetKey(controller->window, GLFW_KEY_S) == GLFW_PRESS) {
+		if(glfwGetKey(controller->window, GLFW_KEY_S) == GLFW_PRESS) {
 			moveAmount.values[2] -= controller->moveFactor * dt;
 		}
 	}
@@ -176,8 +177,8 @@ static void updateTilt(ShovelerController *controller, float dt)
 	float tiltAmountX = controller->tiltFactor * (float) cursorDiffX;
 	float tiltAmountY = controller->tiltFactor * (float) cursorDiffY;
 	ShovelerVector2 tiltAmount = {
-			controller->lockTiltX ? 0.0f : tiltAmountX,
-			controller->lockTiltY ? 0.0f : tiltAmountY,
+		controller->lockTiltX ? 0.0f : tiltAmountX,
+		controller->lockTiltY ? 0.0f : tiltAmountY,
 	};
 
 	if(tiltAmount.values[0] != 0.0f || tiltAmount.values[1] != 0.0f) {
@@ -189,41 +190,78 @@ static void shiftPosition(ShovelerController *controller, ShovelerVector3 moveAm
 {
 	ShovelerVector3 right = shovelerVector3Cross(controller->frame.direction, controller->frame.up);
 
+	if(tryMoveDirection(controller, right, moveAmount.values[0], moveAmount.values[1], moveAmount.values[2])) {
+		return;
+	}
+
+	if(tryMoveDirection(controller, right, moveAmount.values[0], 0.0f, 0.0f)) {
+		return;
+	}
+
+	if(tryMoveDirection(controller, right, 0.0f, moveAmount.values[1], 0.0f)) {
+		return;
+	}
+
+	if(tryMoveDirection(controller, right, 0.0f, 0.0f, moveAmount.values[2])) {
+		return;
+	}
+}
+
+static bool tryMoveDirection(ShovelerController *controller, ShovelerVector3 right, float moveAmountRight, float moveAmountUp, float moveAmountForward)
+{
 	ShovelerVector3 targetPosition;
-	targetPosition = shovelerVector3LinearCombination(1.0, controller->frame.position, moveAmount.values[2], controller->frame.direction);
-	targetPosition = shovelerVector3LinearCombination(1.0, targetPosition, moveAmount.values[0], right);
-	targetPosition = shovelerVector3LinearCombination(1.0, targetPosition, moveAmount.values[1], controller->frame.up);
+	targetPosition = shovelerVector3LinearCombination(1.0, controller->frame.position, moveAmountForward, controller->frame.direction);
+	targetPosition = shovelerVector3LinearCombination(1.0, targetPosition, moveAmountRight, right);
+	targetPosition = shovelerVector3LinearCombination(1.0, targetPosition, moveAmountUp, controller->frame.up);
 
 	// check for 2d collisions
 	if(controller->boundingBoxSize2 > 0.0f) {
 		ShovelerVector2 targetPosition2 = shovelerVector2(targetPosition.values[0], targetPosition.values[1]);
 
 		ShovelerBoundingBox2 targetBoundingBox2 = shovelerBoundingBox2(
-				shovelerVector2LinearCombination(1.0, targetPosition2, -0.5f * controller->boundingBoxSize2, shovelerVector2(1.0f, 1.0f)),
-				shovelerVector2LinearCombination(1.0, targetPosition2, 0.5f * controller->boundingBoxSize2, shovelerVector2(1.0f, 1.0f)));
+			shovelerVector2LinearCombination(1.0, targetPosition2, -0.5f * controller->boundingBoxSize2, shovelerVector2(1.0f, 1.0f)),
+			shovelerVector2LinearCombination(1.0, targetPosition2, 0.5f * controller->boundingBoxSize2, shovelerVector2(1.0f, 1.0f)));
 
 		ShovelerCollider2 *collider = shovelerCollidersIntersect2(controller->colliders, &targetBoundingBox2);
 		if(collider != NULL) {
-			shovelerLogTrace("Bumping into 2d collider %p at (%.2f, %.2f), aborting position shift.", collider, targetPosition2.values[0], targetPosition2.values[1]);
-			return;
+			shovelerLogTrace("Bumping into 2d collider %p with bounding box (%.2f, %.2f)-(%.2f, %.2f), aborting position shift to (%.2f, %.2f).",
+				collider,
+				collider->boundingBox.min.values[0],
+				collider->boundingBox.min.values[1],
+				collider->boundingBox.max.values[0],
+				collider->boundingBox.max.values[1],
+				targetPosition2.values[0],
+				targetPosition2.values[1]);
+			return false;
 		}
 	}
 
 	// check for 3d collisions
 	if(controller->boundingBoxSize3 > 0.0f) {
 		ShovelerBoundingBox3 targetBoundingBox3 = shovelerBoundingBox3(
-				shovelerVector3LinearCombination(1.0, targetPosition, -0.5f * controller->boundingBoxSize3, shovelerVector3(1.0f, 1.0f, 1.0f)),
-				shovelerVector3LinearCombination(1.0, targetPosition, 0.5f * controller->boundingBoxSize3, shovelerVector3(1.0f, 1.0f, 1.0f)));
+			shovelerVector3LinearCombination(1.0, targetPosition, -0.5f * controller->boundingBoxSize3, shovelerVector3(1.0f, 1.0f, 1.0f)),
+			shovelerVector3LinearCombination(1.0, targetPosition, 0.5f * controller->boundingBoxSize3, shovelerVector3(1.0f, 1.0f, 1.0f)));
 
 		ShovelerCollider3 *collider = shovelerCollidersIntersect3(controller->colliders, &targetBoundingBox3);
 		if(collider != NULL) {
-			shovelerLogTrace("Bumping into 3d collider %p at (%.2f, %.2f, %.2f), aborting position shift.", collider, targetPosition.values[0], targetPosition.values[1], targetPosition.values[2]);
-			return;
+			shovelerLogTrace("Bumping into 3d collider %p with bounding box (%.2f, %.2f, %.2f)-(%.2f, %.2f, %.2f), aborting position shift to (%.2f, %.2f, %.2f).",
+				collider,
+				collider->boundingBox.min.values[0],
+				collider->boundingBox.min.values[1],
+				collider->boundingBox.min.values[2],
+				collider->boundingBox.max.values[0],
+				collider->boundingBox.max.values[1],
+				collider->boundingBox.max.values[2],
+				targetPosition.values[0],
+				targetPosition.values[1],
+				targetPosition.values[2]);
+			return false;
 		}
 	}
 
 	controller->frame.position = targetPosition;
 	triggerMove(controller, controller->frame.position);
+	return true;
 }
 
 static void shiftOrientation(ShovelerController *controller, ShovelerVector2 tiltAmount)
