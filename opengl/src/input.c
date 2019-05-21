@@ -28,9 +28,6 @@ ShovelerInput *shovelerInputCreate(ShovelerGame *game)
 	input->scrollCallbacks = g_hash_table_new_full(g_direct_hash, g_direct_equal, freeScrollCallback, NULL);
 	input->windowSizeCallbacks = g_hash_table_new_full(g_direct_hash, g_direct_equal, freeWindowSizeCallback, NULL);
 
-	glfwSetInputMode(game->window, GLFW_STICKY_KEYS, GL_TRUE);
-	glfwSetInputMode(game->window, GLFW_STICKY_MOUSE_BUTTONS, GL_TRUE);
-
 	glfwSetKeyCallback(game->window, keyHandler);
 	glfwSetMouseButtonCallback(game->window, mouseButtonHandler);
 	glfwSetCursorPosCallback(game->window, cursorPosHandler);
@@ -119,8 +116,6 @@ bool shovelerInputRemoveWindowSizeCallback(ShovelerInput *input, ShovelerInputWi
 void shovelerInputFree(ShovelerInput *input)
 {
 	glfwSetInputMode(input->game->window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-	glfwSetInputMode(input->game->window, GLFW_STICKY_KEYS, GL_FALSE);
-	glfwSetInputMode(input->game->window, GLFW_STICKY_MOUSE_BUTTONS, GL_FALSE);
 
 	glfwSetKeyCallback(input->game->window, NULL);
 	glfwSetMouseButtonCallback(input->game->window, NULL);

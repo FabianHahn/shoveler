@@ -51,12 +51,19 @@ typedef struct ShovelerControllerStruct {
 	bool lockTiltY;
 	double previousCursorX;
 	double previousCursorY;
+	bool movingForward;
+	bool movingBackward;
+	bool movingUpward;
+	bool movingDownward;
+	bool movingLeft;
+	bool movingRight;
 	/** set of (ShovelerControllerTiltCallback *) */
 	GHashTable *tiltCallbacks;
 	/** set of (ShovelerControllerMoveCallback *) */
 	GHashTable *moveCallbacks;
 	/** set of (ShovelerControllerAspectRatioChangeCallback *) */
 	GHashTable *aspectRatioChangeCallbacks;
+	ShovelerInputKeyCallback *keyCallback;
 	ShovelerInputWindowSizeCallback *windowSizeCallback;
 } ShovelerController;
 
