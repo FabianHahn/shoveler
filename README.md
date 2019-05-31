@@ -24,7 +24,7 @@
 
 Make sure you have headers for the [X Window System](http://www.opengroup.org/tech/desktop/x-window-system/) installed that will be used by [glfw](http://www.glfw.org/) to create a window to render to. If you are using a Linux distribution based on the [APT](https://wiki.debian.org/Apt) package manager such as _Debian_ or _Ubuntu_, you can install them with the following command:
 ```
-sudo apt-get install xorg-dev
+sudo apt-get install xorg-dev libxi-dev
 ```
 
 Clone the repository and switch into it:
