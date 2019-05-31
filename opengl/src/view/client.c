@@ -173,7 +173,15 @@ static bool activateComponent(ShovelerViewComponent *component, void *componentD
 		return false;
 	}
 
+	ShovelerViewEntity *positionEntity = shovelerViewGetEntity(componentData->entity->view, componentData->configuration.positionEntityId);
+	assert(positionEntity != NULL);
+	ShovelerViewPosition *position = shovelerViewEntityGetPosition(positionEntity);
+
 	ShovelerController *controller = shovelerViewGetController(component->entity->view);
+	ShovelerReferenceFrame frame = controller->frame;
+	frame.position = shovelerVector3(position->x, position->y, position->z);
+	shovelerControllerSetFrame(controller, &frame);
+
 	componentData->moveCallback = shovelerControllerAddMoveCallback(controller, moveCallback, componentData);
 
 	if(componentData->configuration.modelEntityId > 0) {

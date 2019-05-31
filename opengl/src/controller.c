@@ -1,4 +1,5 @@
 #include <stdlib.h> // malloc, free
+#include <string.h> // memcmp
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -112,6 +113,23 @@ ShovelerControllerAspectRatioChangeCallback *shovelerControllerAddAspectRatioCha
 bool shovelerControllerRemoveAspectRatioChangeCallback(ShovelerController *controller, ShovelerControllerAspectRatioChangeCallback *aspectRatioChangeCallback)
 {
 	return g_hash_table_remove(controller->aspectRatioChangeCallbacks, aspectRatioChangeCallback);
+}
+
+void shovelerControllerSetFrame(ShovelerController *controller, const ShovelerReferenceFrame *frame)
+{
+	bool moved = memcmp(&controller->frame.position, &frame->position, sizeof(ShovelerVector3)) != 0;
+	bool tilted = memcmp(&controller->frame.direction, &frame->direction, sizeof(ShovelerVector3)) != 0
+		&& memcmp(&controller->frame.up, &frame->up, sizeof(ShovelerVector3)) != 0;
+
+	controller->frame = *frame;
+
+	if(moved) {
+		triggerMove(controller, controller->frame.position);
+	}
+
+	if(tilted) {
+		triggerTilt(controller, controller->frame.direction, controller->frame.up);
+	}
 }
 
 void shovelerControllerUpdate(ShovelerController *controller, float dt)

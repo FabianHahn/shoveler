@@ -75,6 +75,7 @@ ShovelerControllerMoveCallback *shovelerControllerAddMoveCallback(ShovelerContro
 bool shovelerControllerRemoveMoveCallback(ShovelerController *controller, ShovelerControllerMoveCallback *moveCallback);
 ShovelerControllerAspectRatioChangeCallback *shovelerControllerAddAspectRatioChangeCallback(ShovelerController *controller, ShovelerControllerAspectRatioChangeCallbackFunction *callbackFunction, void *userData);
 bool shovelerControllerRemoveAspectRatioChangeCallback(ShovelerController *controller, ShovelerControllerAspectRatioChangeCallback *aspectRatioChangeCallback);
+void shovelerControllerSetFrame(ShovelerController *controller, const ShovelerReferenceFrame *frame);
 void shovelerControllerUpdate(ShovelerController *controller, float dt);
 void shovelerControllerFree(ShovelerController *controller);
 
