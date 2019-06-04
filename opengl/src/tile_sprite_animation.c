@@ -93,6 +93,11 @@ void shovelerTileSpriteAnimationUpdate(ShovelerTileSpriteAnimation *animation, S
 
 			if(animation->frameMoveAmount > animation->moveAmountThreshold) {
 				animation->frameMoveAmount -= animation->moveAmountThreshold;
+				if (animation->frameMoveAmount > animation->moveAmountThreshold) {
+					// prevent flickering if there is still too much move amount left
+					animation->frameMoveAmount = animation->moveAmountThreshold;
+				}
+
 				animation->frame = animation->frame == 1 ? 2 : 1; // switch frame
 
 				if (animation->direction != newDirection) { // we are no longer moving in the same direction
