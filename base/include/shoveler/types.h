@@ -50,9 +50,9 @@ typedef struct {
 	ShovelerVector3 max;
 } ShovelerBoundingBox3;
 
-static inline ShovelerVector2 shovelerVector2(float x, float y) { ShovelerVector2 v = {x, y}; return v; }
-static inline ShovelerVector3 shovelerVector3(float x, float y, float z) { ShovelerVector3 v = {x, y, z}; return v; }
-static inline ShovelerVector4 shovelerVector4(float x, float y, float z, float w) { ShovelerVector4 v = {x, y, z, w}; return v; }
+static inline ShovelerVector2 shovelerVector2(float x, float y) { ShovelerVector2 v = {{x, y}}; return v; }
+static inline ShovelerVector3 shovelerVector3(float x, float y, float z) { ShovelerVector3 v = {{x, y, z}}; return v; }
+static inline ShovelerVector4 shovelerVector4(float x, float y, float z, float w) { ShovelerVector4 v = {{x, y, z, w}}; return v; }
 
 static inline ShovelerMatrix shovelerMatrix(
 	float a11, float a12, float a13, float a14,
@@ -60,11 +60,11 @@ static inline ShovelerMatrix shovelerMatrix(
 	float a31, float a32, float a33, float a34,
 	float a41, float a42, float a43, float a44)
 {
-	ShovelerMatrix m = {
+	ShovelerMatrix m = {{
 		a11, a12, a13, a14,
 		a21, a22, a23, a24,
 		a31, a32, a33, a34,
-		a41, a42, a43, a44};
+		a41, a42, a43, a44}};
 	return m;
 }
 
@@ -95,17 +95,17 @@ static inline ShovelerBoundingBox3 shovelerBoundingBox3(ShovelerVector3 min, Sho
 #define shovelerMatrixGet(MATRIX, ROW, COL) (MATRIX).values[(ROW) * 4 + (COL)]
 #define shovelerMatrixSet(MATRIX, ROW, COL, VALUE) shovelerMatrixGet(MATRIX, ROW, COL) = VALUE
 
-static ShovelerMatrix shovelerMatrixZero = {
-		0, 0, 0, 0,
-		0, 0, 0, 0,
-		0, 0, 0, 0,
-		0, 0, 0, 0};
+static ShovelerMatrix shovelerMatrixZero = {{
+	0, 0, 0, 0,
+	0, 0, 0, 0,
+	0, 0, 0, 0,
+	0, 0, 0, 0}};
 
-static ShovelerMatrix shovelerMatrixIdentity = {
-		1, 0, 0, 0,
-		0, 1, 0, 0,
-		0, 0, 1, 0,
-		0, 0, 0, 1};
+static ShovelerMatrix shovelerMatrixIdentity = {{
+	1, 0, 0, 0,
+	0, 1, 0, 0,
+	0, 0, 1, 0,
+	0, 0, 0, 1}};
 
 static inline ShovelerMatrix shovelerMatrixTranspose(ShovelerMatrix A)
 {
