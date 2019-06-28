@@ -1,14 +1,18 @@
 #include <assert.h> // assert
+#include <limits.h> // UINT_MAX
 #include <stdlib.h> // malloc, free
 #include <string.h> // memcpy, memset
 
 #include "shoveler/image.h"
 
-static int getBorderDistance(int width, int height, int i, int j);
-static int minInt(int a, int b);
+static unsigned int getBorderDistance(unsigned int width, unsigned int height, unsigned int i, unsigned int j);
+static unsigned int minInt(unsigned int a, unsigned int b);
 
-ShovelerImage *shovelerImageCreate(int width, int height, int channels)
+ShovelerImage *shovelerImageCreate(unsigned int width, unsigned int height, unsigned int channels)
 {
+	assert(width <= UINT_MAX / height); // width * height won't overflow
+	assert(height * width <= UINT_MAX / channels); // width * height * channels won't overflow
+
 	ShovelerImage *image = malloc(sizeof(ShovelerImage));
 	image->width = width;
 	image->height = height;
@@ -28,9 +32,9 @@ ShovelerImage *shovelerImageCreateFlippedX(ShovelerImage *input)
 {
 	ShovelerImage *image = shovelerImageCreate(input->width, input->height, input->channels);
 
-	for(int i = 0; i < image->width; i++) {
-		for(int j = 0; j < image->height; j++) {
-			for (int c = 0; c < image->channels; c++) {
+	for(unsigned int i = 0; i < image->width; i++) {
+		for(unsigned int j = 0; j < image->height; j++) {
+			for (unsigned int c = 0; c < image->channels; c++) {
 				shovelerImageGet(image, i, j, c) = shovelerImageGet(input, image->width - i - 1, j, c);
 			}
 		}
@@ -43,9 +47,9 @@ ShovelerImage *shovelerImageCreateFlippedY(ShovelerImage *input)
 {
 	ShovelerImage *image = shovelerImageCreate(input->width, input->height, input->channels);
 
-	for(int i = 0; i < image->width; i++) {
-		for(int j = 0; j < image->height; j++) {
-			for (int c = 0; c < image->channels; c++) {
+	for(unsigned int i = 0; i < image->width; i++) {
+		for(unsigned int j = 0; j < image->height; j++) {
+			for (unsigned int c = 0; c < image->channels; c++) {
 				shovelerImageGet(image, i, j, c) = shovelerImageGet(input, i, image->height - j - 1, c);
 			}
 		}
@@ -58,9 +62,9 @@ ShovelerImage *shovelerImageCreateRotatedClockwise(ShovelerImage *input)
 {
 	ShovelerImage *image = shovelerImageCreate(input->height, input->width, input->channels);
 
-	for(int i = 0; i < image->width; i++) {
-		for(int j = 0; j < image->height; j++) {
-			for (int c = 0; c < image->channels; c++) {
+	for(unsigned int i = 0; i < image->width; i++) {
+		for(unsigned int j = 0; j < image->height; j++) {
+			for (unsigned int c = 0; c < image->channels; c++) {
 				shovelerImageGet(image, j, image->width - i - 1, c) = shovelerImageGet(input, i, j, c);
 			}
 		}
@@ -73,9 +77,9 @@ ShovelerImage *shovelerImageCreateRotatedCounterClockwise(ShovelerImage *input)
 {
 	ShovelerImage *image = shovelerImageCreate(input->height, input->width, input->channels);
 
-	for(int i = 0; i < image->width; i++) {
-		for(int j = 0; j < image->height; j++) {
-			for (int c = 0; c < image->channels; c++) {
+	for(unsigned int i = 0; i < image->width; i++) {
+		for(unsigned int j = 0; j < image->height; j++) {
+			for (unsigned int c = 0; c < image->channels; c++) {
 				shovelerImageGet(image, image->height - j - 1, i, c) = shovelerImageGet(input, i, j, c);
 			}
 		}
@@ -87,7 +91,7 @@ ShovelerImage *shovelerImageCreateRotatedCounterClockwise(ShovelerImage *input)
 ShovelerImage *shovelerImageCreateAnimationTileset(ShovelerImage *input, int shiftAmount)
 {
 	assert(input->width == input->height);
-	int size = input->width;
+	unsigned int size = input->width;
 
 	ShovelerImage *moveImage = shovelerImageCreate(size, size, input->channels);
 	shovelerImageClear(moveImage);
@@ -146,9 +150,9 @@ void shovelerImageClear(ShovelerImage *image)
 
 void shovelerImageSet(ShovelerImage *image, ShovelerColor color, unsigned char alpha)
 {
-	for(int i = 0; i < image->width; i++) {
-		for(int j = 0; j < image->height; j++) {
-			for(int c = 0; c < image->channels; c++) {
+	for(unsigned int i = 0; i < image->width; i++) {
+		for(unsigned int j = 0; j < image->height; j++) {
+			for(unsigned int c = 0; c < image->channels; c++) {
 				unsigned char value;
 				if(c == 0) {
 					value = color.r;
@@ -165,13 +169,13 @@ void shovelerImageSet(ShovelerImage *image, ShovelerColor color, unsigned char a
 	}
 }
 
-void shovelerImageAddFrame(ShovelerImage *image, int size, ShovelerColor color)
+void shovelerImageAddFrame(ShovelerImage *image, unsigned int size, ShovelerColor color)
 {
 	assert(image->channels == 4);
 
-	for(int i = 0; i < image->width; i++) {
-		for(int j = 0; j < image->height; j++) {
-			int borderDistance = getBorderDistance(image->width, image->height, i, j);
+	for(unsigned int i = 0; i < image->width; i++) {
+		for(unsigned int j = 0; j < image->height; j++) {
+			unsigned int borderDistance = getBorderDistance(image->width, image->height, i, j);
 			if(borderDistance < size) {
 				unsigned char alpha = 255.0 * ((double) (size - borderDistance) / size);
 				shovelerImageGet(image, i, j, 0) = color.r;
@@ -185,21 +189,31 @@ void shovelerImageAddFrame(ShovelerImage *image, int size, ShovelerColor color)
 
 void shovelerImageAddSubImage(ShovelerImage *image, int xOffset, int yOffset, ShovelerImage *subImage)
 {
+	assert(xOffset < 0 || UINT_MAX - (unsigned int) xOffset >= subImage->width); // adding xOffset to subImage->width will never overflow
+	assert(yOffset < 0 || UINT_MAX - (unsigned int) yOffset >= subImage->height); // adding yOffset to subImage->height will never overflow
 	assert(image->channels == subImage->channels);
 
-	for(int i = 0; i < subImage->width; i++) {
-		int imageI = xOffset + i;
-		if(imageI < 0 || imageI >= image->width) {
+	for(unsigned int i = 0; i < subImage->width; i++) {
+		if (xOffset < 0 && (unsigned int) -xOffset > i) {
+			continue; // would result in negative imageI
+		}
+
+		unsigned int imageI = xOffset + i;
+		if(imageI >= image->width) {
 			continue;
 		}
 
-		for(int j = 0; j < subImage->height; j++) {
-			int imageJ = yOffset + j;
-			if(imageJ < 0 || imageJ >= image->height) {
+		for(unsigned int j = 0; j < subImage->height; j++) {
+			if (yOffset < 0 && (unsigned int) -yOffset > j) {
+				continue; // would result in negative imageJ
+			}
+
+			unsigned int imageJ = yOffset + j;
+			if(imageJ >= image->height) {
 				continue;
 			}
 
-			for(int c = 0; c < subImage->channels; c++) {
+			for(unsigned int c = 0; c < subImage->channels; c++) {
 				shovelerImageGet(image, imageI, imageJ, c) = shovelerImageGet(subImage, i, j, c);
 			}
 		}
@@ -216,16 +230,19 @@ void shovelerImageFree(ShovelerImage *image)
 	free(image);
 }
 
-static int getBorderDistance(int width, int height, int i, int j)
+static unsigned int getBorderDistance(unsigned int width, unsigned int height, unsigned int i, unsigned int j)
 {
-	int xLow = i;
-	int xHigh = width - 1 - i;
-	int yLow = j;
-	int yHigh = height - 1 - j;
+	assert(i < width);
+	assert(j < height);
+
+	unsigned int xLow = i;
+	unsigned int xHigh = width - 1 - i;
+	unsigned int yLow = j;
+	unsigned int yHigh = height - 1 - j;
 	return minInt(xLow, minInt(xHigh, minInt(yLow, yHigh)));
 }
 
-static int minInt(int a, int b)
+static unsigned int minInt(unsigned int a, unsigned int b)
 {
 	if(a < b) {
 		return a;

@@ -40,43 +40,23 @@ ShovelerImage *shovelerImagePpmRead(const char *filename)
 	ungetc(c, file);
 
 	// read header
-	int width = 0;
-	int height = 0;
-	fscanf(file, "%d %d", &width, &height);
-
-	if(width <= 0) {
-		shovelerLogError("Failed to read PPM image from '%s': parsed invalid width of %d.", filename, width);
-		fclose(file);
-		return NULL;
-	}
-
-	if(height <= 0) {
-		shovelerLogError("Failed to read PPM image from '%s': parsed invalid height of %d.", filename, height);
-		fclose(file);
-		return NULL;
-	}
-
-	int maxValue = 0;
-	fscanf(file, "%d", &maxValue);
-
-	if(maxValue <= 0) {
-		shovelerLogError("Failed to read PPM image from '%s': parsed invalid max value of %d.", filename, maxValue);
-		fclose(file);
-		return NULL;
-	}
+	unsigned int width = 0;
+	unsigned int height = 0;
+	unsigned int maxValue = 0;
+	fscanf(file, "%u %u %u", &width, &height, &maxValue);
 
 	ShovelerImage *image = shovelerImageCreate(width, height, 3);
 
-	for(int y = 0; y < height; y++) {
-		for(int x = 0; x < width; x++) {
-			int r = 0;
-			int g = 0;
-			int b = 0;
-			fscanf(file, "%d", &r);
-			fscanf(file, "%d", &g);
-			fscanf(file, "%d", &b);
+	for(unsigned int y = 0; y < height; y++) {
+		for(unsigned int x = 0; x < width; x++) {
+			unsigned int r = 0;
+			unsigned int g = 0;
+			unsigned int b = 0;
+			fscanf(file, "%u", &r);
+			fscanf(file, "%u", &g);
+			fscanf(file, "%u", &b);
 			if(r > maxValue || g > maxValue || b > maxValue) {
-				shovelerLogError("Failed to read PPM image from '%s': invalid pixel (%d, %d) value of (%d, %d, %d).", filename, x, y, r, g, b);
+				shovelerLogError("Failed to read PPM image from '%s': invalid pixel (%u, %u) value of (%u, %u, %u).", filename, x, y, r, g, b);
 				shovelerImageFree(image);
 				fclose(file);
 				return NULL;
@@ -107,10 +87,10 @@ bool shovelerImagePpmWrite(ShovelerImage *image, const char *filename)
 		return false;
 	}
 
-	fprintf(file, "P3\n# PPM image exported by shoveler\n%d %d\n%d\n", image->width, image->height, UCHAR_MAX);
+	fprintf(file, "P3\n# PPM image exported by shoveler\n%u %u\n%d\n", image->width, image->height, UCHAR_MAX);
 
-	for(int y = 0; y < image->height; y++) {
-		for(int x = 0; x < image->width; x++) {
+	for(unsigned int y = 0; y < image->height; y++) {
+		for(unsigned int x = 0; x < image->width; x++) {
 			unsigned char r = shovelerImageGet(image, x, y, 0);
 			unsigned char g = shovelerImageGet(image, x, y, 1);
 			unsigned char b = shovelerImageGet(image, x, y, 2);
@@ -120,6 +100,6 @@ bool shovelerImagePpmWrite(ShovelerImage *image, const char *filename)
 
 	fclose(file);
 
-	shovelerLogInfo("Successfully wrote PPM image of size (%d, %d) to '%s'.", image->width, image->height, filename);
+	shovelerLogInfo("Successfully wrote PPM image of size (%u, %u) to '%s'.", image->width, image->height, filename);
 	return true;
 }

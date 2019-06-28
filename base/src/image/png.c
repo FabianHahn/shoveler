@@ -1,6 +1,8 @@
 #include <glib.h>
 #include <png.h>
 
+#include <assert.h> // assert
+#include <limits.h> // UINT_MAX
 #include <setjmp.h> // setjmp
 #include <stdio.h> // fread
 #include <stdlib.h> // malloc, free
@@ -76,6 +78,8 @@ ShovelerImage *shovelerImagePngReadBuffer(const unsigned char *buffer, size_t si
 
 bool shovelerImagePngWriteFile(ShovelerImage *image, const char *filename)
 {
+	assert(image->height <= UINT_MAX / sizeof(png_bytep)); // image->height * sizeof(png_bytep) won't overflow
+
 	if(image->channels > 4) {
 		shovelerLogError("Failed to write PNG image to '%s': can only write image with up to 4 channels.", filename);
 		return false;
@@ -126,11 +130,11 @@ bool shovelerImagePngWriteFile(ShovelerImage *image, const char *filename)
 
 	png_bytep *row_pointers = malloc(image->height * sizeof(png_bytep));
 
-	for(int y = 0; y < image->height; y++) {
+	for(unsigned int y = 0; y < image->height; y++) {
 		row_pointers[y] = malloc(image->width * image->channels * sizeof(png_byte));
 
-		for(int x = 0; x < image->width; x++) {
-			for(int c = 0; c < image->channels; c++) {
+		for(unsigned int x = 0; x < image->width; x++) {
+			for(unsigned int c = 0; c < image->channels; c++) {
 				row_pointers[y][image->channels * x + c] = shovelerImageGet(image, x, image->height - y - 1, c);
 			}
 		}
@@ -142,7 +146,7 @@ bool shovelerImagePngWriteFile(ShovelerImage *image, const char *filename)
 		png_destroy_write_struct(&png_ptr, &info_ptr);
 
 		// cleanup memory
-		for(int y = 0; y < image->height; y++) {
+		for(unsigned int y = 0; y < image->height; y++) {
 			free(row_pointers[y]);
 		}
 		free(row_pointers);
@@ -168,7 +172,7 @@ bool shovelerImagePngWriteFile(ShovelerImage *image, const char *filename)
 	fclose(file);
 
 	// Cceanup memory
-	for(int y = 0; y < image->height; y++) {
+	for(unsigned int y = 0; y < image->height; y++) {
 		free(row_pointers[y]);
 	}
 	free(row_pointers);
@@ -328,11 +332,11 @@ static void readMemoryStream(png_structp png, png_bytep outBytes, png_size_t byt
 static ShovelerImage *createImageFromRowPointers(png_uint_32 width, png_uint_32 height, png_uint_32 channels, png_bytep *rowPointers)
 {
 	ShovelerImage *image = shovelerImageCreate(width, height, channels);
-	for(int y = 0; y < height; y++) {
+	for(unsigned int y = 0; y < height; y++) {
 		png_byte *row = rowPointers[y];
-		for(int x = 0; x < width; x++) {
+		for(unsigned int x = 0; x < width; x++) {
 			unsigned char *ptr = &(row[x * channels]);
-			for(int c = 0; c < channels; c++) {
+			for(unsigned int c = 0; c < channels; c++) {
 				shovelerImageGet(image, x, height - y - 1, c) = ptr[c];
 			}
 		}
