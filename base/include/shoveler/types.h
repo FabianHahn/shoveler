@@ -467,6 +467,8 @@ static inline float shovelerCoordinateMap(ShovelerVector3 coordinates, ShovelerC
 			return coordinates.values[2];
 		case SHOVELER_COORDINATE_MAPPING_NEGATIVE_Z:
 			return -coordinates.values[2];
+		default:
+			return 0.0f;
 	}
 }
 
