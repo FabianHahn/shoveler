@@ -16,6 +16,8 @@ ShovelerCollider2 *shovelerColliderChunkCreate(ShovelerChunk *chunk)
 	collider->data = chunk;
 	collider->intersect = intersectCollider;
 	collider->freeData = freeCollider;
+
+	return collider;
 }
 
 static ShovelerCollider2 *intersectCollider(ShovelerCollider2 *collider, const ShovelerBoundingBox2 *object)
