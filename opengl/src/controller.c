@@ -188,7 +188,7 @@ static void keyHandler(ShovelerInput *input, int key, int scancode, int action, 
 
 static void updatePosition(ShovelerController *controller, float dt)
 {
-	ShovelerVector3 moveAmount = {0.0f, 0.0f, 0.0f};
+	ShovelerVector3 moveAmount = shovelerVector3(0.0f, 0.0f, 0.0f);
 	if(!controller->lockMoveX) {
 		if(controller->movingLeft) {
 			moveAmount.values[0] -= controller->moveFactor * dt;
@@ -237,10 +237,9 @@ static void updateTilt(ShovelerController *controller, float dt)
 
 	float tiltAmountX = controller->tiltFactor * (float) cursorDiffX;
 	float tiltAmountY = controller->tiltFactor * (float) cursorDiffY;
-	ShovelerVector2 tiltAmount = {
+	ShovelerVector2 tiltAmount = shovelerVector2(
 		controller->lockTiltX ? 0.0f : tiltAmountX,
-		controller->lockTiltY ? 0.0f : tiltAmountY,
-	};
+		controller->lockTiltY ? 0.0f : tiltAmountY);
 
 	if(tiltAmount.values[0] != 0.0f || tiltAmount.values[1] != 0.0f) {
 		shiftOrientation(controller, tiltAmount);

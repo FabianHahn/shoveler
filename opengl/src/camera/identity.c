@@ -14,7 +14,7 @@ static void freeIdentityCamera(void *identityCameraPointer);
 ShovelerCamera *shovelerCameraIdentityCreate(ShovelerShaderCache *shaderCache)
 {
 	ShovelerCameraIdentity *identityCamera = malloc(sizeof(ShovelerCameraIdentity));
-	shovelerCameraInit(&identityCamera->camera, shaderCache, (ShovelerVector3){0, 0, 0}, identityCamera, updateView, freeIdentityCamera);
+	shovelerCameraInit(&identityCamera->camera, shaderCache, shovelerVector3(0, 0, 0), identityCamera, updateView, freeIdentityCamera);
 	return &identityCamera->camera;
 }
 

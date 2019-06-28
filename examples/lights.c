@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
 	nearestNeighborSampler = shovelerSamplerCreate(false, true, true);
 	interpolatingSampler = shovelerSamplerCreate(true, true, true);
 
-	colorMaterial = shovelerMaterialColorCreate(game->shaderCache, (ShovelerVector3){0.7, 0.7, 0.7});
+	colorMaterial = shovelerMaterialColorCreate(game->shaderCache, shovelerVector3(0.7, 0.7, 0.7));
 
 	ShovelerImage *image = shovelerImageCreate(2, 2, 3);
 	shovelerImageClear(image);
@@ -167,16 +167,16 @@ int main(int argc, char *argv[])
 	shovelerModelUpdateTransformation(rightCubeModel);
 	shovelerSceneAddModel(game->scene, rightCubeModel);
 
-	ShovelerLight *pointlight = shovelerLightPointCreate(game->shaderCache, (ShovelerVector3){0, 0, 0}, 1024, 1024, 1, 0.0f, 80.0f, (ShovelerVector3){1.0f, 1.0f, 1.0f});
+	ShovelerLight *pointlight = shovelerLightPointCreate(game->shaderCache, shovelerVector3(0, 0, 0), 1024, 1024, 1, 0.0f, 80.0f, shovelerVector3(1.0f, 1.0f, 1.0f));
 	shovelerSceneAddLight(game->scene, pointlight);
 
-	ShovelerLight *pointlight2 = shovelerLightPointCreate(game->shaderCache, (ShovelerVector3){-8, -8, -8}, 1024, 1024, 1, 0.0f, 80.0f, (ShovelerVector3){0.1f, 0.1f, 0.1f});
+	ShovelerLight *pointlight2 = shovelerLightPointCreate(game->shaderCache, shovelerVector3(-8, -8, -8), 1024, 1024, 1, 0.0f, 80.0f, shovelerVector3(0.1f, 0.1f, 0.1f));
 	shovelerSceneAddLight(game->scene, pointlight2);
 
 	point = shovelerDrawablePointCreate();
-	particleMaterial = shovelerMaterialParticleCreate(game->shaderCache, (ShovelerVector3){1.0f, 1.0f, 1.0f});
+	particleMaterial = shovelerMaterialParticleCreate(game->shaderCache, shovelerVector3(1.0f, 1.0f, 1.0f));
 	ShovelerModel *pointlightModel = shovelerModelCreate(point, particleMaterial);
-	pointlightModel->scale = (ShovelerVector3){0.5f, 0.5f, 0};
+	pointlightModel->scale = shovelerVector3(0.5f, 0.5f, 0);
 	pointlightModel->castsShadow = false;
 	pointlightModel->emitter = true;
 	shovelerModelUpdateTransformation(pointlightModel);
@@ -184,7 +184,7 @@ int main(int argc, char *argv[])
 
 	ShovelerModel *pointlightModel2 = shovelerModelCreate(point, particleMaterial);
 	pointlightModel2->translation = shovelerLightGetPosition(pointlight2);
-	pointlightModel2->scale = (ShovelerVector3){0.1f, 0.1f, 0};
+	pointlightModel2->scale = shovelerVector3(0.1f, 0.1f, 0);
 	pointlightModel2->castsShadow = false;
 	pointlightModel2->emitter = true;
 	shovelerModelUpdateTransformation(pointlightModel2);
