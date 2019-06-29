@@ -1,0 +1,12 @@
+include(CMakeFindDependencyMacro)
+
+if(SHOVELER_USE_GLIB)
+	find_dependency(glib 2.48 REQUIRED)
+else()
+	find_dependency(fakeglib REQUIRED)
+endif()
+
+if(NOT TARGET shoveler::shoveler_base)
+    include("${CMAKE_CURRENT_LIST_DIR}/shovelerTargets.cmake")
+endif()
+

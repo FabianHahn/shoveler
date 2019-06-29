@@ -140,6 +140,18 @@ target_include_directories(shoveler_opengl
 
 target_link_libraries(shoveler_opengl PUBLIC shoveler_base glad glfw)
 
+if(SHOVELER_INSTALL)
+	install(TARGETS shoveler_opengl
+		EXPORT shoveler-targets
+		LIBRARY DESTINATION lib
+		ARCHIVE DESTINATION lib
+		RUNTIME DESTINATION bin
+		INCLUDES DESTINATION include)
+
+	install(DIRECTORY include/
+		DESTINATION include)
+endif()
+
 if(SHOVELER_BUILD_TESTS)
 	add_executable(shoveler_opengl_test ${SHOVELER_OPENGL_TEST_SRC})
 
