@@ -84,7 +84,7 @@ if(SHOVELER_BUILD_TESTS)
 	target_include_directories(shoveler_base_test
 		PRIVATE src)
 
-	target_link_libraries(shoveler_base_test shoveler::shoveler_base gtest)
+	target_link_libraries(shoveler_base_test shoveler::shoveler_base GTest::gtest)
 	set_property(TARGET shoveler_base_test PROPERTY CXX_STANDARD 11)
 	add_test(shoveler_base shoveler_base_test)
 endif()

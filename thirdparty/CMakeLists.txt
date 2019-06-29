@@ -4,6 +4,11 @@ endif()
 
 add_subdirectory(glad)
 add_subdirectory(glfw)
-add_subdirectory(googletest)
+
+if(SHOVELER_VENDOR_GOOGLETEST)
+	add_subdirectory(googletest)
+	add_library(GTest::gtest ALIAS gtest)
+endif()
+
 add_subdirectory(zlib)
 add_subdirectory(libpng)

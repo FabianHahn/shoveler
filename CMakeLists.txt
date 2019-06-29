@@ -9,6 +9,7 @@ option(SHOVELER_BUILD_TESTS "Build the shoveler tests" ON)
 option(SHOVELER_BUILD_EXAMPLES "Build example binaries using shoveler." ON)
 option(SHOVELER_USE_GLIB "Link against system glib instead of bundled fakeglib." OFF)
 option(SHOVELER_VENDOR_FAKEGLIB "Vendor the fakeglib thirdparty library." ON)
+option(SHOVELER_VENDOR_GOOGLETEST "Vendor the googletest thirdparty library" ON)
 
 if(SHOVELER_USE_GLIB)
 	find_package(glib 2.48 REQUIRED)

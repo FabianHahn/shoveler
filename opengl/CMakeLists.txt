@@ -146,7 +146,7 @@ if(SHOVELER_BUILD_TESTS)
 	target_include_directories(shoveler_opengl_test
 		PRIVATE src)
 
-	target_link_libraries(shoveler_opengl_test shoveler::shoveler_opengl gtest)
+	target_link_libraries(shoveler_opengl_test shoveler::shoveler_opengl GTest::gtest)
 	set_property(TARGET shoveler_opengl_test PROPERTY CXX_STANDARD 11)
 	add_test(shoveler_opengl shoveler_opengl_test)
 endif()
