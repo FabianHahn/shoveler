@@ -22,6 +22,7 @@ set(FAKEGLIB_LIB_SRC
 
 if(FAKEGLIB_BUILD_SHARED)
 	add_library(fakeglib SHARED ${FAKEGLIB_LIB_SRC})
+	add_library(fakeglib::fakeglib ALIAS fakeglib)
 	set_property(TARGET fakeglib PROPERTY CXX_STANDARD 11)
 	
 	generate_export_header(fakeglib
@@ -36,12 +37,22 @@ if(FAKEGLIB_BUILD_SHARED)
 	target_include_directories(fakeglib
 		PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 		PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
-	    PUBLIC $<INSTALL_INTERFACE:include>
-	    PRIVATE src)
+		PUBLIC $<INSTALL_INTERFACE:include>
+		PRIVATE src)
+
+	if(FAKEGLIB_INSTALL)
+		install(TARGETS fakeglib
+			EXPORT fakeglib-targets
+			LIBRARY DESTINATION lib
+			ARCHIVE DESTINATION lib
+			RUNTIME DESTINATION bin
+			INCLUDES DESTINATION include)
+	endif()
 endif()
 
 if(FAKEGLIB_BUILD_STATIC)
 	add_library(fakeglibstatic STATIC ${FAKEGLIB_LIB_SRC})
+	add_library(fakeglib::fakeglibstatic ALIAS fakeglibstatic)
 	set_property(TARGET fakeglibstatic PROPERTY CXX_STANDARD 11)
 	target_compile_definitions(fakeglibstatic PUBLIC FAKEGLIB_STATIC)
 	
@@ -57,6 +68,21 @@ if(FAKEGLIB_BUILD_STATIC)
 	target_include_directories(fakeglibstatic
 		PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 		PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
-	    PUBLIC $<INSTALL_INTERFACE:include>
-	    PRIVATE src)
+		PUBLIC $<INSTALL_INTERFACE:include>
+		PRIVATE src)
+
+	if(FAKEGLIB_INSTALL)
+		install(TARGETS fakeglibstatic
+			EXPORT fakeglib-targets
+			LIBRARY DESTINATION lib
+			ARCHIVE DESTINATION lib
+			RUNTIME DESTINATION bin
+			INCLUDES DESTINATION include)
+	endif()
 endif()
+
+if(FAKEGLIB_INSTALL)
+	install(DIRECTORY include/
+		DESTINATION include)
+endif()
+
