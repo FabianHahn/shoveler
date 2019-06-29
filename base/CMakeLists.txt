@@ -58,23 +58,24 @@ set(SHOVELER_BASE_TEST_SRC
 
 include_directories(${ZLIB_INCLUDE_DIR})
 add_library(shoveler_base ${SHOVELER_BASE_SRC})
+add_library(shoveler::shoveler_base ALIAS shoveler_base)
 set_property(TARGET shoveler_base PROPERTY C_STANDARD 99)
 
 target_include_directories(shoveler_base
 	PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    PUBLIC $<INSTALL_INTERFACE:include>
-    PRIVATE src)
+	PUBLIC $<INSTALL_INTERFACE:include>
+	PRIVATE src)
 
-target_link_libraries(shoveler_base png_static zlibstatic)
+target_link_libraries(shoveler_base PRIVATE png_static zlibstatic)
 
 if(SHOVELER_USE_GLIB)
-	target_link_libraries(shoveler_base glib)
+	target_link_libraries(shoveler_base PUBLIC glib::glib)
 else()
-	target_link_libraries(shoveler_base fakeglibstatic)
+	target_link_libraries(shoveler_base PUBLIC fakeglib::fakeglibstatic)
 endif()
 
 if(UNIX)
-	target_link_libraries(shoveler_base m)
+	target_link_libraries(shoveler_base PRIVATE m)
 endif()
 
 if(SHOVELER_BUILD_TESTS)
@@ -83,7 +84,7 @@ if(SHOVELER_BUILD_TESTS)
 	target_include_directories(shoveler_base_test
 		PRIVATE src)
 
-	target_link_libraries(shoveler_base_test shoveler_base gtest)
+	target_link_libraries(shoveler_base_test shoveler::shoveler_base gtest)
 	set_property(TARGET shoveler_base_test PROPERTY CXX_STANDARD 11)
 	add_test(shoveler_base shoveler_base_test)
 endif()

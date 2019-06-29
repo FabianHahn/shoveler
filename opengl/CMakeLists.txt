@@ -130,14 +130,15 @@ set(SHOVELER_OPENGL_TEST_SRC
 )
 
 add_library(shoveler_opengl ${SHOVELER_OPENGL_SRC})
+add_library(shoveler::shoveler_opengl ALIAS shoveler_opengl)
 set_property(TARGET shoveler_opengl PROPERTY C_STANDARD 99)
 
 target_include_directories(shoveler_opengl
 	PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    PUBLIC $<INSTALL_INTERFACE:include>
-    PRIVATE src)
+	PUBLIC $<INSTALL_INTERFACE:include>
+	PRIVATE src)
 
-target_link_libraries(shoveler_opengl shoveler_base glad glfw)
+target_link_libraries(shoveler_opengl PUBLIC shoveler_base glad glfw)
 
 if(SHOVELER_BUILD_TESTS)
 	add_executable(shoveler_opengl_test ${SHOVELER_OPENGL_TEST_SRC})
@@ -145,7 +146,7 @@ if(SHOVELER_BUILD_TESTS)
 	target_include_directories(shoveler_opengl_test
 		PRIVATE src)
 
-	target_link_libraries(shoveler_opengl_test shoveler_opengl gtest)
+	target_link_libraries(shoveler_opengl_test shoveler::shoveler_opengl gtest)
 	set_property(TARGET shoveler_opengl_test PROPERTY CXX_STANDARD 11)
 	add_test(shoveler_opengl shoveler_opengl_test)
 endif()
