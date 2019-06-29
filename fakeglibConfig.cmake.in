@@ -1,0 +1,6 @@
+include(CMakeFindDependencyMacro)
+
+if(NOT TARGET fakeglib::fakeglib)
+    include("fakeglibTargets.cmake")
+endif()
+
