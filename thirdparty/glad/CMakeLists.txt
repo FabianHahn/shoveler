@@ -11,3 +11,14 @@ target_include_directories(glad
 	PUBLIC $<INSTALL_INTERFACE:include>
 	PRIVATE src)
 
+if(SHOVELER_INSTALL)
+	install(TARGETS glad
+		EXPORT shoveler-targets
+		LIBRARY DESTINATION lib
+		ARCHIVE DESTINATION lib
+		RUNTIME DESTINATION bin
+		INCLUDES DESTINATION include)
+
+	install(DIRECTORY include/
+		DESTINATION include)
+endif()

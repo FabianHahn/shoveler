@@ -77,6 +77,18 @@ if(UNIX)
 	target_link_libraries(shoveler_base PRIVATE m)
 endif()
 
+if(SHOVELER_INSTALL)
+	install(TARGETS shoveler_base
+		EXPORT shoveler-targets
+		LIBRARY DESTINATION lib
+		ARCHIVE DESTINATION lib
+		RUNTIME DESTINATION bin
+		INCLUDES DESTINATION include)
+
+	install(DIRECTORY include/
+		DESTINATION include)
+endif()
+
 if(SHOVELER_BUILD_TESTS)
 	add_executable(shoveler_base_test ${SHOVELER_BASE_TEST_SRC})
 

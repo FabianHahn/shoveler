@@ -38,5 +38,19 @@ if(SHOVELER_BUILD_EXAMPLES)
 	add_executable(shoveler_example_view ${SHOVELER_EXAMPLE_VIEW_SRC})
 	set_property(TARGET shoveler_example_view PROPERTY C_STANDARD 99)
 	target_link_libraries(shoveler_example_view shoveler::shoveler_opengl)
+
+	if(SHOVELER_INSTALL)
+		install(TARGETS
+				shoveler_example_canvas
+				shoveler_example_chunk
+				shoveler_example_lights
+				shoveler_example_tiles
+				shoveler_example_view
+			EXPORT shoveler-targets
+			LIBRARY DESTINATION lib
+			ARCHIVE DESTINATION lib
+			RUNTIME DESTINATION bin
+			INCLUDES DESTINATION include)
+	endif()
 endif()
 
