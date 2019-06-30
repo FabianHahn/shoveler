@@ -56,7 +56,6 @@ set(SHOVELER_BASE_TEST_SRC
 	src/view_test.cpp
 )
 
-include_directories(${ZLIB_INCLUDE_DIR})
 add_library(shoveler_base ${SHOVELER_BASE_SRC})
 add_library(shoveler::shoveler_base ALIAS shoveler_base)
 set_property(TARGET shoveler_base PROPERTY C_STANDARD 99)
@@ -66,7 +65,7 @@ target_include_directories(shoveler_base
 	PUBLIC $<INSTALL_INTERFACE:include>
 	PRIVATE src)
 
-target_link_libraries(shoveler_base PRIVATE png_static zlibstatic)
+target_link_libraries(shoveler_base PRIVATE PNG::PNG ZLIB::ZLIB)
 
 if(SHOVELER_USE_GLIB)
 	target_link_libraries(shoveler_base PUBLIC glib::glib)
