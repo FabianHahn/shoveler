@@ -3,7 +3,10 @@ if(SHOVELER_VENDOR_FAKEGLIB)
 endif()
 
 add_subdirectory(glad)
-add_subdirectory(glfw)
+
+if(SHOVELER_VENDOR_GLFW)
+	add_subdirectory(glfw)
+endif()
 
 if(SHOVELER_VENDOR_GOOGLETEST)
 	add_subdirectory(googletest)
