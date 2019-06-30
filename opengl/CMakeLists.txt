@@ -138,7 +138,7 @@ target_include_directories(shoveler_opengl
 	PUBLIC $<INSTALL_INTERFACE:include>
 	PRIVATE src)
 
-target_link_libraries(shoveler_opengl PUBLIC shoveler_base glad glfw)
+target_link_libraries(shoveler_opengl PUBLIC shoveler_base glad::glad glfw)
 
 if(SHOVELER_BUILD_TESTS)
 	add_executable(shoveler_opengl_test ${SHOVELER_OPENGL_TEST_SRC})
