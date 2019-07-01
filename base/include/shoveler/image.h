@@ -3,7 +3,7 @@
 
 #include <shoveler/color.h>
 
-typedef struct {
+typedef struct ShovelerImageStruct {
 	unsigned int width;
 	unsigned int height;
 	unsigned int channels;
