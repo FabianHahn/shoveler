@@ -9,6 +9,7 @@ set(SHOVELER_BASE_SRC
 	src/compression.c
 	src/executor.c
 	src/file.c
+	src/font.c
 	src/frustum.c
 	src/image.c
 	src/log.c
@@ -29,6 +30,7 @@ set(SHOVELER_BASE_SRC
 	include/shoveler/constants.h
 	include/shoveler/executor.h
 	include/shoveler/file.h
+	include/shoveler/font.h
 	include/shoveler/frustum.h
 	include/shoveler/hash.h
 	include/shoveler/image.h
@@ -65,7 +67,7 @@ target_include_directories(shoveler_base
 	PUBLIC $<INSTALL_INTERFACE:include>
 	PRIVATE src)
 
-target_link_libraries(shoveler_base PRIVATE PNG::PNG ZLIB::ZLIB)
+target_link_libraries(shoveler_base PUBLIC Freetype::Freetype PRIVATE PNG::PNG ZLIB::ZLIB)
 
 if(SHOVELER_USE_GLIB)
 	target_link_libraries(shoveler_base PUBLIC glib::glib)
