@@ -10,6 +10,7 @@ set(SHOVELER_BASE_SRC
 	src/executor.c
 	src/file.c
 	src/font.c
+	src/font_atlas.c
 	src/frustum.c
 	src/image.c
 	src/log.c
@@ -31,6 +32,7 @@ set(SHOVELER_BASE_SRC
 	include/shoveler/executor.h
 	include/shoveler/file.h
 	include/shoveler/font.h
+	include/shoveler/font_atlas.h
 	include/shoveler/frustum.h
 	include/shoveler/hash.h
 	include/shoveler/image.h
