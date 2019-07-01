@@ -27,6 +27,10 @@ if(SHOVELER_BUILD_EXAMPLES)
 	set_property(TARGET shoveler_example_chunk PROPERTY C_STANDARD 99)
 	target_link_libraries(shoveler_example_chunk shoveler::shoveler_opengl)
 
+	add_executable(shoveler_example_font font.c)
+	set_property(TARGET shoveler_example_font PROPERTY C_STANDARD 99)
+	target_link_libraries(shoveler_example_font shoveler::shoveler_base)
+
 	add_executable(shoveler_example_lights ${SHOVELER_EXAMPLE_LIGHTS_SRC})
 	set_property(TARGET shoveler_example_lights PROPERTY C_STANDARD 99)
 	target_link_libraries(shoveler_example_lights shoveler::shoveler_opengl)
@@ -43,6 +47,7 @@ if(SHOVELER_BUILD_EXAMPLES)
 		install(TARGETS
 				shoveler_example_canvas
 				shoveler_example_chunk
+				shoveler_example_font
 				shoveler_example_lights
 				shoveler_example_tiles
 				shoveler_example_view
