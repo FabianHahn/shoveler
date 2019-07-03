@@ -7,7 +7,10 @@
 #include "shoveler/log.h"
 #include "shoveler/image.h"
 
+static void insertGlyph(ShovelerFontAtlas *fontAtlas, FT_Bitmap bitmap);
+static void growImage(ShovelerFontAtlas *fontAtlas);
 static void addBitmapToImage(ShovelerImage *image, FT_Bitmap bitmap, unsigned bottomLeftX, unsigned bottomLeftY);
+static ShovelerFontAtlasRectangle *allocateRectangle(unsigned int minX, unsigned int minY, unsigned int width, unsigned int height);
 
 ShovelerFontAtlas *shovelerFontAtlasCreate(ShovelerFont *font, unsigned int fontSize)
 {
@@ -26,10 +29,19 @@ ShovelerFontAtlas *shovelerFontAtlasCreate(ShovelerFont *font, unsigned int font
 	ShovelerFontAtlas *fontAtlas = malloc(sizeof(ShovelerFontAtlas));
 	fontAtlas->font = font;
 	fontAtlas->fontSize = fontSize;
-	fontAtlas->image = shovelerImageCreate(font->face->glyph->bitmap.width, font->face->glyph->bitmap.rows, 1);
+	fontAtlas->image = shovelerImageCreate(64, 64, 1);
 	shovelerImageClear(fontAtlas->image);
 
-	addBitmapToImage(fontAtlas->image, font->face->glyph->bitmap, 0, 0);
+	fontAtlas->skylineEdges = g_queue_new();
+	g_queue_push_tail(fontAtlas->skylineEdges, allocateRectangle(0, 0, 64, 0));
+
+	insertGlyph(fontAtlas, font->face->glyph->bitmap);
+	FT_Load_Char(font->face, 'a', FT_LOAD_RENDER);
+	insertGlyph(fontAtlas, font->face->glyph->bitmap);
+	FT_Load_Char(font->face, 'b', FT_LOAD_RENDER);
+	insertGlyph(fontAtlas, font->face->glyph->bitmap);
+	FT_Load_Char(font->face, 'c', FT_LOAD_RENDER);
+	insertGlyph(fontAtlas, font->face->glyph->bitmap);
 
 	return fontAtlas;
 }
@@ -40,9 +52,88 @@ void shovelerFontAtlasFree(ShovelerFontAtlas *fontAtlas)
 		return;
 	}
 
+	g_queue_free_full(fontAtlas->skylineEdges, free);
 	shovelerImageFree(fontAtlas->image);
 
 	free(fontAtlas);
+}
+
+static void insertGlyph(ShovelerFontAtlas *fontAtlas, FT_Bitmap bitmap)
+{
+	GList *bestStartSkylineEdgeIter = NULL;
+	GList *bestEndSkylineEdgeIter = NULL;
+	unsigned int bestHeight = UINT_MAX;
+	bool isRotated = false;
+	for(GList *iter = fontAtlas->skylineEdges->head; iter != NULL; iter = iter->next) {
+		ShovelerFontAtlasRectangle *skylineEdge = iter->data;
+
+		// try to put the bitmap on top of this skyline edge
+		unsigned int candidateHeight = skylineEdge->height + bitmap.rows;
+		if(candidateHeight < bestHeight && candidateHeight <= fontAtlas->image->height) {
+			// the bitmap could be wider than this skyline edge, so we might have to extend across a few more as long as their height is lower
+			GList *endIter = iter;
+			unsigned int currentEdgeWidth = skylineEdge->width;
+			while(currentEdgeWidth < bitmap.width && endIter != NULL) {
+				endIter = endIter->next;
+				ShovelerFontAtlasRectangle *additionalSkylineEdge = endIter->data;
+
+				if(additionalSkylineEdge->height > skylineEdge->height) {
+					// this skyline edge is higher than the one we started with, but the bitmap doesn't fit yet - abort
+					break;
+				}
+
+				currentEdgeWidth += additionalSkylineEdge->width;
+			}
+
+			if(currentEdgeWidth >= bitmap.width) {
+				// we could put the bitmap here, and this is the best we've found so far
+				bestStartSkylineEdgeIter = iter;
+				bestEndSkylineEdgeIter = endIter;
+				bestHeight = candidateHeight;
+				isRotated = false;
+			}
+		}
+
+		// todo try rotated as well
+	}
+
+	if(bestStartSkylineEdgeIter == NULL) {
+		// doesn't fit, grow and retry
+		growImage(fontAtlas);
+		// insertGlyph(fontAtlas, bitmap);
+		return;
+	}
+
+	ShovelerFontAtlasRectangle *bestStartSkylineEdge = bestStartSkylineEdgeIter->data;
+
+	// place the bitmap here
+	addBitmapToImage(fontAtlas->image, bitmap, bestStartSkylineEdge->minX, bestStartSkylineEdge->height);
+	
+	GList *currentSkylineEdgeIter = bestStartSkylineEdgeIter;
+	unsigned int remainingWidth = bitmap.width;
+	for(GList *iter = bestStartSkylineEdgeIter; iter != bestEndSkylineEdgeIter; iter = iter->next) {
+		ShovelerFontAtlasRectangle *currentSkylineEdge = iter->data;
+
+		// lift it up to the new height
+		currentSkylineEdge->height = bestHeight;
+
+		// update remaining width
+		remainingWidth -= currentSkylineEdge->width;
+	}
+
+	// split the last edge into two
+	ShovelerFontAtlasRectangle *bestEndSkylineEdge = bestEndSkylineEdgeIter->data;
+	
+	ShovelerFontAtlasRectangle* splitEndSkylineEdge = allocateRectangle(bestEndSkylineEdge->minX + remainingWidth, 0, bestEndSkylineEdge->width - remainingWidth, bestEndSkylineEdge->height);
+	g_queue_insert_after(fontAtlas->skylineEdges, bestEndSkylineEdgeIter, splitEndSkylineEdge);
+
+	bestEndSkylineEdge->width = remainingWidth;
+	bestEndSkylineEdge->height = bestHeight;
+}
+
+static void growImage(ShovelerFontAtlas *fontAtlas)
+{
+
 }
 
 static void addBitmapToImage(ShovelerImage *image, FT_Bitmap bitmap, unsigned bottomLeftX, unsigned bottomLeftY)
@@ -67,4 +158,14 @@ static void addBitmapToImage(ShovelerImage *image, FT_Bitmap bitmap, unsigned bo
 			shovelerImageGet(image, imageX, imageY, 0) = bitmap.buffer[(bitmap.rows - bitmapY - 1) * bitmap.pitch + bitmapX];
 		}
 	}
+}
+
+static ShovelerFontAtlasRectangle *allocateRectangle(unsigned int minX, unsigned int minY, unsigned int width, unsigned int height)
+{
+	ShovelerFontAtlasRectangle *rectangle = malloc(sizeof(ShovelerFontAtlasRectangle));
+	rectangle->minX = minX;
+	rectangle->minY = minY;
+	rectangle->width = width;
+	rectangle->height = height;
+	return rectangle;
 }
