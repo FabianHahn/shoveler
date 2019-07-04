@@ -8,12 +8,11 @@
 typedef struct ShovelerFontStruct ShovelerFont; // forward declaration: font.h
 typedef struct ShovelerImageStruct ShovelerImage; // forward declaration: image.h
 
-typedef struct ShovelerFontAtlasRectangleStruct {
+typedef struct ShovelerFontAtlasSkylineEdgeStruct {
 	unsigned int minX;
-	unsigned int minY;
 	unsigned int width;
 	unsigned int height;
-} ShovelerFontAtlasRectangle;
+} ShovelerFontAtlasSkylineEdge;
 
 typedef struct ShovelerFontAtlasStruct {
 	ShovelerFont *font;
