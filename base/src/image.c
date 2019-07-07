@@ -10,6 +10,9 @@ static unsigned int minInt(unsigned int a, unsigned int b);
 
 ShovelerImage *shovelerImageCreate(unsigned int width, unsigned int height, unsigned int channels)
 {
+	assert(width > 0);
+	assert(height > 0);
+	assert(channels > 0);
 	assert(width <= UINT_MAX / height); // width * height won't overflow
 	assert(height * width <= UINT_MAX / channels); // width * height * channels won't overflow
 
