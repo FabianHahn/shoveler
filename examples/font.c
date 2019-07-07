@@ -24,6 +24,20 @@ int main(int argc, char *argv[])
 	}
 
 	ShovelerFontAtlas *fontAtlas = shovelerFontAtlasCreate(font, 48);
+
+	for(char c = 'a'; c <= 'z'; c++) {
+		shovelerFontAtlasGetGlyph(fontAtlas, c);
+	}
+
+	for(char c = 'A'; c <= 'Z'; c++) {
+		shovelerFontAtlasGetGlyph(fontAtlas, c);
+	}
+
+	for(char c = '0'; c <= '9'; c++) {
+		shovelerFontAtlasGetGlyph(fontAtlas, c);
+	}
+
+	shovelerFontAtlasValidateState(fontAtlas);
 	shovelerImagePngWriteFile(fontAtlas->image, "atlas.png");
 
 	shovelerFontAtlasFree(fontAtlas);
