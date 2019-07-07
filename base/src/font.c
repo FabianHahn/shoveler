@@ -40,6 +40,7 @@ ShovelerFont *shovelerFontsLoadFont(ShovelerFonts *fonts, const char *name, cons
 	font->fonts = fonts;
 	font->name = strdup(name);
 	font->face = face;
+	g_hash_table_insert(fonts->fonts, font->name, font);
 
 	return font;
 }
