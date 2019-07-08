@@ -37,6 +37,7 @@ set(SHOVELER_OPENGL_SRC
 	src/canvas.c
 	src/chunk.c
 	src/controller.c
+	src/font_atlas_texture.c
 	src/framebuffer.c
 	src/game.c
 	src/global.c
@@ -100,6 +101,7 @@ set(SHOVELER_OPENGL_SRC
 	include/shoveler/controller.h
 	include/shoveler/drawable.h
 	include/shoveler/filter.h
+	include/shoveler/font_atlas_texture.h
 	include/shoveler/framebuffer.h
 	include/shoveler/game.h
 	include/shoveler/global.h
