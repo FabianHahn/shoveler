@@ -16,6 +16,7 @@ set(SHOVELER_OPENGL_SRC
 	src/material/depth_texture_gaussian_filter.c
 	src/material/particle.c
 	src/material/screenspace_texture.c
+	src/material/text.c
 	src/material/texture.c
 	src/material/tile_sprite.c
 	src/material/tilemap.c
@@ -75,6 +76,7 @@ set(SHOVELER_OPENGL_SRC
 	include/shoveler/material/depth_texture_gaussian_filter.h
 	include/shoveler/material/particle.h
 	include/shoveler/material/screenspace_texture.h
+	include/shoveler/material/text.h
 	include/shoveler/material/texture.h
 	include/shoveler/material/tile_sprite.h
 	include/shoveler/material/tilemap.h
