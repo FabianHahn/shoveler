@@ -53,6 +53,9 @@ ShovelerFontAtlasGlyph *shovelerFontAtlasGetGlyph(ShovelerFontAtlas *fontAtlas, 
 	glyph->index = glyphIndex;
 	glyph->width = fontAtlas->font->face->glyph->bitmap.width;
 	glyph->height = fontAtlas->font->face->glyph->bitmap.rows;
+	glyph->bearingX = fontAtlas->font->face->glyph->bitmap_left;
+	glyph->bearingY = fontAtlas->font->face->glyph->bitmap_top;
+	glyph->advance = fontAtlas->font->face->glyph->advance.x;
 	insertGlyph(fontAtlas, fontAtlas->font->face->glyph->bitmap, &glyph->minX, &glyph->minY, &glyph->isRotated);
 
 	g_hash_table_insert(fontAtlas->glyphs, &glyph->index, glyph);

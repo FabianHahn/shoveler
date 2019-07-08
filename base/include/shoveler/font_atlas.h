@@ -20,6 +20,9 @@ typedef struct ShovelerFontAtlasGlyphStruct {
 	unsigned int minY;
 	unsigned int width;
 	unsigned int height;
+	unsigned int bearingX;
+	unsigned int bearingY;
+	unsigned int advance;
 	bool isRotated;
 } ShovelerFontAtlasGlyph;
 
