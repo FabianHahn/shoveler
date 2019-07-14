@@ -1,6 +1,7 @@
 #include <stdlib.h> // malloc, free
 
 #include "shoveler/material/canvas.h"
+#include "shoveler/material/text.h"
 #include "shoveler/material/tile_sprite.h"
 #include "shoveler/canvas.h"
 #include "shoveler/light.h"
@@ -11,6 +12,7 @@
 
 typedef struct {
 	ShovelerMaterial *material;
+	ShovelerMaterial *textMaterial;
 	ShovelerMaterial *tileSpriteMaterial;
 	ShovelerCanvas *activeCanvas;
 	ShovelerVector2 activeRegionPosition;
@@ -27,10 +29,14 @@ ShovelerMaterial *shovelerMaterialCanvasCreate(ShovelerShaderCache *shaderCache)
 	materialData->material->data = materialData;
 	materialData->material->render = render;
 	materialData->material->freeData = freeTilemap;
+	materialData->textMaterial = shovelerMaterialTextCreate(shaderCache);
 	materialData->tileSpriteMaterial = shovelerMaterialTileSpriteCreate(shaderCache);
 	materialData->activeCanvas = NULL;
 	materialData->activeRegionPosition = shovelerVector2(0.0f, 0.0f);
 	materialData->activeRegionSize = shovelerVector2(1.0f, 1.0f);
+
+	shovelerUniformMapInsert(materialData->textMaterial->uniforms, "regionPosition", shovelerUniformCreateVector2Pointer(&materialData->activeRegionPosition));
+	shovelerUniformMapInsert(materialData->textMaterial->uniforms, "regionSize", shovelerUniformCreateVector2Pointer(&materialData->activeRegionSize));
 
 	shovelerUniformMapInsert(materialData->tileSpriteMaterial->uniforms, "regionPosition", shovelerUniformCreateVector2Pointer(&materialData->activeRegionPosition));
 	shovelerUniformMapInsert(materialData->tileSpriteMaterial->uniforms, "regionSize", shovelerUniformCreateVector2Pointer(&materialData->activeRegionSize));
@@ -51,6 +57,12 @@ void shovelerMaterialCanvasSetActiveRegion(ShovelerMaterial *material, ShovelerV
 	materialData->activeRegionSize = size;
 }
 
+ShovelerMaterial *shovelerMaterialCanvasGetTextMaterial(ShovelerMaterial *material)
+{
+	MaterialData *materialData = material->data;
+	return materialData->textMaterial;
+}
+
 ShovelerMaterial *shovelerMaterialCanvasGetTileSpriteMaterial(ShovelerMaterial *material)
 {
 	MaterialData *materialData = material->data;
@@ -66,7 +78,7 @@ static bool render(ShovelerMaterial *material, ShovelerScene *scene, ShovelerCam
 		return false;
 	}
 
-	return shovelerCanvasRender(materialData->activeCanvas, materialData->tileSpriteMaterial, scene, camera, light, model, renderState);
+	return shovelerCanvasRender(materialData->activeCanvas, materialData->textMaterial, materialData->tileSpriteMaterial, scene, camera, light, model, renderState);
 }
 
 static void freeTilemap(ShovelerMaterial *material)
@@ -74,5 +86,6 @@ static void freeTilemap(ShovelerMaterial *material)
 	MaterialData *materialData = material->data;
 
 	shovelerMaterialFree(materialData->tileSpriteMaterial);
+	shovelerMaterialFree(materialData->textMaterial);
 	free(materialData);
 }
