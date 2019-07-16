@@ -29,6 +29,7 @@ typedef struct ShovelerFontAtlasGlyphStruct {
 typedef struct ShovelerFontAtlasStruct {
 	ShovelerFont *font;
 	unsigned int fontSize;
+	unsigned int padding;
 	ShovelerImage *image;
 	/** list of (ShovelerFontAtlasRectangle *) representing rectangles above the skyline */
 	GQueue *skylineEdges;
@@ -36,7 +37,7 @@ typedef struct ShovelerFontAtlasStruct {
 	GHashTable *glyphs;
 } ShovelerFontAtlas;
 
-ShovelerFontAtlas *shovelerFontAtlasCreate(ShovelerFont *font, unsigned int fontSize);
+ShovelerFontAtlas *shovelerFontAtlasCreate(ShovelerFont *font, unsigned int fontSize, unsigned int padding);
 ShovelerFontAtlasGlyph *shovelerFontAtlasGetGlyph(ShovelerFontAtlas *fontAtlas, uint32_t codePoint);
 void shovelerFontAtlasValidateState(ShovelerFontAtlas *fontAtlas);
 void shovelerFontAtlasFree(ShovelerFontAtlas *fontAtlas);

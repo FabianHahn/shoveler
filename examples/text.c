@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
 
 	ShovelerCanvas *canvas = shovelerCanvasCreate();
 
-	ShovelerFontAtlas *fontAtlas = shovelerFontAtlasCreate(font, 48);
+	ShovelerFontAtlas *fontAtlas = shovelerFontAtlasCreate(font, 48, 1);
 	ShovelerFontAtlasTexture *fontAtlasTexture = shovelerFontAtlasTextureCreate(fontAtlas);
 
 	ShovelerCanvasTextSprite textSprite;

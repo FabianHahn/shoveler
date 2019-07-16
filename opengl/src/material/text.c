@@ -172,7 +172,7 @@ ShovelerMaterial *shovelerMaterialTextCreate(ShovelerShaderCache *shaderCache)
 	materialData->material->data = materialData;
 	materialData->material->render = render;
 	materialData->material->freeData = freeMaterialData;
-	materialData->sampler = shovelerSamplerCreate(false, false, false);
+	materialData->sampler = shovelerSamplerCreate(true, false, false);
 	materialData->activeFontAtlasTexture = NULL;
 	materialData->activeTexture = NULL;
 	materialData->activeFontSize = 0;

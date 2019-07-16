@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	ShovelerFontAtlas *fontAtlas = shovelerFontAtlasCreate(font, 48);
+	ShovelerFontAtlas *fontAtlas = shovelerFontAtlasCreate(font, 48, 1);
 
 	for(char c = 'a'; c <= 'z'; c++) {
 		shovelerFontAtlasGetGlyph(fontAtlas, c);
