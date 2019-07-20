@@ -7,7 +7,7 @@
 typedef struct ShovelerFontAtlasTextureStruct ShovelerFontAtlasTexture; // forward declaration: font_atlas_texture.h
 typedef struct ShovelerShaderCacheStruct ShovelerShaderCache; // forward declaration: shader_cache.h
 
-ShovelerMaterial *shovelerMaterialTextCreate(ShovelerShaderCache *shaderCache);
+ShovelerMaterial *shovelerMaterialTextCreate(ShovelerShaderCache *shaderCache, bool screenspace);
 void shovelerMaterialTextSetActiveFontAtlasTexture(ShovelerMaterial *material, ShovelerFontAtlasTexture *fontAtlasTexture);
 void shovelerMaterialTextSetActiveText(ShovelerMaterial *material, const char *text, ShovelerVector2 corner, float size);
 

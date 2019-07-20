@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
 	animation = shovelerTileSpriteAnimationCreate(&characterSprite, 0.1f);
 	animation->moveAmountThreshold = 0.25f;
 
-	ShovelerMaterial *canvasMaterial = shovelerMaterialCanvasCreate(game->shaderCache);
+	ShovelerMaterial *canvasMaterial = shovelerMaterialCanvasCreate(game->shaderCache, /* screenspace */ false);
 	shovelerMaterialCanvasSetActive(canvasMaterial, canvas);
 	shovelerMaterialCanvasSetActiveRegion(canvasMaterial, shovelerVector2(0.0f, 0.0f), shovelerVector2(1.0f, 1.0f));
 	ShovelerDrawable *quad = shovelerDrawableQuadCreate();

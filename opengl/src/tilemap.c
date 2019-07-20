@@ -91,7 +91,9 @@ bool shovelerTilemapRender(ShovelerTilemap *tilemap, ShovelerMaterial *material,
 			return false;
 		}
 
-		shovelerRenderStateEnableDepthTest(renderState, GL_EQUAL);
+		if(!material->screenspace) {
+			shovelerRenderStateEnableDepthTest(renderState, GL_EQUAL);
+		}
 	}
 
 	return true;

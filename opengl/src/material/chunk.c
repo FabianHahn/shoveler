@@ -20,15 +20,15 @@ typedef struct {
 static bool render(ShovelerMaterial *material, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerRenderState *renderState);
 static void freeMaterialData(ShovelerMaterial *material);
 
-ShovelerMaterial *shovelerMaterialChunkCreate(ShovelerShaderCache *shaderCache)
+ShovelerMaterial *shovelerMaterialChunkCreate(ShovelerShaderCache *shaderCache, bool screenspace)
 {
 	MaterialData *materialData = malloc(sizeof(MaterialData));
 	materialData->material = shovelerMaterialCreateUnmanaged(shaderCache, 0);
 	materialData->material->data = materialData;
 	materialData->material->render = render;
 	materialData->material->freeData = freeMaterialData;
-	materialData->canvasMaterial = shovelerMaterialCanvasCreate(shaderCache);
-	materialData->tilemapMaterial = shovelerMaterialTilemapCreate(shaderCache);
+	materialData->canvasMaterial = shovelerMaterialCanvasCreate(shaderCache, screenspace);
+	materialData->tilemapMaterial = shovelerMaterialTilemapCreate(shaderCache, screenspace);
 	materialData->activeChunk = NULL;
 
 	return materialData->material;

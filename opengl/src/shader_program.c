@@ -84,6 +84,7 @@ GLuint shovelerShaderProgramLink(GLuint vertexShader, GLuint geometryShader, GLu
 
 	if(deleteShaders) {
 		glDeleteShader(vertexShader);
+		glDeleteShader(geometryShader);
 		glDeleteShader(fragmentShader);
 	}
 

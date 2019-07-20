@@ -5,9 +5,9 @@
 #include <shoveler/material.h>
 #include <shoveler/tileset.h>
 
-struct ShovelerShaderCacheStruct; // forward declaration: shader_cache.h
+typedef struct ShovelerShaderCacheStruct ShovelerShaderCache; // forward declaration: shader_cache.h
 
-ShovelerMaterial *shovelerMaterialTileSpriteCreate(struct ShovelerShaderCacheStruct *shaderCache);
+ShovelerMaterial *shovelerMaterialTileSpriteCreate(ShovelerShaderCache *shaderCache, bool screenspace);
 void shovelerMaterialTileSpriteSetActive(ShovelerMaterial *material, const ShovelerCanvasTileSprite *tileSprite);
 
 #endif

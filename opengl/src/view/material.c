@@ -123,7 +123,7 @@ static bool activateComponent(ShovelerViewComponent *component, void *componentD
 
 	switch (componentData->configuration.type) {
 		case SHOVELER_VIEW_MATERIAL_TYPE_COLOR:
-			componentData->material = shovelerMaterialColorCreate(shaderCache, componentData->configuration.color);
+			componentData->material = shovelerMaterialColorCreate(shaderCache, /* screenspace */ false, componentData->configuration.color);
 			break;
 		case SHOVELER_VIEW_MATERIAL_TYPE_TEXTURE: {
 			ShovelerViewEntity *textureEntity = shovelerViewGetEntity(component->entity->view, componentData->configuration.dataEntityId);
@@ -133,7 +133,7 @@ static bool activateComponent(ShovelerViewComponent *component, void *componentD
 			ShovelerSampler *sampler = shovelerViewEntityGetTextureSampler(textureEntity);
 			assert(sampler != NULL);
 
-			componentData->material = shovelerMaterialTextureCreate(shaderCache, texture, false, sampler, false);
+			componentData->material = shovelerMaterialTextureCreate(shaderCache, /* screenspace */ false, texture, false, sampler, false);
 		} break;
 		case SHOVELER_VIEW_MATERIAL_TYPE_PARTICLE:
 			componentData->material = shovelerMaterialParticleCreate(shaderCache, componentData->configuration.color);
@@ -144,7 +144,7 @@ static bool activateComponent(ShovelerViewComponent *component, void *componentD
 			ShovelerTilemap *tilemap = shovelerViewEntityGetTilemap(tilemapEntity);
 			assert(tilemap != NULL);
 
-			componentData->material = shovelerMaterialTilemapCreate(shaderCache);
+			componentData->material = shovelerMaterialTilemapCreate(shaderCache, /* screenspace */ false);
 			shovelerMaterialTilemapSetActive(componentData->material, tilemap);
 		} break;
 		case SHOVELER_VIEW_MATERIAL_TYPE_CANVAS: {
@@ -153,7 +153,7 @@ static bool activateComponent(ShovelerViewComponent *component, void *componentD
 			ShovelerCanvas *canvas = shovelerViewEntityGetCanvas(canvasEntity);
 			assert(canvas != NULL);
 
-			componentData->material = shovelerMaterialCanvasCreate(shaderCache);
+			componentData->material = shovelerMaterialCanvasCreate(shaderCache, /* screenspace */ false);
 			shovelerMaterialCanvasSetActive(componentData->material, canvas);
 			shovelerMaterialCanvasSetActiveRegion(componentData->material, componentData->configuration.canvasRegionPosition, componentData->configuration.canvasRegionSize);
 		} break;
@@ -163,7 +163,7 @@ static bool activateComponent(ShovelerViewComponent *component, void *componentD
 			ShovelerChunk *chunk = shovelerViewEntityGetChunk(chunkEntity);
 			assert(chunk != NULL);
 
-			componentData->material = shovelerMaterialChunkCreate(shaderCache);
+			componentData->material = shovelerMaterialChunkCreate(shaderCache, /* screenspace */ false);
 			shovelerMaterialChunkSetActive(componentData->material, chunk);
 		} break;
 		default:

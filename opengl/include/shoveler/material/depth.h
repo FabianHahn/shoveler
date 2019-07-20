@@ -3,8 +3,8 @@
 
 #include <shoveler/material.h>
 
-struct ShovelerShaderCacheStruct; // forward declaration: shader_cache.h
+typedef struct ShovelerShaderCacheStruct ShovelerShaderCache; // forward declaration: shader_cache.h
 
-ShovelerMaterial *shovelerMaterialDepthCreate(struct ShovelerShaderCacheStruct *shaderCache);
+ShovelerMaterial *shovelerMaterialDepthCreate(ShovelerShaderCache *shaderCache, bool screenspace);
 
 #endif

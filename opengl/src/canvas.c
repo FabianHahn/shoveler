@@ -73,7 +73,9 @@ bool shovelerCanvasRender(ShovelerCanvas *canvas, ShovelerMaterial *textMaterial
 					return false;
 				}
 
-				shovelerRenderStateEnableDepthTest(renderState, GL_EQUAL);
+				if(!tileSpriteMaterial->screenspace) {
+					shovelerRenderStateEnableDepthTest(renderState, GL_EQUAL);
+				}
 			} break;
 		}
 	}

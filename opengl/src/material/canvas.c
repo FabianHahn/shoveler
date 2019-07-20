@@ -22,15 +22,15 @@ typedef struct {
 static bool render(ShovelerMaterial *material, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerRenderState *renderState);
 static void freeTilemap(ShovelerMaterial *material);
 
-ShovelerMaterial *shovelerMaterialCanvasCreate(ShovelerShaderCache *shaderCache)
+ShovelerMaterial *shovelerMaterialCanvasCreate(ShovelerShaderCache *shaderCache, bool screenspace)
 {
 	MaterialData *materialData = malloc(sizeof(MaterialData));
 	materialData->material = shovelerMaterialCreateUnmanaged(shaderCache, 0);
 	materialData->material->data = materialData;
 	materialData->material->render = render;
 	materialData->material->freeData = freeTilemap;
-	materialData->textMaterial = shovelerMaterialTextCreate(shaderCache);
-	materialData->tileSpriteMaterial = shovelerMaterialTileSpriteCreate(shaderCache);
+	materialData->textMaterial = shovelerMaterialTextCreate(shaderCache, screenspace);
+	materialData->tileSpriteMaterial = shovelerMaterialTileSpriteCreate(shaderCache, screenspace);
 	materialData->activeCanvas = NULL;
 	materialData->activeRegionPosition = shovelerVector2(0.0f, 0.0f);
 	materialData->activeRegionSize = shovelerVector2(1.0f, 1.0f);

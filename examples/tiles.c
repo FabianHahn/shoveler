@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
 	shovelerTilemapAddTileset(tilemap, tileset2);
 	shovelerImageFree(tilesetImage);
 
-	ShovelerMaterial *tilemapMaterial = shovelerMaterialTilemapCreate(game->shaderCache);
+	ShovelerMaterial *tilemapMaterial = shovelerMaterialTilemapCreate(game->shaderCache, /* screenspace */ false);
 	shovelerMaterialTilemapSetActive(tilemapMaterial, tilemap);
 
 	ShovelerDrawable *quad = shovelerDrawableQuadCreate();

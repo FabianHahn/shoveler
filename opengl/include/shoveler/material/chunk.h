@@ -8,7 +8,7 @@
 
 struct ShovelerShaderCacheStruct; // forward declaration: shader_cache.h
 
-ShovelerMaterial *shovelerMaterialChunkCreate(struct ShovelerShaderCacheStruct *shaderCache);
+ShovelerMaterial *shovelerMaterialChunkCreate(struct ShovelerShaderCacheStruct *shaderCache, bool screenspace);
 void shovelerMaterialChunkSetActive(ShovelerMaterial *material, ShovelerChunk *chunk);
 
 #endif

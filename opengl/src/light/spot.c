@@ -25,7 +25,7 @@ ShovelerLightSpotShared *shovelerLightSpotSharedCreate(ShovelerShaderCache *shad
 	shared->shaderCache = shaderCache;
 	shared->shadowMapSampler = shovelerSamplerCreate(true, true, true);
 	shared->depthFramebuffer = shovelerFramebufferCreateDepthOnly(width, height, samples);
-	shared->depthMaterial = shovelerMaterialDepthCreate(shaderCache);
+	shared->depthMaterial = shovelerMaterialDepthCreate(shaderCache, /* screenspace */ false);
 	shared->depthFilter = shovelerFilterDepthTextureGaussianCreate(shaderCache, width, height, samples, exponentialFactor);
 	shared->depthRenderPassOptions.overrideMaterial = shared->depthMaterial;
 	shared->depthRenderPassOptions.emitters = false;

@@ -25,7 +25,7 @@ ShovelerScene *shovelerSceneCreate(ShovelerShaderCache *shaderCache)
 	ShovelerScene *scene = malloc(sizeof(ShovelerScene));
 	scene->shaderCache = shaderCache;
 	scene->uniforms = shovelerUniformMapCreate();
-	scene->depthMaterial = shovelerMaterialDepthCreate(shaderCache);
+	scene->depthMaterial = shovelerMaterialDepthCreate(shaderCache, /* screenspace */ false);
 	scene->debugMode = false;
 	scene->activeFramebufferSize = shovelerVector2(0.0f, 0.0f);
 	scene->lights = g_hash_table_new_full(g_direct_hash, g_direct_equal, freeLight, NULL);
