@@ -44,7 +44,7 @@ typedef struct {
 	} value;
 } ShovelerCanvasSprite;
 
-typedef struct {
+typedef struct ShovelerCanvasStruct {
 	/** list of (ShovelerCanvasSprite *) */
 	GQueue *sprites;
 } ShovelerCanvas;

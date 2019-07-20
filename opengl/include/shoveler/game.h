@@ -16,11 +16,13 @@
 #include <shoveler/scene.h>
 #include <shoveler/view.h>
 
-struct ShovelerCollidersStruct;
-struct ShovelerGameStruct;
-struct ShovelerShaderCacheStruct; // forward declaration: shader_cache.h
+typedef struct ShovelerCanvasStruct ShovelerCanvas; // forward declaration: canvas.h
+typedef struct ShovelerCollidersStruct ShovelerColliders; // forward declaration: colliders.h
+typedef struct ShovelerDrawableStruct ShovelerDrawable; // forward declaration: drawable.h
+typedef struct ShovelerGameStruct ShovelerGame; // forward declaration: below
+typedef struct ShovelerShaderCacheStruct ShovelerShaderCache; // forward declaration: shader_cache.h
 
-typedef void (ShovelerGameUpdateCallback)(struct ShovelerGameStruct *game, double dt);
+typedef void (ShovelerGameUpdateCallback)(ShovelerGame *game, double dt);
 
 typedef struct {
 	const char *windowTitle;
@@ -54,12 +56,16 @@ typedef struct ShovelerGameStruct {
 	ShovelerRenderState renderState;
 	ShovelerInput *input;
 	ShovelerFramebuffer *framebuffer;
-	struct ShovelerShaderCacheStruct *shaderCache;
+	ShovelerShaderCache *shaderCache;
 	ShovelerScene *scene;
 	ShovelerCamera *camera;
-	struct ShovelerCollidersStruct *colliders;
+	ShovelerColliders *colliders;
 	ShovelerController *controller;
 	ShovelerView *view;
+	ShovelerCanvas *screenspaceCanvas;
+	ShovelerDrawable *screenspaceCanvasQuad;
+	ShovelerMaterial *screenspaceCanvasMaterial;
+	ShovelerModel *screenspaceCanvasModel;
 	ShovelerGameUpdateCallback *update;
 	double lastFrameTime;
 	double lastFpsPrintTime;

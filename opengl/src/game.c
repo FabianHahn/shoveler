@@ -3,16 +3,21 @@
 #include <glad/glad.h>
 
 #include "shoveler/camera/perspective.h"
+#include "shoveler/drawable/quad.h"
+#include "shoveler/material/canvas.h"
 #include "shoveler/view/colliders.h"
 #include "shoveler/view/shader_cache.h"
+#include "shoveler/canvas.h"
 #include "shoveler/colliders.h"
 #include "shoveler/game.h"
 #include "shoveler/global.h"
 #include "shoveler/input.h"
+#include "shoveler/model.h"
 #include "shoveler/opengl.h"
 #include "shoveler/scene.h"
 #include "shoveler/shader_cache.h"
 
+static void updateScreenspaceCanvasRegion(ShovelerGame *game);
 static void keyHandler(ShovelerInput *input, int key, int scancode, int action, int mods, void *unused);
 static gint64 elapsedNs(double dt);
 static void printFps(void *gamePointer);
@@ -103,6 +108,15 @@ ShovelerGame *shovelerGameCreate(ShovelerGameUpdateCallback *update, const Shove
 	game->colliders = shovelerCollidersCreate();
 	game->controller = shovelerControllerCreate(game->window, game->input, game->colliders, &controllerSettings->frame, controllerSettings->moveFactor, controllerSettings->tiltFactor, controllerSettings->boundingBoxSize2, controllerSettings->boundingBoxSize3);
 	game->view = shovelerViewCreate();
+
+	game->screenspaceCanvas = shovelerCanvasCreate();
+	game->screenspaceCanvasQuad = shovelerDrawableQuadCreate();
+	game->screenspaceCanvasMaterial = shovelerMaterialCanvasCreate(game->shaderCache, /* screenspace */ true);
+	shovelerMaterialCanvasSetActive(game->screenspaceCanvasMaterial, game->screenspaceCanvas);
+	updateScreenspaceCanvasRegion(game);
+	game->screenspaceCanvasModel = shovelerModelCreate(game->screenspaceCanvasQuad, game->screenspaceCanvasMaterial);
+	shovelerSceneAddModel(game->scene, game->screenspaceCanvasModel);
+
 	game->update = update;
 	game->lastFrameTime = glfwGetTime();
 	game->lastFpsPrintTime = game->lastFrameTime;
@@ -154,6 +168,7 @@ void shovelerGameToggleFullscreen(ShovelerGame *game)
 	}
 
 	game->fullscreen = !game->fullscreen;
+	updateScreenspaceCanvasRegion(game);
 }
 
 int shovelerGameRenderFrame(ShovelerGame *game)
@@ -189,6 +204,11 @@ void shovelerGameFree(ShovelerGame *game)
 
 	shovelerFramebufferFree(game->framebuffer);
 
+	shovelerSceneRemoveModel(game->scene, game->screenspaceCanvasModel);
+	shovelerMaterialFree(game->screenspaceCanvasMaterial);
+	shovelerDrawableFree(game->screenspaceCanvasQuad);
+	shovelerCanvasFree(game->screenspaceCanvas);
+
 	shovelerViewFree(game->view);
 	shovelerControllerFree(game->controller);
 	shovelerCollidersFree(game->colliders);
@@ -201,6 +221,14 @@ void shovelerGameFree(ShovelerGame *game)
 
 	shovelerExecutorFree(game->updateExecutor);
 	free(game);
+}
+
+static void updateScreenspaceCanvasRegion(ShovelerGame *game)
+{
+	ShovelerVector2 regionPosition = shovelerVector2(0.5f * game->framebuffer->width, 0.5f * game->framebuffer->height);
+	ShovelerVector2 regionSize = shovelerVector2(game->framebuffer->width, game->framebuffer->height);
+
+	shovelerMaterialCanvasSetActiveRegion(game->screenspaceCanvasMaterial, regionPosition, regionSize);
 }
 
 static void keyHandler(ShovelerInput *input, int key, int scancode, int action, int mods, void *unused)
