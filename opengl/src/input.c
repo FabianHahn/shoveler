@@ -193,11 +193,18 @@ static void windowSizeHandler(GLFWwindow *window, int width, int height)
 {
 	ShovelerGame *game = shovelerGameGetForWindow(window);
 
+	if(width < 0 || height < 0) {
+		return;
+	}
+
+	unsigned int unsignedWidth = width;
+	unsigned int unsignedHeight = height;
+
 	GHashTableIter iter;
 	ShovelerInputWindowSizeCallback *callback;
 	g_hash_table_iter_init(&iter, game->input->windowSizeCallbacks);
 	while(g_hash_table_iter_next(&iter, (gpointer *) &callback, NULL)) {
-		callback->function(game->input, width, height, callback->userData);
+		callback->function(game->input, unsignedWidth, unsignedHeight, callback->userData);
 	}
 }
 

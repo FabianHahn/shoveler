@@ -13,7 +13,7 @@ typedef void (ShovelerInputKeyCallbackFunction)(struct ShovelerInputStruct *inpu
 typedef void (ShovelerInputMouseButtonCallbackFunction)(struct ShovelerInputStruct *input, int button, int action, int mods, void *userData);
 typedef void (ShovelerInputCursorPositionCallbackFunction)(struct ShovelerInputStruct *input, double xpos, double ypos, void *userData);
 typedef void (ShovelerInputScrollCallbackFunction)(struct ShovelerInputStruct *input, double xoffset, double yoffset, void *userData);
-typedef void (ShovelerInputWindowSizeCallbackFunction)(struct ShovelerInputStruct *input, int width, int height, void *userData);
+typedef void (ShovelerInputWindowSizeCallbackFunction)(struct ShovelerInputStruct *input, unsigned int width, unsigned int height, void *userData);
 
 typedef struct {
 	ShovelerInputKeyCallbackFunction *function;

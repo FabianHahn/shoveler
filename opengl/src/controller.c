@@ -17,7 +17,7 @@ static void updateTilt(ShovelerController *controller, float dt);
 static void shiftOrientation(ShovelerController *controller, ShovelerVector2 tiltAmount);
 static void shiftPosition(ShovelerController *controller, ShovelerVector3 moveAmount);
 static bool tryMoveDirection(ShovelerController *controller, ShovelerVector3 right, float moveAmountRight, float moveAmountUp, float moveAmountForward);
-static void windowSizeHandler(ShovelerInput *input, int width, int height, void *controllerPointer);
+static void windowSizeHandler(ShovelerInput *input, unsigned int width, unsigned int height, void *controllerPointer);
 static void triggerTilt(ShovelerController *controller, ShovelerVector3 direction, ShovelerVector3 orientation);
 static void triggerMove(ShovelerController *controller, ShovelerVector3 moveAmount);
 static void triggerAspectRatioChange(ShovelerController *controller, float aspectRatio);
@@ -350,7 +350,7 @@ static void shiftOrientation(ShovelerController *controller, ShovelerVector2 til
 	triggerTilt(controller, controller->frame.direction, controller->frame.up);
 }
 
-static void windowSizeHandler(ShovelerInput *input, int width, int height, void *controllerPointer)
+static void windowSizeHandler(ShovelerInput *input, unsigned int width, unsigned int height, void *controllerPointer)
 {
 	ShovelerController *controller = controllerPointer;
 	triggerAspectRatioChange(controller, (float) width / height);
