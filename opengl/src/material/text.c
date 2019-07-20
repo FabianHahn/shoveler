@@ -52,16 +52,16 @@ static const char *fragmentShaderSource =
 	"uniform vec2 regionPosition;\n"
 	"uniform vec2 regionSize;\n"
 	"uniform sampler2D fontAtlas;\n"
-	"uniform int fontSize;\n"
+	"uniform uint fontSize;\n"
 	"uniform vec2 textCorner;\n"
 	"uniform float textSize;\n"
 	"uniform float characterAdvance;\n"
-	"uniform int glyphMinX;\n"
-	"uniform int glyphMinY;\n"
-	"uniform int glyphWidth;\n"
-	"uniform int glyphHeight;\n"
-	"uniform int glyphBearingX;\n"
-	"uniform int glyphBearingY;\n"
+	"uniform uint glyphMinX;\n"
+	"uniform uint glyphMinY;\n"
+	"uniform uint glyphWidth;\n"
+	"uniform uint glyphHeight;\n"
+	"uniform uint glyphBearingX;\n"
+	"uniform uint glyphBearingY;\n"
 	"uniform bool glyphIsRotated;\n"
 	"\n"
 	"flat in vec2 fragmentPosition;\n"
@@ -144,18 +144,18 @@ typedef struct {
 	ShovelerSampler *sampler;
 	ShovelerFontAtlasTexture *activeFontAtlasTexture;
 	ShovelerTexture *activeTexture;
-	int activeFontSize;
+	unsigned int activeFontSize;
 	const char *activeText;
 	ShovelerVector2 activeTextCorner;
 	float activeTextSize;
 	float activeCharacterAdvance;
-	int activeGlyphMinX;
-	int activeGlyphMinY;
-	int activeGlyphWidth;
-	int activeGlyphHeight;
-	int activeGlyphBearingX;
-	int activeGlyphBearingY;
-	int activeGlyphIsRotated;
+	unsigned int activeGlyphMinX;
+	unsigned int activeGlyphMinY;
+	unsigned int activeGlyphWidth;
+	unsigned int activeGlyphHeight;
+	unsigned int activeGlyphBearingX;
+	unsigned int activeGlyphBearingY;
+	bool activeGlyphIsRotated;
 } MaterialData;
 
 static bool render(ShovelerMaterial *material, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerRenderState *renderState);
@@ -185,23 +185,23 @@ ShovelerMaterial *shovelerMaterialTextCreate(ShovelerShaderCache *shaderCache)
 	materialData->activeGlyphHeight = 0;
 	materialData->activeGlyphBearingX = 0;
 	materialData->activeGlyphBearingY = 0;
-	materialData->activeGlyphIsRotated = 0;
+	materialData->activeGlyphIsRotated = false;
 
 	shovelerUniformMapInsert(materialData->material->uniforms, "fontAtlas", shovelerUniformCreateTexturePointer(&materialData->activeTexture, &materialData->sampler));
-	shovelerUniformMapInsert(materialData->material->uniforms, "fontSize", shovelerUniformCreateIntPointer(&materialData->activeFontSize));
+	shovelerUniformMapInsert(materialData->material->uniforms, "fontSize", shovelerUniformCreateUnsignedIntPointer(&materialData->activeFontSize));
 
 	shovelerUniformMapInsert(materialData->material->uniforms, "textCorner", shovelerUniformCreateVector2Pointer(&materialData->activeTextCorner));
 	shovelerUniformMapInsert(materialData->material->uniforms, "textSize", shovelerUniformCreateFloatPointer(&materialData->activeTextSize));
 
 	shovelerUniformMapInsert(materialData->material->uniforms, "characterAdvance", shovelerUniformCreateFloatPointer(&materialData->activeCharacterAdvance));
 
-	shovelerUniformMapInsert(materialData->material->uniforms, "glyphMinX", shovelerUniformCreateIntPointer(&materialData->activeGlyphMinX));
-	shovelerUniformMapInsert(materialData->material->uniforms, "glyphMinY", shovelerUniformCreateIntPointer(&materialData->activeGlyphMinY));
-	shovelerUniformMapInsert(materialData->material->uniforms, "glyphWidth", shovelerUniformCreateIntPointer(&materialData->activeGlyphWidth));
-	shovelerUniformMapInsert(materialData->material->uniforms, "glyphHeight", shovelerUniformCreateIntPointer(&materialData->activeGlyphHeight));
-	shovelerUniformMapInsert(materialData->material->uniforms, "glyphBearingX", shovelerUniformCreateIntPointer(&materialData->activeGlyphBearingX));
-	shovelerUniformMapInsert(materialData->material->uniforms, "glyphBearingY", shovelerUniformCreateIntPointer(&materialData->activeGlyphBearingY));
-	shovelerUniformMapInsert(materialData->material->uniforms, "glyphIsRotated", shovelerUniformCreateIntPointer(&materialData->activeGlyphIsRotated));
+	shovelerUniformMapInsert(materialData->material->uniforms, "glyphMinX", shovelerUniformCreateUnsignedIntPointer(&materialData->activeGlyphMinX));
+	shovelerUniformMapInsert(materialData->material->uniforms, "glyphMinY", shovelerUniformCreateUnsignedIntPointer(&materialData->activeGlyphMinY));
+	shovelerUniformMapInsert(materialData->material->uniforms, "glyphWidth", shovelerUniformCreateUnsignedIntPointer(&materialData->activeGlyphWidth));
+	shovelerUniformMapInsert(materialData->material->uniforms, "glyphHeight", shovelerUniformCreateUnsignedIntPointer(&materialData->activeGlyphHeight));
+	shovelerUniformMapInsert(materialData->material->uniforms, "glyphBearingX", shovelerUniformCreateUnsignedIntPointer(&materialData->activeGlyphBearingX));
+	shovelerUniformMapInsert(materialData->material->uniforms, "glyphBearingY", shovelerUniformCreateUnsignedIntPointer(&materialData->activeGlyphBearingY));
+	shovelerUniformMapInsert(materialData->material->uniforms, "glyphIsRotated", shovelerUniformCreateBoolPointer(&materialData->activeGlyphIsRotated));
 
 	return materialData->material;
 }
