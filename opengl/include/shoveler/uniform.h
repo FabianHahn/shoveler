@@ -10,8 +10,12 @@
 #include <shoveler/types.h>
 
 typedef enum {
+	SHOVELER_UNIFORM_TYPE_BOOL,
+	SHOVELER_UNIFORM_TYPE_BOOL_POINTER,
 	SHOVELER_UNIFORM_TYPE_INT,
 	SHOVELER_UNIFORM_TYPE_INT_POINTER,
+	SHOVELER_UNIFORM_TYPE_UNSIGNED_INT,
+	SHOVELER_UNIFORM_TYPE_UNSIGNED_INT_POINTER,
 	SHOVELER_UNIFORM_TYPE_FLOAT,
 	SHOVELER_UNIFORM_TYPE_FLOAT_POINTER,
 	SHOVELER_UNIFORM_TYPE_VECTOR2,
@@ -37,8 +41,12 @@ typedef struct {
 } ShovelerUniformTexturePointer;
 
 typedef union {
+	bool boolValue;
+	bool *boolPointerValue;
 	int intValue;
 	int *intPointerValue;
+	unsigned int unsignedIntValue;
+	unsigned int *unsignedIntPointerValue;
 	float floatValue;
 	float *floatPointerValue;
 	ShovelerVector2 vector2Value;
@@ -58,8 +66,12 @@ typedef struct {
 	ShovelerUniformValue value;
 } ShovelerUniform;
 
+ShovelerUniform *shovelerUniformCreateBool(bool value);
+ShovelerUniform *shovelerUniformCreateBoolPointer(bool *value);
 ShovelerUniform *shovelerUniformCreateInt(int value);
 ShovelerUniform *shovelerUniformCreateIntPointer(int *value);
+ShovelerUniform *shovelerUniformCreateUnsignedInt(unsigned int value);
+ShovelerUniform *shovelerUniformCreateUnsignedIntPointer(unsigned int *value);
 ShovelerUniform *shovelerUniformCreateFloat(float value);
 ShovelerUniform *shovelerUniformCreateFloatPointer(float *value);
 ShovelerUniform *shovelerUniformCreateVector2(ShovelerVector2 value);

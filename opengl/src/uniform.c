@@ -4,6 +4,22 @@
 #include "shoveler/opengl.h"
 #include "shoveler/uniform.h"
 
+ShovelerUniform *shovelerUniformCreateBool(bool value)
+{
+	ShovelerUniform *uniform = malloc(sizeof(ShovelerUniform));
+	uniform->type = SHOVELER_UNIFORM_TYPE_BOOL;
+	uniform->value.boolValue = value;
+	return uniform;
+}
+
+ShovelerUniform *shovelerUniformCreateBoolPointer(bool *value)
+{
+	ShovelerUniform *uniform = malloc(sizeof(ShovelerUniform));
+	uniform->type = SHOVELER_UNIFORM_TYPE_BOOL_POINTER;
+	uniform->value.boolPointerValue = value;
+	return uniform;
+}
+
 ShovelerUniform *shovelerUniformCreateInt(int value)
 {
 	ShovelerUniform *uniform = malloc(sizeof(ShovelerUniform));
@@ -17,6 +33,22 @@ ShovelerUniform *shovelerUniformCreateIntPointer(int *value)
 	ShovelerUniform *uniform = malloc(sizeof(ShovelerUniform));
 	uniform->type = SHOVELER_UNIFORM_TYPE_INT_POINTER;
 	uniform->value.intPointerValue = value;
+	return uniform;
+}
+
+ShovelerUniform *shovelerUniformCreateUnsignedInt(unsigned int value)
+{
+	ShovelerUniform *uniform = malloc(sizeof(ShovelerUniform));
+	uniform->type = SHOVELER_UNIFORM_TYPE_UNSIGNED_INT;
+	uniform->value.unsignedIntValue = value;
+	return uniform;
+}
+
+ShovelerUniform *shovelerUniformCreateUnsignedIntPointer(unsigned int *value)
+{
+	ShovelerUniform *uniform = malloc(sizeof(ShovelerUniform));
+	uniform->type = SHOVELER_UNIFORM_TYPE_UNSIGNED_INT_POINTER;
+	uniform->value.unsignedIntPointerValue = value;
 	return uniform;
 }
 
@@ -129,11 +161,23 @@ ShovelerUniform *shovelerUniformCopy(const ShovelerUniform *uniform)
 bool shovelerUniformUse(ShovelerUniform *uniform, GLint location, GLuint *textureUnitIndexCounter)
 {
 	switch(uniform->type) {
+		case SHOVELER_UNIFORM_TYPE_BOOL:
+			glUniform1i(location, uniform->value.boolValue ? 1 : 0);
+		break;
+		case SHOVELER_UNIFORM_TYPE_BOOL_POINTER:
+			glUniform1i(location, *uniform->value.boolPointerValue ? 1 : 0);
+		break;
 		case SHOVELER_UNIFORM_TYPE_INT:
 			glUniform1i(location, uniform->value.intValue);
 		break;
 		case SHOVELER_UNIFORM_TYPE_INT_POINTER:
 			glUniform1i(location, *uniform->value.intPointerValue);
+		break;
+		case SHOVELER_UNIFORM_TYPE_UNSIGNED_INT:
+			glUniform1ui(location, uniform->value.unsignedIntValue);
+		break;
+		case SHOVELER_UNIFORM_TYPE_UNSIGNED_INT_POINTER:
+			glUniform1ui(location, *uniform->value.unsignedIntPointerValue);
 		break;
 		case SHOVELER_UNIFORM_TYPE_FLOAT:
 			glUniform1f(location, uniform->value.floatValue);
