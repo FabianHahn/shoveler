@@ -30,18 +30,14 @@ ShovelerScene *shovelerSceneCreate(ShovelerShaderCache *shaderCache)
 	scene->lights = g_hash_table_new_full(g_direct_hash, g_direct_equal, freeLight, NULL);
 	scene->models = g_hash_table_new_full(g_direct_hash, g_direct_equal, freeModel, NULL);
 
-	shovelerUniformMapInsert(scene->uniforms, "sceneDebugMode", shovelerUniformCreateIntPointer(&scene->debugMode));
+	shovelerUniformMapInsert(scene->uniforms, "sceneDebugMode", shovelerUniformCreateBoolPointer(&scene->debugMode));
 
 	return scene;
 }
 
 void shovelerSceneToggleDebugMode(ShovelerScene *scene)
 {
-	if(scene->debugMode > 0) {
-		scene->debugMode = 0;
-	} else {
-		scene->debugMode = 1;
-	}
+	scene->debugMode = !scene->debugMode;
 }
 
 bool shovelerSceneAddLight(ShovelerScene *scene, ShovelerLight *light)

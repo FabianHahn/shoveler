@@ -21,7 +21,7 @@ typedef struct ShovelerSceneStruct {
 	struct ShovelerShaderCacheStruct *shaderCache;
 	ShovelerUniformMap *uniforms;
 	struct ShovelerMaterialStruct *depthMaterial;
-	/* private */ int debugMode;
+	/* private */ bool debugMode;
 	GHashTable *lights;
 	GHashTable *models;
 } ShovelerScene;
