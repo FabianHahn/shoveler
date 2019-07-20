@@ -26,11 +26,13 @@ ShovelerScene *shovelerSceneCreate(ShovelerShaderCache *shaderCache)
 	scene->shaderCache = shaderCache;
 	scene->uniforms = shovelerUniformMapCreate();
 	scene->depthMaterial = shovelerMaterialDepthCreate(shaderCache);
-	scene->debugMode = 0;
+	scene->debugMode = false;
+	scene->activeFramebufferSize = shovelerVector2(0.0f, 0.0f);
 	scene->lights = g_hash_table_new_full(g_direct_hash, g_direct_equal, freeLight, NULL);
 	scene->models = g_hash_table_new_full(g_direct_hash, g_direct_equal, freeModel, NULL);
 
 	shovelerUniformMapInsert(scene->uniforms, "sceneDebugMode", shovelerUniformCreateBoolPointer(&scene->debugMode));
+	shovelerUniformMapInsert(scene->uniforms, "framebufferSize", shovelerUniformCreateVector2Pointer(&scene->activeFramebufferSize));
 
 	return scene;
 }
@@ -102,6 +104,7 @@ int shovelerSceneRenderFrame(ShovelerScene *scene, ShovelerCamera *camera, Shove
 	int rendered = 0;
 
 	shovelerFramebufferUse(framebuffer);
+	scene->activeFramebufferSize = shovelerVector2(framebuffer->width, framebuffer->height);
 
 	shovelerRenderStateSetDepthMask(renderState, GL_TRUE);
 	glClearDepth(1.0f);

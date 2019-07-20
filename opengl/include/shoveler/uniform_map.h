@@ -7,7 +7,7 @@
 
 struct ShovelerShaderStruct; // forward declaration: shader.h
 
-typedef struct {
+typedef struct ShovelerUniformMapStruct {
 	GHashTable *uniforms;
 } ShovelerUniformMap;
 

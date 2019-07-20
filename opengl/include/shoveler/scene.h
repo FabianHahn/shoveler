@@ -5,45 +5,46 @@
 
 #include <glib.h>
 
-#include <shoveler/camera.h>
-#include <shoveler/framebuffer.h>
 #include <shoveler/render_state.h>
-#include <shoveler/sampler.h>
-#include <shoveler/shader.h>
-#include <shoveler/uniform_map.h>
+#include <shoveler/types.h>
 
-struct ShovelerLightStruct; // forward declaration: light.h
-struct ShovelerMaterialStruct; // forward declaration: material.h
-struct ShovelerModelStruct; // forward declaration: model.h
-struct ShovelerShaderCacheStruct; // forward declaration: shader_cache.h
+typedef struct ShovelerCameraStruct ShovelerCamera; // forward declaration: camera.h
+typedef struct ShovelerFramebufferStruct ShovelerFramebuffer; // forward declaration: framebuffer.h
+typedef struct ShovelerLightStruct ShovelerLight; // forward declaration: light.h
+typedef struct ShovelerMaterialStruct ShovelerMaterial; // forward declaration: material.h
+typedef struct ShovelerModelStruct ShovelerModel; // forward declaration: model.h
+typedef struct ShovelerShaderStruct ShovelerShader; // forward declaration: shader.h
+typedef struct ShovelerShaderCacheStruct ShovelerShaderCache; // forward declaration: shader_cache.h
+typedef struct ShovelerUniformMapStruct ShovelerUniformMap; // forward declaration: uniform_map.h
 
 typedef struct ShovelerSceneStruct {
-	struct ShovelerShaderCacheStruct *shaderCache;
+	ShovelerShaderCache *shaderCache;
 	ShovelerUniformMap *uniforms;
-	struct ShovelerMaterialStruct *depthMaterial;
+	ShovelerMaterial *depthMaterial;
 	/* private */ bool debugMode;
+	/* private */ ShovelerVector2 activeFramebufferSize;
 	GHashTable *lights;
 	GHashTable *models;
 } ShovelerScene;
 
 typedef struct {
-	struct ShovelerMaterialStruct *overrideMaterial;
+	ShovelerMaterial *overrideMaterial;
 	bool emitters;
 	bool screenspace;
 	bool onlyShadowCasters;
 	ShovelerRenderState renderState;
 } ShovelerSceneRenderPassOptions;
 
-ShovelerScene *shovelerSceneCreate(struct ShovelerShaderCacheStruct *shaderCache);
+ShovelerScene *shovelerSceneCreate(ShovelerShaderCache *shaderCache);
 void shovelerSceneToggleDebugMode(ShovelerScene *scene);
-bool shovelerSceneAddLight(ShovelerScene *scene, struct ShovelerLightStruct *light);
-bool shovelerSceneRemoveLight(ShovelerScene *scene, struct ShovelerLightStruct *light);
-bool shovelerSceneAddModel(ShovelerScene *scene, struct ShovelerModelStruct *model);
-bool shovelerSceneRemoveModel(ShovelerScene *scene, struct ShovelerModelStruct *model);
-int shovelerSceneRenderPass(ShovelerScene *scene, ShovelerCamera *camera, struct ShovelerLightStruct *light, ShovelerSceneRenderPassOptions options, ShovelerRenderState *renderState);
+bool shovelerSceneAddLight(ShovelerScene *scene, ShovelerLight *light);
+bool shovelerSceneRemoveLight(ShovelerScene *scene, ShovelerLight *light);
+bool shovelerSceneAddModel(ShovelerScene *scene, ShovelerModel *model);
+bool shovelerSceneRemoveModel(ShovelerScene *scene, ShovelerModel *model);
+int shovelerSceneRenderPass(ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerSceneRenderPassOptions options, ShovelerRenderState *renderState);
 int shovelerSceneRenderFrame(ShovelerScene *scene, ShovelerCamera *camera, ShovelerFramebuffer *framebuffer, ShovelerRenderState *renderState);
 /** Generates a shader, where shaders for calls to this with the same arguments might be cached. */
-ShovelerShader *shovelerSceneGenerateShader(ShovelerScene *scene, ShovelerCamera *camera, struct ShovelerLightStruct *light, struct ShovelerModelStruct *model, struct ShovelerMaterialStruct *material, void *userData);
+ShovelerShader *shovelerSceneGenerateShader(ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerMaterial *material, void *userData);
 void shovelerSceneFree(ShovelerScene *scene);
 
 #endif

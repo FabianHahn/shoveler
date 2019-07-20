@@ -51,7 +51,7 @@ bool shovelerShaderAttachUniform(ShovelerShader *shader, const char *name, Shove
 		shovelerLogTrace("Material %p with shader program %d does not have a uniform attachment point for '%s', skipping.", shader->material, shader->material->program, name);
 		return false;
 	} else if(g_hash_table_contains(shader->attachments, name)) {
-		shovelerLogWarning("Material %p with shader program %d already contains an attachment for '%s', skipping.", shader->material, shader->material->program, name);
+		shovelerLogTrace("Material %p with shader program %d already contains an attachment for '%s', skipping.", shader->material, shader->material->program, name);
 		return false;
 	}
 

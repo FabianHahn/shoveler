@@ -7,7 +7,7 @@
 
 #include <shoveler/texture.h>
 
-typedef struct {
+typedef struct ShovelerFramebufferStruct {
 	GLuint framebuffer;
 	GLsizei width;
 	GLsizei height;

@@ -8,6 +8,7 @@
 #include "shoveler/model.h"
 #include "shoveler/light.h"
 #include "shoveler/log.h"
+#include "shoveler/shader.h"
 
 ShovelerCanvas *shovelerCanvasCreate()
 {

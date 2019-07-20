@@ -9,6 +9,7 @@
 #include "shoveler/model.h"
 #include "shoveler/render_state.h"
 #include "shoveler/scene.h"
+#include "shoveler/shader.h"
 #include "shoveler/texture.h"
 #include "shoveler/tilemap.h"
 #include "shoveler/tileset.h"

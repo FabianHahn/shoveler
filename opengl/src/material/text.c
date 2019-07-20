@@ -10,6 +10,7 @@
 #include "shoveler/model.h"
 #include "shoveler/sampler.h"
 #include "shoveler/scene.h"
+#include "shoveler/shader.h"
 #include "shoveler/shader_cache.h"
 #include "shoveler/shader_program.h"
 
