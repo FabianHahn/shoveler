@@ -90,6 +90,13 @@ int main(int argc, char *argv[])
 	textSprite.size = 0.25f;
 	shovelerCanvasAddTextSprite(canvas, &textSprite);
 
+	ShovelerCanvasTextSprite screenspaceTextSprite;
+	screenspaceTextSprite.fontAtlasTexture = fontAtlasTexture;
+	screenspaceTextSprite.text = "shoveler";
+	screenspaceTextSprite.position = shovelerVector2(50.0f, 50.0f);
+	screenspaceTextSprite.size = 48.0f;
+	shovelerCanvasAddTextSprite(game->screenspaceCanvas, &screenspaceTextSprite);
+
 	for(const char *c = textSprite.text; *c != '\0'; c++) {
 		unsigned char character = *((unsigned char *) c);
 		shovelerFontAtlasGetGlyph(fontAtlas, character);
