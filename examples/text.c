@@ -97,13 +97,13 @@ int main(int argc, char *argv[])
 	shovelerFontAtlasTextureUpdate(fontAtlasTexture);
 	shovelerImagePngWriteFile(fontAtlas->image, "atlas.png");
 
-	ShovelerMaterial *canvasMaterial = shovelerMaterialCanvasCreate(game->shaderCache, false);
+	ShovelerMaterial *canvasMaterial = shovelerMaterialCanvasCreate(game->shaderCache, /* screenspace */ false);
 	shovelerMaterialCanvasSetActive(canvasMaterial, canvas);
 	shovelerMaterialCanvasSetActiveRegion(canvasMaterial, shovelerVector2(0.5f, 0.5f), shovelerVector2(1.0f, 1.0f));
 	ShovelerDrawable *quad = shovelerDrawableQuadCreate();
 	ShovelerModel *canvasModel = shovelerModelCreate(quad, canvasMaterial);
 	canvasModel->scale = shovelerVector3(0.5, 0.5, 1.0);
-	canvasModel->screenspace = true;
+	canvasModel->emitter = true;
 	shovelerModelUpdateTransformation(canvasModel);
 	shovelerSceneAddModel(game->scene, canvasModel);
 

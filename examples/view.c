@@ -97,7 +97,6 @@ int main(int argc, char *argv[])
 	cubeModelConfiguration.scale = shovelerVector3(1.0, 1.0, 1.0);
 	cubeModelConfiguration.visible = true;
 	cubeModelConfiguration.emitter = false;
-	cubeModelConfiguration.screenspace = false;
 	cubeModelConfiguration.castsShadow = true;
 	cubeModelConfiguration.polygonMode = GL_FILL;
 	ShovelerViewEntity *cubeEntity = shovelerViewAddEntity(game->view, 3);
@@ -113,7 +112,6 @@ int main(int argc, char *argv[])
 	planeModelConfiguration.scale = shovelerVector3(10.0, 10.0, 1.0);
 	planeModelConfiguration.visible = true;
 	planeModelConfiguration.emitter = false;
-	planeModelConfiguration.screenspace = false;
 	planeModelConfiguration.castsShadow = true;
 	planeModelConfiguration.polygonMode = GL_FILL;
 	ShovelerViewEntity *planeEntity = shovelerViewAddEntity(game->view, 4);
@@ -133,7 +131,6 @@ int main(int argc, char *argv[])
 	lightModelConfiguration.scale = shovelerVector3(0.5, 0.5, 0.5);
 	lightModelConfiguration.visible = true;
 	lightModelConfiguration.emitter = true;
-	lightModelConfiguration.screenspace = false;
 	lightModelConfiguration.castsShadow = false;
 	lightModelConfiguration.polygonMode = GL_FILL;
 	ShovelerViewLightConfiguration lightConfiguration;
@@ -319,7 +316,6 @@ int main(int argc, char *argv[])
 	tilemapMaterialModelConfiguration.scale = shovelerVector3(0.5, 0.5, 1.0);
 	tilemapMaterialModelConfiguration.visible = true;
 	tilemapMaterialModelConfiguration.emitter = false;
-	tilemapMaterialModelConfiguration.screenspace = false;
 	tilemapMaterialModelConfiguration.castsShadow = true;
 	tilemapMaterialModelConfiguration.polygonMode = GL_FILL;
 	ShovelerViewMaterialConfiguration tilemapMaterialConfiguration;
@@ -338,7 +334,6 @@ int main(int argc, char *argv[])
 	canvasMaterialModelConfiguration.scale = shovelerVector3(0.5, 0.5, 1.0);
 	canvasMaterialModelConfiguration.visible = true;
 	canvasMaterialModelConfiguration.emitter = false;
-	canvasMaterialModelConfiguration.screenspace = false;
 	canvasMaterialModelConfiguration.castsShadow = true;
 	canvasMaterialModelConfiguration.polygonMode = GL_FILL;
 	ShovelerViewMaterialConfiguration canvasMaterialConfiguration;
@@ -359,7 +354,6 @@ int main(int argc, char *argv[])
 	chunkMaterialModelConfiguration.scale = shovelerVector3(0.5, 0.5, 1.0);
 	chunkMaterialModelConfiguration.visible = true;
 	chunkMaterialModelConfiguration.emitter = false;
-	chunkMaterialModelConfiguration.screenspace = false;
 	chunkMaterialModelConfiguration.castsShadow = true;
 	chunkMaterialModelConfiguration.polygonMode = GL_FILL;
 	ShovelerViewMaterialConfiguration chunkMaterialConfiguration;

@@ -22,7 +22,6 @@ ShovelerModel *shovelerModelCreate(ShovelerDrawable *drawable, ShovelerMaterial 
 	model->normalTransformation = shovelerMatrixIdentity;
 	model->visible = true;
 	model->emitter = false;
-	model->screenspace = false;
 	model->castsShadow = true;
 	model->polygonMode = GL_FILL;
 	model->uniforms = shovelerUniformMapCreate();

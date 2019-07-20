@@ -17,7 +17,6 @@ typedef struct {
 	ShovelerVector3 scale;
 	bool visible;
 	bool emitter;
-	bool screenspace;
 	bool castsShadow;
 	GLuint polygonMode;
 } ShovelerViewModelConfiguration;
@@ -33,7 +32,6 @@ bool shovelerViewEntityUpdateModelRotation(ShovelerViewEntity *entity, ShovelerV
 bool shovelerViewEntityUpdateModelScale(ShovelerViewEntity *entity, ShovelerVector3 scale);
 bool shovelerViewEntityUpdateModelVisible(ShovelerViewEntity *entity, bool visible);
 bool shovelerViewEntityUpdateModelEmitter(ShovelerViewEntity *entity, bool emitter);
-bool shovelerViewEntityUpdateModelScreenspace(ShovelerViewEntity *entity, bool screenspace);
 bool shovelerViewEntityUpdateModelPolygonMode(ShovelerViewEntity *entity, GLuint polygonMode);
 bool shovelerViewEntityRemoveModel(ShovelerViewEntity *entity);
 

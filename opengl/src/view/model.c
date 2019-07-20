@@ -205,25 +205,6 @@ bool shovelerViewEntityUpdateModelEmitter(ShovelerViewEntity *entity, bool emitt
 	return true;
 }
 
-bool shovelerViewEntityUpdateModelScreenspace(ShovelerViewEntity *entity, bool screenspace)
-{
-	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewModelComponentName);
-	if(component == NULL) {
-		shovelerLogWarning("Trying to update model screenspace of entity %lld which does not have a model, ignoring.", entity->entityId);
-		return false;
-	}
-
-	ModelComponentData *modelComponentData = component->data;
-	modelComponentData->configuration.screenspace = screenspace;
-
-	if(modelComponentData->model != NULL) {
-		modelComponentData->model->screenspace = screenspace;
-	}
-
-	shovelerViewComponentUpdate(component);
-	return true;
-}
-
 bool shovelerViewEntityUpdateModelPolygonMode(ShovelerViewEntity *entity, GLuint polygonMode)
 {
 	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewModelComponentName);
@@ -302,7 +283,6 @@ static bool activateComponent(ShovelerViewComponent *component, void *modelCompo
 	modelComponentData->model->scale = modelComponentData->configuration.scale;
 	modelComponentData->model->visible = modelComponentData->configuration.visible;
 	modelComponentData->model->emitter = modelComponentData->configuration.emitter;
-	modelComponentData->model->screenspace = modelComponentData->configuration.screenspace;
 	modelComponentData->model->castsShadow = modelComponentData->configuration.castsShadow;
 	modelComponentData->model->polygonMode = modelComponentData->configuration.polygonMode;
 	shovelerModelUpdateTransformation(modelComponentData->model);

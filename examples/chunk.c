@@ -158,7 +158,7 @@ int main(int argc, char *argv[])
 	ShovelerDrawable *quad = shovelerDrawableQuadCreate();
 	ShovelerModel *chunkModel = shovelerModelCreate(quad, chunkMaterial);
 	chunkModel->scale = shovelerVector3(5.0, 5.0, 1.0);
-	chunkModel->screenspace = true;
+	chunkModel->emitter = true;
 	shovelerModelUpdateTransformation(chunkModel);
 	shovelerSceneAddModel(game->scene, chunkModel);
 

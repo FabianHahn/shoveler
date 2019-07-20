@@ -78,11 +78,11 @@ int shovelerSceneRenderPass(ShovelerScene *scene, ShovelerCamera *camera, Shovel
 			continue;
 		}
 
-		if(model->screenspace != options.screenspace) {
+		if(model->material->screenspace != options.screenspace) {
 			continue;
 		}
 
-		if(options.onlyShadowCasters && !model->screenspace && !model->castsShadow) {
+		if(options.onlyShadowCasters && !model->material->screenspace && !model->castsShadow) {
 			continue;
 		}
 
@@ -201,14 +201,13 @@ ShovelerSceneRenderPassOptions createRenderPassOptions(ShovelerScene *scene, Ren
 			options.renderState.blendSourceFactor = GL_ONE;
 			options.renderState.blendDestinationFactor = GL_ONE;
 			options.renderState.depthFunction = GL_LESS;
-			options.renderState.depthMask = GL_FALSE;
+			options.renderState.depthMask = GL_TRUE;
 		break;
 		case RENDER_MODE_SCREENSPACE:
 			options.screenspace = true;
 			options.renderState.blendSourceFactor = GL_ONE;
 			options.renderState.blendDestinationFactor = GL_ZERO;
-			options.renderState.depthFunction = GL_ALWAYS;
-			options.renderState.depthMask = GL_TRUE;
+			options.renderState.depthTest = false;
 		break;
 		case RENDER_MODE_ADDITIVE_LIGHT:
 			options.renderState.blendSourceFactor = GL_ONE;

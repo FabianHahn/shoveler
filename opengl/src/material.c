@@ -26,6 +26,7 @@ ShovelerMaterial *shovelerMaterialCreate(ShovelerShaderCache *shaderCache, bool 
 ShovelerMaterial *shovelerMaterialCreateUnmanaged(ShovelerShaderCache *shaderCache, bool screenspace, GLuint program)
 {
 	ShovelerMaterial *material = malloc(sizeof(ShovelerMaterial));
+	material->screenspace = screenspace;
 	material->shaderCache = shaderCache;
 	material->manageProgram = false;
 	material->program = program;

@@ -23,7 +23,6 @@ typedef struct ShovelerModelStruct {
 	ShovelerMatrix normalTransformation;
 	bool visible;
 	bool emitter;
-	bool screenspace;
 	bool castsShadow;
 	GLuint polygonMode;
 	ShovelerUniformMap *uniforms;

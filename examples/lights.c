@@ -192,7 +192,6 @@ int main(int argc, char *argv[])
 
 	screenspaceTextureMaterial = shovelerMaterialScreenspaceTextureCreate(game->shaderCache, shovelerLightPointGetShared(pointlight)->depthFramebuffer->depthTarget, false, true, nearestNeighborSampler, false);
 	ShovelerModel *screenQuadModel = shovelerModelCreate(quad, screenspaceTextureMaterial);
-	screenQuadModel->screenspace = true;
 	screenQuadModel->translation.values[0] = -1.0;
 	screenQuadModel->translation.values[1] = -1.0;
 	screenQuadModel->scale.values[0] = 0.5;
