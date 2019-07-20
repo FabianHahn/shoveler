@@ -19,8 +19,9 @@ typedef struct ShovelerModelStruct ShovelerModel; // forward declaration: model.
 typedef struct {
 	ShovelerFontAtlasTexture *fontAtlasTexture;
 	const char *text;
-	ShovelerVector2 position;
+	ShovelerVector2 corner;
 	float size;
+	ShovelerVector4 color;
 } ShovelerCanvasTextSprite;
 
 typedef struct {

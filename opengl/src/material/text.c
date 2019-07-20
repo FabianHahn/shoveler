@@ -25,6 +25,7 @@ static const char *fragmentShaderSource =
 	"uniform uint fontSize;\n"
 	"uniform vec2 textCorner;\n"
 	"uniform float textSize;\n"
+	"uniform vec4 textColor;\n"
 	"uniform float characterAdvance;\n"
 	"uniform uint glyphMinX;\n"
 	"uniform uint glyphMinY;\n"
@@ -102,7 +103,7 @@ static const char *fragmentShaderSource =
 	"		if (sceneDebugMode) {\n"
 	"			fragmentColor = vec4(fontAtlasUv.xy, fontAtlasUv.y, 1.0);\n"
 	"		} else {\n"
-	"			fragmentColor = vec4(fontAtlasValue, 0.0, 0.0, 1.0);\n"
+	"			fragmentColor = vec4(textColor.rgb, fontAtlasValue * textColor.a);\n"
 	"		}\n"
 	"	} else {\n"
 	"		fragmentColor = vec4(0.0);\n"
@@ -118,6 +119,7 @@ typedef struct {
 	const char *activeText;
 	ShovelerVector2 activeTextCorner;
 	float activeTextSize;
+	ShovelerVector4 activeTextColor;
 	float activeCharacterAdvance;
 	unsigned int activeGlyphMinX;
 	unsigned int activeGlyphMinY;
@@ -148,6 +150,7 @@ ShovelerMaterial *shovelerMaterialTextCreate(ShovelerShaderCache *shaderCache, b
 	materialData->activeFontSize = 0;
 	materialData->activeTextCorner = shovelerVector2(0.0f, 0.0f);
 	materialData->activeTextSize = 0.0f;
+	materialData->activeTextColor = shovelerVector4(1.0f, 1.0f, 1.0f, 1.0f);
 	materialData->activeCharacterAdvance = 0.0f;
 	materialData->activeGlyphMinX = 0;
 	materialData->activeGlyphMinY = 0;
@@ -162,6 +165,8 @@ ShovelerMaterial *shovelerMaterialTextCreate(ShovelerShaderCache *shaderCache, b
 
 	shovelerUniformMapInsert(materialData->material->uniforms, "textCorner", shovelerUniformCreateVector2Pointer(&materialData->activeTextCorner));
 	shovelerUniformMapInsert(materialData->material->uniforms, "textSize", shovelerUniformCreateFloatPointer(&materialData->activeTextSize));
+
+	shovelerUniformMapInsert(materialData->material->uniforms, "textColor", shovelerUniformCreateVector4Pointer(&materialData->activeTextColor));
 
 	shovelerUniformMapInsert(materialData->material->uniforms, "characterAdvance", shovelerUniformCreateFloatPointer(&materialData->activeCharacterAdvance));
 
@@ -189,6 +194,12 @@ void shovelerMaterialTextSetActiveText(ShovelerMaterial *material, const char *t
 	materialData->activeText = text;
 	materialData->activeTextCorner = corner;
 	materialData->activeTextSize = size;
+}
+
+void shovelerMaterialTextSetActiveColor(ShovelerMaterial *material, ShovelerVector4 color)
+{
+	MaterialData *materialData = material->data;
+	materialData->activeTextColor = color;
 }
 
 static bool render(ShovelerMaterial *material, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerRenderState *renderState)

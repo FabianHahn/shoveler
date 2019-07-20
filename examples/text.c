@@ -86,15 +86,17 @@ int main(int argc, char *argv[])
 	ShovelerCanvasTextSprite textSprite;
 	textSprite.fontAtlasTexture = fontAtlasTexture;
 	textSprite.text = "shoveler";
-	textSprite.position = shovelerVector2(0.0f, 0.25f);
+	textSprite.corner = shovelerVector2(0.0f, 0.25f);
 	textSprite.size = 0.25f;
+	textSprite.color = shovelerVector4(1.0f, 0.0f, 0.0f, 1.0f);
 	shovelerCanvasAddTextSprite(canvas, &textSprite);
 
 	ShovelerCanvasTextSprite screenspaceTextSprite;
 	screenspaceTextSprite.fontAtlasTexture = fontAtlasTexture;
 	screenspaceTextSprite.text = "shoveler";
-	screenspaceTextSprite.position = shovelerVector2(50.0f, 50.0f);
+	screenspaceTextSprite.corner = shovelerVector2(50.0f, 50.0f);
 	screenspaceTextSprite.size = 48.0f;
+	screenspaceTextSprite.color = shovelerVector4(0.0f, 1.0f, 0.0f, 0.5f);
 	shovelerCanvasAddTextSprite(game->screenspaceCanvas, &screenspaceTextSprite);
 
 	for(const char *c = textSprite.text; *c != '\0'; c++) {

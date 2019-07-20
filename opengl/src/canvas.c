@@ -51,7 +51,8 @@ bool shovelerCanvasRender(ShovelerCanvas *canvas, ShovelerMaterial *textMaterial
 			case SHOVELER_CANVAS_SPRITE_TYPE_TEXT: {
 				const ShovelerCanvasTextSprite *textSprite = sprite->value.text;
 				shovelerMaterialTextSetActiveFontAtlasTexture(textMaterial, textSprite->fontAtlasTexture);
-				shovelerMaterialTextSetActiveText(textMaterial, textSprite->text, textSprite->position, textSprite->size);
+				shovelerMaterialTextSetActiveText(textMaterial, textSprite->text, textSprite->corner, textSprite->size);
+				shovelerMaterialTextSetActiveColor(textMaterial, textSprite->color);
 
 				if(!shovelerMaterialRender(textMaterial, scene, camera, light, model, renderState)) {
 					shovelerLogWarning("Failed to render material for text sprite %p of canvas %p with text material %p, scene %p, camera %p, light %p and model %p.", textSprite, canvas, textMaterial, scene, camera, light, model);
