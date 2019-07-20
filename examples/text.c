@@ -25,6 +25,12 @@
 #include <shoveler/shader_program.h>
 #include <shoveler/texture.h>
 
+static double frameTimeSinceLastUpdate = 0.0;
+static unsigned int framesSinceLastUpdate = 0;
+static double exponentialAverageFps = 0.0;
+static GString *fpsString;
+static ShovelerCanvasTextSprite screenspaceTextSprite;
+
 static void shovelerSampleUpdate(ShovelerGame *game, double dt);
 
 int main(int argc, char *argv[])
@@ -78,6 +84,8 @@ int main(int argc, char *argv[])
 	game->controller->lockTiltX = true;
 	game->controller->lockTiltY = true;
 
+	fpsString = g_string_new("");
+
 	ShovelerCanvas *canvas = shovelerCanvasCreate();
 
 	ShovelerFontAtlas *fontAtlas = shovelerFontAtlasCreate(font, 48, 1);
@@ -91,10 +99,9 @@ int main(int argc, char *argv[])
 	textSprite.color = shovelerVector4(1.0f, 0.0f, 0.0f, 1.0f);
 	shovelerCanvasAddTextSprite(canvas, &textSprite);
 
-	ShovelerCanvasTextSprite screenspaceTextSprite;
 	screenspaceTextSprite.fontAtlasTexture = fontAtlasTexture;
-	screenspaceTextSprite.text = "shoveler";
-	screenspaceTextSprite.corner = shovelerVector2(50.0f, 50.0f);
+	screenspaceTextSprite.text = "";
+	screenspaceTextSprite.corner = shovelerVector2(0.0f, 0.0f);
 	screenspaceTextSprite.size = 48.0f;
 	screenspaceTextSprite.color = shovelerVector4(0.0f, 1.0f, 0.0f, 0.5f);
 	shovelerCanvasAddTextSprite(game->screenspaceCanvas, &screenspaceTextSprite);
@@ -123,6 +130,7 @@ int main(int argc, char *argv[])
 	}
 	shovelerLogInfo("Exiting main loop, goodbye.");
 
+	g_string_free(fpsString, true);
 	shovelerDrawableFree(quad);
 	shovelerMaterialFree(canvasMaterial);
 	shovelerCanvasFree(canvas);
@@ -141,4 +149,25 @@ static void shovelerSampleUpdate(ShovelerGame *game, double dt)
 	ShovelerController *controller = shovelerCameraPerspectiveGetController(game->camera);
 
 	shovelerCameraUpdateView(game->camera);
+
+	frameTimeSinceLastUpdate += dt;
+	framesSinceLastUpdate++;
+
+	if(frameTimeSinceLastUpdate > 0.1) {
+		double fps = framesSinceLastUpdate / frameTimeSinceLastUpdate;
+		exponentialAverageFps = 0.5 * fps + 0.5 * exponentialAverageFps;
+		g_string_set_size(fpsString, 0);
+		g_string_append_printf(fpsString, "FPS: %.1f", exponentialAverageFps);
+		screenspaceTextSprite.text = fpsString->str;
+		screenspaceTextSprite.corner = shovelerVector2(10.0f, game->framebuffer->height - screenspaceTextSprite.size - 10.0f);
+
+		for(const char *c = screenspaceTextSprite.text; *c != '\0'; c++) {
+			unsigned char character = *((unsigned char *) c);
+			shovelerFontAtlasGetGlyph(screenspaceTextSprite.fontAtlasTexture->fontAtlas, character);
+		}
+		shovelerFontAtlasTextureUpdate(screenspaceTextSprite.fontAtlasTexture);
+
+		frameTimeSinceLastUpdate = 0.0;
+		framesSinceLastUpdate = 0;
+	}
 }
