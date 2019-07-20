@@ -3,6 +3,8 @@
 #include "shoveler/material/screenspace_texture.h"
 #include "shoveler/shader_cache.h"
 #include "shoveler/shader_program.h"
+#include "shoveler/uniform.h"
+#include "shoveler/uniform_map.h"
 
 typedef struct {
 	ShovelerTexture *texture;
@@ -63,7 +65,7 @@ ShovelerMaterial *shovelerMaterialScreenspaceTextureCreate(ShovelerShaderCache *
 	GLuint fragmentShaderObject = shovelerShaderProgramCompileFromString(fragmentShaderSource, GL_FRAGMENT_SHADER);
 	GLuint program = shovelerShaderProgramLink(vertexShaderObject, 0, fragmentShaderObject, true);
 
-	ShovelerMaterial *material = shovelerMaterialCreate(shaderCache, program);
+	ShovelerMaterial *material = shovelerMaterialCreate(shaderCache, /* screenspace */ true, program);
 
 	ShovelerMaterialScreenspaceTextureData *materialScreenspaceTextureData = malloc(sizeof(ShovelerMaterialScreenspaceTextureData));
 	materialScreenspaceTextureData->texture = texture;

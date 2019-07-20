@@ -18,5 +18,5 @@ ShovelerMaterial *shovelerMaterialDepthCreate(ShovelerShaderCache *shaderCache, 
 	GLuint vertexShaderObject = shovelerShaderProgramModelVertexCreate(screenspace);
 	GLuint fragmentShaderObject = shovelerShaderProgramCompileFromString(fragmentShaderSource, GL_FRAGMENT_SHADER);
 	GLuint program = shovelerShaderProgramLink(vertexShaderObject, 0, fragmentShaderObject, true);
-	return shovelerMaterialCreate(shaderCache, program);
+	return shovelerMaterialCreate(shaderCache, screenspace, program);
 }

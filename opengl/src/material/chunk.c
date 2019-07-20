@@ -23,7 +23,7 @@ static void freeMaterialData(ShovelerMaterial *material);
 ShovelerMaterial *shovelerMaterialChunkCreate(ShovelerShaderCache *shaderCache, bool screenspace)
 {
 	MaterialData *materialData = malloc(sizeof(MaterialData));
-	materialData->material = shovelerMaterialCreateUnmanaged(shaderCache, 0);
+	materialData->material = shovelerMaterialCreateUnmanaged(shaderCache, screenspace, 0);
 	materialData->material->data = materialData;
 	materialData->material->render = render;
 	materialData->material->freeData = freeMaterialData;

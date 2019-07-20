@@ -5,6 +5,8 @@
 #include "shoveler/shader_cache.h"
 #include "shoveler/shader_program.h"
 #include "shoveler/types.h"
+#include "shoveler/uniform.h"
+#include "shoveler/uniform_map.h"
 
 static const char *fragmentShaderSource =
 	"#version 400\n"
@@ -92,7 +94,7 @@ ShovelerMaterial *shovelerMaterialTileSpriteCreate(ShovelerShaderCache *shaderCa
 	GLuint program = shovelerShaderProgramLink(vertexShaderObject, 0, fragmentShaderObject, true);
 
 	MaterialData *materialData = malloc(sizeof(MaterialData));
-	materialData->material = shovelerMaterialCreate(shaderCache, program);
+	materialData->material = shovelerMaterialCreate(shaderCache, screenspace, program);
 	materialData->material->data = materialData;
 	materialData->material->freeData = freeMaterialData;
 	materialData->activeSpriteTilesetColumn = 0;

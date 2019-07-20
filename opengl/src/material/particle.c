@@ -1,6 +1,8 @@
 #include "shoveler/material/particle.h"
 #include "shoveler/shader_cache.h"
 #include "shoveler/shader_program.h"
+#include "shoveler/uniform.h"
+#include "shoveler/uniform_map.h"
 
 static const char *vertexShaderSource =
 		"#version 400\n"
@@ -86,7 +88,7 @@ ShovelerMaterial *shovelerMaterialParticleCreate(ShovelerShaderCache *shaderCach
 	GLuint geometryShaderObject = shovelerShaderProgramCompileFromString(geometryShaderSource, GL_GEOMETRY_SHADER);
 	GLuint fragmentShaderObject = shovelerShaderProgramCompileFromString(fragmentShaderSource, GL_FRAGMENT_SHADER);
 	GLuint program = shovelerShaderProgramLink(vertexShaderObject, geometryShaderObject, fragmentShaderObject, true);
-	ShovelerMaterial *material = shovelerMaterialCreate(shaderCache, program);
+	ShovelerMaterial *material = shovelerMaterialCreate(shaderCache, /* screenspace */ false, program);
 
 	shovelerUniformMapInsert(material->uniforms, "particleColor", shovelerUniformCreateVector3(color));
 

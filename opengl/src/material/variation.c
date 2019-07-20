@@ -3,6 +3,7 @@
 #include "shoveler/material/variation.h"
 #include "shoveler/shader.h"
 #include "shoveler/shader_cache.h"
+#include "shoveler/uniform_map.h"
 
 typedef struct {
 	ShovelerMaterial *material;
@@ -15,7 +16,7 @@ static void freeVariation(ShovelerMaterial *variationMaterial);
 ShovelerMaterial *shovelerMaterialVariationCreate(ShovelerShaderCache *shaderCache, ShovelerMaterial *delegate)
 {
 	Variation *variation = malloc(sizeof(Variation));
-	variation->material = shovelerMaterialCreateUnmanaged(shaderCache, delegate->program);
+	variation->material = shovelerMaterialCreateUnmanaged(shaderCache, delegate->screenspace, delegate->program);
 	variation->material->data = variation;
 	variation->material->attachUniforms = attachUniforms;
 	variation->material->freeData = freeVariation;

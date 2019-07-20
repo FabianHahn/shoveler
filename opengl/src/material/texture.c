@@ -4,6 +4,8 @@
 #include "shoveler/shader_program/model_vertex.h"
 #include "shoveler/shader_cache.h"
 #include "shoveler/shader_program.h"
+#include "shoveler/uniform.h"
+#include "shoveler/uniform_map.h"
 
 typedef struct {
 	ShovelerTexture *texture;
@@ -79,7 +81,7 @@ ShovelerMaterial *shovelerMaterialTextureCreate(ShovelerShaderCache *shaderCache
 	GLuint fragmentShaderObject = shovelerShaderProgramCompileFromString(fragmentShaderSource, GL_FRAGMENT_SHADER);
 	GLuint program = shovelerShaderProgramLink(vertexShaderObject, 0, fragmentShaderObject, true);
 
-	ShovelerMaterial *material = shovelerMaterialCreate(shaderCache, program);
+	ShovelerMaterial *material = shovelerMaterialCreate(shaderCache, screenspace, program);
 
 	ShovelerMaterialTextureData *materialTextureData = malloc(sizeof(ShovelerMaterialTextureData));
 	materialTextureData->texture = texture;

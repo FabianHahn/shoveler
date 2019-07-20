@@ -138,7 +138,7 @@ ShovelerMaterial *shovelerMaterialTextCreate(ShovelerShaderCache *shaderCache, b
 	GLuint program = shovelerShaderProgramLink(vertexShaderObject, 0, fragmentShaderObject, true);
 
 	MaterialData *materialData = malloc(sizeof(MaterialData));
-	materialData->material = shovelerMaterialCreate(shaderCache, program);
+	materialData->material = shovelerMaterialCreate(shaderCache, screenspace, program);
 	materialData->material->data = materialData;
 	materialData->material->render = render;
 	materialData->material->freeData = freeMaterialData;

@@ -2,9 +2,10 @@
 #define SHOVELER_MATERIAL_PARTICLE_H
 
 #include <shoveler/material.h>
+#include <shoveler/types.h>
 
-struct ShovelerShaderCacheStruct; // forward declaration: shader_cache.h
+typedef struct ShovelerShaderCacheStruct ShovelerShaderCache; // forward declaration: shader_cache.h
 
-ShovelerMaterial *shovelerMaterialParticleCreate(struct ShovelerShaderCacheStruct *shaderCache, ShovelerVector3 color);
+ShovelerMaterial *shovelerMaterialParticleCreate(ShovelerShaderCache *shaderCache, ShovelerVector3 color);
 
 #endif

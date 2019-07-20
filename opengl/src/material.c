@@ -16,14 +16,14 @@ static bool render(ShovelerMaterial *material, ShovelerScene *scene, ShovelerCam
 static int attachUniforms(ShovelerMaterial *material, ShovelerShader *shader, void *userData);
 static void freeMaterialData(ShovelerMaterial *material);
 
-ShovelerMaterial *shovelerMaterialCreate(ShovelerShaderCache *shaderCache, GLuint program)
+ShovelerMaterial *shovelerMaterialCreate(ShovelerShaderCache *shaderCache, bool screenspace, GLuint program)
 {
-	ShovelerMaterial *material = shovelerMaterialCreateUnmanaged(shaderCache, program);
+	ShovelerMaterial *material = shovelerMaterialCreateUnmanaged(shaderCache, screenspace, program);
 	material->manageProgram = true;
 	return material;
 }
 
-ShovelerMaterial *shovelerMaterialCreateUnmanaged(ShovelerShaderCache *shaderCache, GLuint program)
+ShovelerMaterial *shovelerMaterialCreateUnmanaged(ShovelerShaderCache *shaderCache, bool screenspace, GLuint program)
 {
 	ShovelerMaterial *material = malloc(sizeof(ShovelerMaterial));
 	material->shaderCache = shaderCache;
