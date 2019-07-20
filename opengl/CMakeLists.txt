@@ -21,6 +21,8 @@ set(SHOVELER_OPENGL_SRC
 	src/material/tile_sprite.c
 	src/material/tilemap.c
 	src/material/variation.c
+	src/shader_program/model_vertex_projected.c
+	src/shader_program/model_vertex_screenspace.c
 	src/view/canvas.c
 	src/view/chunk.c
 	src/view/client.c
@@ -81,6 +83,9 @@ set(SHOVELER_OPENGL_SRC
 	include/shoveler/material/tile_sprite.h
 	include/shoveler/material/tilemap.h
 	include/shoveler/material/variation.h
+	include/shoveler/shader_program/model_vertex.h
+	include/shoveler/shader_program/model_vertex_projected.h
+	include/shoveler/shader_program/model_vertex_screenspace.h
 	include/shoveler/view/canvas.h
 	include/shoveler/view/chunk.h
 	include/shoveler/view/client.h
