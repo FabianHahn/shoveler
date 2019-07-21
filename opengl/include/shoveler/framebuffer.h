@@ -20,6 +20,6 @@ ShovelerFramebuffer *shovelerFramebufferCreateColorOnly(GLsizei width, GLsizei h
 ShovelerFramebuffer *shovelerFramebufferCreateDepthOnly(GLsizei width, GLsizei height, GLsizei samples);
 bool shovelerFramebufferUse(ShovelerFramebuffer *framebuffer);
 bool shovelerFramebufferBlitToDefault(ShovelerFramebuffer *framebuffer);
-void shovelerFramebufferFree(ShovelerFramebuffer *framebuffer);
+void shovelerFramebufferFree(ShovelerFramebuffer *framebuffer, bool keepTargets);
 
 #endif

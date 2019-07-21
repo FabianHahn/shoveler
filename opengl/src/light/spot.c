@@ -77,7 +77,7 @@ void shovelerLightSpotSharedFree(ShovelerLightSpotShared *shared)
 
 	shovelerFilterFree(shared->depthFilter);
 	shovelerMaterialFree(shared->depthMaterial);
-	shovelerFramebufferFree(shared->depthFramebuffer);
+	shovelerFramebufferFree(shared->depthFramebuffer, /* keepTargets */ false);
 	shovelerSamplerFree(shared->shadowMapSampler);
 
 	free(shared);

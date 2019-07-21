@@ -154,7 +154,7 @@ void shovelerGameToggleFullscreen(ShovelerGame *game)
 		shovelerLogInfo("Switching game %p window to windowed mode.", game);
 		glfwSetWindowMonitor(game->window, NULL, 0, 0, game->windowedWidth, game->windowedHeight, GLFW_DONT_CARE);
 
-		shovelerFramebufferFree(game->framebuffer);
+		shovelerFramebufferFree(game->framebuffer, /* keepTargets */ false);
 		game->framebuffer = shovelerFramebufferCreate(game->windowedWidth, game->windowedHeight, game->samples, 4, 8);
 	} else {
 		GLFWmonitor *monitor = glfwGetPrimaryMonitor();
@@ -163,7 +163,7 @@ void shovelerGameToggleFullscreen(ShovelerGame *game)
 		const GLFWvidmode* mode = glfwGetVideoMode(monitor);
 		glfwSetWindowMonitor(game->window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
 
-		shovelerFramebufferFree(game->framebuffer);
+		shovelerFramebufferFree(game->framebuffer, /* keepTargets */ false);
 		game->framebuffer = shovelerFramebufferCreate(mode->width, mode->height, game->samples, 4, 8);
 	}
 
@@ -202,7 +202,7 @@ void shovelerGameFree(ShovelerGame *game)
 
 	shovelerCameraPerspectiveDetachController(game->camera);
 
-	shovelerFramebufferFree(game->framebuffer);
+	shovelerFramebufferFree(game->framebuffer, /* keepTargets */ false);
 
 	shovelerSceneRemoveModel(game->scene, game->screenspaceCanvasModel);
 	shovelerMaterialFree(game->screenspaceCanvasMaterial);

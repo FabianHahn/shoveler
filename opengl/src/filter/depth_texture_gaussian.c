@@ -113,8 +113,8 @@ static void freeDepthTextureGaussian(void *data)
 	shovelerDrawableFree(depthTextureGaussianFilter->filterQuad);
 	shovelerMaterialFree(depthTextureGaussianFilter->filterYMaterial);
 	shovelerMaterialFree(depthTextureGaussianFilter->filterXMaterial);
-	shovelerFramebufferFree(depthTextureGaussianFilter->filterYFramebuffer);
-	shovelerFramebufferFree(depthTextureGaussianFilter->filterXFramebuffer);
+	shovelerFramebufferFree(depthTextureGaussianFilter->filterYFramebuffer, /* keepTargets */ false);
+	shovelerFramebufferFree(depthTextureGaussianFilter->filterXFramebuffer, /* keepTargets */ false);
 	shovelerCameraFree(depthTextureGaussianFilter->filterCamera);
 	shovelerSamplerFree(depthTextureGaussianFilter->filterSampler);
 	free(depthTextureGaussianFilter);

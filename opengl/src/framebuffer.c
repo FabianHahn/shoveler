@@ -90,14 +90,17 @@ bool shovelerFramebufferBlitToDefault(ShovelerFramebuffer *framebuffer)
 	return shovelerOpenGLCheckSuccess();
 }
 
-void shovelerFramebufferFree(ShovelerFramebuffer *framebuffer)
+void shovelerFramebufferFree(ShovelerFramebuffer *framebuffer, bool keepTargets)
 {
 	if(framebuffer == NULL) {
 		return;
 	}
 
-	shovelerTextureFree(framebuffer->depthTarget);
-	shovelerTextureFree(framebuffer->renderTarget);
+	if(!keepTargets) {
+		shovelerTextureFree(framebuffer->depthTarget);
+		shovelerTextureFree(framebuffer->renderTarget);
+	}
+
 	glDeleteFramebuffers(1, &framebuffer->framebuffer);
 	free(framebuffer);
 }
