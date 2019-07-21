@@ -4,6 +4,7 @@
 
 #include "shoveler/view/resources.h"
 #include "shoveler/view/tilemap_tiles.h"
+#include "shoveler/image.h"
 #include "shoveler/log.h"
 
 typedef struct {

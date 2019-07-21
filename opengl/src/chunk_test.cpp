@@ -4,6 +4,7 @@
 
 extern "C" {
 #include "shoveler/chunk.h"
+#include "shoveler/image.h"
 #include "shoveler/texture.h"
 #include "shoveler/tilemap.h"
 }

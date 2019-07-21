@@ -37,8 +37,8 @@ bool shovelerTilemapIntersect(ShovelerTilemap *tilemap, const ShovelerBoundingBo
 
 	ShovelerVector2 size = shovelerVector2LinearCombination(1.0f, boundingBox->max, -1.0f, boundingBox->min);
 
-	unsigned int numColumns = tilemap->tiles->image->width;
-	unsigned int numRows = tilemap->tiles->image->height;
+	unsigned int numColumns = tilemap->tiles->width;
+	unsigned int numRows = tilemap->tiles->height;
 
 	float columnStride = size.values[0] / numColumns;
 	float rowStride = size.values[1] / numRows;

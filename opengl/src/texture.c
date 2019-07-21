@@ -2,6 +2,7 @@
 #include <math.h> // floor, log2, fmax
 #include <stdlib.h> // malloc, free
 
+#include "shoveler/image.h"
 #include "shoveler/log.h"
 #include "shoveler/opengl.h"
 #include "shoveler/texture.h"
@@ -14,6 +15,9 @@ ShovelerTexture *shovelerTextureCreate2d(ShovelerImage *image, bool manageImage)
 	assert(image->channels <= 4);
 
 	ShovelerTexture *texture = malloc(sizeof(ShovelerTexture));
+	texture->width = image->width;
+	texture->height = image->height;
+	texture->channels = image->channels;
 	texture->image = image;
 	texture->manageImage = manageImage;
 	texture->target = GL_TEXTURE_2D;
@@ -45,7 +49,7 @@ ShovelerTexture *shovelerTextureCreate2d(ShovelerImage *image, bool manageImage)
 	return texture;
 }
 
-ShovelerTexture *shovelerTextureCreateRenderTarget(GLsizei width, GLsizei height, GLsizei samples, int channels, int bitsPerChannel)
+ShovelerTexture *shovelerTextureCreateRenderTarget(unsigned int width, unsigned int height, unsigned int channels, GLsizei samples, int bitsPerChannel)
 {
 	assert(samples >= 1);
 	assert(channels >= 1);
@@ -53,6 +57,9 @@ ShovelerTexture *shovelerTextureCreateRenderTarget(GLsizei width, GLsizei height
 	assert(bitsPerChannel == 8 || bitsPerChannel == 16 || bitsPerChannel == 32);
 
 	ShovelerTexture *texture = malloc(sizeof(ShovelerTexture));
+	texture->width = width;
+	texture->height = height;
+	texture->channels = channels;
 	texture->image = NULL;
 	texture->target = samples > 1 ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
 	glGenTextures(1, &texture->texture);
@@ -111,9 +118,12 @@ ShovelerTexture *shovelerTextureCreateRenderTarget(GLsizei width, GLsizei height
 	return texture;
 }
 
-ShovelerTexture *shovelerTextureCreateDepthTarget(GLsizei width, GLsizei height, GLsizei samples)
+ShovelerTexture *shovelerTextureCreateDepthTarget(unsigned int width, unsigned int height, GLsizei samples)
 {
 	ShovelerTexture *texture = malloc(sizeof(ShovelerTexture));
+	texture->width = width;
+	texture->height = height;
+	texture->channels = 1;
 	texture->image = NULL;
 	texture->target = samples > 1 ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
 	glGenTextures(1, &texture->texture);
@@ -133,9 +143,13 @@ ShovelerTexture *shovelerTextureCreateDepthTarget(GLsizei width, GLsizei height,
 
 bool shovelerTextureUpdate(ShovelerTexture *texture)
 {
+	if(texture->image == NULL) {
+		return false;
+	}
+
 	glBindTexture(texture->target, texture->texture);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-	glTexSubImage2D(texture->target, 0, 0, 0, texture->image->width, texture->image->height, texture->format, GL_UNSIGNED_BYTE, texture->image->data);
+	glTexSubImage2D(texture->target, 0, 0, 0, texture->width, texture->height, texture->format, GL_UNSIGNED_BYTE, texture->image->data);
 	glGenerateMipmap(texture->target);
 	return shovelerOpenGLCheckSuccess();
 }

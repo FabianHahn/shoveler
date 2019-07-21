@@ -6,6 +6,7 @@
 #include "shoveler/material/tilemap.h"
 #include "shoveler/shader_program/model_vertex.h"
 #include "shoveler/camera.h"
+#include "shoveler/image.h"
 #include "shoveler/light.h"
 #include "shoveler/log.h"
 #include "shoveler/material.h"

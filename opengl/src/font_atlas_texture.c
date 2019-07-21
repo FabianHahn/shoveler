@@ -2,6 +2,7 @@
 
 #include "shoveler/font_atlas.h"
 #include "shoveler/font_atlas_texture.h"
+#include "shoveler/image.h"
 #include "shoveler/texture.h"
 
 ShovelerFontAtlasTexture *shovelerFontAtlasTextureCreate(ShovelerFontAtlas *fontAtlas)
