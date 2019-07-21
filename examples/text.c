@@ -23,7 +23,9 @@
 #include <shoveler/opengl.h>
 #include <shoveler/scene.h>
 #include <shoveler/shader_program.h>
+#include <shoveler/text_texture_renderer.h>
 #include <shoveler/texture.h>
+#include <shoveler/tileset.h>
 
 static double frameTimeSinceLastUpdate = 0.0;
 static unsigned int framesSinceLastUpdate = 0;
@@ -88,16 +90,20 @@ int main(int argc, char *argv[])
 
 	ShovelerCanvas *canvas = shovelerCanvasCreate();
 
-	ShovelerFontAtlas *fontAtlas = shovelerFontAtlasCreate(font, 48, 1);
+	ShovelerFontAtlas *fontAtlas = shovelerFontAtlasCreate(font, /* fontSize */ 48, /* padding */ 1);
 	ShovelerFontAtlasTexture *fontAtlasTexture = shovelerFontAtlasTextureCreate(fontAtlas);
 
-	ShovelerCanvasTextSprite textSprite;
-	textSprite.fontAtlasTexture = fontAtlasTexture;
-	textSprite.text = "shoveler";
-	textSprite.corner = shovelerVector2(0.0f, 0.25f);
-	textSprite.size = 0.25f;
-	textSprite.color = shovelerVector4(1.0f, 0.0f, 0.0f, 1.0f);
-	shovelerCanvasAddTextSprite(canvas, &textSprite);
+	ShovelerTextTextureRenderer *textTextureRenderer = shovelerTextTextureRendererCreate(fontAtlasTexture, game->shaderCache);
+	ShovelerTexture *shovelerTextTexture = shovelerTextTextureRendererRender(textTextureRenderer, "shoveler", &game->renderState);
+	ShovelerTileset *textTileset = shovelerTilesetCreateFromTexture(shovelerTextTexture, /* columns */ 1, /* rows */ 1, /* padding */ 0);
+
+	ShovelerCanvasTileSprite textSprite;
+	textSprite.tileset = textTileset;
+	textSprite.tilesetColumn = 0;
+	textSprite.tilesetRow = 0;
+	textSprite.position = shovelerVector2(0.5f, 0.5f);
+	textSprite.size = shovelerVector2(1.0f, (float) shovelerTextTexture->height / shovelerTextTexture->width);
+	shovelerCanvasAddTileSprite(canvas, &textSprite);
 
 	screenspaceTextSprite.fontAtlasTexture = fontAtlasTexture;
 	screenspaceTextSprite.text = "";
@@ -106,11 +112,6 @@ int main(int argc, char *argv[])
 	screenspaceTextSprite.color = shovelerVector4(0.0f, 1.0f, 0.0f, 0.5f);
 	shovelerCanvasAddTextSprite(game->screenspaceCanvas, &screenspaceTextSprite);
 
-	for(const char *c = textSprite.text; *c != '\0'; c++) {
-		unsigned char character = *((unsigned char *) c);
-		shovelerFontAtlasGetGlyph(fontAtlas, character);
-	}
-	shovelerFontAtlasTextureUpdate(fontAtlasTexture);
 	shovelerImagePngWriteFile(fontAtlas->image, "atlas.png");
 
 	ShovelerMaterial *canvasMaterial = shovelerMaterialCanvasCreate(game->shaderCache, /* screenspace */ false);
@@ -134,6 +135,8 @@ int main(int argc, char *argv[])
 	shovelerDrawableFree(quad);
 	shovelerMaterialFree(canvasMaterial);
 	shovelerCanvasFree(canvas);
+	shovelerTilesetFree(textTileset);
+	shovelerTextTextureRendererFree(textTextureRenderer);
 	shovelerFontAtlasTextureFree(fontAtlasTexture);
 	shovelerFontAtlasFree(fontAtlas);
 	shovelerFontsFree(fonts);
