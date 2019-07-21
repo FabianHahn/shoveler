@@ -3,6 +3,8 @@
 #include <stdlib.h> // malloc free
 
 #include "shoveler/image.h"
+#include "shoveler/sampler.h"
+#include "shoveler/texture.h"
 #include "shoveler/tileset.h"
 
 ShovelerTileset *shovelerTilesetCreate(const ShovelerImage *image, unsigned char columns, unsigned char rows, unsigned char padding)
@@ -66,11 +68,27 @@ ShovelerTileset *shovelerTilesetCreate(const ShovelerImage *image, unsigned char
 		}
 	}
 
+	tileset->manageTexture = true;
 	tileset->texture = shovelerTextureCreate2d(paddedImage, true);
 	shovelerTextureUpdate(tileset->texture);
 
 	// create a sampler without mipmapping to prevent seam artifacts between tiles
 	tileset->sampler = shovelerSamplerCreate(true, false, true);
+	return tileset;
+}
+
+ShovelerTileset *shovelerTilesetCreateFromTexture(ShovelerTexture *texture, unsigned char columns, unsigned char rows, unsigned char padding)
+{
+	ShovelerTileset *tileset = malloc(sizeof(ShovelerTileset));
+	tileset->columns = columns;
+	tileset->rows = rows;
+	tileset->padding = padding;
+	tileset->manageTexture = false;
+	tileset->texture = texture;
+
+	// create a sampler without mipmapping to prevent seam artifacts between tiles
+	tileset->sampler = shovelerSamplerCreate(true, false, true);
+
 	return tileset;
 }
 
@@ -81,6 +99,10 @@ void shovelerTilesetFree(ShovelerTileset *tileset)
 	}
 
 	shovelerSamplerFree(tileset->sampler);
-	shovelerTextureFree(tileset->texture);
+
+	if(tileset->manageTexture) {
+		shovelerTextureFree(tileset->texture);
+	}
+
 	free(tileset);
 }

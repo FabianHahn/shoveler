@@ -5,7 +5,7 @@
 
 #include <glad/glad.h>
 
-typedef struct {
+typedef struct ShovelerSamplerStruct {
 	GLuint sampler;
 } ShovelerSampler;
 
