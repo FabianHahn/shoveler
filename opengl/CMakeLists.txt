@@ -54,6 +54,7 @@ set(SHOVELER_OPENGL_SRC
 	src/shader.c
 	src/shader_cache.c
 	src/shader_program.c
+	src/text_texture_renderer.c
 	src/texture.c
 	src/tile_sprite_animation.c
 	src/tilemap.c
@@ -123,6 +124,7 @@ set(SHOVELER_OPENGL_SRC
 	include/shoveler/shader.h
 	include/shoveler/shader_cache.h
 	include/shoveler/shader_program.h
+	include/shoveler/text_texture_renderer.h
 	include/shoveler/texture.h
 	include/shoveler/tile_sprite_animation.h
 	include/shoveler/tilemap.h
