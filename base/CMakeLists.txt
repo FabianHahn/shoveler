@@ -6,6 +6,7 @@ set(SHOVELER_BASE_SRC
 	src/view/resources.c
 	src/colliders.c
 	src/color.c
+	src/component.c
 	src/compression.c
 	src/executor.c
 	src/file.c
@@ -27,6 +28,7 @@ set(SHOVELER_BASE_SRC
 	include/shoveler/collider.h
 	include/shoveler/colliders.h
 	include/shoveler/color.h
+	include/shoveler/component.h
 	include/shoveler/compression.h
 	include/shoveler/constants.h
 	include/shoveler/executor.h
@@ -49,6 +51,7 @@ set(SHOVELER_BASE_TEST_SRC
 	src/view/resources_test.cpp
 	src/colliders_test.cpp
 	src/color_test.cpp
+	src/component_test.cpp
 	src/compression_test.cpp
 	src/executor_test.cpp
 	src/frustum_test.cpp
