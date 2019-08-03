@@ -5,6 +5,7 @@
 
 extern "C" {
 #include "shoveler/view/resources.h"
+#include "shoveler/component.h"
 }
 
 static void *loadResource(ShovelerResourcesTypeLoader *typeLoader, const unsigned char *buffer, size_t bytes);
@@ -101,7 +102,8 @@ TEST_F(ShovelerViewResourcesTest, updateResource)
 
 	ShovelerResource *resource = shovelerResourcesGet(resources, testTypeId, testResourceId);
 	nextLoadResourceData = (void *) otherTestResourceData;
-	bool resourceComponentUpdated = shovelerViewEntityUpdateResource(testEntity, configuration);
+	ShovelerComponent *component = shovelerViewEntityGetTypedComponent(testEntity, shovelerViewResourceComponentName);
+	bool resourceComponentUpdated = shovelerComponentUpdateConfigurationOptionString(component, shovelerViewResourceTypeIdOptionKey, testTypeId);
 	ASSERT_TRUE(resourceComponentUpdated);
 	ASSERT_TRUE(resource->data == otherTestResourceData) << "resource data should have changed after component update";
 }
