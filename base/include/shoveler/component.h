@@ -22,6 +22,7 @@ typedef enum {
 	SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_VECTOR2,
 	SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_VECTOR3,
 	SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_VECTOR4,
+	SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BYTES,
 } ShovelerComponentConfigurationOptionType;
 
 typedef	struct {
@@ -37,6 +38,10 @@ typedef	struct {
 		ShovelerVector2 vector2Value;
 		ShovelerVector3 vector3Value;
 		ShovelerVector4 vector4Value;
+		struct {
+			unsigned char *data;
+			size_t size;
+		} bytesValue;
 	};
 } ShovelerComponentConfigurationValue;
 
@@ -151,6 +156,15 @@ static inline bool shovelerComponentTypeAddConfigurationOptionVector4(ShovelerCo
 	return shovelerComponentTypeAddConfigurationOption(componentType, key, value.type, &value, update);
 }
 
+static inline bool shovelerComponentTypeAddConfigurationOptionBytes(ShovelerComponentType *componentType, const char *key, const unsigned char *defaultValueData, size_t defaultValueSize, ShovelerComponentTypeConfigurationOptionUpdateFunction *update)
+{
+	ShovelerComponentConfigurationValue value;
+	value.type = SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BYTES;
+	value.bytesValue.data = (unsigned char *) defaultValueData; // won't be modified
+	value.bytesValue.size = defaultValueSize;
+	return shovelerComponentTypeAddConfigurationOption(componentType, key, value.type, &value, update);
+}
+
 ShovelerComponent *shovelerComponentCreate(ShovelerComponentType *type, void *callbackUserData);
 bool shovelerComponentUpdateConfigurationOption(ShovelerComponent *component, const char *key, const ShovelerComponentConfigurationValue *value);
 const ShovelerComponentConfigurationValue *shovelerComponentGetConfigurationValue(ShovelerComponent *component, const char *key);
@@ -228,6 +242,15 @@ static inline bool shovelerComponentUpdateConfigurationOptionVector4(ShovelerCom
 	ShovelerComponentConfigurationValue value;
 	value.type = SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_VECTOR4;
 	value.vector4Value = vector4Value;
+	return shovelerComponentUpdateConfigurationOption(component, key, &value);
+}
+
+static inline bool shovelerComponentUpdateConfigurationOptionBytes(ShovelerComponent *component, const char *key, const unsigned char *data, size_t size)
+{
+	ShovelerComponentConfigurationValue value;
+	value.type = SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BYTES;
+	value.bytesValue.data = (unsigned char *) data; // won't be modified
+	value.bytesValue.size = size;
 	return shovelerComponentUpdateConfigurationOption(component, key, &value);
 }
 
@@ -310,6 +333,16 @@ static inline ShovelerVector4 shovelerComponentGetConfigurationValueVector4(Shov
 	assert(configurationValue->type == SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_VECTOR4);
 
 	return configurationValue->vector4Value;
+}
+
+static inline void shovelerComponentGetConfigurationValueBytes(ShovelerComponent *component, const char *key, const unsigned char **outputData, size_t *outputSize)
+{
+	const ShovelerComponentConfigurationValue *configurationValue = shovelerComponentGetConfigurationValue(component, key);
+	assert(configurationValue != NULL);
+	assert(configurationValue->type == SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BYTES);
+
+	*outputData = configurationValue->bytesValue.data;
+	*outputSize = configurationValue->bytesValue.size;
 }
 
 #endif

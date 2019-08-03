@@ -1,6 +1,6 @@
 #include <assert.h> // assert
 #include <stdlib.h> // malloc free
-#include <string.h> // strdup
+#include <string.h> // strdup memcpy
 
 #include "shoveler/component.h"
 
@@ -172,6 +172,11 @@ static ShovelerComponentConfigurationValue *copyConfigurationValue(const Shovele
 		case SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_VECTOR4:
 			copy->vector4Value = reference->vector4Value;
 			break;
+		case SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BYTES:
+			copy->bytesValue.data = malloc(reference->bytesValue.size * sizeof(unsigned char));
+			copy->bytesValue.size = reference->bytesValue.size;
+			memcpy(copy->bytesValue.data, reference->bytesValue.data, reference->bytesValue.size);
+			break;
 	}
 
 	return copy;
@@ -210,6 +215,12 @@ static void assignConfigurationValue(ShovelerComponentConfigurationValue *target
 		case SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_VECTOR4:
 			target->vector4Value = source->vector4Value;
 			break;
+		case SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BYTES:
+			free(target->bytesValue.data);
+			target->bytesValue.data = malloc(source->bytesValue.size * sizeof(unsigned char));
+			target->bytesValue.size = source->bytesValue.size;
+			memcpy(target->bytesValue.data, source->bytesValue.data, source->bytesValue.size);
+			break;
 	}
 }
 
@@ -219,6 +230,8 @@ static void freeConfigurationValue(void *configurationValuePointer)
 
 	if(configurationValue->type == SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_STRING) {
 		free(configurationValue->stringValue);
+	} else if(configurationValue->type == SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BYTES) {
+		free(configurationValue->bytesValue.data);
 	}
 
 	free(configurationValue);
