@@ -20,6 +20,8 @@ public:
 		collidingTiles[9 * 10 + 9] = true;
 
 		tilesData = shovelerImageCreate(10, 10, 3);
+		tiles.width = 10;
+		tiles.height = 10;
 		tiles.image = tilesData;
 
 		tilemap = shovelerTilemapCreate(&tiles, collidingTiles);
