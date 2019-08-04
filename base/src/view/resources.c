@@ -54,6 +54,18 @@ bool shovelerViewEntityGetResourceConfiguration(ShovelerViewEntity *entity, Shov
 	return true;
 }
 
+bool shovelerViewEntityUpdateResourceConfiguration(ShovelerViewEntity *entity, ShovelerViewResourceConfiguration configuration)
+{
+	ShovelerComponent *component = shovelerViewEntityGetTypedComponent(entity, shovelerViewResourceComponentName);
+	if(component == NULL) {
+		return false;
+	}
+
+	shovelerComponentUpdateConfigurationOptionString(component, shovelerViewResourceTypeIdOptionKey, configuration.typeId);
+	shovelerComponentUpdateConfigurationOptionBytes(component, shovelerViewResourceBufferOptionKey, configuration.buffer, configuration.bufferSize);
+	return true;
+}
+
 bool shovelerViewEntityRemoveResource(ShovelerViewEntity *entity)
 {
 	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewResourceComponentName);
