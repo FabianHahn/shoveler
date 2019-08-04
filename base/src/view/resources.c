@@ -7,34 +7,31 @@
 #include "shoveler/view/resources.h"
 #include "shoveler/component.h"
 #include "shoveler/log.h"
+#include "shoveler/resources.h"
 
-static unsigned char defaultBufferData = 0;
+static void *activateResourceComponent(ShovelerComponent *component);
+static void deactivateResourceComponent(ShovelerComponent *component);
 
-static void *activateResourceComponent(ShovelerComponent *component, void *viewComponentPointer);
-static void deactivateResourceComponent(ShovelerComponent *component, void *viewComponentPointer);
-
-bool shovelerViewEntityAddResource(ShovelerViewEntity *entity, ShovelerViewResourceConfiguration configuration)
+ShovelerComponent *shovelerViewEntityAddResource(ShovelerViewEntity *entity, ShovelerViewResourceConfiguration configuration)
 {
-	if(!shovelerViewHasComponentType(entity->view, shovelerViewResourceComponentName)) {
-		ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerViewResourceComponentName, activateResourceComponent, deactivateResourceComponent);
-		shovelerComponentTypeAddConfigurationOptionString(componentType, shovelerViewResourceTypeIdOptionKey, "", NULL);
-		shovelerComponentTypeAddConfigurationOptionBytes(componentType, shovelerViewResourceBufferOptionKey, &defaultBufferData, 1, NULL);
+	if(!shovelerViewHasComponentType(entity->view, shovelerViewResourceComponentTypeName)) {
+		ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerViewResourceComponentTypeName, activateResourceComponent, deactivateResourceComponent);
+		shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewResourceTypeIdOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_STRING, /* isOptional */ false, /* liveUpdate */ NULL);
+		shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewResourceBufferOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BYTES, /* isOptional */ false, /* liveUpdate */ NULL);
 		shovelerViewAddComponentType(entity->view, componentType);
 	}
 
-	ShovelerViewComponent *viewComponent = shovelerViewEntityAddTypedComponent(entity, shovelerViewResourceComponentName);
-	shovelerComponentUpdateConfigurationOptionString(viewComponent->data, shovelerViewResourceTypeIdOptionKey, configuration.typeId);
-	shovelerComponentUpdateConfigurationOptionBytes(viewComponent->data, shovelerViewResourceBufferOptionKey, configuration.buffer, configuration.bufferSize);
+	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerViewResourceComponentTypeName);
+	shovelerComponentUpdateCanonicalConfigurationOptionString(component, shovelerViewResourceTypeIdOptionKey, configuration.typeId);
+	shovelerComponentUpdateCanonicalConfigurationOptionBytes(component, shovelerViewResourceBufferOptionKey, configuration.buffer, configuration.bufferSize);
 
-	shovelerViewComponentActivate(viewComponent);
-	return true;
+	shovelerComponentActivate(component);
+	return component;
 }
 
 void *shovelerViewEntityGetResource(ShovelerViewEntity *entity)
 {
-	assert(shovelerViewHasResources(entity->view));
-
-	ShovelerComponent *component = shovelerViewEntityGetTypedComponent(entity, shovelerViewResourceComponentName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewResourceComponentTypeName);
 	if(component == NULL) {
 		return NULL;
 	}
@@ -44,7 +41,7 @@ void *shovelerViewEntityGetResource(ShovelerViewEntity *entity)
 
 bool shovelerViewEntityGetResourceConfiguration(ShovelerViewEntity *entity, ShovelerViewResourceConfiguration *outputConfiguration)
 {
-	ShovelerComponent *component = shovelerViewEntityGetTypedComponent(entity, shovelerViewResourceComponentName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewResourceComponentTypeName);
 	if(component == NULL) {
 		return false;
 	}
@@ -56,36 +53,35 @@ bool shovelerViewEntityGetResourceConfiguration(ShovelerViewEntity *entity, Shov
 
 bool shovelerViewEntityUpdateResourceConfiguration(ShovelerViewEntity *entity, ShovelerViewResourceConfiguration configuration)
 {
-	ShovelerComponent *component = shovelerViewEntityGetTypedComponent(entity, shovelerViewResourceComponentName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewResourceComponentTypeName);
 	if(component == NULL) {
 		return false;
 	}
 
-	shovelerComponentUpdateConfigurationOptionString(component, shovelerViewResourceTypeIdOptionKey, configuration.typeId);
-	shovelerComponentUpdateConfigurationOptionBytes(component, shovelerViewResourceBufferOptionKey, configuration.buffer, configuration.bufferSize);
+	shovelerComponentUpdateCanonicalConfigurationOptionString(component, shovelerViewResourceTypeIdOptionKey, configuration.typeId);
+	shovelerComponentUpdateCanonicalConfigurationOptionBytes(component, shovelerViewResourceBufferOptionKey, configuration.buffer, configuration.bufferSize);
 	return true;
 }
 
 bool shovelerViewEntityRemoveResource(ShovelerViewEntity *entity)
 {
-	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewResourceComponentName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewResourceComponentTypeName);
 	if(component == NULL) {
 		shovelerLogWarning("Trying to remove resource from entity %lld which does not have a resource, ignoring.", entity->entityId);
 		return false;
 	}
 
-	return shovelerViewEntityRemoveComponent(entity, shovelerViewResourceComponentName);
+	return shovelerViewEntityRemoveComponent(entity, shovelerViewResourceComponentTypeName);
 }
 
-static void *activateResourceComponent(ShovelerComponent *component, void *viewComponentPointer)
+static void *activateResourceComponent(ShovelerComponent *component)
 {
-	ShovelerViewComponent *viewComponent = viewComponentPointer;
-	assert(shovelerViewHasResources(viewComponent->entity->view));
+	assert(shovelerViewHasResources(component->entity->view));
 
-	ShovelerResources *resources = shovelerViewGetResources(viewComponent->entity->view);
+	ShovelerResources *resources = shovelerViewGetResources(component->entity->view);
 
 	GString *resourceId = g_string_new("");
-	g_string_append_printf(resourceId, "%lld", viewComponent->entity->entityId);
+	g_string_append_printf(resourceId, "%lld", component->entity->entityId);
 
 	const char *typeId = shovelerComponentGetConfigurationValueString(component, shovelerViewResourceTypeIdOptionKey);
 	const unsigned char *bufferData;
@@ -102,7 +98,7 @@ static void *activateResourceComponent(ShovelerComponent *component, void *viewC
 	return resource->data;
 }
 
-static void deactivateResourceComponent(ShovelerComponent *component, void *viewComponentPointer)
+static void deactivateResourceComponent(ShovelerComponent *component)
 {
 	// nothing to do here, resources are currently persisted
 }

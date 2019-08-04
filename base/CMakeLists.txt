@@ -51,7 +51,6 @@ set(SHOVELER_BASE_TEST_SRC
 	src/view/resources_test.cpp
 	src/colliders_test.cpp
 	src/color_test.cpp
-	src/component_test.cpp
 	src/compression_test.cpp
 	src/executor_test.cpp
 	src/frustum_test.cpp

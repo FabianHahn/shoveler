@@ -4,8 +4,9 @@
 #include <stdbool.h> // bool
 #include <stddef.h> // size_t
 
-#include <shoveler/resources.h>
 #include <shoveler/view.h>
+
+typedef struct ShovelerResourcesStruct ShovelerResources;
 
 typedef struct {
 	const char *typeId;
@@ -13,16 +14,21 @@ typedef struct {
 	size_t bufferSize;
 } ShovelerViewResourceConfiguration;
 
-static const char *shovelerViewResourceComponentName = "resource";
+static const char *shovelerViewResourceComponentTypeName = "resource";
 static const char *shovelerViewResourceTypeIdOptionKey = "type_id";
 static const char *shovelerViewResourceBufferOptionKey = "buffer";
 static const char *shovelerViewResourcesTargetName = "resources";
 
-bool shovelerViewEntityAddResource(ShovelerViewEntity *entity, ShovelerViewResourceConfiguration configuration);
+ShovelerComponent *shovelerViewEntityAddResource(ShovelerViewEntity *entity, ShovelerViewResourceConfiguration configuration);
 void *shovelerViewEntityGetResource(ShovelerViewEntity *entity);
 bool shovelerViewEntityGetResourceConfiguration(ShovelerViewEntity *entity, ShovelerViewResourceConfiguration *outputConfiguration);
 bool shovelerViewEntityUpdateResourceConfiguration(ShovelerViewEntity *entity, ShovelerViewResourceConfiguration configuration);
 bool shovelerViewEntityRemoveResource(ShovelerViewEntity *entity);
+
+static inline ShovelerComponent *shovelerViewEntityGetResourceComponent(ShovelerViewEntity *entity)
+{
+	return shovelerViewEntityGetComponent(entity, shovelerViewResourceComponentTypeName);
+}
 
 static inline bool shovelerViewSetResources(ShovelerView *view, ShovelerResources *resources)
 {
