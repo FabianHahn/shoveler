@@ -19,7 +19,7 @@ typedef struct {
 	ShovelerVector2 size;
 } ShovelerViewTileSpriteConfiguration;
 
-static const char *shovelerViewTileSpriteComponentName = "tile_sprite";
+static const char *shovelerViewTileSpriteComponentTypeName = "tile_sprite";
 
 /** Adds a canvas tile sprite component to an entity, copying the supplied configuration. */
 bool shovelerViewEntityAddTileSprite(ShovelerViewEntity *entity, const ShovelerViewTileSpriteConfiguration *configuration);

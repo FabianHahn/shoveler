@@ -25,6 +25,7 @@ set(SHOVELER_OPENGL_SRC
 	src/shader_program/model_vertex_screenspace.c
 	src/view/canvas.c
 	src/view/chunk.c
+	src/view/chunk_layer.c
 	src/view/client.c
 	src/view/drawable.c
 	src/view/light.c
@@ -89,6 +90,7 @@ set(SHOVELER_OPENGL_SRC
 	include/shoveler/shader_program/model_vertex_screenspace.h
 	include/shoveler/view/canvas.h
 	include/shoveler/view/chunk.h
+	include/shoveler/view/chunk_layer.h
 	include/shoveler/view/client.h
 	include/shoveler/view/controller.h
 	include/shoveler/view/drawable.h
