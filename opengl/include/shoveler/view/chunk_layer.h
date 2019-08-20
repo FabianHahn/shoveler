@@ -3,8 +3,6 @@
 
 #include <stdbool.h> // bool
 
-#include <glib.h>
-
 #include <shoveler/chunk.h>
 #include <shoveler/component.h>
 #include <shoveler/view.h>
@@ -27,5 +25,10 @@ bool shovelerViewEntityGetChunkLayerConfiguration(ShovelerViewEntity *entity, Sh
 /** Updates a chunk layer component of an entity, copying the supplied configuration. */
 bool shovelerViewEntityUpdateChunkLayer(ShovelerViewEntity *entity, const ShovelerViewChunkLayerConfiguration *configuration);
 bool shovelerViewEntityRemoveChunkLayer(ShovelerViewEntity *entity);
+
+static inline ShovelerComponent *shovelerViewEntityGetChunkLayerComponent(ShovelerViewEntity *entity)
+{
+	return shovelerViewEntityGetComponent(entity, shovelerViewChunkLayerComponentTypeName);
+}
 
 #endif
