@@ -5,184 +5,105 @@
 #include "shoveler/view/controller.h"
 #include "shoveler/view/model.h"
 #include "shoveler/view/position.h"
+#include "shoveler/component.h"
 #include "shoveler/controller.h"
 #include "shoveler/log.h"
 #include "shoveler/model.h"
 #include "shoveler/types.h"
 #include "shoveler/view.h"
 
-typedef struct {
-	ShovelerViewClientConfiguration configuration;
-	ShovelerViewEntity *entity;
-	ShovelerControllerMoveCallback *moveCallback;
-} ComponentData;
+static void moveCallback(ShovelerController *controller, ShovelerVector3 position, void *componentPointer);
+static void *activateClientComponent(ShovelerComponent *component);
+static void deactivateClientComponent(ShovelerComponent *component);
 
-static void assignConfiguration(ShovelerViewClientConfiguration *destination, const ShovelerViewClientConfiguration *source);
-static void clearConfiguration(ShovelerViewClientConfiguration *configuration);
-static void moveCallback(ShovelerController *controller, ShovelerVector3 position, void *componentDataPointer);
-static bool activateComponent(ShovelerViewComponent *component, void *componentDataPointer);
-static void deactivateComponent(ShovelerViewComponent *component, void *componentDataPointer);
-static void freeComponent(ShovelerViewComponent *component, void *componentDataPointer);
-
-bool shovelerViewEntityAddClient(ShovelerViewEntity *entity, const ShovelerViewClientConfiguration *configuration)
+ShovelerComponent *shovelerViewEntityAddClient(ShovelerViewEntity *entity, const ShovelerViewClientConfiguration *configuration)
 {
-	assert(shovelerViewHasController(entity->view));
-
-	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewClientComponentName);
-	if(component != NULL) {
-		shovelerLogWarning("Trying to add client to entity %lld which already has a client, ignoring.", entity->entityId);
-		return false;
+	if(!shovelerViewHasComponentType(entity->view, shovelerViewClientComponentTypeName)) {
+		ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerViewClientComponentTypeName, activateClientComponent, deactivateClientComponent);
+		shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerViewClientPositionOptionKey, shovelerViewPositionComponentTypeName, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL);
+		shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerViewClientModelOptionKey, shovelerViewModelComponentTypeName, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL);
+		shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewClientDisableModelVisibilityOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BOOL, /* isOptional */ true, /* liveUpdate */ NULL);
+		shovelerViewAddComponentType(entity->view, componentType);
 	}
 
-	ComponentData *componentData = malloc(sizeof(ComponentData));
-	componentData->configuration.positionEntityId = 0;
-	componentData->configuration.modelEntityId = 0;
-	componentData->configuration.disableModelVisibility = false;
-	componentData->entity = entity;
-	componentData->moveCallback = NULL;
-
-	assignConfiguration(&componentData->configuration, configuration);
-
-	component = shovelerViewEntityAddComponent(entity, shovelerViewClientComponentName, componentData, activateComponent, deactivateComponent, freeComponent);
-	assert(component != NULL);
-
-	shovelerViewComponentAddDependency(component, componentData->configuration.positionEntityId, shovelerViewPositionComponentName);
-
-	if(componentData->configuration.modelEntityId > 0) {
-		shovelerViewComponentAddDependency(component, componentData->configuration.modelEntityId, shovelerViewModelComponentName);
+	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerViewClientComponentTypeName);
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewClientPositionOptionKey, configuration->positionEntityId);
+	if(configuration->modelEntityId != 0) {
+		shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewClientModelOptionKey, configuration->modelEntityId);
+		shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewClientDisableModelVisibilityOptionKey, configuration->disableModelVisibility);
 	}
 
-	return true;
+	shovelerComponentActivate(component);
+	return component;
 }
 
-const ShovelerViewClientConfiguration *shovelerViewEntityGetClientConfiguration(ShovelerViewEntity *entity)
+bool shovelerViewEntityGetClientConfiguration(ShovelerViewEntity *entity, ShovelerViewClientConfiguration *outputConfiguration)
 {
-	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewClientComponentName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewClientComponentTypeName);
 	if(component == NULL) {
 		return false;
 	}
 
-	ComponentData *componentData = component->data;
-	return &componentData->configuration;
-}
-
-bool shovelerViewEntityDelegateClient(ShovelerViewEntity *entity)
-{
-	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewClientComponentName);
-	if(component == NULL) {
-		shovelerLogWarning("Trying to delegate client on entity %lld which does not have a client, ignoring.", entity->entityId);
-		return false;
+	outputConfiguration->positionEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerViewClientPositionOptionKey);
+	if(shovelerComponentHasConfigurationValue(component, shovelerViewClientModelOptionKey)) {
+		outputConfiguration->modelEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerViewClientModelOptionKey);
+		outputConfiguration->disableModelVisibility = shovelerComponentGetConfigurationValueBool(component, shovelerViewClientDisableModelVisibilityOptionKey);
 	}
-
-	shovelerViewComponentDelegate(component);
-	shovelerViewComponentActivate(component);
-	return true;
-}
-
-bool shovelerViewEntityUndelegateClient(ShovelerViewEntity *entity)
-{
-	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewClientComponentName);
-	if(component == NULL) {
-		shovelerLogWarning("Trying to undelegate client on entity %lld which does not have a client, ignoring.", entity->entityId);
-		return false;
-	}
-
-	shovelerViewComponentDeactivate(component);
-	shovelerViewComponentUndelegate(component);
 	return true;
 }
 
 bool shovelerViewEntityUpdateClient(ShovelerViewEntity *entity, const ShovelerViewClientConfiguration *configuration)
 {
-	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewClientComponentName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewClientComponentTypeName);
 	if(component == NULL) {
 		shovelerLogWarning("Trying to update client of entity %lld which does not have a client, ignoring.", entity->entityId);
 		return false;
 	}
 
-	ComponentData *componentData = component->data;
-
-	shovelerViewComponentDeactivate(component);
-
-	if(!shovelerViewComponentRemoveDependency(component, componentData->configuration.modelEntityId, shovelerViewModelComponentName)) {
-		return false;
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewClientPositionOptionKey, configuration->positionEntityId);
+	if(configuration->modelEntityId != 0) {
+		shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewClientModelOptionKey, configuration->modelEntityId);
+		shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewClientDisableModelVisibilityOptionKey, configuration->disableModelVisibility);
 	}
-
-	if(!shovelerViewComponentRemoveDependency(component, componentData->configuration.positionEntityId, shovelerViewPositionComponentName)) {
-		return false;
-	}
-
-	assignConfiguration(&componentData->configuration, configuration);
-
-	shovelerViewComponentAddDependency(component, componentData->configuration.positionEntityId, shovelerViewPositionComponentName);
-
-	if(componentData->configuration.modelEntityId > 0) {
-		shovelerViewComponentAddDependency(component, componentData->configuration.modelEntityId, shovelerViewModelComponentName);
-	}
-
-	shovelerViewComponentActivate(component);
-
-	shovelerViewComponentUpdate(component);
-	return true;
 }
 
 bool shovelerViewEntityRemoveClient(ShovelerViewEntity *entity)
 {
-	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewClientComponentName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewClientComponentTypeName);
 	if(component == NULL) {
 		shovelerLogWarning("Trying to remove client from entity %lld which does not have a client, ignoring.", entity->entityId);
 		return false;
 	}
 
-	return shovelerViewEntityRemoveComponent(entity, shovelerViewClientComponentName);
+	return shovelerViewEntityRemoveComponent(entity, shovelerViewClientComponentTypeName);
 }
 
-static void assignConfiguration(ShovelerViewClientConfiguration *destination, const ShovelerViewClientConfiguration *source)
+static void moveCallback(ShovelerController *controller, ShovelerVector3 position, void *componentPointer)
 {
-	clearConfiguration(destination);
+	ShovelerComponent *component = componentPointer;
 
-	destination->positionEntityId = source->positionEntityId;
-	destination->modelEntityId = source->modelEntityId;
-	destination->disableModelVisibility = source->disableModelVisibility;
-}
-
-static void clearConfiguration(ShovelerViewClientConfiguration *configuration)
-{
-	configuration->positionEntityId = 0;
-	configuration->modelEntityId = 0;
-	configuration->disableModelVisibility = false;
-}
-
-static void moveCallback(ShovelerController *controller, ShovelerVector3 position, void *componentDataPointer)
-{
-	ComponentData *componentData = componentDataPointer;
-
-	ShovelerViewEntity *positionEntity = shovelerViewGetEntity(componentData->entity->view, componentData->configuration.positionEntityId);
+	long long int positionEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerViewClientPositionOptionKey);
+	ShovelerViewEntity *positionEntity = shovelerViewGetEntity(component->entity->view, positionEntityId);
 	assert(positionEntity != NULL);
-	shovelerViewEntityRequestPositionUpdate(positionEntity, position.values[0], position.values[1], position.values[2]);
+
+	// TODO shovelerViewEntityRequestPositionUpdate(positionEntity, position.values[0], position.values[1], position.values[2]);
 }
 
-static bool activateComponent(ShovelerViewComponent *component, void *componentDataPointer)
+static void *activateClientComponent(ShovelerComponent *component)
 {
 	assert(shovelerViewHasController(component->entity->view));
 
-	ComponentData *componentData = componentDataPointer;
-
-	if(!component->authoritative) {
-		shovelerLogWarning("Failed to activate client of entity %lld because it is not authoritative.", component->entity->entityId);
-		return false;
-	}
-
-	ShovelerViewEntity *positionEntity = shovelerViewGetEntity(componentData->entity->view, componentData->configuration.positionEntityId);
+	long long int positionEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerViewClientPositionOptionKey);
+	ShovelerViewEntity *positionEntity = shovelerViewGetEntity(component->entity->view, positionEntityId);
 	assert(positionEntity != NULL);
-	ShovelerViewPosition *position = shovelerViewEntityGetPosition(positionEntity);
+	const ShovelerVector3 *positionCoordinates = shovelerViewEntityGetPositionCoordinates(positionEntity);
 
 	ShovelerController *controller = shovelerViewGetController(component->entity->view);
 	ShovelerReferenceFrame frame = controller->frame;
-	frame.position = shovelerVector3(position->x, position->y, position->z);
+	frame.position = *positionCoordinates;
 	shovelerControllerSetFrame(controller, &frame);
 
-	componentData->moveCallback = shovelerControllerAddMoveCallback(controller, moveCallback, componentData);
+	ShovelerControllerMoveCallback *moveCallback = shovelerControllerAddMoveCallback(controller, moveCallback, component);
 
 	if(componentData->configuration.modelEntityId > 0) {
 		ShovelerViewEntity *modelEntity = shovelerViewGetEntity(component->entity->view, componentData->configuration.modelEntityId);
@@ -194,10 +115,10 @@ static bool activateComponent(ShovelerViewComponent *component, void *componentD
 		}
 	}
 
-	return true;
+	return moveCallback;
 }
 
-static void deactivateComponent(ShovelerViewComponent *component, void *componentDataPointer)
+static void deactivateClientComponent(ShovelerComponent *component)
 {
 	assert(shovelerViewHasController(component->entity->view));
 
@@ -218,7 +139,7 @@ static void deactivateComponent(ShovelerViewComponent *component, void *componen
 	}
 }
 
-static void freeComponent(ShovelerViewComponent *component, void *componentDataPointer)
+static void freeComponent(ShovelerComponent *component, void *componentDataPointer)
 {
 	assert(shovelerViewHasController(component->entity->view));
 

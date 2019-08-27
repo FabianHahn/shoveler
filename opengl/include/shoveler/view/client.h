@@ -5,8 +5,6 @@
 
 #include <shoveler/view.h>
 
-static const char *shovelerViewClientComponentName = "client";
-
 typedef struct {
 	/** Position dependency component to track. */
 	long long int positionEntityId;
@@ -16,13 +14,21 @@ typedef struct {
 	bool disableModelVisibility;
 } ShovelerViewClientConfiguration;
 
+static const char *shovelerViewClientComponentTypeName = "client";
+static const char *shovelerViewClientPositionOptionKey = "position";
+static const char *shovelerViewClientModelOptionKey = "model";
+static const char *shovelerViewClientDisableModelVisibilityOptionKey = "disable_model_visibility";
+
 /** Adds a client component to an entity, copying the supplied configuration. */
-bool shovelerViewEntityAddClient(ShovelerViewEntity *entity, const ShovelerViewClientConfiguration *configuration);
-const ShovelerViewClientConfiguration *shovelerViewEntityGetClientConfiguration(ShovelerViewEntity *entity);
-bool shovelerViewEntityDelegateClient(ShovelerViewEntity *entity);
-bool shovelerViewEntityUndelegateClient(ShovelerViewEntity *entity);
+ShovelerComponent *shovelerViewEntityAddClient(ShovelerViewEntity *entity, const ShovelerViewClientConfiguration *configuration);
+bool shovelerViewEntityGetClientConfiguration(ShovelerViewEntity *entity, ShovelerViewClientConfiguration *outputConfiguration);
 /** Updates a client component of an entity, copying the supplied configuration. */
 bool shovelerViewEntityUpdateClient(ShovelerViewEntity *entity, const ShovelerViewClientConfiguration *configuration);
 bool shovelerViewEntityRemoveClient(ShovelerViewEntity *entity);
+
+static inline ShovelerComponent *shovelerViewEntityGetCanvasComponent(ShovelerViewEntity *entity)
+{
+	return shovelerViewEntityGetComponent(entity, shovelerViewClientComponentTypeName);
+}
 
 #endif

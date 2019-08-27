@@ -21,7 +21,7 @@ typedef struct {
 	GLuint polygonMode;
 } ShovelerViewModelConfiguration;
 
-static const char *shovelerViewModelComponentName = "model";
+static const char *shovelerViewModelComponentTypeName = "model";
 
 bool shovelerViewEntityAddModel(ShovelerViewEntity *entity, ShovelerViewModelConfiguration configuration);
 ShovelerModel *shovelerViewEntityGetModel(ShovelerViewEntity *entity);
