@@ -257,6 +257,11 @@ bool shovelerViewEntityIsAuthoritative(ShovelerViewEntity *entity, const char *c
 void shovelerViewEntityUndelegate(ShovelerViewEntity *entity, const char *componentTypeName)
 {
 	g_hash_table_remove(entity->authoritativeComponents, componentTypeName);
+
+	ShovelerComponent *component = g_hash_table_lookup(entity->components, componentTypeName);
+	if(component != NULL && component->type->requiresAuthority) {
+		shovelerComponentDeactivate(component);
+	}
 }
 
 void shovelerViewEntitySetType(ShovelerViewEntity *entity, const char *type)

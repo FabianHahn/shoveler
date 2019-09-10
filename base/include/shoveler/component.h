@@ -71,6 +71,7 @@ typedef struct ShovelerComponentTypeStruct {
 	GHashTable *configurationOptions;
 	ShovelerComponentTypeActivationFunction *activate;
 	ShovelerComponentTypeDeactivationFunction *deactivate;
+	bool requiresAuthority;
 } ShovelerComponentType;
 
 typedef struct ShovelerComponentStruct {
@@ -81,7 +82,7 @@ typedef struct ShovelerComponentStruct {
 	void *data;
 } ShovelerComponent;
 
-ShovelerComponentType *shovelerComponentTypeCreate(const char *name, ShovelerComponentTypeActivationFunction *activate, ShovelerComponentTypeDeactivationFunction *deactivate);
+ShovelerComponentType *shovelerComponentTypeCreate(const char *name, ShovelerComponentTypeActivationFunction *activate, ShovelerComponentTypeDeactivationFunction *deactivate, bool requiresAuthority);
 /**
  * Adds a new configuration option to the component type.
  *

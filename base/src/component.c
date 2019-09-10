@@ -14,13 +14,14 @@ static void freeConfigurationValue(void *configurationValuePointer);
 static long long int toDependencyTargetEntityId(ShovelerComponent *component, const ShovelerComponentConfigurationValue *configurationValue);
 static void freeConfigurationOption(void *configurationOptionPointer);
 
-ShovelerComponentType *shovelerComponentTypeCreate(const char *name, ShovelerComponentTypeActivationFunction *activate, ShovelerComponentTypeDeactivationFunction *deactivate)
+ShovelerComponentType *shovelerComponentTypeCreate(const char *name, ShovelerComponentTypeActivationFunction *activate, ShovelerComponentTypeDeactivationFunction *deactivate, bool requiresAuthority)
 {
 	ShovelerComponentType *componentType = malloc(sizeof(ShovelerComponentType));
 	componentType->name = strdup(name);
 	componentType->configurationOptions = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, freeConfigurationOption);
 	componentType->activate = activate;
 	componentType->deactivate = deactivate;
+	componentType->requiresAuthority = requiresAuthority;
 
 	return componentType;
 }
@@ -206,6 +207,10 @@ bool shovelerComponentActivate(ShovelerComponent *component)
 {
 	if(component->data != NULL) {
 		return true;
+	}
+
+	if(component->type->requiresAuthority && !shovelerViewEntityIsAuthoritative(component->entity, component->type->name)) {
+		return false;
 	}
 
 	if(!shovelerViewCheckDependencies(component->entity->view, component->entity->entityId, component->type->name)) {

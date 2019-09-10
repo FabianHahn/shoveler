@@ -15,7 +15,7 @@ static void deactivateResourceComponent(ShovelerComponent *component);
 ShovelerComponent *shovelerViewEntityAddResource(ShovelerViewEntity *entity, ShovelerViewResourceConfiguration configuration)
 {
 	if(!shovelerViewHasComponentType(entity->view, shovelerViewResourceComponentTypeName)) {
-		ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerViewResourceComponentTypeName, activateResourceComponent, deactivateResourceComponent);
+		ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerViewResourceComponentTypeName, activateResourceComponent, deactivateResourceComponent, /* requiresAuthority */ false);
 		shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewResourceTypeIdOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_STRING, /* isOptional */ false, /* liveUpdate */ NULL);
 		shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewResourceBufferOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BYTES, /* isOptional */ false, /* liveUpdate */ NULL);
 		shovelerViewAddComponentType(entity->view, componentType);

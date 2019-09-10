@@ -8,7 +8,7 @@
 ShovelerComponent *shovelerViewEntityAddPosition(ShovelerViewEntity *entity, ShovelerVector3 coordinates)
 {
 	if(!shovelerViewHasComponentType(entity->view, shovelerViewPositionComponentTypeName)) {
-		ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerViewPositionComponentTypeName, /* activate */ NULL, /* deactivate */ NULL);
+		ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerViewPositionComponentTypeName, /* activate */ NULL, /* deactivate */ NULL, /* requiresAuthority */ false);
 		shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewPositionCoordinatesOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_STRING, /* isOptional */ false, shovelerComponentLiveUpdateNoop);
 		shovelerViewAddComponentType(entity->view, componentType);
 	}
