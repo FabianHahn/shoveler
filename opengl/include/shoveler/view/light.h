@@ -13,19 +13,26 @@ typedef enum {
 
 typedef struct {
 	ShovelerViewLightType type;
-	int width;
-	int height;
-	GLsizei samples;
+	unsigned int width;
+	unsigned int height;
+	unsigned int samples;
 	float ambientFactor;
 	float exponentialFactor;
 	ShovelerVector3 color;
 } ShovelerViewLightConfiguration;
 
-static const char *shovelerViewLightComponentName = "light";
+static const char *shovelerViewLightComponentTypeName = "light";
 
-bool shovelerViewEntityAddLight(ShovelerViewEntity *entity, ShovelerViewLightConfiguration configuration);
-const ShovelerViewLightConfiguration *shovelerViewEntityGetLightConfiguration(ShovelerViewEntity *entity);
-bool shovelerViewEntityUpdateLight(ShovelerViewEntity *entity, ShovelerViewLightConfiguration configuration);
+/** Adds a light component to an entity, copying the supplied configuration. */
+ShovelerComponent *shovelerViewEntityAddLight(ShovelerViewEntity *entity, const ShovelerViewLightConfiguration *configuration);
+bool shovelerViewEntityGetLightConfiguration(ShovelerViewEntity *entity, ShovelerViewLightConfiguration *outputConfiguration);
+/** Updates a light component of an entity, copying the supplied configuration. */
+bool shovelerViewEntityUpdateLight(ShovelerViewEntity *entity, const ShovelerViewLightConfiguration *configuration);
 bool shovelerViewEntityRemoveLight(ShovelerViewEntity *entity);
+
+static inline ShovelerComponent *shovelerViewEntityGetLightComponent(ShovelerViewEntity *entity)
+{
+	return shovelerViewEntityGetComponent(entity, shovelerViewLightComponentTypeName);
+}
 
 #endif

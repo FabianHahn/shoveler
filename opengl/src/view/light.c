@@ -7,27 +7,45 @@
 #include "shoveler/view/position.h"
 #include "shoveler/view/scene.h"
 #include "shoveler/view/shader_cache.h"
+#include "shoveler/component.h"
 #include "shoveler/light.h"
 #include "shoveler/log.h"
 #include "shoveler/scene.h"
 #include "shoveler/view.h"
 
 typedef struct {
-	ShovelerViewLightConfiguration configuration;
 	ShovelerLight *light;
 	ShovelerViewComponentCallback *positionCallback;
 } LightComponentData;
 
-static void positionCallback(ShovelerViewComponent *positionComponent, ShovelerViewComponentCallbackType callbackType, void *lightComponentDataPointer);
-static bool activateComponent(ShovelerViewComponent *component, void *lightComponentDataPointer);
-static void deactivateComponent(ShovelerViewComponent *component, void *lightComponentDataPointer);
-static void freeComponent(ShovelerViewComponent *component, void *lightComponentDataPointer);
+static bool activateLightComponent(ShovelerComponent *component, void *lightComponentDataPointer);
+static void deactivateLightComponent(ShovelerComponent *component, void *lightComponentDataPointer);
+static void positionCallback(ShovelerComponent *positionComponent, ShovelerViewComponentCallbackType callbackType, void *lightComponentDataPointer);
 
-bool shovelerViewEntityAddLight(ShovelerViewEntity *entity, ShovelerViewLightConfiguration lightConfiguration)
+ShovelerComponent *shovelerViewEntityAddLight(ShovelerViewEntity *entity, const ShovelerViewLightConfiguration *lightConfiguration)
 {
+	if(!shovelerViewHasComponentType(entity->view, shovelerViewLightComponentTypeName)) {
+		ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerViewLightComponentTypeName, activateDrawableComponent, deactivateDrawableComponent, /* requiresAuthority */ false);
+		shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewDrawableTypeOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_UINT, /* isOptional */ false, /* liveUpdate */ NULL);
+		shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewDrawableTilesWidthOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_UINT, /* isOptional */ true, /* liveUpdate */ NULL);
+		shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewDrawableTilesHeightOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_UINT, /* isOptional */ true, /* liveUpdate */ NULL);
+		shovelerViewAddComponentType(entity->view, componentType);
+	}
+
+	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerViewDrawableComponentTypeName);
+	shovelerComponentUpdateCanonicalConfigurationOptionUint(component, shovelerViewDrawableTypeOptionKey, configuration->type);
+	if(configuration->type == SHOVELER_VIEW_DRAWABLE_TYPE_TILES) {
+		shovelerComponentUpdateCanonicalConfigurationOptionUint(component, shovelerViewDrawableTilesWidthOptionKey, configuration->tilesWidth);
+		shovelerComponentUpdateCanonicalConfigurationOptionUint(component, shovelerViewDrawableTilesHeightOptionKey, configuration->tilesHeight);
+	}
+
+	shovelerComponentActivate(component);
+	return component;
+
+
 	assert(shovelerViewHasScene(entity->view));
 
-	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewLightComponentName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewLightComponentTypeName);
 	if(component != NULL) {
 		shovelerLogWarning("Trying to add light to entity %lld which already has a light, ignoring.", entity->entityId);
 		return false;
@@ -38,7 +56,7 @@ bool shovelerViewEntityAddLight(ShovelerViewEntity *entity, ShovelerViewLightCon
 	lightComponentData->light = NULL;
 	lightComponentData->positionCallback = NULL;
 
-	component = shovelerViewEntityAddComponent(entity, shovelerViewLightComponentName, lightComponentData, activateComponent, deactivateComponent, freeComponent);
+	component = shovelerViewEntityAddComponent(entity, shovelerViewLightComponentTypeName, lightComponentData, activateLightComponent, deactivateLightComponent, freeComponent);
 	assert(component != NULL);
 
 	shovelerViewComponentAddDependency(component, entity->entityId, shovelerViewPositionComponentName);
@@ -47,9 +65,9 @@ bool shovelerViewEntityAddLight(ShovelerViewEntity *entity, ShovelerViewLightCon
 	return true;
 }
 
-const ShovelerViewLightConfiguration *shovelerViewEntityGetLightConfiguration(ShovelerViewEntity *entity)
+bool shovelerViewEntityGetLightConfiguration(ShovelerViewEntity *entity, ShovelerViewLightConfiguration *outputConfiguration)
 {
-	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewLightComponentName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewLightComponentTypeName);
 	if(component == NULL) {
 		return NULL;
 	}
@@ -58,9 +76,9 @@ const ShovelerViewLightConfiguration *shovelerViewEntityGetLightConfiguration(Sh
 	return &componentData->configuration;
 }
 
-bool shovelerViewEntityUpdateLight(ShovelerViewEntity *entity, ShovelerViewLightConfiguration configuration)
+bool shovelerViewEntityUpdateLight(ShovelerViewEntity *entity, const ShovelerViewLightConfiguration *configuration)
 {
-	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewLightComponentName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewLightComponentTypeName);
 	if(component == NULL) {
 		shovelerLogWarning("Trying to update light of entity %lld which does not have a light, ignoring.", entity->entityId);
 		return false;
@@ -80,7 +98,7 @@ bool shovelerViewEntityRemoveLight(ShovelerViewEntity *entity)
 {
 	assert(shovelerViewHasScene(entity->view));
 
-	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewLightComponentName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewLightComponentTypeName);
 	if(component == NULL) {
 		shovelerLogWarning("Trying to remove light from entity %lld which does not have a light, ignoring.", entity->entityId);
 		return false;
@@ -90,10 +108,10 @@ bool shovelerViewEntityRemoveLight(ShovelerViewEntity *entity)
 	ShovelerScene *scene = shovelerViewGetScene(entity->view);
 	shovelerSceneRemoveLight(scene, lightComponentData->light);
 
-	return shovelerViewEntityRemoveComponent(entity, shovelerViewLightComponentName);
+	return shovelerViewEntityRemoveComponent(entity, shovelerViewLightComponentTypeName);
 }
 
-static void positionCallback(ShovelerViewComponent *positionComponent, ShovelerViewComponentCallbackType callbackType, void *lightComponentDataPointer)
+static void positionCallback(ShovelerComponent *positionComponent, ShovelerComponentCallbackType callbackType, void *lightComponentDataPointer)
 {
 	LightComponentData *lightComponentData = lightComponentDataPointer;
 
@@ -101,7 +119,7 @@ static void positionCallback(ShovelerViewComponent *positionComponent, ShovelerV
 	shovelerLightUpdatePosition(lightComponentData->light, shovelerVector3(position->x, position->y, position->z));
 }
 
-static bool activateComponent(ShovelerViewComponent *component, void *lightComponentDataPointer)
+static bool activateComponent(ShovelerComponent *component, void *lightComponentDataPointer)
 {
 	LightComponentData *lightComponentData = lightComponentDataPointer;
 	assert(shovelerViewHasScene(component->entity->view));
@@ -129,7 +147,7 @@ static bool activateComponent(ShovelerViewComponent *component, void *lightCompo
 	return true;
 }
 
-static void deactivateComponent(ShovelerViewComponent *component, void *lightComponentDataPointer)
+static void deactivateComponent(ShovelerComponent *component, void *lightComponentDataPointer)
 {
 	LightComponentData *lightComponentData = lightComponentDataPointer;
 	assert(shovelerViewHasScene(component->entity->view));
@@ -146,7 +164,7 @@ static void deactivateComponent(ShovelerViewComponent *component, void *lightCom
 	lightComponentData->positionCallback = NULL;
 }
 
-static void freeComponent(ShovelerViewComponent *component, void *lightComponentDataPointer)
+static void freeComponent(ShovelerComponent *component, void *lightComponentDataPointer)
 {
 	assert(shovelerViewHasScene(component->entity->view));
 
