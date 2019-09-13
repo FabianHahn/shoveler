@@ -65,6 +65,8 @@ typedef struct ShovelerViewDependencyCallbackStruct {
 	void *userData;
 } ShovelerViewDependencyCallback;
 
+typedef void (ShovelerViewForEachReverseDependencyCallbackFunction)(ShovelerView *view, long long int targetEntityId, const char *targetComponentTypeName, ShovelerComponent *sourceComponent, void *userData);
+
 ShovelerView *shovelerViewCreate();
 /** Adds a component type to the view, with the view taking ownership over it. */
 bool shovelerViewAddComponentType(ShovelerView *view, ShovelerComponentType *componentType);
@@ -74,6 +76,7 @@ void shovelerViewAddDependency(ShovelerView *view, long long int sourceEntityId,
 /** Removes an existing dependency from a component, but doesn't automatically activate it even if this was the only unsatisfied one. */
 bool shovelerViewRemoveDependency(ShovelerView *view, long long int sourceEntityId, const char *sourceComponentTypeName, long long int targetEntityId, const char *targetComponentTypeName);
 bool shovelerViewCheckDependencies(ShovelerView *view, long long int sourceEntityId, const char *sourceComponentTypeName);
+void shovelerViewForEachReverseDependency(ShovelerView *view, long long int targetEntityId, const char *targetComponentTypeName, ShovelerViewForEachReverseDependencyCallbackFunction *callbackFunction, void *userData);
 void shovelerViewActivateReverseDependencies(ShovelerView *view, long long int targetEntityId, const char *targetComponentTypeName);
 void shovelerViewDeactivateReverseDependencies(ShovelerView *view, long long int targetEntityId, const char *targetComponentTypeName);
 ShovelerViewEntity *shovelerViewAddEntity(ShovelerView *view, long long int entityId);

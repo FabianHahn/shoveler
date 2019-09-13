@@ -67,7 +67,7 @@ typedef void (ShovelerComponentTypeDeactivationFunction)(ShovelerComponent *comp
 
 typedef struct ShovelerComponentTypeStruct {
 	char *name;
-	/* map from string configuration option keys to (ShovelerComponentConfiguration *) */
+	/* map from string configuration option keys to (ShovelerComponentTypeConfigurationOption *) */
 	GHashTable *configurationOptions;
 	ShovelerComponentTypeActivationFunction *activate;
 	ShovelerComponentTypeDeactivationFunction *deactivate;

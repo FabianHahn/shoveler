@@ -1,16 +1,22 @@
 #include <assert.h> // assert
 #include <stdlib.h> // malloc free
 #include <string.h> // strdup memcpy
+#include <shoveler/component.h>
 
 #include "shoveler/component.h"
 #include "shoveler/log.h"
 #include "shoveler/view.h"
+
+typedef struct {
+	bool isCanonical;
+} UpdateReverseDependencyContext;
 
 static ShovelerComponentConfigurationValue *createConfigurationValue(ShovelerComponentConfigurationOptionType type);
 static void clearConfigurationValue(ShovelerComponentConfigurationValue *configurationValue);
 static ShovelerComponentConfigurationValue *copyConfigurationValue(const ShovelerComponentConfigurationValue *reference);
 static void assignConfigurationValue(ShovelerComponentConfigurationValue *target, const ShovelerComponentConfigurationValue *source);
 static void freeConfigurationValue(void *configurationValuePointer);
+static void updateReverseDependency(ShovelerView *view, long long int targetEntityId, const char *targetComponentTypeName, ShovelerComponent *sourceComponent, void *contextPointer);
 static long long int toDependencyTargetEntityId(ShovelerComponent *component, const ShovelerComponentConfigurationValue *configurationValue);
 static void freeConfigurationOption(void *configurationOptionPointer);
 
@@ -189,6 +195,11 @@ bool shovelerComponentUpdateConfigurationOption(ShovelerComponent *component, co
 		if(canLiveUpdate) {
 			// live update value
 			configurationOption->liveUpdate(component, configurationOption, configurationValue);
+
+			// if this component was live updated, we need to also update all of our reverse dependencies
+			UpdateReverseDependencyContext context;
+			context.isCanonical = isCanonical;
+			shovelerViewForEachReverseDependency(component->entity->view, component->entity->entityId, component->type->name, updateReverseDependency, &context);
 		} else {
 			// cannot live update, so try reactivating again
 			shovelerComponentActivate(component);
@@ -266,7 +277,11 @@ void shovelerComponentFree(ShovelerComponent *component)
 	while(g_hash_table_iter_next(&iter, (gpointer *) &key, (gpointer *) &configurationOption)) {
 		if(configurationOption->dependencyComponentTypeName != NULL) {
 			ShovelerComponentConfigurationValue *configurationValue = g_hash_table_lookup(component->configurationValues, key);
-			assert(configurationValue != NULL);
+			if(configurationValue == NULL) {
+				// this configuration option is optional
+				assert(configurationOption->isOptional);
+				continue;
+			}
 
 			shovelerViewRemoveDependency(
 				component->entity->view,
@@ -403,6 +418,60 @@ static void freeConfigurationValue(void *configurationValuePointer)
 
 	clearConfigurationValue(configurationValue);
 	free(configurationValue);
+}
+
+static void updateReverseDependency(ShovelerView *view, long long int targetEntityId, const char *targetComponentTypeName, ShovelerComponent *sourceComponent, void *contextPointer)
+{
+	UpdateReverseDependencyContext *context = (UpdateReverseDependencyContext *) contextPointer;
+
+	GHashTableIter configurationOptionIter;
+	g_hash_table_iter_init(&configurationOptionIter, sourceComponent->type->configurationOptions);
+	const char *key;
+	ShovelerComponentTypeConfigurationOption *configurationOption;
+	while(g_hash_table_iter_next(&configurationOptionIter, (gpointer *) &key, (gpointer *) &configurationOption)) {
+		// check if this option is a dependency pointing to the target
+		if(configurationOption->dependencyComponentTypeName == NULL || strcmp(configurationOption->dependencyComponentTypeName, targetComponentTypeName) != 0) {
+			continue;
+		}
+
+		ShovelerComponentConfigurationValue *configurationValue = g_hash_table_lookup(sourceComponent->configurationValues, key);
+		if(configurationValue == NULL) {
+			// value is optional and isn't set
+			assert(configurationOption->isOptional);
+			continue;
+		}
+
+		if(configurationOption->type == SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_ENTITY_ID) {
+			if(configurationValue->entityIdValue != targetEntityId) {
+				continue;
+			}
+
+			if(context->isCanonical) {
+				shovelerComponentUpdateCanonicalConfigurationOptionEntityId(sourceComponent, key, targetEntityId);
+			} else {
+				shovelerComponentUpdateConfigurationOptionEntityId(sourceComponent, key, targetEntityId);
+			}
+		} else {
+			assert(configurationOption->type == SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_ENTITY_ID_ARRAY);
+
+			bool requiresUpdate = false;
+			for(size_t i = 0; i < configurationValue->entityIdArrayValue.size; i++) {
+				if(configurationValue->entityIdArrayValue.entityIds[i] == targetEntityId) {
+					requiresUpdate = true;
+					break;
+				}
+			}
+
+			if(!requiresUpdate) {
+				continue;
+			}
+
+			// copy configuration value so we don't attempt to assign it to itself
+			ShovelerComponentConfigurationValue *configurationValueCopy = copyConfigurationValue(configurationValue);
+			shovelerComponentUpdateConfigurationOption(sourceComponent, key, configurationValueCopy, context->isCanonical);
+			freeConfigurationValue(configurationValueCopy);
+		}
+	}
 }
 
 static long long int toDependencyTargetEntityId(ShovelerComponent *component, const ShovelerComponentConfigurationValue *configurationValue)
