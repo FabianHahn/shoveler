@@ -7,16 +7,12 @@
 #include "shoveler/log.h"
 #include "shoveler/view.h"
 
-typedef struct {
-	bool isCanonical;
-} UpdateReverseDependencyContext;
-
 static ShovelerComponentConfigurationValue *createConfigurationValue(ShovelerComponentConfigurationOptionType type);
 static void clearConfigurationValue(ShovelerComponentConfigurationValue *configurationValue);
 static ShovelerComponentConfigurationValue *copyConfigurationValue(const ShovelerComponentConfigurationValue *reference);
 static void assignConfigurationValue(ShovelerComponentConfigurationValue *target, const ShovelerComponentConfigurationValue *source);
 static void freeConfigurationValue(void *configurationValuePointer);
-static void updateReverseDependency(ShovelerView *view, long long int targetEntityId, const char *targetComponentTypeName, ShovelerComponent *sourceComponent, void *contextPointer);
+static void updateReverseDependency(ShovelerView *view, long long int targetEntityId, const char *targetComponentTypeName, ShovelerComponent *sourceComponent, void *targetComponentPointer);
 static long long int toDependencyTargetEntityId(ShovelerComponent *component, const ShovelerComponentConfigurationValue *configurationValue);
 static void freeConfigurationOption(void *configurationOptionPointer);
 
@@ -43,13 +39,14 @@ bool shovelerComponentTypeAddConfigurationOption(ShovelerComponentType *componen
 	configurationOption->type = type;
 	configurationOption->isOptional = isOptional;
 	configurationOption->liveUpdate = liveUpdate;
+	configurationOption->updateDependency = NULL;
 	configurationOption->dependencyComponentTypeName = NULL;
 
 	g_hash_table_insert(componentType->configurationOptions, configurationOption->key, configurationOption);
 	return true;
 }
 
-bool shovelerComponentTypeAddDependencyConfigurationOption(ShovelerComponentType *componentType, const char *key, const char *dependencyComponentTypeName, bool isArray, bool isOptional, ShovelerComponentTypeConfigurationOptionLiveUpdateFunction *liveUpdate)
+bool shovelerComponentTypeAddDependencyConfigurationOption(ShovelerComponentType *componentType, const char *key, const char *dependencyComponentTypeName, bool isArray, bool isOptional, ShovelerComponentTypeConfigurationOptionLiveUpdateFunction *liveUpdate, ShovelerComponentTypeConfigurationOptionUpdateDependencyFunction *updateDependency)
 {
 	if(g_hash_table_lookup(componentType->configurationOptions, key) != NULL) {
 		return false;
@@ -60,6 +57,7 @@ bool shovelerComponentTypeAddDependencyConfigurationOption(ShovelerComponentType
 	configurationOption->type = isArray ? SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_ENTITY_ID_ARRAY : SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_ENTITY_ID;
 	configurationOption->isOptional = isOptional;
 	configurationOption->liveUpdate = liveUpdate;
+	configurationOption->updateDependency = updateDependency;
 	configurationOption->dependencyComponentTypeName = strdup(dependencyComponentTypeName);
 
 	g_hash_table_insert(componentType->configurationOptions, configurationOption->key, configurationOption);
@@ -196,10 +194,8 @@ bool shovelerComponentUpdateConfigurationOption(ShovelerComponent *component, co
 			// live update value
 			configurationOption->liveUpdate(component, configurationOption, configurationValue);
 
-			// if this component was live updated, we need to also update all of our reverse dependencies
-			UpdateReverseDependencyContext context;
-			context.isCanonical = isCanonical;
-			shovelerViewForEachReverseDependency(component->entity->view, component->entity->entityId, component->type->name, updateReverseDependency, &context);
+			// update reverse dependencies
+			shovelerViewForEachReverseDependency(component->entity->view, component->entity->entityId, component->type->name, updateReverseDependency, component);
 		} else {
 			// cannot live update, so try reactivating again
 			shovelerComponentActivate(component);
@@ -420,9 +416,14 @@ static void freeConfigurationValue(void *configurationValuePointer)
 	free(configurationValue);
 }
 
-static void updateReverseDependency(ShovelerView *view, long long int targetEntityId, const char *targetComponentTypeName, ShovelerComponent *sourceComponent, void *contextPointer)
+static void updateReverseDependency(ShovelerView *view, long long int targetEntityId, const char *targetComponentTypeName, ShovelerComponent *sourceComponent, void *targetComponentPointer)
 {
-	UpdateReverseDependencyContext *context = (UpdateReverseDependencyContext *) contextPointer;
+	ShovelerComponent *targetComponent = (ShovelerComponent *) targetComponentPointer;
+
+	if(sourceComponent->data == NULL) {
+		// no need to update the reverse dependency if it isn't active
+		return;
+	}
 
 	GHashTableIter configurationOptionIter;
 	g_hash_table_iter_init(&configurationOptionIter, sourceComponent->type->configurationOptions);
@@ -445,12 +446,6 @@ static void updateReverseDependency(ShovelerView *view, long long int targetEnti
 			if(configurationValue->entityIdValue != targetEntityId) {
 				continue;
 			}
-
-			if(context->isCanonical) {
-				shovelerComponentUpdateCanonicalConfigurationOptionEntityId(sourceComponent, key, targetEntityId);
-			} else {
-				shovelerComponentUpdateConfigurationOptionEntityId(sourceComponent, key, targetEntityId);
-			}
 		} else {
 			assert(configurationOption->type == SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_ENTITY_ID_ARRAY);
 
@@ -465,12 +460,14 @@ static void updateReverseDependency(ShovelerView *view, long long int targetEnti
 			if(!requiresUpdate) {
 				continue;
 			}
-
-			// copy configuration value so we don't attempt to assign it to itself
-			ShovelerComponentConfigurationValue *configurationValueCopy = copyConfigurationValue(configurationValue);
-			shovelerComponentUpdateConfigurationOption(sourceComponent, key, configurationValueCopy, context->isCanonical);
-			freeConfigurationValue(configurationValueCopy);
 		}
+
+		if(configurationOption->updateDependency != NULL) {
+			configurationOption->updateDependency(sourceComponent, configurationOption, targetComponent);
+		}
+
+		// recursively update reverse dependencies
+		shovelerViewForEachReverseDependency(view, sourceComponent->entity->entityId, sourceComponent->type->name, updateReverseDependency, sourceComponent);
 	}
 }
 

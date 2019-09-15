@@ -12,6 +12,7 @@ static const char *testTargetName = "test";
 static void *activateComponent(ShovelerComponent *component);
 static void deactivateComponent(ShovelerComponent *component);
 static void liveUpdateComponent(ShovelerComponent *component, ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *value);
+static void updateDependencyComponent(ShovelerComponent *component, ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent);
 static void dependencyCallbackFunction(ShovelerView *view, const ShovelerViewQualifiedComponent *dependencySource, const ShovelerViewQualifiedComponent *dependencyTarget, bool added, void *testPointer);
 
 class ShovelerViewTest : public ::testing::Test {
@@ -23,7 +24,7 @@ public:
 
 		ShovelerComponentType *componentType = shovelerComponentTypeCreate(componentTypeName, activateComponent, deactivateComponent, /* requiresAuthority */ false);
 		shovelerComponentTypeAddConfigurationOption(componentType, configurationOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
-		shovelerComponentTypeAddDependencyConfigurationOption(componentType, dependencyConfigurationOptionKey, otherComponentTypeName, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL);
+		shovelerComponentTypeAddDependencyConfigurationOption(componentType, dependencyConfigurationOptionKey, otherComponentTypeName, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, updateDependencyComponent);
 		bool componentTypeAdded = shovelerViewAddComponentType(view, componentType);
 		ASSERT_TRUE(componentTypeAdded);
 
@@ -74,8 +75,11 @@ public:
 	bool activateCalled;
 	bool deactivateCalled;
 	bool liveUpdateCalled;
+	bool updateDependencyCalled;
 	ShovelerComponentTypeConfigurationOption *lastLiveUpdateConfigurationOption;
 	const ShovelerComponentConfigurationValue *lastLiveUpdateValue;
+	ShovelerComponentTypeConfigurationOption *lastUpdateDependencyConfigurationOption;
+	ShovelerComponent *lastUpdateDependencyComponent;
 	ShovelerViewQualifiedComponent lastDependencySource;
 	ShovelerViewQualifiedComponent lastDependencyTarget;
 	bool lastDependencyAdded;
@@ -330,8 +334,9 @@ TEST_F(ShovelerViewTest, updateConfigurationLiveNotifiesReverseDependency) {
 
 	bool updated = shovelerComponentUpdateCanonicalConfigurationOptionString(testDependencyComponent, liveUpdateConfigurationOptionKey, newConfigurationValue);
 	ASSERT_TRUE(updated);
-	ASSERT_TRUE(activateCalled);
-	ASSERT_TRUE(deactivateCalled);
+	ASSERT_TRUE(updateDependencyCalled);
+	ASSERT_STREQ(lastUpdateDependencyConfigurationOption->key, dependencyConfigurationOptionKey);
+	ASSERT_EQ(lastUpdateDependencyComponent, testDependencyComponent);
 }
 
 static void *activateComponent(ShovelerComponent *component)
@@ -353,6 +358,14 @@ static void liveUpdateComponent(ShovelerComponent *component, ShovelerComponentT
 	test->liveUpdateCalled = true;
 	test->lastLiveUpdateConfigurationOption = configurationOption;
 	test->lastLiveUpdateValue = value;
+}
+
+static void updateDependencyComponent(ShovelerComponent *component, ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent)
+{
+	ShovelerViewTest *test = (ShovelerViewTest *) shovelerViewGetTarget(component->entity->view, testTargetName);
+	test->updateDependencyCalled = true;
+	test->lastUpdateDependencyConfigurationOption = configurationOption;
+	test->lastUpdateDependencyComponent = dependencyComponent;
 }
 
 static void dependencyCallbackFunction(ShovelerView *view, const ShovelerViewQualifiedComponent *dependencySource, const ShovelerViewQualifiedComponent *dependencyTarget, bool added, void *testPointer)

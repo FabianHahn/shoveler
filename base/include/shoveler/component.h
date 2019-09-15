@@ -53,12 +53,14 @@ typedef struct ShovelerComponentConfigurationValueStruct {
 } ShovelerComponentConfigurationValue;
 
 typedef void (ShovelerComponentTypeConfigurationOptionLiveUpdateFunction)(ShovelerComponent *component, ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *value);
+typedef void (ShovelerComponentTypeConfigurationOptionUpdateDependencyFunction)(ShovelerComponent *component, ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent);
 
 typedef struct ShovelerComponentTypeConfigurationOptionStruct {
 	char *key;
 	ShovelerComponentConfigurationOptionType type;
 	bool isOptional;
 	ShovelerComponentTypeConfigurationOptionLiveUpdateFunction *liveUpdate;
+	ShovelerComponentTypeConfigurationOptionUpdateDependencyFunction *updateDependency;
 	char *dependencyComponentTypeName;
 } ShovelerComponentTypeConfigurationOption;
 
@@ -87,7 +89,7 @@ ShovelerComponentType *shovelerComponentTypeCreate(const char *name, ShovelerCom
  * Adds a new configuration option to the component type.
  *
  * If the passed live update function is not NULL, this indicates that the configuration option can
- * be updated without deactivating and reactivating the component.
+ * be updated by calling that function instead of deactivating and reactivating the component.
  */
 bool shovelerComponentTypeAddConfigurationOption(ShovelerComponentType *componentType, const char *key, ShovelerComponentConfigurationOptionType type, bool isOptional, ShovelerComponentTypeConfigurationOptionLiveUpdateFunction *liveUpdate);
 /**
@@ -98,9 +100,13 @@ bool shovelerComponentTypeAddConfigurationOption(ShovelerComponentType *componen
  * entity ID contains an activated component of the specified type.
  *
  * If the passed live update function is not NULL, this indicates that the configuration option can
- * be updated without deactivating and reactivating the component.
+ * be updated by calling that function instead of deactivating and reactivating the component.
+ *
+ * If the component is active and the passed update dependency function is not NULL, it will be
+ * called whenever the dependency this component value points to is live updated. This includes
+ * updates to the dependency's transitive dependencies.
  */
-bool shovelerComponentTypeAddDependencyConfigurationOption(ShovelerComponentType *componentType, const char *key, const char *dependencyComponentTypeName, bool isArray, bool isOptional, ShovelerComponentTypeConfigurationOptionLiveUpdateFunction *liveUpdate);
+bool shovelerComponentTypeAddDependencyConfigurationOption(ShovelerComponentType *componentType, const char *key, const char *dependencyComponentTypeName, bool isArray, bool isOptional, ShovelerComponentTypeConfigurationOptionLiveUpdateFunction *liveUpdate, ShovelerComponentTypeConfigurationOptionUpdateDependencyFunction *updateDependency);
 bool shovelerComponentTypeRemoveConfigurationOption(ShovelerComponentType *componentType, const char *key);
 void shovelerComponentTypeFree(ShovelerComponentType *componentType);
 
@@ -116,8 +122,27 @@ ShovelerComponent *shovelerComponentCreate(ShovelerViewEntity *entity, const cha
  */
 bool shovelerComponentUpdateConfigurationOption(ShovelerComponent *component, const char *key, const ShovelerComponentConfigurationValue *value, bool isCanonical);
 const ShovelerComponentConfigurationValue *shovelerComponentGetConfigurationValue(ShovelerComponent *component, const char *key);
+/**
+ * Activates this component if the activation conditions are satisified.
+ *
+ * To activate the component, the activation function is called and the returned data is stored
+ * within the component's data field.
+ *
+ * Activation can fail under the following conditions:
+ *  - The component type requires authority, but the component isn't delegated.
+ *  - A dependency configuration option is set but the dependency component doesn't exist or
+ *    isn't active itself.
+ *  - The component's activation function failed.
+ */
 bool shovelerComponentActivate(ShovelerComponent *component);
 bool shovelerComponentIsActive(ShovelerComponent *component);
+/**
+ * Deactivates this component if it is active.
+ *
+ * If any other components depend on this component, they are recursively deactivated before
+ * this component is deactivated by calling its deactivation function. After deactivation, the
+ * component's data field is set to NULL until the component is activated again.
+ */
 void shovelerComponentDeactivate(ShovelerComponent *component);
 void shovelerComponentFree(ShovelerComponent *component);
 
