@@ -20,8 +20,8 @@ ShovelerComponent *shovelerViewEntityAddClient(ShovelerViewEntity *entity, const
 {
 	if(!shovelerViewHasComponentType(entity->view, shovelerViewClientComponentTypeName)) {
 		ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerViewClientComponentTypeName, activateClientComponent, deactivateClientComponent, /* requiresAuthority */ true);
-		shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerViewClientPositionOptionKey, shovelerViewPositionComponentTypeName, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL);
-		shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerViewClientModelOptionKey, shovelerViewModelComponentTypeName, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL);
+		shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerViewClientPositionOptionKey, shovelerViewPositionComponentTypeName, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+		shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerViewClientModelOptionKey, shovelerViewModelComponentTypeName, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* updateDependency */ NULL);
 		shovelerViewAddComponentType(entity->view, componentType);
 	}
 

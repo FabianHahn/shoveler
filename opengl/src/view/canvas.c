@@ -14,7 +14,7 @@ ShovelerComponent *shovelerViewEntityAddCanvas(ShovelerViewEntity *entity, const
 {
 	if(!shovelerViewHasComponentType(entity->view, shovelerViewCanvasComponentTypeName)) {
 		ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerViewCanvasComponentTypeName, activateCanvasComponent, deactivateCanvasComponent, /* requiresAuthority */ false);
-		shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerViewCanvasTileSpritesOptionKey, shovelerViewTileSpriteComponentTypeName, /* isArray */ true, /* isOptional */ false, /* liveUpdate */ NULL);
+		shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerViewCanvasTileSpritesOptionKey, shovelerViewTileSpriteComponentTypeName, /* isArray */ true, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
 		shovelerViewAddComponentType(entity->view, componentType);
 	}
 
