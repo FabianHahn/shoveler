@@ -30,6 +30,7 @@ static const char *shovelerViewChunkLayersOptionKey = "layers";
 /** Adds a chunk component to an entity, copying the supplied configuration. */
 ShovelerComponent *shovelerViewEntityAddChunk(ShovelerViewEntity *entity, const ShovelerViewChunkConfiguration *configuration);
 ShovelerChunk *shovelerViewEntityGetChunk(ShovelerViewEntity *entity);
+/** Returns the current chunk configuration, retaining ownership over returned fields. */
 bool shovelerViewEntityGetChunkConfiguration(ShovelerViewEntity *entity, ShovelerViewChunkConfiguration *outputConfiguration);
 /** Updates a chunk component of an entity, copying the supplied configuration. */
 bool shovelerViewEntityUpdateChunk(ShovelerViewEntity *entity, const ShovelerViewChunkConfiguration *configuration);
