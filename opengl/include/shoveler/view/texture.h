@@ -16,7 +16,7 @@ typedef struct {
 	bool clamp;
 } ShovelerViewTextureConfiguration;
 
-static const char *shovelerViewTextureComponentName = "texture";
+static const char *shovelerViewTextureComponentTypeName = "texture";
 
 bool shovelerViewEntityAddTexture(ShovelerViewEntity *entity, ShovelerViewTextureConfiguration configuration);
 ShovelerTexture *shovelerViewEntityGetTexture(ShovelerViewEntity *entity);
