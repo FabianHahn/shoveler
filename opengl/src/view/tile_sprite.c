@@ -5,191 +5,150 @@
 #include "shoveler/view/position.h"
 #include "shoveler/view/tile_sprite.h"
 #include "shoveler/view/tileset.h"
+#include "shoveler/component.h"
 #include "shoveler/log.h"
+#include "shoveler/types.h"
+#include "shoveler/view.h"
 
-typedef struct {
-	ShovelerViewTileSpriteConfiguration configuration;
-	ShovelerCanvasTileSprite *tileSprite;
-	ShovelerViewComponentCallback *positionCallback;
-} ComponentData;
+static void *activateTileSpriteComponent(ShovelerComponent *component);
+static void deactivateTileSpriteComponent(ShovelerComponent *component);
+static void updateTileSpritePositionDependency(ShovelerComponent *component, ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent);
+static ShovelerVector2 getTileSpritePosition(ShovelerComponent *component);
 
-static void assignConfiguration(ShovelerViewTileSpriteConfiguration *destination, const ShovelerViewTileSpriteConfiguration *source);
-static void clearConfiguration(ShovelerViewTileSpriteConfiguration *configuration);
-static bool activateComponent(ShovelerViewComponent *component, void *componentDataPointer);
-static void deactivateComponent(ShovelerViewComponent *component, void *componentDataPointer);
-static void freeComponent(ShovelerViewComponent *component, void *componentDataPointer);
-static void positionCallback(ShovelerViewComponent *positionComponent, ShovelerViewComponentCallbackType callbackType, void *componentDataPointer);
-static void updatePosition(ComponentData *componentData, const ShovelerViewPosition *position);
-
-bool shovelerViewEntityAddTileSprite(ShovelerViewEntity *entity, const ShovelerViewTileSpriteConfiguration *configuration)
+ShovelerComponent *shovelerViewEntityAddTileSprite(ShovelerViewEntity *entity, const ShovelerViewTileSpriteConfiguration *configuration)
 {
-	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTileSpriteComponentName);
-	if(component != NULL) {
-		shovelerLogWarning("Trying to add canvas tile sprite to entity %lld which already has canvas tile sprite, ignoring.", entity->entityId);
-		return false;
+	if(!shovelerViewHasComponentType(entity->view, shovelerViewTileSpriteComponentTypeName)) {
+		ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerViewTileSpriteComponentTypeName, activateTileSpriteComponent, deactivateTileSpriteComponent, /* requiresAuthority */ false);
+		shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerViewTileSpritePositionOptionKey, shovelerViewPositionComponentTypeName, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, updateTileSpritePositionDependency);
+		shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerViewTileSpriteTilesetOptionKey, shovelerViewTileSpriteComponentTypeName, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+		shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewTileSpriteTilesetColumnOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
+		shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewTileSpriteTilesetRowOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
+		shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewTileSpritePositionMappingXOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
+		shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewTileSpritePositionMappingYOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
+		shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewTileSpriteSizeOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_VECTOR2, /* isOptional */ false, /* liveUpdate */ NULL);
+		shovelerViewAddComponentType(entity->view, componentType);
 	}
 
-	ComponentData *componentData = malloc(sizeof(ComponentData));
-	componentData->configuration.tilesetEntityId = 0;
-	componentData->configuration.tilesetColumn = 0;
-	componentData->configuration.tilesetRow = 0;
-	componentData->configuration.positionMappingX = SHOVELER_COORDINATE_MAPPING_POSITIVE_X;
-	componentData->configuration.positionMappingY = SHOVELER_COORDINATE_MAPPING_POSITIVE_Y;
-	componentData->configuration.size = shovelerVector2(0.0f, 0.0f);
-	componentData->tileSprite = NULL;
-	componentData->positionCallback = NULL;
+	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerViewTileSpriteComponentTypeName);
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewTileSpritePositionOptionKey, configuration->positionEntityId);
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewTileSpriteTilesetOptionKey, configuration->tilesetEntityId);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerViewTileSpriteTilesetColumnOptionKey, configuration->tilesetColumn);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerViewTileSpriteTilesetRowOptionKey, configuration->tilesetRow);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerViewTileSpritePositionMappingXOptionKey, configuration->positionMappingX);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerViewTileSpritePositionMappingYOptionKey, configuration->positionMappingY);
+	shovelerComponentUpdateCanonicalConfigurationOptionVector2(component, shovelerViewTileSpriteSizeOptionKey, configuration->size);
 
-	assignConfiguration(&componentData->configuration, configuration);
-
-	component = shovelerViewEntityAddComponent(entity, shovelerViewTileSpriteComponentName, componentData, activateComponent, deactivateComponent, freeComponent);
-	assert(component != NULL);
-
-	shovelerViewComponentAddDependency(component, entity->entityId, shovelerViewPositionComponentName);
-	shovelerViewComponentAddDependency(component, componentData->configuration.tilesetEntityId, shovelerViewTilesetComponentName);
-
-	shovelerViewComponentActivate(component);
-	return true;
+	shovelerComponentActivate(component);
+	return component;
 }
 
 ShovelerCanvasTileSprite *shovelerViewEntityGetTileSprite(ShovelerViewEntity *entity)
 {
-	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTileSpriteComponentName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTileSpriteComponentTypeName);
 	if(component == NULL) {
 		return false;
 	}
 
-	ComponentData *componentData = component->data;
-	return componentData->tileSprite;
+	return component->data;
 }
 
-const ShovelerViewTileSpriteConfiguration *shovelerViewEntityGetTileSpriteConfiguration(ShovelerViewEntity *entity)
+bool shovelerViewEntityGetTileSpriteConfiguration(ShovelerViewEntity *entity, ShovelerViewTileSpriteConfiguration *outputConfiguration)
 {
-	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTileSpriteComponentName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTileSpriteComponentTypeName);
 	if(component == NULL) {
 		return false;
 	}
 
-	ComponentData *componentData = component->data;
-	return &componentData->configuration;
+	outputConfiguration->positionEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerViewTileSpritePositionOptionKey);
+	outputConfiguration->tilesetEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerViewTileSpriteTilesetOptionKey);
+	outputConfiguration->tilesetColumn = shovelerComponentGetConfigurationValueInt(component, shovelerViewTileSpriteTilesetColumnOptionKey);
+	outputConfiguration->tilesetRow = shovelerComponentGetConfigurationValueInt(component, shovelerViewTileSpriteTilesetRowOptionKey);
+	outputConfiguration->positionMappingX = shovelerComponentGetConfigurationValueInt(component, shovelerViewTileSpritePositionMappingXOptionKey);
+	outputConfiguration->positionMappingY = shovelerComponentGetConfigurationValueInt(component, shovelerViewTileSpritePositionMappingYOptionKey);
+	outputConfiguration->size = shovelerComponentGetConfigurationValueVector2(component, shovelerViewTileSpriteSizeOptionKey);
+	return true;
 }
 
 bool shovelerViewEntityUpdateTileSprite(ShovelerViewEntity *entity, const ShovelerViewTileSpriteConfiguration *configuration)
 {
-	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTileSpriteComponentName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTileSpriteComponentTypeName);
 	if(component == NULL) {
 		shovelerLogWarning("Trying to update canvas tile sprite of entity %lld which does not have a canvas tile sprite, ignoring.", entity->entityId);
 		return false;
 	}
 
-	ComponentData *componentData = component->data;
-
-	shovelerViewComponentDeactivate(component);
-
-	if(!shovelerViewComponentRemoveDependency(component, componentData->configuration.tilesetEntityId, shovelerViewTileSpriteComponentName)) {
-		return false;
-	}
-
-	assignConfiguration(&componentData->configuration, configuration);
-
-	shovelerViewComponentAddDependency(component, componentData->configuration.tilesetEntityId, shovelerViewTileSpriteComponentName);
-
-	shovelerViewComponentActivate(component);
-
-	shovelerViewComponentUpdate(component);
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewTileSpritePositionOptionKey, configuration->positionEntityId);
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewTileSpriteTilesetOptionKey, configuration->tilesetEntityId);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerViewTileSpriteTilesetColumnOptionKey, configuration->tilesetColumn);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerViewTileSpriteTilesetRowOptionKey, configuration->tilesetRow);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerViewTileSpritePositionMappingXOptionKey, configuration->positionMappingX);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerViewTileSpritePositionMappingYOptionKey, configuration->positionMappingY);
+	shovelerComponentUpdateCanonicalConfigurationOptionVector2(component, shovelerViewTileSpriteSizeOptionKey, configuration->size);
 	return true;
 }
 
 bool shovelerViewEntityRemoveTileSprite(ShovelerViewEntity *entity)
 {
-	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTileSpriteComponentName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTileSpriteComponentTypeName);
 	if(component == NULL) {
 		shovelerLogWarning("Trying to remove canvas tile sprite from entity %lld which does not have a canvas tile sprite, ignoring.", entity->entityId);
 		return false;
 	}
 
-	return shovelerViewEntityRemoveComponent(entity, shovelerViewTileSpriteComponentName);
+	return shovelerViewEntityRemoveComponent(entity, shovelerViewTileSpriteComponentTypeName);
 }
 
-static void assignConfiguration(ShovelerViewTileSpriteConfiguration *destination, const ShovelerViewTileSpriteConfiguration *source)
+static void *activateTileSpriteComponent(ShovelerComponent *component)
 {
-	clearConfiguration(destination);
-
-	destination->tilesetEntityId = source->tilesetEntityId;
-	destination->tilesetColumn = source->tilesetColumn;
-	destination->tilesetRow = source->tilesetRow;
-	destination->positionMappingX = source->positionMappingX;
-	destination->positionMappingY = source->positionMappingY;
-	destination->size = source->size;
-}
-
-static void clearConfiguration(ShovelerViewTileSpriteConfiguration *configuration)
-{
-	configuration->tilesetEntityId = 0;
-	configuration->tilesetColumn = 0;
-	configuration->tilesetRow = 0;
-	configuration->positionMappingX = SHOVELER_COORDINATE_MAPPING_POSITIVE_X;
-	configuration->positionMappingY = SHOVELER_COORDINATE_MAPPING_POSITIVE_Y;
-	configuration->size = shovelerVector2(0.0f, 0.0f);
-}
-
-static bool activateComponent(ShovelerViewComponent *component, void *componentDataPointer)
-{
-	ComponentData *componentData = componentDataPointer;
-
-	ShovelerViewEntity *tilesetEntityId = shovelerViewGetEntity(component->entity->view, componentData->configuration.tilesetEntityId);
-	assert(tilesetEntityId != NULL);
-	ShovelerTileset *tileset = shovelerViewEntityGetTileset(tilesetEntityId);
+	long long int tilesetEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerViewTileSpriteTilesetOptionKey);
+	ShovelerViewEntity *tilesetEntity = shovelerViewGetEntity(component->entity->view, tilesetEntityId);
+	assert(tilesetEntity != NULL);
+	ShovelerTileset *tileset = shovelerViewEntityGetTileset(tilesetEntity);
 	assert(tileset != NULL);
 
-	componentData->tileSprite = malloc(sizeof(ShovelerCanvasTileSprite));
-	componentData->tileSprite->tileset = tileset;
-	componentData->tileSprite->tilesetColumn = componentData->configuration.tilesetColumn;
-	componentData->tileSprite->tilesetRow = componentData->configuration.tilesetRow;
-	componentData->tileSprite->size = componentData->configuration.size;
+	int tilesetColumn = shovelerComponentGetConfigurationValueInt(component, shovelerViewTileSpriteTilesetColumnOptionKey);
+	int tilesetRow = shovelerComponentGetConfigurationValueInt(component, shovelerViewTileSpriteTilesetRowOptionKey);
+	ShovelerCoordinateMapping positionMappingX = shovelerComponentGetConfigurationValueInt(component, shovelerViewTileSpritePositionMappingXOptionKey);
+	ShovelerCoordinateMapping positionMappingY = shovelerComponentGetConfigurationValueInt(component, shovelerViewTileSpritePositionMappingYOptionKey);
+	ShovelerVector2 size = shovelerComponentGetConfigurationValueVector2(component, shovelerViewTileSpriteSizeOptionKey);
 
-	updatePosition(componentData, shovelerViewEntityGetPosition(component->entity));
-
-	componentData->positionCallback = shovelerViewEntityAddCallback(component->entity, shovelerViewPositionComponentName, &positionCallback, componentData);
-
-	return true;
+	ShovelerCanvasTileSprite *tileSprite = malloc(sizeof(ShovelerCanvasTileSprite));
+	tileSprite->tileset = tileset;
+	tileSprite->tilesetColumn = shovelerComponentGetConfigurationValueInt(component, shovelerViewTileSpriteTilesetColumnOptionKey);
+	tileSprite->tilesetRow = shovelerComponentGetConfigurationValueInt(component, shovelerViewTileSpriteTilesetRowOptionKey);
+	tileSprite->position = getTileSpritePosition(component);
+	tileSprite->size = shovelerComponentGetConfigurationValueVector2(component, shovelerViewTileSpriteSizeOptionKey);
+	return tileSprite;
 }
 
-static void deactivateComponent(ShovelerViewComponent *component, void *componentDataPointer)
+static void deactivateTileSpriteComponent(ShovelerComponent *component)
 {
-	ComponentData *componentData = componentDataPointer;
+	ShovelerCanvasTileSprite *tileSprite = (ShovelerCanvasTileSprite *) component->data;
+	assert(tileSprite != NULL);
 
-	free(componentData->tileSprite);
-	componentData->tileSprite = NULL;
-
-	shovelerViewEntityRemoveCallback(component->entity, shovelerViewPositionComponentName, componentData->positionCallback);
-	componentData->positionCallback = NULL;
+	free(tileSprite);
 }
 
-static void freeComponent(ShovelerViewComponent *component, void *componentDataPointer)
+static void updateTileSpritePositionDependency(ShovelerComponent *component, ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent)
 {
-	ComponentData *componentData = componentDataPointer;
+	ShovelerCanvasTileSprite *tileSprite = (ShovelerCanvasTileSprite *) component->data;
+	assert(tileSprite != NULL);
 
-	free(componentData->tileSprite);
-
-	if(componentData->positionCallback != NULL) {
-		shovelerViewEntityRemoveCallback(component->entity, shovelerViewPositionComponentName, componentData->positionCallback);
-	}
-
-	clearConfiguration(&componentData->configuration);
-	free(componentData);
+	tileSprite->position = getTileSpritePosition(component);
 }
 
-static void positionCallback(ShovelerViewComponent *positionComponent, ShovelerViewComponentCallbackType callbackType, void *componentDataPointer)
+static ShovelerVector2 getTileSpritePosition(ShovelerComponent *component)
 {
-	ComponentData *componentData = componentDataPointer;
+	long long int positionEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerViewTileSpritePositionOptionKey);
+	ShovelerViewEntity *positionEntity = shovelerViewGetEntity(component->entity->view, positionEntityId);
+	assert(positionEntity != NULL);
+	const ShovelerVector3 *positionCoordinates = shovelerViewEntityGetPositionCoordinates(positionEntity);
+	assert(positionCoordinates != NULL);
 
-	updatePosition(componentData, shovelerViewEntityGetPosition(positionComponent->entity));
-}
+	ShovelerCoordinateMapping positionMappingX = shovelerComponentGetConfigurationValueEntityId(component, shovelerViewTileSpritePositionMappingXOptionKey);
+	ShovelerCoordinateMapping positionMappingY = shovelerComponentGetConfigurationValueEntityId(component, shovelerViewTileSpritePositionMappingYOptionKey);
 
-static void updatePosition(ComponentData *componentData, const ShovelerViewPosition *position)
-{
-	ShovelerVector3 positionCoordinates = shovelerVector3((float) position->x, (float) position->y, (float) position->z);
-
-	componentData->tileSprite->position.values[0] = shovelerCoordinateMap(positionCoordinates, componentData->configuration.positionMappingX);
-	componentData->tileSprite->position.values[1] = shovelerCoordinateMap(positionCoordinates, componentData->configuration.positionMappingY);
+	return shovelerVector2(
+		shovelerCoordinateMap(*positionCoordinates, positionMappingX),
+		shovelerCoordinateMap(*positionCoordinates, positionMappingY));
 }
