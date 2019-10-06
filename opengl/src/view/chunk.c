@@ -11,14 +11,14 @@
 
 static void *activateChunkComponent(ShovelerComponent *component);
 static void deactivateChunkComponent(ShovelerComponent *component);
-static void updatePositionDependency(ShovelerComponent *component, ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent);
+static void updateChunkPositionDependency(ShovelerComponent *component, ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent);
 static ShovelerVector2 getChunkPosition(ShovelerComponent *component);
 
 ShovelerComponent *shovelerViewEntityAddChunk(ShovelerViewEntity *entity, const ShovelerViewChunkConfiguration *configuration)
 {
 	if(!shovelerViewHasComponentType(entity->view, shovelerViewChunkComponentTypeName)) {
 		ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerViewChunkComponentTypeName, activateChunkComponent, deactivateChunkComponent, /* requiresAuthority */ false);
-		shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerViewChunkPositionOptionKey, shovelerViewPositionComponentTypeName, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, updatePositionDependency);
+		shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerViewChunkPositionOptionKey, shovelerViewPositionComponentTypeName, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, updateChunkPositionDependency);
 		shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewChunkPositionMappingXOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_UINT, /* isOptional */ false, /* liveUpdate */ NULL);
 		shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewChunkPositionMappingYOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_UINT, /* isOptional */ false, /* liveUpdate */ NULL);
 		shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewChunkSizeOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_VECTOR2, /* isOptional */ false, /* liveUpdate */ NULL);
@@ -141,7 +141,7 @@ static void deactivateChunkComponent(ShovelerComponent *component)
 	shovelerChunkFree(component->data);
 }
 
-static void updatePositionDependency(ShovelerComponent *component, ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent)
+static void updateChunkPositionDependency(ShovelerComponent *component, ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent)
 {
 	ShovelerChunk *chunk = (ShovelerChunk *) component->data;
 	assert(chunk != NULL);
