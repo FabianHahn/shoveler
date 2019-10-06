@@ -15,7 +15,7 @@ typedef struct {
 	unsigned char padding;
 } ShovelerViewTilesetConfiguration;
 
-static const char *shovelerViewTilesetComponentName = "tileset";
+static const char *shovelerViewTilesetComponentTypeName = "tileset";
 
 bool shovelerViewEntityAddTileset(ShovelerViewEntity *entity, ShovelerViewTilesetConfiguration configuration);
 ShovelerTileset *shovelerViewEntityGetTileset(ShovelerViewEntity *entity);

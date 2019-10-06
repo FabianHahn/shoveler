@@ -28,7 +28,7 @@ typedef struct {
 	ShovelerViewTilemapTilesTileConfiguration *tiles;
 } ShovelerViewTilemapTilesConfiguration;
 
-static const char *shovelerViewTilemapTilesComponentName = "tilemap_tiles";
+static const char *shovelerViewTilemapTilesComponentTypeName = "tilemap_tiles";
 
 /** Adds a tilemap tiles component to an entity, copying the supplied configuration. */
 bool shovelerViewEntityAddTilemapTiles(ShovelerViewEntity *entity, const ShovelerViewTilemapTilesConfiguration *configuration);

@@ -13,17 +13,25 @@
 typedef struct {
 	long long int tilesEntityId;
 	int numTilesets;
-	long long int *tilesetEntityIds;
+	const long long int *tilesetEntityIds;
 } ShovelerViewTilemapConfiguration;
 
 static const char *shovelerViewTilemapComponentTypeName = "tilemap";
+static const char *shovelerViewTilemapTilesOptionKey = "tiles";
+static const char *shovelerViewTilemapTilesetsOptionKey = "tilesets";
 
 /** Adds a tilemap component to an entity, copying the supplied configuration. */
-bool shovelerViewEntityAddTilemap(ShovelerViewEntity *entity, const ShovelerViewTilemapConfiguration *configuration);
+ShovelerComponent *shovelerViewEntityAddTilemap(ShovelerViewEntity *entity, const ShovelerViewTilemapConfiguration *configuration);
 ShovelerTilemap *shovelerViewEntityGetTilemap(ShovelerViewEntity *entity);
-const ShovelerViewTilemapConfiguration *shovelerViewEntityGetTilemapConfiguration(ShovelerViewEntity *entity);
+/** Returns the current tilemap configuration, retaining ownership over returned fields. */
+bool shovelerViewEntityGetTilemapConfiguration(ShovelerViewEntity *entity, ShovelerViewTilemapConfiguration *outputConfiguration);
 /** Updates a tilemap component of an entity, copying the supplied configuration. */
-bool shovelerViewEntityUpdateTilemap(ShovelerViewEntity *entity, ShovelerViewTilemapConfiguration configuration);
+bool shovelerViewEntityUpdateTilemap(ShovelerViewEntity *entity, const ShovelerViewTilemapConfiguration *configuration);
 bool shovelerViewEntityRemoveTilemap(ShovelerViewEntity *entity);
+
+static inline ShovelerComponent *shovelerViewEntityGetTilemapComponent(ShovelerViewEntity *entity)
+{
+	return shovelerViewEntityGetComponent(entity, shovelerViewTilemapComponentTypeName);
+}
 
 #endif
