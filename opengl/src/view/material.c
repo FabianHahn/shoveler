@@ -8,6 +8,7 @@
 #include "shoveler/view/canvas.h"
 #include "shoveler/view/chunk.h"
 #include "shoveler/view/material.h"
+#include "shoveler/view/sampler.h"
 #include "shoveler/view/shader_cache.h"
 #include "shoveler/view/texture.h"
 #include "shoveler/view/tilemap.h"
@@ -25,6 +26,7 @@ ShovelerComponent *shovelerViewEntityAddMaterial(ShovelerViewEntity *entity, con
 		ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerViewMaterialComponentTypeName, activateMaterialComponent, deactivateMaterialComponent, /* requiresAuthority */ false);
 		shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewMaterialTypeOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
 		shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerViewMaterialTextureOptionKey, shovelerViewTextureComponentTypeName, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+		shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerViewMaterialTextureSamplerOptionKey, shovelerViewSamplerComponentTypeName, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* updateDependency */ NULL);
 		shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerViewMaterialTilemapOptionKey, shovelerViewTilemapComponentTypeName, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* updateDependency */ NULL);
 		shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerViewMaterialCanvasOptionKey, shovelerViewCanvasComponentTypeName, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* updateDependency */ NULL);
 		shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerViewMaterialChunkOptionKey, shovelerViewChunkComponentTypeName, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* updateDependency */ NULL);
@@ -44,6 +46,7 @@ ShovelerComponent *shovelerViewEntityAddMaterial(ShovelerViewEntity *entity, con
 			break;
 		case SHOVELER_VIEW_MATERIAL_TYPE_TEXTURE:
 			shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewMaterialTextureOptionKey, configuration->textureEntityId);
+			shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewMaterialTextureSamplerOptionKey, configuration->textureSamplerEntityId);
 			break;
 		case SHOVELER_VIEW_MATERIAL_TYPE_TILEMAP:
 			shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewMaterialTilemapOptionKey, configuration->tilemapEntityId);
@@ -89,6 +92,7 @@ bool shovelerViewEntityGetMaterialConfiguration(ShovelerViewEntity *entity, Shov
 			break;
 		case SHOVELER_VIEW_MATERIAL_TYPE_TEXTURE:
 			outputConfiguration->textureEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerViewMaterialTextureOptionKey);
+			outputConfiguration->textureSamplerEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerViewMaterialTextureSamplerOptionKey);
 			break;
 		case SHOVELER_VIEW_MATERIAL_TYPE_TILEMAP:
 			outputConfiguration->tilemapEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerViewMaterialTilemapOptionKey);
@@ -124,6 +128,7 @@ bool shovelerViewEntityUpdateMaterial(ShovelerViewEntity *entity, const Shoveler
 			break;
 		case SHOVELER_VIEW_MATERIAL_TYPE_TEXTURE:
 			shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewMaterialTextureOptionKey, configuration->textureEntityId);
+			shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewMaterialTextureSamplerOptionKey, configuration->textureSamplerEntityId);
 			break;
 		case SHOVELER_VIEW_MATERIAL_TYPE_TILEMAP:
 			shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewMaterialTilemapOptionKey, configuration->tilemapEntityId);
@@ -172,7 +177,11 @@ static void *activateMaterialComponent(ShovelerComponent *component)
 			assert(textureEntity != NULL);
 			ShovelerTexture *texture = shovelerViewEntityGetTexture(textureEntity);
 			assert(texture != NULL);
-			ShovelerSampler *sampler = shovelerViewEntityGetTextureSampler(textureEntity);
+
+			long long int textureSamplerEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerViewMaterialTextureSamplerOptionKey);
+			ShovelerViewEntity *textureSamplerEntity = shovelerViewGetEntity(component->entity->view, textureSamplerEntityId);
+			assert(textureSamplerEntity != NULL);
+			ShovelerSampler *sampler = shovelerViewEntityGetSampler(textureSamplerEntity);
 			assert(sampler != NULL);
 
 			material = shovelerMaterialTextureCreate(shaderCache, /* screenspace */ false, texture, false, sampler, false);

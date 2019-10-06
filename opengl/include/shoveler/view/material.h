@@ -19,6 +19,7 @@ typedef enum {
 typedef struct {
 	ShovelerViewMaterialType type;
 	long long int textureEntityId;
+	long long int textureSamplerEntityId;
 	long long int tilemapEntityId;
 	long long int canvasEntityId;
 	long long int chunkEntityId;
@@ -30,6 +31,7 @@ typedef struct {
 static const char *shovelerViewMaterialComponentTypeName = "material";
 static const char *shovelerViewMaterialTypeOptionKey = "type";
 static const char *shovelerViewMaterialTextureOptionKey = "texture";
+static const char *shovelerViewMaterialTextureSamplerOptionKey = "texture_sampler";
 static const char *shovelerViewMaterialTilemapOptionKey = "tilemap";
 static const char *shovelerViewMaterialCanvasOptionKey = "canvas";
 static const char *shovelerViewMaterialChunkOptionKey = "chunk";
