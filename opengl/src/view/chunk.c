@@ -27,9 +27,10 @@ ShovelerComponent *shovelerViewEntityAddChunk(ShovelerViewEntity *entity, const 
 	}
 
 	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerViewChunkComponentTypeName);
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewChunkPositionOptionKey, configuration->positionEntityId);
 	shovelerComponentUpdateCanonicalConfigurationOptionUint(component, shovelerViewChunkPositionMappingXOptionKey, configuration->positionMappingX);
 	shovelerComponentUpdateCanonicalConfigurationOptionUint(component, shovelerViewChunkPositionMappingXOptionKey, configuration->positionMappingY);
-	shovelerComponentUpdateCanonicalConfigurationOptionVector2(component, shovelerViewChunkPositionMappingXOptionKey, configuration->size);
+	shovelerComponentUpdateCanonicalConfigurationOptionVector2(component, shovelerViewChunkSizeOptionKey, configuration->size);
 	shovelerComponentUpdateCanonicalConfigurationOptionEntityIdArray(component, shovelerViewChunkLayersOptionKey, configuration->layerEntityIds, configuration->numLayers);
 
 	shovelerComponentActivate(component);
@@ -53,6 +54,7 @@ bool shovelerViewEntityGetChunkConfiguration(ShovelerViewEntity *entity, Shovele
 		return false;
 	}
 
+	outputConfiguration->positionEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerViewChunkPositionOptionKey);
 	outputConfiguration->positionMappingX = shovelerComponentGetConfigurationValueUint(component, shovelerViewChunkPositionMappingXOptionKey);
 	outputConfiguration->positionMappingY = shovelerComponentGetConfigurationValueUint(component, shovelerViewChunkPositionMappingYOptionKey);
 	outputConfiguration->size = shovelerComponentGetConfigurationValueVector2(component, shovelerViewChunkSizeOptionKey);

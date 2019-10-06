@@ -5,13 +5,14 @@
 #include "shoveler/log.h"
 #include "shoveler/tile_sprite_animation.h"
 
-ShovelerTileSpriteAnimation *shovelerTileSpriteAnimationCreate(ShovelerCanvasTileSprite *tileSprite, float moveAmountThreshold)
+ShovelerTileSpriteAnimation *shovelerTileSpriteAnimationCreate(ShovelerCanvasTileSprite *tileSprite, ShovelerVector2 initialPosition, float moveAmountThreshold)
 {
 	assert(tileSprite->tileset->columns >= 4);
 	assert(tileSprite->tileset->rows >= 3);
 
 	ShovelerTileSpriteAnimation *animation = malloc(sizeof(ShovelerTileSpriteAnimation));
 	animation->tileSprite = tileSprite;
+	animation->currentPosition = initialPosition;
 	animation->moveAmountThreshold = moveAmountThreshold;
 	animation->numZeroUpdatesForStopping = 2;
 	animation->eps = 1.0e-6f;
@@ -24,10 +25,12 @@ ShovelerTileSpriteAnimation *shovelerTileSpriteAnimationCreate(ShovelerCanvasTil
 	return animation;
 }
 
-void shovelerTileSpriteAnimationUpdate(ShovelerTileSpriteAnimation *animation, ShovelerVector2 moveAmount)
+void shovelerTileSpriteAnimationUpdate(ShovelerTileSpriteAnimation *animation, ShovelerVector2 newPosition)
 {
-	float moveX = moveAmount.values[0];
-	float moveY = moveAmount.values[1];
+	float moveX = newPosition.values[0] - animation->currentPosition.values[0];
+	float moveY = newPosition.values[1] - animation->currentPosition.values[1];
+	animation->currentPosition = newPosition;
+
 	float moveMagnitudeX = fabsf(moveX);
 	float moveMagnitudeY = fabsf(moveY);
 
