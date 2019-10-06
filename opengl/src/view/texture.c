@@ -3,146 +3,98 @@
 
 #include "shoveler/view/resources.h"
 #include "shoveler/view/texture.h"
+#include "shoveler/component.h"
 #include "shoveler/log.h"
+#include "shoveler/view.h"
 
-typedef struct {
-	ShovelerViewTextureConfiguration configuration;
-	ShovelerTexture *texture;
-	ShovelerSampler *sampler;
-} TextureComponentData;
+/*
+ * typedef struct {
+	long long int imageResourceEntityId;
+} ShovelerViewTextureConfiguration;
 
-static bool activateComponent(ShovelerViewComponent *component, void *componentDataPointer);
-static void deactivateComponent(ShovelerViewComponent *component, void *componentDataPointer);
-static void freeComponent(ShovelerViewComponent *component, void *componentDataPointer);
+static const char *shovelerViewTextureComponentTypeName = "texture";
+static const char *shovelerViewTextureImageResourceOptionKey = "image_resource";
+*/
 
-bool shovelerViewEntityAddTexture(ShovelerViewEntity *entity, ShovelerViewTextureConfiguration configuration)
+static void *activateTextureComponent(ShovelerComponent *component);
+static void deactivateTextureComponent(ShovelerComponent *component);
+
+bool shovelerViewEntityAddTexture(ShovelerViewEntity *entity, const ShovelerViewTextureConfiguration *configuration)
 {
-	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTextureComponentName);
-	if(component != NULL) {
-		shovelerLogWarning("Trying to add texture to entity %lld which already has a texture, ignoring.", entity->entityId);
-		return false;
+	if(!shovelerViewHasComponentType(entity->view, shovelerViewTextureComponentTypeName)) {
+		ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerViewTextureComponentTypeName, activateTextureComponent, deactivateTextureComponent, /* requiresAuthority */ false);
+		shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerViewTextureImageResourceOptionKey, shovelerViewResourceComponentTypeName, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+		shovelerViewAddComponentType(entity->view, componentType);
 	}
 
-	TextureComponentData *componentData = malloc(sizeof(TextureComponentData));
-	componentData->configuration = configuration;
-	componentData->texture = NULL;
-	componentData->sampler = NULL;
+	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerViewTextureComponentTypeName);
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewTextureImageResourceOptionKey, configuration->imageResourceEntityId);
 
-	component = shovelerViewEntityAddComponent(entity, shovelerViewTextureComponentName, componentData, activateComponent, deactivateComponent, freeComponent);
-	assert(component != NULL);
-
-	shovelerViewComponentAddDependency(component, configuration.imageResourceEntityId, shovelerViewResourceComponentName);
-
-	shovelerViewComponentActivate(component);
-	return true;
+	shovelerComponentActivate(component);
+	return component;
 }
 
 ShovelerTexture *shovelerViewEntityGetTexture(ShovelerViewEntity *entity)
 {
-	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTextureComponentName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTextureComponentTypeName);
 	if(component == NULL) {
 		return NULL;
 	}
 
-	TextureComponentData *componentData = component->data;
-	return componentData->texture;
+	return component->data;
 }
 
-ShovelerSampler *shovelerViewEntityGetTextureSampler(ShovelerViewEntity *entity)
+bool shovelerViewEntityGetTextureConfiguration(ShovelerViewEntity *entity, ShovelerViewTextureConfiguration *outputConfiguration)
 {
-	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTextureComponentName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTextureComponentTypeName);
 	if(component == NULL) {
-		return NULL;
+		return false;
 	}
 
-	TextureComponentData *componentData = component->data;
-	return componentData->sampler;
+	outputConfiguration->imageResourceEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerViewTextureImageResourceOptionKey);
+	return true;
 }
 
-const ShovelerViewTextureConfiguration *shovelerViewEntityGetTextureConfiguration(ShovelerViewEntity *entity)
+bool shovelerViewEntityUpdateTexture(ShovelerViewEntity *entity, const ShovelerViewTextureConfiguration *configuration)
 {
-	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTextureComponentName);
-	if(component == NULL) {
-		return NULL;
-	}
-
-	TextureComponentData *componentData = component->data;
-	return &componentData->configuration;
-}
-
-bool shovelerViewEntityUpdateTexture(ShovelerViewEntity *entity, ShovelerViewTextureConfiguration configuration)
-{
-	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTextureComponentName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTextureComponentTypeName);
 	if(component == NULL) {
 		shovelerLogWarning("Trying to update texture of entity %lld which does not have a texture, ignoring.", entity->entityId);
 		return false;
 	}
 
-	TextureComponentData *componentData = component->data;
-
-	shovelerViewComponentDeactivate(component);
-
-	if(!shovelerViewComponentRemoveDependency(component, configuration.imageResourceEntityId, shovelerViewResourceComponentName)) {
-		return false;
-	}
-
-	componentData->configuration = configuration;
-	shovelerViewComponentAddDependency(component, configuration.imageResourceEntityId, shovelerViewResourceComponentName);
-	shovelerViewComponentActivate(component);
-
-	shovelerViewComponentUpdate(component);
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewTextureImageResourceOptionKey, configuration->imageResourceEntityId);
 	return true;
 }
 
 bool shovelerViewEntityRemoveTexture(ShovelerViewEntity *entity)
 {
-	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTextureComponentName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTextureComponentTypeName);
 	if(component == NULL) {
 		shovelerLogWarning("Trying to remove texture from entity %lld which does not have a texture, ignoring.", entity->entityId);
 		return false;
 	}
 
-	return shovelerViewEntityRemoveComponent(entity, shovelerViewTextureComponentName);
+	return shovelerViewEntityRemoveComponent(entity, shovelerViewTextureComponentTypeName);
 }
 
-static bool activateComponent(ShovelerViewComponent *component, void *componentDataPointer)
+static void *activateTextureComponent(ShovelerComponent *component)
 {
-	TextureComponentData *componentData = componentDataPointer;
-
-	ShovelerViewEntity *imageResourceEntity = shovelerViewGetEntity(component->entity->view, componentData->configuration.imageResourceEntityId);
+	long long int imageResourceEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerViewTextureImageResourceOptionKey);
+	ShovelerViewEntity *imageResourceEntity = shovelerViewGetEntity(component->entity->view, imageResourceEntityId);
 	assert(imageResourceEntity != NULL);
 	ShovelerImage *image = shovelerViewEntityGetResource(imageResourceEntity);
 	assert(image != NULL);
 
-	componentData->texture = shovelerTextureCreate2d(image, false);
-	shovelerTextureUpdate(componentData->texture);
+	ShovelerTexture *texture = shovelerTextureCreate2d(image, false);
+	shovelerTextureUpdate(texture);
 
-	componentData->sampler = shovelerSamplerCreate(componentData->configuration.interpolate, componentData->configuration.useMipmaps, componentData->configuration.clamp);
-	return true;
+	return texture;
 }
 
-static void deactivateComponent(ShovelerViewComponent *component, void *componentDataPointer)
+static void deactivateTextureComponent(ShovelerComponent *component)
 {
-	TextureComponentData *componentData = componentDataPointer;
+	ShovelerTexture *texture = (ShovelerTexture *) component->data;
 
-	shovelerSamplerFree(componentData->sampler);
-	componentData->sampler = NULL;
-
-	shovelerTextureFree(componentData->texture);
-	componentData->texture = NULL;
-}
-
-static void freeComponent(ShovelerViewComponent *component, void *componentDataPointer)
-{
-	TextureComponentData *componentData = componentDataPointer;
-
-	if(componentData->texture != NULL) {
-		shovelerTextureFree(componentData->texture);
-	}
-
-	if(componentData->sampler != NULL) {
-		shovelerSamplerFree(componentData->sampler);
-	}
-
-	free(componentData);
+	shovelerTextureFree(texture);
 }
