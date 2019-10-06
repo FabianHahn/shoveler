@@ -12,12 +12,14 @@
 
 typedef struct {
 	long long int tilesEntityId;
+	long long int collidersEntityId;
 	int numTilesets;
 	const long long int *tilesetEntityIds;
 } ShovelerViewTilemapConfiguration;
 
 static const char *shovelerViewTilemapComponentTypeName = "tilemap";
 static const char *shovelerViewTilemapTilesOptionKey = "tiles";
+static const char *shovelerViewTilemapCollidersOptionKey = "colliders";
 static const char *shovelerViewTilemapTilesetsOptionKey = "tilesets";
 
 /** Adds a tilemap component to an entity, copying the supplied configuration. */

@@ -447,8 +447,13 @@ static inline void shovelerComponentGetConfigurationValueBytes(ShovelerComponent
 	assert(configurationValue != NULL);
 	assert(configurationValue->type == SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BYTES);
 
-	*outputData = configurationValue->bytesValue.data;
-	*outputSize = configurationValue->bytesValue.size;
+	if(outputData != NULL) {
+		*outputData = configurationValue->bytesValue.data;
+	}
+
+	if(outputSize != NULL) {
+		*outputSize = configurationValue->bytesValue.size;
+	}
 }
 
 #endif

@@ -36,6 +36,7 @@ set(SHOVELER_OPENGL_SRC
 	src/view/tile_sprite.c
 	src/view/tile_sprite_animation.c
 	src/view/tilemap.c
+	src/view/tilemap_colliders.c
 	src/view/tilemap_tiles.c
 	src/view/tileset.c
 	src/camera.c
@@ -105,6 +106,7 @@ set(SHOVELER_OPENGL_SRC
 	include/shoveler/view/tile_sprite.h
 	include/shoveler/view/tile_sprite_animation.h
 	include/shoveler/view/tilemap.h
+	include/shoveler/view/tilemap_colliders.h
 	include/shoveler/view/tilemap_tiles.h
 	include/shoveler/view/tileset.h
 	include/shoveler/camera.h

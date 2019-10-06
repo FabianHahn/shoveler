@@ -3,23 +3,12 @@
 #include <string.h> // memcpy
 
 #include "shoveler/view/tilemap.h"
+#include "shoveler/view/tilemap_colliders.h"
 #include "shoveler/view/tilemap_tiles.h"
 #include "shoveler/view/tileset.h"
 #include "shoveler/component.h"
 #include "shoveler/log.h"
 #include "shoveler/view.h"
-
-/*
- * typedef struct {
-	long long int tilesEntityId;
-	int numTilesets;
-	const long long int *tilesetEntityIds;
-} ShovelerViewTilemapConfiguration;
-
-static const char *shovelerViewTilemapComponentTypeName = "tilemap";
-static const char *shovelerViewTilemapTilesOptionKey = "tiles";
-static const char *shovelerViewTilemapTilesetsOptionKey = "tilesets";
-*/
 
 static void *activateTilemapComponent(ShovelerComponent *component);
 static void deactivateTilemapComponent(ShovelerComponent *component);
@@ -29,12 +18,14 @@ ShovelerComponent *shovelerViewEntityAddTilemap(ShovelerViewEntity *entity, cons
 	if(!shovelerViewHasComponentType(entity->view, shovelerViewTilemapComponentTypeName)) {
 		ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerViewTilemapComponentTypeName, activateTilemapComponent, deactivateTilemapComponent, /* requiresAuthority */ false);
 		shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerViewTilemapTilesOptionKey, shovelerViewTilemapTilesComponentTypeName, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+		shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerViewTilemapCollidersOptionKey, shovelerViewTilemapCollidersComponentTypeName, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
 		shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerViewTilemapTilesetsOptionKey, shovelerViewTilesetComponentTypeName, /* isArray */ true, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
 		shovelerViewAddComponentType(entity->view, componentType);
 	}
 
 	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerViewTilemapComponentTypeName);
 	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewTilemapTilesOptionKey, configuration->tilesEntityId);
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewTilemapCollidersOptionKey, configuration->collidersEntityId);
 	shovelerComponentUpdateCanonicalConfigurationOptionEntityIdArray(component, shovelerViewTilemapTilesetsOptionKey, configuration->tilesetEntityIds, configuration->numTilesets);
 
 	shovelerComponentActivate(component);
@@ -59,6 +50,7 @@ bool shovelerViewEntityGetTilemapConfiguration(ShovelerViewEntity *entity, Shove
 	}
 
 	outputConfiguration->tilesEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerViewTilemapTilesOptionKey);
+	outputConfiguration->collidersEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerViewTilemapCollidersOptionKey);
 
 	const ShovelerComponentConfigurationValue *layersValue = shovelerComponentGetConfigurationValue(component, shovelerViewTilemapTilesetsOptionKey);
 	assert(layersValue != NULL);
@@ -77,6 +69,7 @@ bool shovelerViewEntityUpdateTilemap(ShovelerViewEntity *entity, const ShovelerV
 	}
 
 	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewTilemapTilesOptionKey, configuration->tilesEntityId);
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewTilemapCollidersOptionKey, configuration->collidersEntityId);
 	shovelerComponentUpdateCanonicalConfigurationOptionEntityIdArray(component, shovelerViewTilemapTilesetsOptionKey, configuration->tilesetEntityIds, configuration->numTilesets);
 	return true;
 }
@@ -98,9 +91,26 @@ static void *activateTilemapComponent(ShovelerComponent *component)
 	ShovelerViewEntity *tilemapEntity = shovelerViewGetEntity(component->entity->view, tilesEntityId);
 	assert(tilemapEntity != NULL);
 	ShovelerTexture *tiles = shovelerViewEntityGetTilemapTiles(tilemapEntity);
-	bool *collidingTiles = shovelerViewEntityGetTilemapCollidingTiles(tilemapEntity);
+	assert(tiles != NULL);
+	int numTilesColumns = tiles->width;
+	int numTilesRows = tiles->height;
 
-	ShovelerTilemap *tilemap = shovelerTilemapCreate(tiles, collidingTiles);
+	long long int collidersEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerViewTilemapCollidersOptionKey);
+	ShovelerViewEntity *collidersEntity = shovelerViewGetEntity(component->entity->view, collidersEntityId);
+	assert(collidersEntity != NULL);
+	ShovelerComponent *collidersComponent = shovelerViewEntityGetTilemapCollidersComponent(collidersEntity);
+	assert(collidersComponent != NULL);
+	const bool *colliders = shovelerViewEntityGetTilemapColliders(collidersEntity);
+	assert(colliders != NULL);
+	int numCollidersColumns = shovelerComponentGetConfigurationValueInt(collidersComponent, shovelerViewTilemapCollidersNumColumnsOptionKey);
+	int numCollidersRows = shovelerComponentGetConfigurationValueInt(collidersComponent, shovelerViewTilemapCollidersNumRowsOptionKey);
+
+	if(numTilesColumns != numCollidersColumns || numTilesRows != numCollidersRows) {
+		shovelerLogWarning("Failed to activate tilemap %lld because dependency tiles dimensions don't match dependency colliders dimensions.", component->entity->entityId);
+		return NULL;
+	}
+
+	ShovelerTilemap *tilemap = shovelerTilemapCreate(tiles, colliders);
 
 	const ShovelerComponentConfigurationValue *tilesetsValue = shovelerComponentGetConfigurationValue(component, shovelerViewTilemapTilesetsOptionKey);
 	assert(tilesetsValue != NULL);

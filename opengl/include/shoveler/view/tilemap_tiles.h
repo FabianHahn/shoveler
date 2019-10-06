@@ -9,35 +9,42 @@
 #include <shoveler/view.h>
 
 typedef struct {
-	unsigned char tilesetColumn;
-	unsigned char tilesetRow;
-	unsigned char tilesetId;
-	bool colliding;
-} ShovelerViewTilemapTilesTileConfiguration;
-
-typedef struct {
 	/**
 	 * If set, tiles are defined by image resource component on the specified entity.
 	 * Otherwise, uses inline tiles definition below.
 	 */
 	bool isImageResourceEntityDefinition;
 	long long int imageResourceEntityId;
-	unsigned int numColumns;
-	unsigned int numRows;
-	/** Array of tiles, where tile (column, row) is at position [row * numColumns + column] */
-	ShovelerViewTilemapTilesTileConfiguration *tiles;
+	int numColumns;
+	int numRows;
+	/** Array of tileset column bytes, where tile (column, row) is at position [row * numColumns + column] */
+	const unsigned char *tilesetColumns;
+	/** Array of tileset row bytes, where tile (column, row) is at position [row * numColumns + column] */
+	const unsigned char *tilesetRows;
+	/** Array of tileset id bytes, where tile (column, row) is at position [row * numColumns + column] */
+	const unsigned char *tilesetIds;
 } ShovelerViewTilemapTilesConfiguration;
 
 static const char *shovelerViewTilemapTilesComponentTypeName = "tilemap_tiles";
+static const char *shovelerViewTilemapTilesImageResourceOptionKey = "image_resource";
+static const char *shovelerViewTilemapTilesNumColumnsOptionKey = "num_columns";
+static const char *shovelerViewTilemapTilesNumRowsOptionKey = "num_rows";
+static const char *shovelerViewTilemapTilesTilesetColumnsOptionKey = "tileset_columns";
+static const char *shovelerViewTilemapTilesTilesetRowsOptionKey = "tileset_rows";
+static const char *shovelerViewTilemapTilesTilesetIdsOptionKey = "tileset_ids";
 
 /** Adds a tilemap tiles component to an entity, copying the supplied configuration. */
-bool shovelerViewEntityAddTilemapTiles(ShovelerViewEntity *entity, const ShovelerViewTilemapTilesConfiguration *configuration);
+ShovelerComponent *shovelerViewEntityAddTilemapTiles(ShovelerViewEntity *entity, const ShovelerViewTilemapTilesConfiguration *configuration);
 ShovelerTexture *shovelerViewEntityGetTilemapTiles(ShovelerViewEntity *entity);
-bool *shovelerViewEntityGetTilemapCollidingTiles(ShovelerViewEntity *entity);
-const ShovelerViewTilemapTilesConfiguration *shovelerViewEntityGetTilemapTilesConfiguration(ShovelerViewEntity *entity);
+/** Returns the current tilemap tiles configuration, retaining ownership over returned fields. */
+bool shovelerViewEntityGetTilemapTilesConfiguration(ShovelerViewEntity *entity, ShovelerViewTilemapTilesConfiguration *outputConfiguration);
 /** Updates a tilemap tiles component on an entity, copying the supplied configuration. */
 bool shovelerViewEntityUpdateTilemapTiles(ShovelerViewEntity *entity, const ShovelerViewTilemapTilesConfiguration *configuration);
-bool shovelerViewEntityUpdateTilemapTilesData(ShovelerViewEntity *entity, const ShovelerViewTilemapTilesTileConfiguration *tiles);
 bool shovelerViewEntityRemoveTilemapTiles(ShovelerViewEntity *entity);
+
+static inline ShovelerComponent *shovelerViewEntityGetTilemapTilesComponent(ShovelerViewEntity *entity)
+{
+	return shovelerViewEntityGetComponent(entity, shovelerViewTilemapTilesComponentTypeName);
+}
 
 #endif
