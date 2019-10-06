@@ -10,17 +10,29 @@
 
 typedef struct {
 	long long int imageResourceEntityId;
-	unsigned char columns;
-	unsigned char rows;
-	unsigned char padding;
+	int numColumns;
+	int numRows;
+	int padding;
 } ShovelerViewTilesetConfiguration;
 
 static const char *shovelerViewTilesetComponentTypeName = "tileset";
+static const char *shovelerViewTilesetImageResourceOptionKey = "image_resource";
+static const char *shovelerViewTilesetNumColumnsOptionKey = "num_columns";
+static const char *shovelerViewTilesetNumRowsOptionKey = "num_rows";
+static const char *shovelerViewTilesetPaddingOptionKey = "padding";
 
-bool shovelerViewEntityAddTileset(ShovelerViewEntity *entity, ShovelerViewTilesetConfiguration configuration);
+/** Adds a tileset component to an entity, copying the supplied configuration. */
+ShovelerComponent *shovelerViewEntityAddTileset(ShovelerViewEntity *entity, const ShovelerViewTilesetConfiguration *configuration);
 ShovelerTileset *shovelerViewEntityGetTileset(ShovelerViewEntity *entity);
-const ShovelerViewTilesetConfiguration *shovelerViewEntityGetTilesetConfiguration(ShovelerViewEntity *entity);
-bool shovelerViewEntityUpdateTileset(ShovelerViewEntity *entity, ShovelerViewTilesetConfiguration configuration);
+/** Returns the current tileset configuration, retaining ownership over returned fields. */
+bool shovelerViewEntityGetTilesetConfiguration(ShovelerViewEntity *entity, ShovelerViewTilesetConfiguration *outputConfiguration);
+/** Updates a tileset component of an entity, copying the supplied configuration. */
+bool shovelerViewEntityUpdateTileset(ShovelerViewEntity *entity, const ShovelerViewTilesetConfiguration *configuration);
 bool shovelerViewEntityRemoveTileset(ShovelerViewEntity *entity);
+
+static inline ShovelerComponent *shovelerViewEntityGetTilesetComponent(ShovelerViewEntity *entity)
+{
+	return shovelerViewEntityGetComponent(entity, shovelerViewTilesetComponentTypeName);
+}
 
 #endif

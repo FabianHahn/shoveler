@@ -3,118 +3,103 @@
 
 #include "shoveler/view/resources.h"
 #include "shoveler/view/tileset.h"
+#include "shoveler/component.h"
 #include "shoveler/log.h"
+#include "shoveler/view.h"
 
-typedef struct {
-	ShovelerViewTilesetConfiguration configuration;
-	ShovelerTileset *tileset;
-} TilesetComponentData;
+static void *activateTilesetComponent(ShovelerComponent *component);
+static void deactivateTilesetComponent(ShovelerComponent *component);
 
-static bool activateComponent(ShovelerViewComponent *component, void *componentDataPointer);
-static void deactivateComponent(ShovelerViewComponent *component, void *componentDataPointer);
-static void freeComponent(ShovelerViewComponent *component, void *componentDataPointer);
-
-bool shovelerViewEntityAddTileset(ShovelerViewEntity *entity, ShovelerViewTilesetConfiguration configuration)
+ShovelerComponent *shovelerViewEntityAddTileset(ShovelerViewEntity *entity, const ShovelerViewTilesetConfiguration *configuration)
 {
-	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTilesetComponentName);
-	if(component != NULL) {
-		shovelerLogWarning("Trying to add tileset to entity %lld which already has a tileset, ignoring.", entity->entityId);
-		return false;
+	if(!shovelerViewHasComponentType(entity->view, shovelerViewTilesetComponentTypeName)) {
+		ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerViewTilesetComponentTypeName, activateTilesetComponent, deactivateTilesetComponent, /* requiresAuthority */ false);
+		shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerViewTilesetImageResourceOptionKey, shovelerViewResourceComponentTypeName, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+		shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewTilesetNumColumnsOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
+		shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewTilesetNumRowsOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
+		shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewTilesetPaddingOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
+		shovelerViewAddComponentType(entity->view, componentType);
 	}
 
-	TilesetComponentData *componentData = malloc(sizeof(TilesetComponentData));
-	componentData->configuration = configuration;
-	componentData->tileset = NULL;
+	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerViewTilesetComponentTypeName);
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewTilesetImageResourceOptionKey, configuration->imageResourceEntityId);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerViewTilesetNumColumnsOptionKey, configuration->numColumns);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerViewTilesetNumRowsOptionKey, configuration->numRows);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerViewTilesetPaddingOptionKey, configuration->padding);
 
-	component = shovelerViewEntityAddComponent(entity, shovelerViewTilesetComponentName, componentData, activateComponent, deactivateComponent, freeComponent);
-	assert(component != NULL);
-
-	shovelerViewComponentAddDependency(component, configuration.imageResourceEntityId, shovelerViewResourceComponentName);
-
-	shovelerViewComponentActivate(component);
-	return true;
+	shovelerComponentActivate(component);
+	return component;
 }
 
 ShovelerTileset *shovelerViewEntityGetTileset(ShovelerViewEntity *entity)
 {
-	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTilesetComponentName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTilesetComponentTypeName);
 	if(component == NULL) {
 		return NULL;
 	}
 
-	TilesetComponentData *componentData = component->data;
-	return componentData->tileset;
+	return component->data;
 }
 
-const ShovelerViewTilesetConfiguration *shovelerViewEntityGetTilesetConfiguration(ShovelerViewEntity *entity)
+bool shovelerViewEntityGetTilesetConfiguration(ShovelerViewEntity *entity, ShovelerViewTilesetConfiguration *outputConfiguration)
 {
-	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTilesetComponentName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTilesetComponentTypeName);
 	if(component == NULL) {
 		return NULL;
 	}
 
-	TilesetComponentData *componentData = component->data;
-	return &componentData->configuration;
+	outputConfiguration->imageResourceEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerViewTilesetImageResourceOptionKey);
+	outputConfiguration->numColumns = shovelerComponentGetConfigurationValueInt(component, shovelerViewTilesetNumColumnsOptionKey);
+	outputConfiguration->numRows = shovelerComponentGetConfigurationValueInt(component, shovelerViewTilesetNumRowsOptionKey);
+	outputConfiguration->padding = shovelerComponentGetConfigurationValueInt(component, shovelerViewTilesetPaddingOptionKey);
+	return true;
 }
 
-bool shovelerViewEntityUpdateTileset(ShovelerViewEntity *entity, ShovelerViewTilesetConfiguration configuration)
+bool shovelerViewEntityUpdateTileset(ShovelerViewEntity *entity, const ShovelerViewTilesetConfiguration *configuration)
 {
-	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTilesetComponentName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTilesetComponentTypeName);
 	if(component == NULL) {
 		shovelerLogWarning("Trying to update tileset of entity %lld which does not have a tileset, ignoring.", entity->entityId);
 		return false;
 	}
 
-	TilesetComponentData *componentData = component->data;
-
-	shovelerViewComponentDeactivate(component);
-
-	if(!shovelerViewComponentRemoveDependency(component, componentData->configuration.imageResourceEntityId, shovelerViewResourceComponentName)) {
-		return false;
-	}
-
-	componentData->configuration = configuration;
-	shovelerViewComponentAddDependency(component, componentData->configuration.imageResourceEntityId, shovelerViewResourceComponentName);
-	shovelerViewComponentActivate(component);
-
-	shovelerViewComponentUpdate(component);
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewTilesetImageResourceOptionKey, configuration->imageResourceEntityId);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerViewTilesetNumColumnsOptionKey, configuration->numColumns);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerViewTilesetNumRowsOptionKey, configuration->numRows);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerViewTilesetPaddingOptionKey, configuration->padding);
 	return true;
 }
 
 bool shovelerViewEntityRemoveTileset(ShovelerViewEntity *entity)
 {
-	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTilesetComponentName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTilesetComponentTypeName);
 	if(component == NULL) {
 		shovelerLogWarning("Trying to remove tileset from entity %lld which does not have a tileset, ignoring.", entity->entityId);
 		return false;
 	}
 
-	return shovelerViewEntityRemoveComponent(entity, shovelerViewTilesetComponentName);
+	return shovelerViewEntityRemoveComponent(entity, shovelerViewTilesetComponentTypeName);
 }
 
-static bool activateComponent(ShovelerViewComponent *component, void *componentDataPointer)
+static void *activateTilesetComponent(ShovelerComponent *component)
 {
-	TilesetComponentData *componentData = componentDataPointer;
-
-	ShovelerViewEntity *imageResourceEntity = shovelerViewGetEntity(component->entity->view, componentData->configuration.imageResourceEntityId);
+	long long int imageResourceEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerViewTilesetImageResourceOptionKey);
+	ShovelerViewEntity *imageResourceEntity = shovelerViewGetEntity(component->entity->view, imageResourceEntityId);
 	assert(imageResourceEntity != NULL);
 	ShovelerImage *image = shovelerViewEntityGetResource(imageResourceEntity);
 	assert(image != NULL);
 
-	componentData->tileset = shovelerTilesetCreate(image, componentData->configuration.columns, componentData->configuration.rows, componentData->configuration.padding);
-	return true;
+	int numColumns = shovelerComponentGetConfigurationValueInt(component, shovelerViewTilesetNumColumnsOptionKey);
+	int numRows = shovelerComponentGetConfigurationValueInt(component, shovelerViewTilesetNumRowsOptionKey);
+	int padding = shovelerComponentGetConfigurationValueInt(component, shovelerViewTilesetPaddingOptionKey);
+	ShovelerTileset *tileset = shovelerTilesetCreate(image, numColumns, numRows, padding);
+
+	return tileset;
 }
 
-static void deactivateComponent(ShovelerViewComponent *component, void *componentDataPointer)
+static void deactivateTilesetComponent(ShovelerComponent *component)
 {
-	TilesetComponentData *componentData = componentDataPointer;
-	shovelerTilesetFree(componentData->tileset);
-	componentData->tileset = NULL;
-}
+	ShovelerTileset *tileset = (ShovelerTileset *) component->data;
 
-static void freeComponent(ShovelerViewComponent *component, void *componentDataPointer)
-{
-	TilesetComponentData *componentData = componentDataPointer;
-	shovelerTilesetFree(componentData->tileset);
-	free(componentData);
+	shovelerTilesetFree(tileset);
 }
