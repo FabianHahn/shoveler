@@ -17,6 +17,7 @@
 #include <shoveler/view/model.h>
 #include <shoveler/view/position.h>
 #include <shoveler/view/resources.h>
+#include <shoveler/view/sampler.h>
 #include <shoveler/view/texture.h>
 #include <shoveler/view/tile_sprite.h>
 #include <shoveler/view/tile_sprite_animation.h>
@@ -39,7 +40,7 @@ static double time = 0.0;
 
 static GString *getImageData(ShovelerImage *image);
 static void updateGame(ShovelerGame *game, double dt);
-static void requestPositionUpdate(ShovelerViewComponent *component, double x, double y, double z, void *userData);
+static void requestPositionUpdate(ShovelerComponent *component, double x, double y, double z, void *userData);
 
 int main(int argc, char *argv[])
 {
@@ -82,13 +83,13 @@ int main(int argc, char *argv[])
 	ShovelerViewDrawableConfiguration cubeDrawableConfiguration;
 	cubeDrawableConfiguration.type = SHOVELER_VIEW_DRAWABLE_TYPE_CUBE;
 	ShovelerViewEntity *cubeDrawableEntity = shovelerViewAddEntity(game->view, 1);
-	shovelerViewEntityAddDrawable(cubeDrawableEntity, cubeDrawableConfiguration);
+	shovelerViewEntityAddDrawable(cubeDrawableEntity, &cubeDrawableConfiguration);
 
 	ShovelerViewMaterialConfiguration grayColorMaterialConfiguration;
 	grayColorMaterialConfiguration.type = SHOVELER_VIEW_MATERIAL_TYPE_COLOR;
 	grayColorMaterialConfiguration.color = shovelerVector3(0.7, 0.7, 0.7);
 	ShovelerViewEntity *grayColorMaterialEntity = shovelerViewAddEntity(game->view, 2);
-	shovelerViewEntityAddMaterial(grayColorMaterialEntity, grayColorMaterialConfiguration);
+	shovelerViewEntityAddMaterial(grayColorMaterialEntity, &grayColorMaterialConfiguration);
 
 	ShovelerViewModelConfiguration cubeModelConfiguration;
 	cubeModelConfiguration.drawableEntityId = 1;
@@ -100,8 +101,8 @@ int main(int argc, char *argv[])
 	cubeModelConfiguration.castsShadow = true;
 	cubeModelConfiguration.polygonMode = GL_FILL;
 	ShovelerViewEntity *cubeEntity = shovelerViewAddEntity(game->view, 3);
-	shovelerViewEntityAddModel(cubeEntity, cubeModelConfiguration);
-	shovelerViewEntityAddPosition(cubeEntity, 0.0, 0.0, 5.0);
+	shovelerViewEntityAddModel(cubeEntity, &cubeModelConfiguration);
+	shovelerViewEntityAddPosition(cubeEntity, shovelerVector3(0.0, 0.0, 5.0));
 
 	ShovelerViewDrawableConfiguration quadDrawableConfiguration;
 	quadDrawableConfiguration.type = SHOVELER_VIEW_DRAWABLE_TYPE_QUAD;
@@ -115,9 +116,9 @@ int main(int argc, char *argv[])
 	planeModelConfiguration.castsShadow = true;
 	planeModelConfiguration.polygonMode = GL_FILL;
 	ShovelerViewEntity *planeEntity = shovelerViewAddEntity(game->view, 4);
-	shovelerViewEntityAddDrawable(planeEntity, quadDrawableConfiguration);
-	shovelerViewEntityAddModel(planeEntity, planeModelConfiguration);
-	shovelerViewEntityAddPosition(planeEntity, 0.0, 0.0, 10.0);
+	shovelerViewEntityAddDrawable(planeEntity, &quadDrawableConfiguration);
+	shovelerViewEntityAddModel(planeEntity, &planeModelConfiguration);
+	shovelerViewEntityAddPosition(planeEntity, shovelerVector3(0.0, 0.0, 10.0));
 
 	ShovelerViewDrawableConfiguration pointDrawableConfiguration;
 	pointDrawableConfiguration.type = SHOVELER_VIEW_DRAWABLE_TYPE_POINT;
@@ -142,11 +143,11 @@ int main(int argc, char *argv[])
 	lightConfiguration.exponentialFactor = 80.0;
 	lightConfiguration.color = shovelerVector3(1.0, 1.0, 1.0);
 	ShovelerViewEntity *lightEntity = shovelerViewAddEntity(game->view, 5);
-	shovelerViewEntityAddDrawable(lightEntity, pointDrawableConfiguration);
-	shovelerViewEntityAddMaterial(lightEntity, whiteParticleMaterialConfiguration);
-	shovelerViewEntityAddModel(lightEntity, lightModelConfiguration);
-	shovelerViewEntityAddLight(lightEntity, lightConfiguration);
-	shovelerViewEntityAddPosition(lightEntity, 0.0, 2.0, 0.0);
+	shovelerViewEntityAddDrawable(lightEntity, &pointDrawableConfiguration);
+	shovelerViewEntityAddMaterial(lightEntity, &whiteParticleMaterialConfiguration);
+	shovelerViewEntityAddModel(lightEntity, &lightModelConfiguration);
+	shovelerViewEntityAddLight(lightEntity, &lightConfiguration);
+	shovelerViewEntityAddPosition(lightEntity, shovelerVector3(0.0, 2.0, 0.0));
 
 	ShovelerImage *image = shovelerImageCreate(2, 2, 4);
 	shovelerImageClear(image);
@@ -167,43 +168,46 @@ int main(int argc, char *argv[])
 	imageResourceConfiguration.bufferSize = imageData->len;
 	ShovelerViewTextureConfiguration textureConfiguration;
 	textureConfiguration.imageResourceEntityId = 6;
-	textureConfiguration.interpolate = true;
-	textureConfiguration.useMipmaps = true;
-	textureConfiguration.clamp = true;
+	ShovelerViewSamplerConfiguration samplerConfiguration;
+	samplerConfiguration.interpolate = true;
+	samplerConfiguration.useMipmaps = true;
+	samplerConfiguration.clamp = true;
 	ShovelerViewEntity *resourceEntity = shovelerViewAddEntity(game->view, 6);
 	shovelerViewEntityAddResource(resourceEntity, imageResourceConfiguration);
-	shovelerViewEntityAddTexture(resourceEntity, textureConfiguration);
+	shovelerViewEntityAddTexture(resourceEntity, &textureConfiguration);
+	shovelerViewEntityAddSampler(resourceEntity, &samplerConfiguration);
 	g_string_free(imageData, true);
 
 	ShovelerViewMaterialConfiguration textureMaterialConfiguration;
 	textureMaterialConfiguration.type = SHOVELER_VIEW_MATERIAL_TYPE_TEXTURE;
-	textureMaterialConfiguration.dataEntityId = 6;
+	textureMaterialConfiguration.textureEntityId = 6;
+	textureMaterialConfiguration.textureSamplerEntityId = 6;
 	ShovelerViewEntity *textureMaterialEntity = shovelerViewAddEntity(game->view, 7);
-	shovelerViewEntityAddMaterial(textureMaterialEntity, textureMaterialConfiguration);
+	shovelerViewEntityAddMaterial(textureMaterialEntity, &textureMaterialConfiguration);
 
-	ShovelerViewTilemapTilesTileConfiguration layerTiles[4];
-	layerTiles[0].tilesetColumn = 0;
-	layerTiles[0].tilesetRow = 0;
-	layerTiles[0].tilesetId = 1; // red
-	layerTiles[0].colliding = false;
-	layerTiles[1].tilesetColumn = 0;
-	layerTiles[1].tilesetRow = 1;
-	layerTiles[1].tilesetId = 1; // green
-	layerTiles[1].colliding = false;
-	layerTiles[2].tilesetColumn = 0;
-	layerTiles[2].tilesetRow = 0;
-	layerTiles[2].tilesetId = 1; // red
-	layerTiles[2].colliding = false;
-	layerTiles[3].tilesetColumn = 0;
-	layerTiles[3].tilesetRow = 0;
-	layerTiles[3].tilesetId = 2; // full tileset
-	layerTiles[3].colliding = false;
+	unsigned char tilesetColumns[4];
+	unsigned char tilesetRows[4];
+	unsigned char tilesetIds[4];
+	tilesetColumns[0] = 0;
+	tilesetRows[0] = 0;
+	tilesetIds[0] = 1; // red
+	tilesetColumns[1] = 0;
+	tilesetRows[1] = 1;
+	tilesetIds[1] = 1; // green
+	tilesetColumns[2] = 0;
+	tilesetRows[2] = 0;
+	tilesetIds[2] = 1; // red
+	tilesetColumns[3] = 0;
+	tilesetRows[3] = 0;
+	tilesetIds[3] = 2; // full tileset
 	ShovelerViewTilemapTilesConfiguration layerConfiguration;
 	layerConfiguration.isImageResourceEntityDefinition = false;
 	layerConfiguration.imageResourceEntityId = 0;
 	layerConfiguration.numColumns = 2;
 	layerConfiguration.numRows = 2;
-	layerConfiguration.tiles = layerTiles;
+	layerConfiguration.tilesetColumns = tilesetColumns;
+	layerConfiguration.tilesetRows = tilesetRows;
+	layerConfiguration.tilesetIds = tilesetIds;
 	ShovelerViewEntity *layerEntity = shovelerViewAddEntity(game->view, 8);
 	shovelerViewEntityAddTilemapTiles(layerEntity, &layerConfiguration);
 
@@ -228,11 +232,11 @@ int main(int argc, char *argv[])
 
 	ShovelerViewTilesetConfiguration tilesetConfiguration;
 	tilesetConfiguration.imageResourceEntityId = 6;
-	tilesetConfiguration.columns = 2;
-	tilesetConfiguration.rows = 2;
+	tilesetConfiguration.numColumns = 2;
+	tilesetConfiguration.numRows = 2;
 	tilesetConfiguration.padding = 1;
 	ShovelerViewEntity *tilesetMaterialEntity = shovelerViewAddEntity(game->view, 10);
-	shovelerViewEntityAddTileset(tilesetMaterialEntity, tilesetConfiguration);
+	shovelerViewEntityAddTileset(tilesetMaterialEntity, &tilesetConfiguration);
 
 	ShovelerImage *animationTilesetImage = shovelerImageCreateAnimationTileset(image, 1);
 	GString *animationTilesetImageData = getImageData(animationTilesetImage);
@@ -242,18 +246,15 @@ int main(int argc, char *argv[])
 	animationTilesetImageResourceConfiguration.bufferSize = animationTilesetImageData->len;
 	ShovelerViewTextureConfiguration animationTilesetTextureConfiguration;
 	animationTilesetTextureConfiguration.imageResourceEntityId = 11;
-	animationTilesetTextureConfiguration.interpolate = true;
-	animationTilesetTextureConfiguration.useMipmaps = true;
-	animationTilesetTextureConfiguration.clamp = true;
 	ShovelerViewTilesetConfiguration animationTilesetConfiguration;
 	animationTilesetConfiguration.imageResourceEntityId = 11;
-	animationTilesetConfiguration.columns = 4;
-	animationTilesetConfiguration.rows = 3;
+	animationTilesetConfiguration.numColumns = 4;
+	animationTilesetConfiguration.numRows = 3;
 	animationTilesetConfiguration.padding = 1;
 	ShovelerViewEntity *animationTilesetEntity = shovelerViewAddEntity(game->view, 11);
-	shovelerViewEntityAddResource(animationTilesetEntity, animationTilesetImageResourceConfiguration);
-	shovelerViewEntityAddTexture(animationTilesetEntity, animationTilesetTextureConfiguration);
-	shovelerViewEntityAddTileset(animationTilesetEntity, animationTilesetConfiguration);
+	shovelerViewEntityAddResource(animationTilesetEntity, &animationTilesetImageResourceConfiguration);
+	shovelerViewEntityAddTexture(animationTilesetEntity, &animationTilesetTextureConfiguration);
+	shovelerViewEntityAddTileset(animationTilesetEntity, &animationTilesetConfiguration);
 	g_string_free(animationTilesetImageData, true);
 
 	shovelerImageFree(image);
@@ -286,7 +287,7 @@ int main(int argc, char *argv[])
 	ShovelerViewEntity *tileSpriteEntity = shovelerViewAddEntity(game->view, 14);
 	shovelerViewEntityAddTileSprite(tileSpriteEntity, &tileSpriteConfiguration);
 	shovelerViewEntityAddTileSpriteAnimation(tileSpriteEntity, &tileSpriteAnimationConfiguration);
-	shovelerViewEntityAddPosition(tileSpriteEntity, 3.0, 4.0, 0.0);
+	shovelerViewEntityAddPosition(tileSpriteEntity, shovelerVector3(3.0, 4.0, 0.0));
 
 	ShovelerViewCanvasConfiguration canvasConfiguration;
 	canvasConfiguration.numTileSprites = 1;
@@ -307,7 +308,7 @@ int main(int argc, char *argv[])
 	};
 	ShovelerViewEntity *chunkEntity = shovelerViewAddEntity(game->view, 16);
 	shovelerViewEntityAddChunk(chunkEntity, &chunkConfiguration);
-	shovelerViewEntityAddPosition(chunkEntity, 5.0, 5.0, 0.0);
+	shovelerViewEntityAddPosition(chunkEntity, shovelerVector3(5.0, 5.0, 0.0));
 
 	ShovelerViewModelConfiguration tilemapMaterialModelConfiguration;
 	tilemapMaterialModelConfiguration.drawableEntityId = 4;
@@ -323,9 +324,9 @@ int main(int argc, char *argv[])
 	tilemapMaterialConfiguration.dataEntityId = 12;
 	ShovelerViewEntity *tilemapMaterialEntity = shovelerViewAddEntity(game->view, 17);
 	shovelerViewEntitySetType(tilemapMaterialEntity, "tilemap");
-	shovelerViewEntityAddModel(tilemapMaterialEntity, tilemapMaterialModelConfiguration);
-	shovelerViewEntityAddMaterial(tilemapMaterialEntity, tilemapMaterialConfiguration);
-	shovelerViewEntityAddPosition(tilemapMaterialEntity, 5.0, 5.0, 7.5);
+	shovelerViewEntityAddModel(tilemapMaterialEntity, &tilemapMaterialModelConfiguration);
+	shovelerViewEntityAddMaterial(tilemapMaterialEntity, &tilemapMaterialConfiguration);
+	shovelerViewEntityAddPosition(tilemapMaterialEntity, shovelerVector3(5.0, 5.0, 7.5));
 
 	ShovelerViewModelConfiguration canvasMaterialModelConfiguration;
 	canvasMaterialModelConfiguration.drawableEntityId = 4;
@@ -345,7 +346,7 @@ int main(int argc, char *argv[])
 	shovelerViewEntitySetType(canvasMaterialEntity, "canvas");
 	shovelerViewEntityAddModel(canvasMaterialEntity, canvasMaterialModelConfiguration);
 	shovelerViewEntityAddMaterial(canvasMaterialEntity, canvasMaterialConfiguration);
-	shovelerViewEntityAddPosition(canvasMaterialEntity, 0.0, 5.0, 7.5);
+	shovelerViewEntityAddPosition(canvasMaterialEntity, shovelerVector3(0.0, 5.0, 7.5));
 
 	ShovelerViewModelConfiguration chunkMaterialModelConfiguration;
 	chunkMaterialModelConfiguration.drawableEntityId = 4;
@@ -363,14 +364,14 @@ int main(int argc, char *argv[])
 	shovelerViewEntitySetType(chunkMaterialEntity, "chunk");
 	shovelerViewEntityAddModel(chunkMaterialEntity, chunkMaterialModelConfiguration);
 	shovelerViewEntityAddMaterial(chunkMaterialEntity, chunkMaterialConfiguration);
-	shovelerViewEntityAddPosition(chunkMaterialEntity, -5.0, 5.0, 7.5);
+	shovelerViewEntityAddPosition(chunkMaterialEntity, shovelerVector3(-5.0, 5.0, 7.5));
 
 	ShovelerViewClientConfiguration clientConfiguration;
 	clientConfiguration.positionEntityId = 20;
 	clientConfiguration.modelEntityId = 0;
 	ShovelerViewEntity *clientEntity = shovelerViewAddEntity(game->view, 20);
 	shovelerViewEntitySetType(clientEntity, "client");
-	shovelerViewEntityAddPosition(clientEntity, 0.0, 0.0, 0.0);
+	shovelerViewEntityAddPosition(clientEntity, shovelerVector3(0.0, 0.0, 0.0));
 	shovelerViewEntityAddClient(clientEntity, &clientConfiguration);
 	shovelerViewEntityDelegatePosition(clientEntity, requestPositionUpdate, NULL);
 	shovelerViewEntityDelegateClient(clientEntity);
@@ -423,7 +424,7 @@ static void updateGame(ShovelerGame *game, double dt)
 	shovelerViewEntityUpdateTilemapTilesData(tilemapEntity, layerConfiguration->tiles);
 }
 
-static void requestPositionUpdate(ShovelerViewComponent *component, double x, double y, double z, void *userData)
+static void requestPositionUpdate(ShovelerComponent *component, double x, double y, double z, void *userData)
 {
 	shovelerLogInfo("Position updated to (%.2f, %.2f, %.2f).", x, y, z);
 }
