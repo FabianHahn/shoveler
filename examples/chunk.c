@@ -150,7 +150,7 @@ int main(int argc, char *argv[])
 	characterSprite.size = shovelerVector2(1.0f, 1.0f);
 	shovelerCanvasAddTileSprite(canvas, &characterSprite);
 
-	animation = shovelerTileSpriteAnimationCreate(&characterSprite, 0.1f);
+	animation = shovelerTileSpriteAnimationCreate(&characterSprite, shovelerVector2(0.0f, 0.0f), 0.1f);
 	animation->moveAmountThreshold = 0.25f;
 
 	ShovelerMaterial *chunkMaterial = shovelerMaterialChunkCreate(game->shaderCache, /* screenspace */ false);

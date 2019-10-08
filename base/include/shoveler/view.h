@@ -21,11 +21,11 @@ typedef struct ShovelerViewStruct{
 	/* private */ GHashTable *reverseDependencies;
 	/** list of (ShovelerViewDependencyCallback *) */
 	/* private */ GQueue *dependencyCallbacks;
-	unsigned int numEntities;
-	unsigned int numComponents;
-	unsigned int numComponentDependencies;
-	unsigned int numActiveComponents;
-	unsigned int numDelegatedComponents;
+	int numEntities;
+	int numComponents;
+	int numComponentDependencies;
+	int numActiveComponents;
+	int numDelegatedComponents;
 } ShovelerView;
 
 typedef enum {

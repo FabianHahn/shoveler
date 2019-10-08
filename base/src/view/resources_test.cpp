@@ -71,7 +71,7 @@ TEST_F(ShovelerViewResourcesTest, addResource)
 
 	nextLoadResourceData = (void *) testResourceData;
 	const ShovelerViewResourceConfiguration configuration{testTypeId, &testResourceBuffer, testResourceBytes};
-	bool resourceComponentAdded = shovelerViewEntityAddResource(testEntity, configuration);
+	bool resourceComponentAdded = shovelerViewEntityAddResource(testEntity, &configuration);
 	ASSERT_TRUE(resourceComponentAdded);
 	ASSERT_EQ(lastLoadBytes, testResourceBytes) << "load should be called with correct bytes";
 	ASSERT_EQ(memcmp(&testResourceBuffer, lastLoadBuffer, testResourceBytes), 0) << "load should be called with correct buffer";
@@ -98,7 +98,7 @@ TEST_F(ShovelerViewResourcesTest, updateResource)
 
 	nextLoadResourceData = (void *) testResourceData;
 	const ShovelerViewResourceConfiguration configuration{testTypeId, &testResourceBuffer, testResourceBytes};
-	ShovelerComponent *testComponent = shovelerViewEntityAddResource(testEntity, configuration);
+	ShovelerComponent *testComponent = shovelerViewEntityAddResource(testEntity, &configuration);
 	ASSERT_TRUE(testComponent != NULL);
 
 	ShovelerResource *resource = shovelerResourcesGet(resources, testTypeId, testResourceId);
@@ -123,7 +123,7 @@ TEST_F(ShovelerViewResourcesTest, removeResource)
 	ASSERT_TRUE(testEntity != NULL);
 
 	const ShovelerViewResourceConfiguration configuration{testTypeId, &testResourceBuffer, testResourceBytes};
-	bool resourceComponentAdded = shovelerViewEntityAddResource(testEntity, configuration);
+	bool resourceComponentAdded = shovelerViewEntityAddResource(testEntity, &configuration);
 	ASSERT_TRUE(resourceComponentAdded);
 	bool resourceComponentRemoved = shovelerViewEntityRemoveResource(testEntity);
 	ASSERT_TRUE(resourceComponentRemoved);

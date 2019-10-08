@@ -19,10 +19,10 @@ static const char *shovelerViewResourceTypeIdOptionKey = "type_id";
 static const char *shovelerViewResourceBufferOptionKey = "buffer";
 static const char *shovelerViewResourcesTargetName = "resources";
 
-ShovelerComponent *shovelerViewEntityAddResource(ShovelerViewEntity *entity, ShovelerViewResourceConfiguration configuration);
+ShovelerComponent *shovelerViewEntityAddResource(ShovelerViewEntity *entity, const ShovelerViewResourceConfiguration *configuration);
 void *shovelerViewEntityGetResource(ShovelerViewEntity *entity);
 bool shovelerViewEntityGetResourceConfiguration(ShovelerViewEntity *entity, ShovelerViewResourceConfiguration *outputConfiguration);
-bool shovelerViewEntityUpdateResourceConfiguration(ShovelerViewEntity *entity, ShovelerViewResourceConfiguration configuration);
+bool shovelerViewEntityUpdateResourceConfiguration(ShovelerViewEntity *entity, const ShovelerViewResourceConfiguration *configuration);
 bool shovelerViewEntityRemoveResource(ShovelerViewEntity *entity);
 
 static inline ShovelerComponent *shovelerViewEntityGetResourceComponent(ShovelerViewEntity *entity)

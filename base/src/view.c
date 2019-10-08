@@ -382,7 +382,7 @@ GString *shovelerViewCreateDependencyGraph(ShovelerView *view)
 			dependencySource.componentTypeName = (char *) componentTypeName; // won't be modified
 
 			GQueue *dependencies = g_hash_table_lookup(view->dependencies, &dependencySource);
-			if(dependencies == NULL) {
+			if(dependencies != NULL) {
 				for(GList *dependencyIter = dependencies->head; dependencyIter != NULL; dependencyIter = dependencyIter->next) {
 					const ShovelerViewQualifiedComponent *dependencyTarget = (ShovelerViewQualifiedComponent *) dependencyIter->data;
 					g_string_append_printf(graph, "	entity%lld_%s -> entity%lld_%s;\n", entityId, componentTypeName, dependencyTarget->entityId, dependencyTarget->componentTypeName);

@@ -12,7 +12,7 @@
 static void *activateResourceComponent(ShovelerComponent *component);
 static void deactivateResourceComponent(ShovelerComponent *component);
 
-ShovelerComponent *shovelerViewEntityAddResource(ShovelerViewEntity *entity, ShovelerViewResourceConfiguration configuration)
+ShovelerComponent *shovelerViewEntityAddResource(ShovelerViewEntity *entity, const ShovelerViewResourceConfiguration *configuration)
 {
 	if(!shovelerViewHasComponentType(entity->view, shovelerViewResourceComponentTypeName)) {
 		ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerViewResourceComponentTypeName, activateResourceComponent, deactivateResourceComponent, /* requiresAuthority */ false);
@@ -22,8 +22,8 @@ ShovelerComponent *shovelerViewEntityAddResource(ShovelerViewEntity *entity, Sho
 	}
 
 	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerViewResourceComponentTypeName);
-	shovelerComponentUpdateCanonicalConfigurationOptionString(component, shovelerViewResourceTypeIdOptionKey, configuration.typeId);
-	shovelerComponentUpdateCanonicalConfigurationOptionBytes(component, shovelerViewResourceBufferOptionKey, configuration.buffer, configuration.bufferSize);
+	shovelerComponentUpdateCanonicalConfigurationOptionString(component, shovelerViewResourceTypeIdOptionKey, configuration->typeId);
+	shovelerComponentUpdateCanonicalConfigurationOptionBytes(component, shovelerViewResourceBufferOptionKey, configuration->buffer, configuration->bufferSize);
 
 	shovelerComponentActivate(component);
 	return component;
@@ -51,15 +51,15 @@ bool shovelerViewEntityGetResourceConfiguration(ShovelerViewEntity *entity, Shov
 	return true;
 }
 
-bool shovelerViewEntityUpdateResourceConfiguration(ShovelerViewEntity *entity, ShovelerViewResourceConfiguration configuration)
+bool shovelerViewEntityUpdateResourceConfiguration(ShovelerViewEntity *entity, const ShovelerViewResourceConfiguration *configuration)
 {
 	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewResourceComponentTypeName);
 	if(component == NULL) {
 		return false;
 	}
 
-	shovelerComponentUpdateCanonicalConfigurationOptionString(component, shovelerViewResourceTypeIdOptionKey, configuration.typeId);
-	shovelerComponentUpdateCanonicalConfigurationOptionBytes(component, shovelerViewResourceBufferOptionKey, configuration.buffer, configuration.bufferSize);
+	shovelerComponentUpdateCanonicalConfigurationOptionString(component, shovelerViewResourceTypeIdOptionKey, configuration->typeId);
+	shovelerComponentUpdateCanonicalConfigurationOptionBytes(component, shovelerViewResourceBufferOptionKey, configuration->buffer, configuration->bufferSize);
 	return true;
 }
 
