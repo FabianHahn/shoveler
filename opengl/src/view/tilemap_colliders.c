@@ -81,7 +81,7 @@ bool shovelerViewEntityRemoveTilemapColliders(ShovelerViewEntity *entity)
 	return shovelerViewEntityRemoveComponent(entity, shovelerViewTilemapCollidersComponentTypeName);
 }
 
-static void *activateTilemapTilesComponent(ShovelerComponent *component)
+static void *activateTilemapCollidersComponent(ShovelerComponent *component)
 {
 	int numColumns = shovelerComponentGetConfigurationValueInt(component, shovelerViewTilemapCollidersNumColumnsOptionKey);
 	int numRows = shovelerComponentGetConfigurationValueInt(component, shovelerViewTilemapCollidersNumRowsOptionKey);
@@ -92,7 +92,7 @@ static void *activateTilemapTilesComponent(ShovelerComponent *component)
 	return colliders;
 }
 
-static void deactivateTilemapTilesComponent(ShovelerComponent *component)
+static void deactivateTilemapCollidersComponent(ShovelerComponent *component)
 {
 	ShovelerTexture *texture = (ShovelerTexture *) component->data;
 

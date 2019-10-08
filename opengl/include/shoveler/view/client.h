@@ -23,7 +23,7 @@ bool shovelerViewEntityGetClientConfiguration(ShovelerViewEntity *entity, Shovel
 bool shovelerViewEntityUpdateClient(ShovelerViewEntity *entity, const ShovelerViewClientConfiguration *configuration);
 bool shovelerViewEntityRemoveClient(ShovelerViewEntity *entity);
 
-static inline ShovelerComponent *shovelerViewEntityGetCanvasComponent(ShovelerViewEntity *entity)
+static inline ShovelerComponent *shovelerViewEntityGetClientComponent(ShovelerViewEntity *entity)
 {
 	return shovelerViewEntityGetComponent(entity, shovelerViewClientComponentTypeName);
 }
