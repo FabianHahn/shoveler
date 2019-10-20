@@ -7,21 +7,21 @@ ShovelerComponent *shovelerViewEntityAddChunkLayer(ShovelerViewEntity *entity, c
 {
 	if(!shovelerViewHasComponentType(entity->view, shovelerViewChunkLayerComponentTypeName)) {
 		ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerViewChunkLayerComponentTypeName, /* activate */ NULL, /* deactivate */ NULL, /* requiresAuthority */ false);
-		shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewChunkLayerTypeOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_UINT, /* isOptional */ false, /* liveUpdate */ NULL);
+		shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewChunkLayerTypeOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
 		shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerViewChunkLayerCanvasOptionKey, shovelerViewCanvasComponentTypeName, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* updateDependency */ NULL);
 		shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerViewChunkLayerTilemapOptionKey, shovelerViewTilemapComponentTypeName, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* updateDependency */ NULL);
 		shovelerViewAddComponentType(entity->view, componentType);
 	}
 
 	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerViewChunkLayerComponentTypeName);
-	shovelerComponentUpdateCanonicalConfigurationOptionUint(component, shovelerViewChunkLayerTypeOptionKey, configuration->type);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerViewChunkLayerTypeOptionKey, configuration->type);
 
 	switch(configuration->type) {
 		case SHOVELER_CHUNK_LAYER_TYPE_CANVAS:
-			shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewChunkLayerCanvasOptionKey, configuration->type);
+			shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewChunkLayerCanvasOptionKey, configuration->canvasEntityId);
 			break;
 		case SHOVELER_CHUNK_LAYER_TYPE_TILEMAP:
-			shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewChunkLayerTilemapOptionKey, configuration->type);
+			shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewChunkLayerTilemapOptionKey, configuration->tilemapEntityId);
 			break;
 		default:
 			break;
@@ -39,7 +39,7 @@ bool shovelerViewEntityGetChunkLayerConfiguration(ShovelerViewEntity *entity, Sh
 		return false;
 	}
 
-	outputConfiguration->type = shovelerComponentGetConfigurationValueUint(component, shovelerViewChunkLayerTypeOptionKey);
+	outputConfiguration->type = shovelerComponentGetConfigurationValueInt(component, shovelerViewChunkLayerTypeOptionKey);
 	switch(outputConfiguration->type) {
 		case SHOVELER_CHUNK_LAYER_TYPE_CANVAS:
 			outputConfiguration->canvasEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerViewChunkLayerCanvasOptionKey);
@@ -62,7 +62,7 @@ bool shovelerViewEntityUpdateChunkLayer(ShovelerViewEntity *entity, const Shovel
 		return false;
 	}
 
-	shovelerComponentUpdateCanonicalConfigurationOptionUint(component, shovelerViewChunkLayerTypeOptionKey, configuration->type);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerViewChunkLayerTypeOptionKey, configuration->type);
 
 	switch(configuration->type) {
 		case SHOVELER_CHUNK_LAYER_TYPE_CANVAS:

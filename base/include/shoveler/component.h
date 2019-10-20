@@ -20,7 +20,6 @@ typedef enum {
 	SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_FLOAT,
 	SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BOOL,
 	SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT,
-	SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_UINT,
 	SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_STRING,
 	SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_VECTOR2,
 	SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_VECTOR3,
@@ -34,7 +33,7 @@ typedef struct ShovelerComponentConfigurationValueStruct {
 		long long int entityIdValue;
 		struct {
 			long long int *entityIds;
-			size_t size;
+			int size;
 		} entityIdArrayValue;
 		float floatValue;
 		bool boolValue;
@@ -47,7 +46,7 @@ typedef struct ShovelerComponentConfigurationValueStruct {
 		ShovelerVector4 vector4Value;
 		struct {
 			unsigned char *data;
-			size_t size;
+			int size;
 		} bytesValue;
 	};
 } ShovelerComponentConfigurationValue;
@@ -201,14 +200,6 @@ static inline bool shovelerComponentUpdateConfigurationOptionInt(ShovelerCompone
 	return shovelerComponentUpdateConfigurationOption(component, key, &value, /* isCanonical */ false);
 }
 
-static inline bool shovelerComponentUpdateConfigurationOptionUint(ShovelerComponent *component, const char *key, unsigned int uintValue)
-{
-	ShovelerComponentConfigurationValue value;
-	value.type = SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_UINT;
-	value.uintValue = uintValue;
-	return shovelerComponentUpdateConfigurationOption(component, key, &value, /* isCanonical */ false);
-}
-
 static inline bool shovelerComponentUpdateConfigurationOptionString(ShovelerComponent *component, const char *key, const char *stringValue)
 {
 	ShovelerComponentConfigurationValue value;
@@ -263,7 +254,7 @@ static inline bool shovelerComponentUpdateCanonicalConfigurationOptionEntityId(S
 	return shovelerComponentUpdateConfigurationOption(component, key, &value, /* isCanonical */ true);
 }
 
-static inline bool shovelerComponentUpdateCanonicalConfigurationOptionEntityIdArray(ShovelerComponent *component, const char *key, const long long int *entityIds, size_t size)
+static inline bool shovelerComponentUpdateCanonicalConfigurationOptionEntityIdArray(ShovelerComponent *component, const char *key, const long long int *entityIds, int size)
 {
 	ShovelerComponentConfigurationValue value;
 	value.type = SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_ENTITY_ID_ARRAY;
@@ -293,14 +284,6 @@ static inline bool shovelerComponentUpdateCanonicalConfigurationOptionInt(Shovel
 	ShovelerComponentConfigurationValue value;
 	value.type = SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT;
 	value.intValue = intValue;
-	return shovelerComponentUpdateConfigurationOption(component, key, &value, /* isCanonical */ true);
-}
-
-static inline bool shovelerComponentUpdateCanonicalConfigurationOptionUint(ShovelerComponent *component, const char *key, unsigned int uintValue)
-{
-	ShovelerComponentConfigurationValue value;
-	value.type = SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_UINT;
-	value.uintValue = uintValue;
 	return shovelerComponentUpdateConfigurationOption(component, key, &value, /* isCanonical */ true);
 }
 
@@ -336,7 +319,7 @@ static inline bool shovelerComponentUpdateCanonicalConfigurationOptionVector4(Sh
 	return shovelerComponentUpdateConfigurationOption(component, key, &value, /* isCanonical */ true);
 }
 
-static inline bool shovelerComponentUpdateCanonicalConfigurationOptionBytes(ShovelerComponent *component, const char *key, const unsigned char *data, size_t size)
+static inline bool shovelerComponentUpdateCanonicalConfigurationOptionBytes(ShovelerComponent *component, const char *key, const unsigned char *data, int size)
 {
 	ShovelerComponentConfigurationValue value;
 	value.type = SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BYTES;
@@ -394,15 +377,6 @@ static inline int shovelerComponentGetConfigurationValueInt(ShovelerComponent *c
 	assert(configurationValue->type == SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT);
 
 	return configurationValue->intValue;
-}
-
-static inline unsigned int shovelerComponentGetConfigurationValueUint(ShovelerComponent *component, const char *key)
-{
-	const ShovelerComponentConfigurationValue *configurationValue = shovelerComponentGetConfigurationValue(component, key);
-	assert(configurationValue != NULL);
-	assert(configurationValue->type == SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_UINT);
-
-	return configurationValue->uintValue;
 }
 
 static inline const char *shovelerComponentGetConfigurationValueString(ShovelerComponent *component, const char *key)

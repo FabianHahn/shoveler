@@ -324,7 +324,7 @@ int main(int argc, char *argv[])
 	shovelerViewEntityAddChunkLayer(chunkLayer1Entity, &chunkLayer1Configuration);
 
 	ShovelerViewChunkLayerConfiguration chunkLayer2Configuration;
-	chunkLayer2Configuration.type = SHOVELER_CHUNK_LAYER_TYPE_TILEMAP;
+	chunkLayer2Configuration.type = SHOVELER_CHUNK_LAYER_TYPE_CANVAS;
 	chunkLayer2Configuration.canvasEntityId = 15;
 	ShovelerViewEntity *chunkLayer2Entity = shovelerViewAddEntity(game->view, 17);
 	shovelerViewEntityAddChunkLayer(chunkLayer2Entity, &chunkLayer2Configuration);
@@ -398,7 +398,7 @@ int main(int argc, char *argv[])
 	chunkMaterialModelConfiguration.polygonMode = GL_FILL;
 	ShovelerViewMaterialConfiguration chunkMaterialConfiguration;
 	chunkMaterialConfiguration.type = SHOVELER_VIEW_MATERIAL_TYPE_CHUNK;
-	chunkMaterialConfiguration.chunkEntityId = 16;
+	chunkMaterialConfiguration.chunkEntityId = 19;
 	ShovelerViewEntity *chunkMaterialEntity = shovelerViewAddEntity(game->view, 22);
 	shovelerViewEntitySetType(chunkMaterialEntity, "chunk");
 	shovelerViewEntityAddModel(chunkMaterialEntity, &chunkMaterialModelConfiguration);

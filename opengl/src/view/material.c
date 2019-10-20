@@ -54,7 +54,7 @@ ShovelerComponent *shovelerViewEntityAddMaterial(ShovelerViewEntity *entity, con
 		case SHOVELER_VIEW_MATERIAL_TYPE_CANVAS:
 			shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewMaterialCanvasOptionKey, configuration->canvasEntityId);
 			shovelerComponentUpdateCanonicalConfigurationOptionVector2(component, shovelerViewMaterialCanvasRegionPositionOptionKey, configuration->canvasRegionPosition);
-			shovelerComponentUpdateCanonicalConfigurationOptionVector2(component, shovelerViewMaterialCanvasRegionPositionOptionKey, configuration->canvasRegionSize);
+			shovelerComponentUpdateCanonicalConfigurationOptionVector2(component, shovelerViewMaterialCanvasRegionSizeOptionKey, configuration->canvasRegionSize);
 			break;
 		case SHOVELER_VIEW_MATERIAL_TYPE_CHUNK:
 			shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewMaterialChunkOptionKey, configuration->chunkEntityId);
@@ -100,7 +100,7 @@ bool shovelerViewEntityGetMaterialConfiguration(ShovelerViewEntity *entity, Shov
 		case SHOVELER_VIEW_MATERIAL_TYPE_CANVAS:
 			outputConfiguration->canvasEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerViewMaterialCanvasOptionKey);
 			outputConfiguration->canvasRegionPosition = shovelerComponentGetConfigurationValueVector2(component, shovelerViewMaterialCanvasRegionPositionOptionKey);
-			outputConfiguration->canvasRegionSize = shovelerComponentGetConfigurationValueVector2(component, shovelerViewMaterialCanvasRegionPositionOptionKey);
+			outputConfiguration->canvasRegionSize = shovelerComponentGetConfigurationValueVector2(component, shovelerViewMaterialCanvasRegionSizeOptionKey);
 			break;
 		case SHOVELER_VIEW_MATERIAL_TYPE_CHUNK:
 			outputConfiguration->chunkEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerViewMaterialChunkOptionKey);
@@ -136,7 +136,7 @@ bool shovelerViewEntityUpdateMaterial(ShovelerViewEntity *entity, const Shoveler
 		case SHOVELER_VIEW_MATERIAL_TYPE_CANVAS:
 			shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewMaterialCanvasOptionKey, configuration->canvasEntityId);
 			shovelerComponentUpdateCanonicalConfigurationOptionVector2(component, shovelerViewMaterialCanvasRegionPositionOptionKey, configuration->canvasRegionPosition);
-			shovelerComponentUpdateCanonicalConfigurationOptionVector2(component, shovelerViewMaterialCanvasRegionPositionOptionKey, configuration->canvasRegionSize);
+			shovelerComponentUpdateCanonicalConfigurationOptionVector2(component, shovelerViewMaterialCanvasRegionSizeOptionKey, configuration->canvasRegionSize);
 			break;
 		case SHOVELER_VIEW_MATERIAL_TYPE_CHUNK:
 			shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewMaterialChunkOptionKey, configuration->chunkEntityId);
@@ -203,7 +203,7 @@ static void *activateMaterialComponent(ShovelerComponent *component)
 		case SHOVELER_VIEW_MATERIAL_TYPE_CANVAS: {
 			long long int canvasEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerViewMaterialCanvasOptionKey);
 			ShovelerVector2 canvasRegionPosition = shovelerComponentGetConfigurationValueVector2(component, shovelerViewMaterialCanvasRegionPositionOptionKey);
-			ShovelerVector2 canvasRegionSize = shovelerComponentGetConfigurationValueVector2(component, shovelerViewMaterialCanvasRegionPositionOptionKey);
+			ShovelerVector2 canvasRegionSize = shovelerComponentGetConfigurationValueVector2(component, shovelerViewMaterialCanvasRegionSizeOptionKey);
 			ShovelerViewEntity *canvasEntity = shovelerViewGetEntity(component->entity->view, canvasEntityId);
 			assert(canvasEntity != NULL);
 			ShovelerCanvas *canvas = shovelerViewEntityGetCanvas(canvasEntity);

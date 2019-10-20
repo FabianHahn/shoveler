@@ -131,8 +131,8 @@ static ShovelerVector2 getTileSpriteAnimationPosition(ShovelerComponent *compone
 	const ShovelerVector3 *positionCoordinates = shovelerViewEntityGetPositionCoordinates(positionEntity);
 	assert(positionCoordinates != NULL);
 
-	ShovelerCoordinateMapping positionMappingX = shovelerComponentGetConfigurationValueEntityId(component, shovelerViewTileSpriteAnimationPositionMappingXOptionKey);
-	ShovelerCoordinateMapping positionMappingY = shovelerComponentGetConfigurationValueEntityId(component, shovelerViewTileSpriteAnimationPositionMappingYOptionKey);
+	ShovelerCoordinateMapping positionMappingX = shovelerComponentGetConfigurationValueInt(component, shovelerViewTileSpriteAnimationPositionMappingXOptionKey);
+	ShovelerCoordinateMapping positionMappingY = shovelerComponentGetConfigurationValueInt(component, shovelerViewTileSpriteAnimationPositionMappingYOptionKey);
 
 	return shovelerVector2(
 		shovelerCoordinateMap(*positionCoordinates, positionMappingX),

@@ -94,9 +94,9 @@ static void *activateTilemapCollidersComponent(ShovelerComponent *component)
 
 static void deactivateTilemapCollidersComponent(ShovelerComponent *component)
 {
-	ShovelerTexture *texture = (ShovelerTexture *) component->data;
+	bool *colliders = (bool *) component->data;
 
-	shovelerTextureFree(texture);
+	free(colliders);
 }
 
 static void liveUpdateCollidersOption(ShovelerComponent *component, ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *value)

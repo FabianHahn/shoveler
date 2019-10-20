@@ -13,7 +13,9 @@ static ShovelerComponentConfigurationValue *copyConfigurationValue(const Shovele
 static void assignConfigurationValue(ShovelerComponentConfigurationValue *target, const ShovelerComponentConfigurationValue *source);
 static void freeConfigurationValue(void *configurationValuePointer);
 static void updateReverseDependency(ShovelerView *view, long long int targetEntityId, const char *targetComponentTypeName, ShovelerComponent *sourceComponent, void *targetComponentPointer);
-static long long int toDependencyTargetEntityId(ShovelerComponent *component, const ShovelerComponentConfigurationValue *configurationValue);
+static void addConfigurationOptionDependencies(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *configurationValue);
+static void removeConfigurationOptionDependencies(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *configurationValue);
+static long long int toDependencyTargetEntityId(ShovelerComponent *component, long long int entityIdValue);
 static void freeConfigurationOption(void *configurationOptionPointer);
 
 ShovelerComponentType *shovelerComponentTypeCreate(const char *name, ShovelerComponentTypeActivationFunction *activate, ShovelerComponentTypeDeactivationFunction *deactivate, bool requiresAuthority)
@@ -98,16 +100,10 @@ ShovelerComponent *shovelerComponentCreate(ShovelerViewEntity *entity, const cha
 			continue;
 		}
 
-		g_hash_table_insert(component->configurationValues, configurationOption->key, createConfigurationValue(configurationOption->type));
+		ShovelerComponentConfigurationValue *configurationValue = createConfigurationValue(configurationOption->type);
+		g_hash_table_insert(component->configurationValues, configurationOption->key, configurationValue);
 
-		if(configurationOption->dependencyComponentTypeName != NULL) {
-			shovelerViewAddDependency(
-				component->entity->view,
-				/* sourceEntityId */ component->entity->entityId,
-				/* sourceComponentTypeName */ component->type->name,
-				/* targetEntityId */ component->entity->entityId,
-				/* targetComponentTypeName */ configurationOption->dependencyComponentTypeName);
-		}
+		addConfigurationOptionDependencies(component, configurationOption, configurationValue);
 	}
 
 	return component;
@@ -144,13 +140,8 @@ bool shovelerComponentUpdateConfigurationOption(ShovelerComponent *component, co
 	}
 
 	if(isDependencyUpdate && configurationValue != NULL) {
-		bool dependencyRemoved = shovelerViewRemoveDependency(
-			component->entity->view,
-			/* sourceEntityId */ component->entity->entityId,
-			/* sourceComponentTypeName */ component->type->name,
-			/* targetEntityId */ toDependencyTargetEntityId(component, configurationValue),
-			/* targetComponentTypeName */ configurationOption->dependencyComponentTypeName);
-		assert(dependencyRemoved);
+		// remove the dependencies from the previous configuration value
+		removeConfigurationOptionDependencies(component, configurationOption, configurationValue);
 	}
 
 	// update option to its new value
@@ -176,14 +167,9 @@ bool shovelerComponentUpdateConfigurationOption(ShovelerComponent *component, co
 	}
 
 	if(isDependencyUpdate && configurationValue != NULL) {
-		// Add the new dependency, which might deactivate the component if the dependency isn't
+		// Add the new dependencies, which might deactivate the component if the dependency isn't
 		// satisfied.
-		shovelerViewAddDependency(
-			component->entity->view,
-			/* sourceEntityId */ component->entity->entityId,
-			/* sourceComponentTypeName */ component->type->name,
-			/* targetEntityId */ toDependencyTargetEntityId(component, configurationValue),
-			/* targetComponentTypeName */ configurationOption->dependencyComponentTypeName);
+		addConfigurationOptionDependencies(component, configurationOption, configurationValue);
 
 		// update wasActive because component might have been deactivated
 		wasActive = component->data != NULL;
@@ -273,18 +259,7 @@ void shovelerComponentFree(ShovelerComponent *component)
 	while(g_hash_table_iter_next(&iter, (gpointer *) &key, (gpointer *) &configurationOption)) {
 		if(configurationOption->dependencyComponentTypeName != NULL) {
 			ShovelerComponentConfigurationValue *configurationValue = g_hash_table_lookup(component->configurationValues, key);
-			if(configurationValue == NULL) {
-				// this configuration option is optional
-				assert(configurationOption->isOptional);
-				continue;
-			}
-
-			shovelerViewRemoveDependency(
-				component->entity->view,
-				/* sourceEntityId */ component->entity->entityId,
-				/* sourceComponentTypeName */ component->type->name,
-				/* targetEntityId */ toDependencyTargetEntityId(component, configurationValue),
-				/* targetComponentTypeName */ configurationOption->dependencyComponentTypeName);
+			removeConfigurationOptionDependencies(component, configurationOption, configurationValue);
 		}
 	}
 
@@ -335,9 +310,6 @@ static void clearConfigurationValue(ShovelerComponentConfigurationValue *configu
 		case SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT:
 			configurationValue->intValue = 0;
 			break;
-		case SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_UINT:
-			configurationValue->uintValue = 0;
-			break;
 		case SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_STRING:
 			free(configurationValue->stringValue);
 			configurationValue->stringValue = NULL;
@@ -371,11 +343,15 @@ static void assignConfigurationValue(ShovelerComponentConfigurationValue *target
 		case SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_ENTITY_ID:
 			target->entityIdValue = source->entityIdValue;
 			break;
-		case SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_ENTITY_ID_ARRAY:
-			target->entityIdArrayValue.entityIds = malloc(source->entityIdArrayValue.size * sizeof(long long int));
-			target->entityIdArrayValue.size = source->entityIdArrayValue.size;
-			memcpy(target->entityIdArrayValue.entityIds, source->entityIdArrayValue.entityIds, source->entityIdArrayValue.size);
-			break;
+		case SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_ENTITY_ID_ARRAY: {
+			if(source->entityIdArrayValue.size > 0) {
+				size_t numElements = (size_t) source->entityIdArrayValue.size;
+
+				target->entityIdArrayValue.entityIds = malloc(numElements * sizeof(long long int));
+				target->entityIdArrayValue.size = source->entityIdArrayValue.size;
+				memcpy(target->entityIdArrayValue.entityIds, source->entityIdArrayValue.entityIds, numElements * sizeof(long long int));
+			}
+		} break;
 		case SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_FLOAT:
 			target->floatValue = source->floatValue;
 			break;
@@ -384,9 +360,6 @@ static void assignConfigurationValue(ShovelerComponentConfigurationValue *target
 			break;
 		case SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT:
 			target->intValue = source->intValue;
-			break;
-		case SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_UINT:
-			target->uintValue = source->uintValue;
 			break;
 		case SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_STRING:
 			target->stringValue = strdup(source->stringValue);
@@ -400,11 +373,15 @@ static void assignConfigurationValue(ShovelerComponentConfigurationValue *target
 		case SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_VECTOR4:
 			target->vector4Value = source->vector4Value;
 			break;
-		case SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BYTES:
-			target->bytesValue.data = malloc(source->bytesValue.size * sizeof(unsigned char));
-			target->bytesValue.size = source->bytesValue.size;
-			memcpy(target->bytesValue.data, source->bytesValue.data, source->bytesValue.size);
-			break;
+		case SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BYTES: {
+			if(source->entityIdArrayValue.size > 0) {
+				size_t numBytes = (size_t) source->bytesValue.size;
+
+				target->bytesValue.data = malloc(numBytes * sizeof(unsigned char));
+				target->bytesValue.size = source->bytesValue.size;
+				memcpy(target->bytesValue.data, source->bytesValue.data, numBytes * sizeof(unsigned char));
+			}
+		} break;
 	}
 }
 
@@ -450,7 +427,7 @@ static void updateReverseDependency(ShovelerView *view, long long int targetEnti
 			assert(configurationOption->type == SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_ENTITY_ID_ARRAY);
 
 			bool requiresUpdate = false;
-			for(size_t i = 0; i < configurationValue->entityIdArrayValue.size; i++) {
+			for(int i = 0; i < configurationValue->entityIdArrayValue.size; i++) {
 				if(configurationValue->entityIdArrayValue.entityIds[i] == targetEntityId) {
 					requiresUpdate = true;
 					break;
@@ -471,10 +448,80 @@ static void updateReverseDependency(ShovelerView *view, long long int targetEnti
 	}
 }
 
-static long long int toDependencyTargetEntityId(ShovelerComponent *component, const ShovelerComponentConfigurationValue *configurationValue)
+static void addConfigurationOptionDependencies(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *configurationValue)
 {
-	if(configurationValue->entityIdValue != 0) {
-		return configurationValue->entityIdValue;
+	if(configurationValue == NULL) {
+		// this configuration option is optional
+		assert(configurationOption->isOptional);
+		return;
+	}
+
+	if(configurationOption->dependencyComponentTypeName == NULL) {
+		// this configuration option isn't a dependency
+		return;
+	}
+
+	assert(configurationOption->type == configurationValue->type);
+
+	if(configurationOption->type == SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_ENTITY_ID) {
+		shovelerViewAddDependency(
+			component->entity->view,
+			/* sourceEntityId */ component->entity->entityId,
+			/* sourceComponentTypeName */ component->type->name,
+			/* targetEntityId */ toDependencyTargetEntityId(component, configurationValue->entityIdValue),
+			/* targetComponentTypeName */ configurationOption->dependencyComponentTypeName);
+	} else if(configurationOption->type == SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_ENTITY_ID_ARRAY) {
+		for(int i = 0; i < configurationValue->entityIdArrayValue.size; i++) {
+			shovelerViewAddDependency(
+				component->entity->view,
+				/* sourceEntityId */ component->entity->entityId,
+				/* sourceComponentTypeName */ component->type->name,
+				/* targetEntityId */ toDependencyTargetEntityId(component, configurationValue->entityIdArrayValue.entityIds[i]),
+				/* targetComponentTypeName */ configurationOption->dependencyComponentTypeName);
+		}
+	}
+}
+
+static void removeConfigurationOptionDependencies(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *configurationValue)
+{
+	if(configurationValue == NULL) {
+		// this configuration option is optional
+		assert(configurationOption->isOptional);
+		return;
+	}
+
+	if(configurationOption->dependencyComponentTypeName == NULL) {
+		// this configuration option isn't a dependency
+		return;
+	}
+
+	assert(configurationOption->type == configurationValue->type);
+
+	if(configurationOption->type == SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_ENTITY_ID) {
+		bool dependencyRemoved = shovelerViewRemoveDependency(
+			component->entity->view,
+			/* sourceEntityId */ component->entity->entityId,
+			/* sourceComponentTypeName */ component->type->name,
+			/* targetEntityId */ toDependencyTargetEntityId(component, configurationValue->entityIdValue),
+			/* targetComponentTypeName */ configurationOption->dependencyComponentTypeName);
+		assert(dependencyRemoved);
+	} else if(configurationOption->type == SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_ENTITY_ID_ARRAY) {
+		for(int i = 0; i < configurationValue->entityIdArrayValue.size; i++) {
+			bool dependencyRemoved = shovelerViewRemoveDependency(
+				component->entity->view,
+				/* sourceEntityId */ component->entity->entityId,
+				/* sourceComponentTypeName */ component->type->name,
+				/* targetEntityId */ toDependencyTargetEntityId(component, configurationValue->entityIdArrayValue.entityIds[i]),
+				/* targetComponentTypeName */ configurationOption->dependencyComponentTypeName);
+			assert(dependencyRemoved);
+		}
+	}
+}
+
+static long long int toDependencyTargetEntityId(ShovelerComponent *component, long long int entityIdValue)
+{
+	if(entityIdValue != 0) {
+		return entityIdValue;
 	} else {
 		return component->entity->entityId;
 	}
