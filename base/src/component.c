@@ -1,7 +1,6 @@
 #include <assert.h> // assert
 #include <stdlib.h> // malloc free
 #include <string.h> // strdup memcpy
-#include <shoveler/component.h>
 
 #include "shoveler/component.h"
 #include "shoveler/log.h"
