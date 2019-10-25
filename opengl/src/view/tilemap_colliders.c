@@ -60,7 +60,7 @@ bool shovelerViewEntityUpdateTilemapColliders(ShovelerViewEntity *entity, const 
 {
 	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTilemapCollidersComponentTypeName);
 	if(component == NULL) {
-		shovelerLogWarning("Trying to update tilemap colliders of entity %lld which does not have a tilemap colliders, ignoring.", entity->entityId);
+		shovelerLogWarning("Trying to update tilemap colliders of entity %lld which does not have a tilemap colliders, ignoring.", entity->id);
 		return false;
 	}
 
@@ -74,7 +74,7 @@ bool shovelerViewEntityRemoveTilemapColliders(ShovelerViewEntity *entity)
 {
 	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTilemapCollidersComponentTypeName);
 	if(component == NULL) {
-		shovelerLogWarning("Trying to remove tilemap colliders from entity %lld which does not have a tilemap colliders, ignoring.", entity->entityId);
+		shovelerLogWarning("Trying to remove tilemap colliders from entity %lld which does not have a tilemap colliders, ignoring.", entity->id);
 		return false;
 	}
 

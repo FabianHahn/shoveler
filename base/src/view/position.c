@@ -35,7 +35,7 @@ bool shovelerViewEntityRemovePosition(ShovelerViewEntity *entity)
 {
 	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewPositionComponentTypeName);
 	if(component == NULL) {
-		shovelerLogWarning("Trying to remove position from entity %lld which does not have a position, ignoring.", entity->entityId);
+		shovelerLogWarning("Trying to remove position from entity %lld which does not have a position, ignoring.", entity->id);
 		return false;
 	}
 

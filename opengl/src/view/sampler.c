@@ -55,7 +55,7 @@ bool shovelerViewEntityUpdateSampler(ShovelerViewEntity *entity, const ShovelerV
 {
 	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewSamplerComponentTypeName);
 	if(component == NULL) {
-		shovelerLogWarning("Trying to update sampler of entity %lld which does not have a sampler, ignoring.", entity->entityId);
+		shovelerLogWarning("Trying to update sampler of entity %lld which does not have a sampler, ignoring.", entity->id);
 		return false;
 	}
 
@@ -69,7 +69,7 @@ bool shovelerViewEntityRemoveSampler(ShovelerViewEntity *entity)
 {
 	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewSamplerComponentTypeName);
 	if(component == NULL) {
-		shovelerLogWarning("Trying to remove sampler from entity %lld which does not have a sampler, ignoring.", entity->entityId);
+		shovelerLogWarning("Trying to remove sampler from entity %lld which does not have a sampler, ignoring.", entity->id);
 		return false;
 	}
 

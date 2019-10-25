@@ -63,7 +63,7 @@ bool shovelerViewEntityUpdateDrawable(ShovelerViewEntity *entity, const Shoveler
 {
 	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewDrawableComponentTypeName);
 	if(component == NULL) {
-		shovelerLogWarning("Trying to update drawable of entity %lld which does not have a drawable, ignoring.", entity->entityId);
+		shovelerLogWarning("Trying to update drawable of entity %lld which does not have a drawable, ignoring.", entity->id);
 		return false;
 	}
 
@@ -79,7 +79,7 @@ bool shovelerViewEntityRemoveDrawable(ShovelerViewEntity *entity)
 {
 	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewDrawableComponentTypeName);
 	if(component == NULL) {
-		shovelerLogWarning("Trying to remove drawable from entity %lld which does not have a drawable, ignoring.", entity->entityId);
+		shovelerLogWarning("Trying to remove drawable from entity %lld which does not have a drawable, ignoring.", entity->id);
 		return false;
 	}
 

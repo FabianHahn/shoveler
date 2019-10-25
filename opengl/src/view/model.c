@@ -86,7 +86,7 @@ bool shovelerViewEntityRemoveModel(ShovelerViewEntity *entity)
 {
 	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewModelComponentTypeName);
 	if(component == NULL) {
-		shovelerLogWarning("Trying to remove model from entity %lld which does not have a model, ignoring.", entity->entityId);
+		shovelerLogWarning("Trying to remove model from entity %lld which does not have a model, ignoring.", entity->id);
 		return false;
 	}
 

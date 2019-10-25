@@ -53,7 +53,7 @@ bool shovelerViewEntityUpdateClient(ShovelerViewEntity *entity, const ShovelerVi
 {
 	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewClientComponentTypeName);
 	if(component == NULL) {
-		shovelerLogWarning("Trying to update client of entity %lld which does not have a client, ignoring.", entity->entityId);
+		shovelerLogWarning("Trying to update client of entity %lld which does not have a client, ignoring.", entity->id);
 		return false;
 	}
 
@@ -67,7 +67,7 @@ bool shovelerViewEntityRemoveClient(ShovelerViewEntity *entity)
 {
 	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewClientComponentTypeName);
 	if(component == NULL) {
-		shovelerLogWarning("Trying to remove client from entity %lld which does not have a client, ignoring.", entity->entityId);
+		shovelerLogWarning("Trying to remove client from entity %lld which does not have a client, ignoring.", entity->id);
 		return false;
 	}
 

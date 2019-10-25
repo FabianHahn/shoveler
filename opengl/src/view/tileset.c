@@ -59,7 +59,7 @@ bool shovelerViewEntityUpdateTileset(ShovelerViewEntity *entity, const ShovelerV
 {
 	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTilesetComponentTypeName);
 	if(component == NULL) {
-		shovelerLogWarning("Trying to update tileset of entity %lld which does not have a tileset, ignoring.", entity->entityId);
+		shovelerLogWarning("Trying to update tileset of entity %lld which does not have a tileset, ignoring.", entity->id);
 		return false;
 	}
 
@@ -74,7 +74,7 @@ bool shovelerViewEntityRemoveTileset(ShovelerViewEntity *entity)
 {
 	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTilesetComponentTypeName);
 	if(component == NULL) {
-		shovelerLogWarning("Trying to remove tileset from entity %lld which does not have a tileset, ignoring.", entity->entityId);
+		shovelerLogWarning("Trying to remove tileset from entity %lld which does not have a tileset, ignoring.", entity->id);
 		return false;
 	}
 

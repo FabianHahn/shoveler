@@ -64,7 +64,7 @@ bool shovelerViewEntityUpdateTilemap(ShovelerViewEntity *entity, const ShovelerV
 {
 	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTilemapComponentTypeName);
 	if(component == NULL) {
-		shovelerLogWarning("Trying to update tilemap of entity %lld which does not have a tilemap, ignoring.", entity->entityId);
+		shovelerLogWarning("Trying to update tilemap of entity %lld which does not have a tilemap, ignoring.", entity->id);
 		return false;
 	}
 
@@ -78,7 +78,7 @@ bool shovelerViewEntityRemoveTilemap(ShovelerViewEntity *entity)
 {
 	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTilemapComponentTypeName);
 	if(component == NULL) {
-		shovelerLogWarning("Trying to remove tilemap from entity %lld which does not have a tilemap, ignoring.", entity->entityId);
+		shovelerLogWarning("Trying to remove tilemap from entity %lld which does not have a tilemap, ignoring.", entity->id);
 		return false;
 	}
 

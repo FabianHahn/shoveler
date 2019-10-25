@@ -67,7 +67,7 @@ bool shovelerViewEntityRemoveResource(ShovelerViewEntity *entity)
 {
 	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewResourceComponentTypeName);
 	if(component == NULL) {
-		shovelerLogWarning("Trying to remove resource from entity %lld which does not have a resource, ignoring.", entity->entityId);
+		shovelerLogWarning("Trying to remove resource from entity %lld which does not have a resource, ignoring.", entity->id);
 		return false;
 	}
 
@@ -76,7 +76,8 @@ bool shovelerViewEntityRemoveResource(ShovelerViewEntity *entity)
 
 static void *activateResourceComponent(ShovelerComponent *component)
 {
-	assert(shovelerViewHasResources(component->entity->view));
+	ShovelerView *view = (ShovelerView *) component->viewAdapter->userData;
+	assert(shovelerViewHasResources(view));
 
 	ShovelerResources *resources = shovelerViewGetResources(component->entity->view);
 

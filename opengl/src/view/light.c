@@ -83,7 +83,7 @@ bool shovelerViewEntityUpdateLight(ShovelerViewEntity *entity, const ShovelerVie
 {
 	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewLightComponentTypeName);
 	if(component == NULL) {
-		shovelerLogWarning("Trying to update light of entity %lld which does not have a light, ignoring.", entity->entityId);
+		shovelerLogWarning("Trying to update light of entity %lld which does not have a light, ignoring.", entity->id);
 		return false;
 	}
 
@@ -104,7 +104,7 @@ bool shovelerViewEntityRemoveLight(ShovelerViewEntity *entity)
 
 	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewLightComponentTypeName);
 	if(component == NULL) {
-		shovelerLogWarning("Trying to remove light from entity %lld which does not have a light, ignoring.", entity->entityId);
+		shovelerLogWarning("Trying to remove light from entity %lld which does not have a light, ignoring.", entity->id);
 		return false;
 	}
 

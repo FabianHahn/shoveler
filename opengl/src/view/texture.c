@@ -59,7 +59,7 @@ bool shovelerViewEntityUpdateTexture(ShovelerViewEntity *entity, const ShovelerV
 {
 	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTextureComponentTypeName);
 	if(component == NULL) {
-		shovelerLogWarning("Trying to update texture of entity %lld which does not have a texture, ignoring.", entity->entityId);
+		shovelerLogWarning("Trying to update texture of entity %lld which does not have a texture, ignoring.", entity->id);
 		return false;
 	}
 
@@ -71,7 +71,7 @@ bool shovelerViewEntityRemoveTexture(ShovelerViewEntity *entity)
 {
 	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTextureComponentTypeName);
 	if(component == NULL) {
-		shovelerLogWarning("Trying to remove texture from entity %lld which does not have a texture, ignoring.", entity->entityId);
+		shovelerLogWarning("Trying to remove texture from entity %lld which does not have a texture, ignoring.", entity->id);
 		return false;
 	}
 

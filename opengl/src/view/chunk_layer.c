@@ -58,7 +58,7 @@ bool shovelerViewEntityUpdateChunkLayer(ShovelerViewEntity *entity, const Shovel
 {
 	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewChunkLayerComponentTypeName);
 	if(component == NULL) {
-		shovelerLogWarning("Trying to update chunk layer of entity %lld which does not have a chunk layer, ignoring.", entity->entityId);
+		shovelerLogWarning("Trying to update chunk layer of entity %lld which does not have a chunk layer, ignoring.", entity->id);
 		return false;
 	}
 
@@ -84,7 +84,7 @@ bool shovelerViewEntityRemoveChunkLayer(ShovelerViewEntity *entity)
 {
 	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewChunkLayerComponentTypeName);
 	if(component == NULL) {
-		shovelerLogWarning("Trying to remove chunk layer from entity %lld which does not have a chunk layer, ignoring.", entity->entityId);
+		shovelerLogWarning("Trying to remove chunk layer from entity %lld which does not have a chunk layer, ignoring.", entity->id);
 		return false;
 	}
 

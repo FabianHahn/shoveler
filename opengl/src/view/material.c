@@ -115,7 +115,7 @@ bool shovelerViewEntityUpdateMaterial(ShovelerViewEntity *entity, const Shoveler
 {
 	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewMaterialComponentTypeName);
 	if(component == NULL) {
-		shovelerLogWarning("Trying to update material of entity %lld which does not have a material, ignoring.", entity->entityId);
+		shovelerLogWarning("Trying to update material of entity %lld which does not have a material, ignoring.", entity->id);
 		return false;
 	}
 
@@ -151,7 +151,7 @@ bool shovelerViewEntityRemoveMaterial(ShovelerViewEntity *entity)
 {
 	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewMaterialComponentTypeName);
 	if(component == NULL) {
-		shovelerLogWarning("Trying to remove material from entity %lld which does not have a material, ignoring.", entity->entityId);
+		shovelerLogWarning("Trying to remove material from entity %lld which does not have a material, ignoring.", entity->id);
 		return false;
 	}
 

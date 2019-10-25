@@ -54,7 +54,7 @@ bool shovelerViewEntityUpdateCanvas(ShovelerViewEntity *entity, const ShovelerVi
 {
 	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewCanvasComponentTypeName);
 	if(component == NULL) {
-		shovelerLogWarning("Trying to update canvas of entity %lld which does not have a canvas, ignoring.", entity->entityId);
+		shovelerLogWarning("Trying to update canvas of entity %lld which does not have a canvas, ignoring.", entity->id);
 		return false;
 	}
 
@@ -66,7 +66,7 @@ bool shovelerViewEntityRemoveCanvas(ShovelerViewEntity *entity)
 {
 	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewCanvasComponentTypeName);
 	if(component == NULL) {
-		shovelerLogWarning("Trying to remove canvas from entity %lld which does not have a canvas, ignoring.", entity->entityId);
+		shovelerLogWarning("Trying to remove canvas from entity %lld which does not have a canvas, ignoring.", entity->id);
 		return false;
 	}
 

@@ -12,6 +12,7 @@ typedef struct ShovelerComponentStruct ShovelerComponent; // forward declaration
 typedef struct ShovelerComponentConfigurationValueStruct ShovelerComponentConfigurationValue; // forward declaration: below
 typedef struct ShovelerComponentTypeConfigurationOptionStruct ShovelerComponentTypeConfigurationOption; // forward declaration: below
 typedef struct ShovelerComponentTypeStruct ShovelerComponentType; // forward declaration: below
+typedef struct ShovelerComponentViewAdapterStruct ShovelerComponentViewAdapter; // forward delcaration: below
 typedef struct ShovelerViewEntityStruct ShovelerViewEntity; // forward declaration: view.h
 
 typedef enum {
@@ -75,9 +76,28 @@ typedef struct ShovelerComponentTypeStruct {
 	bool requiresAuthority;
 } ShovelerComponentType;
 
+typedef void (ShovelerComponentAdapterViewForEachDependencyCallbackFunction)(ShovelerComponent *sourceComponent, ShovelerComponent *targetComponent, void *userData);
+
+typedef void (ShovelerComponentViewAdapterAddDependencyFunction)(ShovelerComponent *component, long long int targetEntityId, const char *targetComponentName, void *userData);
+typedef bool (ShovelerComponentViewAdapterRemoveDependencyFunction)(ShovelerComponent *component, long long int targetEntityId, const char *targetComponentName, void *userData);
+typedef void (ShovelerComponentViewAdapterForEachDependencyFunction)(ShovelerComponent *component, ShovelerComponentAdapterViewForEachDependencyCallbackFunction *callbackFunction, void *callbackUserData, void *adapterUserData);
+typedef void (ShovelerComponentViewAdapterReportActivationFunction)(ShovelerComponent *component, int delta, void *userData);
+
+// Adapter struct to make a component integrate with a view.
+typedef struct ShovelerComponentViewAdapterStruct {
+	ShovelerComponentViewAdapterAddDependencyFunction *addDependency;
+	ShovelerComponentViewAdapterRemoveDependencyFunction *removeDependency;
+	ShovelerComponentViewAdapterForEachDependencyFunction *forEachDependency;
+	ShovelerComponentViewAdapterForEachDependencyFunction *forEachReverseDependency;
+	ShovelerComponentViewAdapterReportActivationFunction *reportActivation;
+	void *userData;
+} ShovelerComponentViewAdapter;
+
 typedef struct ShovelerComponentStruct {
-	ShovelerViewEntity *entity;
+	ShovelerComponentViewAdapter *viewAdapter;
+	long long int entityId;
 	ShovelerComponentType *type;
+	bool isAuthoritative;
 	/* map from string configuration option keys to (ShovelerComponentConfigurationValue *) */
 	GHashTable *configurationValues;
 	void *data;
@@ -109,7 +129,7 @@ bool shovelerComponentTypeAddDependencyConfigurationOption(ShovelerComponentType
 bool shovelerComponentTypeRemoveConfigurationOption(ShovelerComponentType *componentType, const char *key);
 void shovelerComponentTypeFree(ShovelerComponentType *componentType);
 
-ShovelerComponent *shovelerComponentCreate(ShovelerViewEntity *entity, const char *componentTypeName);
+ShovelerComponent *shovelerComponentCreate(ShovelerComponentViewAdapter *viewAdapter, long long int entityId, ShovelerComponentType *componentType);
 /**
  * Updates a configuration option with the specified key on this component.
  *

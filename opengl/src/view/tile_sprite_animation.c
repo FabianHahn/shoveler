@@ -67,7 +67,7 @@ bool shovelerViewEntityUpdateTileSpriteAnimation(ShovelerViewEntity *entity, con
 {
 	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTileSpriteAnimationComponentTypeName);
 	if(component == NULL) {
-		shovelerLogWarning("Trying to update tile sprite animation of entity %lld which does not have a tile sprite animation, ignoring.", entity->entityId);
+		shovelerLogWarning("Trying to update tile sprite animation of entity %lld which does not have a tile sprite animation, ignoring.", entity->id);
 		return false;
 	}
 
@@ -83,7 +83,7 @@ bool shovelerViewEntityRemoveTileSpriteAnimation(ShovelerViewEntity *entity)
 {
 	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTileSpriteAnimationComponentTypeName);
 	if(component == NULL) {
-		shovelerLogWarning("Trying to remove tile sprite animation from entity %lld which does not have a tile sprite animation, ignoring.", entity->entityId);
+		shovelerLogWarning("Trying to remove tile sprite animation from entity %lld which does not have a tile sprite animation, ignoring.", entity->id);
 		return false;
 	}
 

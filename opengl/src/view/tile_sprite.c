@@ -73,7 +73,7 @@ bool shovelerViewEntityUpdateTileSprite(ShovelerViewEntity *entity, const Shovel
 {
 	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTileSpriteComponentTypeName);
 	if(component == NULL) {
-		shovelerLogWarning("Trying to update canvas tile sprite of entity %lld which does not have a canvas tile sprite, ignoring.", entity->entityId);
+		shovelerLogWarning("Trying to update canvas tile sprite of entity %lld which does not have a canvas tile sprite, ignoring.", entity->id);
 		return false;
 	}
 
@@ -91,7 +91,7 @@ bool shovelerViewEntityRemoveTileSprite(ShovelerViewEntity *entity)
 {
 	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTileSpriteComponentTypeName);
 	if(component == NULL) {
-		shovelerLogWarning("Trying to remove canvas tile sprite from entity %lld which does not have a canvas tile sprite, ignoring.", entity->entityId);
+		shovelerLogWarning("Trying to remove canvas tile sprite from entity %lld which does not have a canvas tile sprite, ignoring.", entity->id);
 		return false;
 	}
 
