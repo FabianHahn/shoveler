@@ -7,7 +7,7 @@
 #include <shoveler/image.h>
 
 ShovelerImage *shovelerImagePngReadFile(const char *filename);
-ShovelerImage *shovelerImagePngReadBuffer(const unsigned char *buffer, size_t size);
+ShovelerImage *shovelerImagePngReadBuffer(const unsigned char *buffer, int bufferSize);
 bool shovelerImagePngWriteFile(ShovelerImage *image, const char *filename);
 
 #endif
