@@ -75,6 +75,10 @@ bool shovelerComponentTypeRemoveConfigurationOption(ShovelerComponentType *compo
 
 void shovelerComponentTypeFree(ShovelerComponentType *componentType)
 {
+	if(componentType == NULL) {
+		return;
+	}
+
 	g_hash_table_destroy(componentType->configurationOptions);
 	free(componentType->name);
 	free(componentType);
@@ -206,7 +210,9 @@ bool shovelerComponentActivate(ShovelerComponent *component)
 		return false;
 	}
 
-	if(!checkDependencyActivation(component)) {
+	bool dependenciesInactive = false;
+	component->viewAdapter->forEachDependency(component, checkDependencyInactive, &dependenciesInactive, component->viewAdapter->userData);
+	if(dependenciesInactive) {
 		return false;
 	}
 
@@ -249,8 +255,36 @@ void shovelerComponentDeactivate(ShovelerComponent *component)
 	shovelerLogTrace("Deactivated component '%s' of entity %lld.", component->type->name, component->entityId);
 }
 
+void shovelerComponentDelegate(ShovelerComponent *component)
+{
+	component->isAuthoritative = true;
+}
+
+bool shovelerComponentIsAuthoritative(ShovelerComponent *component)
+{
+	return component->isAuthoritative;
+}
+
+void shovelerComponentUndelegate(ShovelerComponent *component)
+{
+	if(shovelerComponentIsActive(component) && component->type->requiresAuthority) {
+		shovelerComponentDeactivate(component);
+	}
+
+	component->isAuthoritative = false;
+}
+
+void *shovelerComponentGetViewTarget(ShovelerComponent *component, const char *targetName)
+{
+	return component->viewAdapter->getTarget(component, targetName, component->viewAdapter->userData);
+}
+
 void shovelerComponentFree(ShovelerComponent *component)
 {
+	if(component == NULL) {
+		return;
+	}
+
 	shovelerComponentDeactivate(component);
 
 	GHashTableIter iter;

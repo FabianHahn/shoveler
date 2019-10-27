@@ -78,13 +78,17 @@ typedef struct ShovelerComponentTypeStruct {
 
 typedef void (ShovelerComponentAdapterViewForEachDependencyCallbackFunction)(ShovelerComponent *sourceComponent, ShovelerComponent *targetComponent, void *userData);
 
-typedef void (ShovelerComponentViewAdapterAddDependencyFunction)(ShovelerComponent *component, long long int targetEntityId, const char *targetComponentName, void *userData);
-typedef bool (ShovelerComponentViewAdapterRemoveDependencyFunction)(ShovelerComponent *component, long long int targetEntityId, const char *targetComponentName, void *userData);
+typedef ShovelerComponent *(ShovelerComponentViewAdapterGetComponentFunction)(ShovelerComponent *component, long long int entityId, const char *componentTypeName, void *userData);
+typedef void *(ShovelerComponentViewAdapterGetTargetFunction)(ShovelerComponent *component, const char *targetName, void *userData);
+typedef void (ShovelerComponentViewAdapterAddDependencyFunction)(ShovelerComponent *component, long long int targetEntityId, const char *targetComponentTypeName, void *userData);
+typedef bool (ShovelerComponentViewAdapterRemoveDependencyFunction)(ShovelerComponent *component, long long int targetEntityId, const char *targetComponentTypeName, void *userData);
 typedef void (ShovelerComponentViewAdapterForEachDependencyFunction)(ShovelerComponent *component, ShovelerComponentAdapterViewForEachDependencyCallbackFunction *callbackFunction, void *callbackUserData, void *adapterUserData);
 typedef void (ShovelerComponentViewAdapterReportActivationFunction)(ShovelerComponent *component, int delta, void *userData);
 
 // Adapter struct to make a component integrate with a view.
 typedef struct ShovelerComponentViewAdapterStruct {
+	ShovelerComponentViewAdapterGetComponentFunction *getComponent;
+	ShovelerComponentViewAdapterGetTargetFunction *getTarget;
 	ShovelerComponentViewAdapterAddDependencyFunction *addDependency;
 	ShovelerComponentViewAdapterRemoveDependencyFunction *removeDependency;
 	ShovelerComponentViewAdapterForEachDependencyFunction *forEachDependency;
@@ -163,6 +167,10 @@ bool shovelerComponentIsActive(ShovelerComponent *component);
  * component's data field is set to NULL until the component is activated again.
  */
 void shovelerComponentDeactivate(ShovelerComponent *component);
+void shovelerComponentDelegate(ShovelerComponent *component);
+bool shovelerComponentIsAuthoritative(ShovelerComponent *component);
+void shovelerComponentUndelegate(ShovelerComponent *component);
+void *shovelerComponentGetViewTarget(ShovelerComponent *component, const char *targetName);
 void shovelerComponentFree(ShovelerComponent *component);
 
 /**
@@ -435,7 +443,7 @@ static inline ShovelerVector4 shovelerComponentGetConfigurationValueVector4(Shov
 	return configurationValue->vector4Value;
 }
 
-static inline void shovelerComponentGetConfigurationValueBytes(ShovelerComponent *component, const char *key, const unsigned char **outputData, size_t *outputSize)
+static inline void shovelerComponentGetConfigurationValueBytes(ShovelerComponent *component, const char *key, const unsigned char **outputData, int *outputSize)
 {
 	const ShovelerComponentConfigurationValue *configurationValue = shovelerComponentGetConfigurationValue(component, key);
 	assert(configurationValue != NULL);

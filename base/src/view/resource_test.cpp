@@ -4,12 +4,13 @@
 #include <gtest/gtest.h>
 
 extern "C" {
+#include "shoveler/view/resource.h"
 #include "shoveler/view/resources.h"
 #include "shoveler/component.h"
 #include "shoveler/resources.h"
 }
 
-static void *loadResource(ShovelerResourcesTypeLoader *typeLoader, const unsigned char *buffer, size_t bytes);
+static void *loadResource(ShovelerResourcesTypeLoader *typeLoader, const unsigned char *buffer, int bufferSize);
 
 class ShovelerViewResourcesTest : public ::testing::Test {
 public:
@@ -34,7 +35,7 @@ public:
 		ASSERT_TRUE(resourcesTargetAdded);
 
 		lastLoadBuffer = NULL;
-		lastLoadBytes = 0;
+		lastLoadBufferSize = 0;
 		nextLoadResourceData = NULL;
 	}
 
@@ -51,7 +52,7 @@ public:
 	ShovelerView *view;
 
 	const unsigned char *lastLoadBuffer;
-	size_t lastLoadBytes;
+	int lastLoadBufferSize;
 	void *nextLoadResourceData;
 };
 
@@ -60,7 +61,7 @@ TEST_F(ShovelerViewResourcesTest, addResource)
 	long long int testEntityId = 42;
 	const char *testResourceId = "42";
 	unsigned char testResourceBuffer = 27;
-	size_t testResourceBytes = 1;
+	int testResourceBytes = 1;
 	const char *testResourceData = "test resource data";
 
 	bool entityAdded = shovelerViewAddEntity(view, testEntityId);
@@ -73,7 +74,7 @@ TEST_F(ShovelerViewResourcesTest, addResource)
 	const ShovelerViewResourceConfiguration configuration{testTypeId, &testResourceBuffer, testResourceBytes};
 	bool resourceComponentAdded = shovelerViewEntityAddResource(testEntity, &configuration);
 	ASSERT_TRUE(resourceComponentAdded);
-	ASSERT_EQ(lastLoadBytes, testResourceBytes) << "load should be called with correct bytes";
+	ASSERT_EQ(lastLoadBufferSize, testResourceBytes) << "load should be called with correct bytes";
 	ASSERT_EQ(memcmp(&testResourceBuffer, lastLoadBuffer, testResourceBytes), 0) << "load should be called with correct buffer";
 
 	ShovelerResource *resource = shovelerResourcesGet(resources, testTypeId, testResourceId);
@@ -86,7 +87,7 @@ TEST_F(ShovelerViewResourcesTest, updateResource)
 	long long int testEntityId = 42;
 	const char *testResourceId = "42";
 	unsigned char testResourceBuffer = 27;
-	size_t testResourceBytes = 1337;
+	int testResourceBytes = 1337;
 	const char *testResourceData = "test resource data";
 	const char *otherTestResourceData = "other test resource data";
 
@@ -114,7 +115,7 @@ TEST_F(ShovelerViewResourcesTest, removeResource)
 	long long int testEntityId = 42;
 	const char *testResourceId = "42";
 	unsigned char testResourceBuffer = 27;
-	size_t testResourceBytes = 1337;
+	int testResourceBytes = 1337;
 
 	bool entityAdded = shovelerViewAddEntity(view, testEntityId);
 	ASSERT_TRUE(entityAdded);
@@ -132,11 +133,11 @@ TEST_F(ShovelerViewResourcesTest, removeResource)
 	ASSERT_TRUE(resource != NULL) << "resource should still be available despite component removal";
 }
 
-static void *loadResource(ShovelerResourcesTypeLoader *typeLoader, const unsigned char *buffer, size_t bytes)
+static void *loadResource(ShovelerResourcesTypeLoader *typeLoader, const unsigned char *buffer, int bufferSize)
 {
 	ShovelerViewResourcesTest *test = (ShovelerViewResourcesTest *) typeLoader->data;
 	test->lastLoadBuffer = buffer;
-	test->lastLoadBytes = bytes;
+	test->lastLoadBufferSize = bufferSize;
 
 	return test->nextLoadResourceData;
 }

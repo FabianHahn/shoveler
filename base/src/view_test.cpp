@@ -214,35 +214,6 @@ TEST_F(ShovelerViewTest, removeEntityRemovesComponents)
 	ASSERT_TRUE(deactivateCalled);
 }
 
-TEST_F(ShovelerViewTest, dependencyCallbacks)
-{
-	long long int testEntityId = 1337;
-	long long int testDependencyEntityId = 42;
-
-	shovelerViewAddDependencyCallback(view, dependencyCallbackFunction, this);
-
-	ShovelerViewEntity *testEntity = shovelerViewAddEntity(view, testEntityId);
-	ASSERT_TRUE(testEntity != NULL);
-	ShovelerComponent *testComponent = shovelerViewEntityAddComponent(testEntity, componentTypeName);
-	ASSERT_TRUE(testComponent != NULL);
-
-	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(testComponent, dependencyConfigurationOptionKey, testDependencyEntityId);
-	ASSERT_EQ(lastDependencySource.entityId, testEntityId);
-	ASSERT_STREQ(lastDependencySource.componentTypeName, componentTypeName);
-	ASSERT_EQ(lastDependencyTarget.entityId, testDependencyEntityId);
-	ASSERT_STREQ(lastDependencyTarget.componentTypeName, otherComponentTypeName);
-	ASSERT_TRUE(lastDependencyAdded);
-
-	clearDependencyCallback();
-	bool removed = shovelerComponentClearCanonicalConfigurationOption(testComponent, dependencyConfigurationOptionKey);
-	ASSERT_TRUE(removed);
-	ASSERT_EQ(lastDependencySource.entityId, testEntityId);
-	ASSERT_STREQ(lastDependencySource.componentTypeName, componentTypeName);
-	ASSERT_EQ(lastDependencyTarget.entityId, testDependencyEntityId);
-	ASSERT_STREQ(lastDependencyTarget.componentTypeName, otherComponentTypeName);
-	ASSERT_FALSE(lastDependencyAdded);
-}
-
 TEST_F(ShovelerViewTest, updateConfiguration) {
 	long long int testEntityId = 1337;
 	const int newConfigurationValue = 27;
@@ -341,20 +312,20 @@ TEST_F(ShovelerViewTest, updateConfigurationLiveNotifiesReverseDependency) {
 
 static void *activateComponent(ShovelerComponent *component)
 {
-	ShovelerViewTest *test = (ShovelerViewTest *) shovelerViewGetTarget(component->entity->view, testTargetName);
+	ShovelerViewTest *test = (ShovelerViewTest *) shovelerComponentGetViewTarget(component, testTargetName);
 	test->activateCalled = true;
 	return test;
 }
 
 static void deactivateComponent(ShovelerComponent *component)
 {
-	ShovelerViewTest *test = (ShovelerViewTest *) shovelerViewGetTarget(component->entity->view, testTargetName);
+	ShovelerViewTest *test = (ShovelerViewTest *) shovelerComponentGetViewTarget(component, testTargetName);
 	test->deactivateCalled = true;
 }
 
 static void liveUpdateComponent(ShovelerComponent *component, ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *value)
 {
-	ShovelerViewTest *test = (ShovelerViewTest *) shovelerViewGetTarget(component->entity->view, testTargetName);
+	ShovelerViewTest *test = (ShovelerViewTest *) shovelerComponentGetViewTarget(component, testTargetName);
 	test->liveUpdateCalled = true;
 	test->lastLiveUpdateConfigurationOption = configurationOption;
 	test->lastLiveUpdateValue = value;
@@ -362,7 +333,7 @@ static void liveUpdateComponent(ShovelerComponent *component, ShovelerComponentT
 
 static void updateDependencyComponent(ShovelerComponent *component, ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent)
 {
-	ShovelerViewTest *test = (ShovelerViewTest *) shovelerViewGetTarget(component->entity->view, testTargetName);
+	ShovelerViewTest *test = (ShovelerViewTest *) shovelerComponentGetViewTarget(component, testTargetName);
 	test->updateDependencyCalled = true;
 	test->lastUpdateDependencyConfigurationOption = configurationOption;
 	test->lastUpdateDependencyComponent = dependencyComponent;

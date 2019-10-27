@@ -67,8 +67,6 @@ ShovelerResource *shovelerResourcesGet(ShovelerResources *resources, const char 
 
 bool shovelerResourcesSet(ShovelerResources *resources, const char *typeId, const char *resourceId, const unsigned char *buffer, int bufferSize)
 {
-	assert(bufferSize > 0);
-
 	ShovelerResourcesTypeLoader *typeLoader = (ShovelerResourcesTypeLoader *) g_hash_table_lookup(resources->typeLoaders, typeId);
 	if(typeLoader == NULL) {
 		shovelerLogError("Failed to load resource '%s' of unknown type '%s' (%d bytes).", resourceId, typeId, bufferSize);
