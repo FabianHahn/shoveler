@@ -12,8 +12,7 @@ static ShovelerComponent *getComponent(ShovelerComponent *component, long long i
 static void *getTarget(ShovelerComponent *component, const char *targetName, void *testPointer);
 static void addDependency(ShovelerComponent *component, long long int targetEntityId, const char *targetComponentTypeName, void *testPointer);
 static bool removeDependency(ShovelerComponent *component, long long int targetEntityId, const char *targetComponentTypeName, void *testPointer);
-static void forEachDependency(ShovelerComponent *component, ShovelerComponentAdapterViewForEachDependencyCallbackFunction *callbackFunction, void *callbackUserData, void *testPointer);
-static void forEachReverseDependency(ShovelerComponent *component, ShovelerComponentAdapterViewForEachDependencyCallbackFunction *callbackFunction, void *callbackUserData, void *testPointer);
+static void forEachReverseDependency(ShovelerComponent *component, ShovelerComponentAdapterViewForEachReverseDependencyCallbackFunction *callbackFunction, void *callbackUserData, void *testPointer);
 static void reportActivation(ShovelerComponent *component, int delta, void *testPointer);
 
 static void *activateComponent(ShovelerComponent *component);
@@ -29,7 +28,6 @@ public:
 		viewAdapter.getTarget = getTarget;
 		viewAdapter.addDependency = addDependency;
 		viewAdapter.removeDependency = removeDependency;
-		viewAdapter.forEachDependency = forEachDependency;
 		viewAdapter.forEachReverseDependency = forEachReverseDependency;
 		viewAdapter.reportActivation = reportActivation;
 		viewAdapter.userData = this;
@@ -78,7 +76,6 @@ public:
 	ShovelerComponent *component;
 	ShovelerComponent *otherComponent;
 
-	std::map<ShovelerComponent *, std::set<std::pair<long long int, std::string> > > dependencies;
 	std::map<std::pair<long long int, std::string>, std::set<ShovelerComponent *> > reverseDependencies;
 
 	bool activateCalled;
@@ -250,7 +247,6 @@ static void addDependency(ShovelerComponent *component, long long int targetEnti
 	ShovelerComponentTest *test = (ShovelerComponentTest *) testPointer;
 
 	auto dependencyTarget = std::make_pair(targetEntityId, targetComponentTypeName);
-	test->dependencies[component].insert(dependencyTarget);
 	test->reverseDependencies[dependencyTarget].insert(component);
 }
 
@@ -259,24 +255,11 @@ static bool removeDependency(ShovelerComponent *component, long long int targetE
 	ShovelerComponentTest *test = (ShovelerComponentTest *) testPointer;
 
 	auto dependencyTarget = std::make_pair(targetEntityId, targetComponentTypeName);
-	test->dependencies[component].erase(dependencyTarget);
 	test->reverseDependencies[dependencyTarget].erase(component);
 	return true;
 }
 
-static void forEachDependency(ShovelerComponent *component, ShovelerComponentAdapterViewForEachDependencyCallbackFunction *callbackFunction, void *callbackUserData, void *testPointer)
-{
-	ShovelerComponentTest *test = (ShovelerComponentTest *) testPointer;
-
-	for(auto const& dependency : test->dependencies[component]) {
-		ShovelerComponent *targetComponent = getComponent(component, dependency.first, dependency.second.c_str(), testPointer);
-		if(targetComponent != NULL) {
-			callbackFunction(component, targetComponent, callbackUserData);
-		}
-	}
-}
-
-static void forEachReverseDependency(ShovelerComponent *component, ShovelerComponentAdapterViewForEachDependencyCallbackFunction *callbackFunction, void *callbackUserData, void *testPointer)
+static void forEachReverseDependency(ShovelerComponent *component, ShovelerComponentAdapterViewForEachReverseDependencyCallbackFunction *callbackFunction, void *callbackUserData, void *testPointer)
 {
 	ShovelerComponentTest *test = (ShovelerComponentTest *) testPointer;
 

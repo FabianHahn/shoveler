@@ -1,5 +1,5 @@
-#ifndef SHOVELER_VIEW__H
-#define SHOVELER_VIEW__H
+#ifndef SHOVELER_VIEW_H
+#define SHOVELER_VIEW_H
 
 #include <stdbool.h> // bool
 
