@@ -13,8 +13,8 @@
 
 typedef struct {
 	const unsigned char *buffer;
-	size_t size;
-	size_t index;
+	int size;
+	int index;
 } MemoryStream;
 
 typedef enum {
@@ -61,13 +61,13 @@ ShovelerImage *shovelerImagePngReadFile(const char *filename)
 	return image;
 }
 
-ShovelerImage *shovelerImagePngReadBuffer(const unsigned char *buffer, size_t size)
+ShovelerImage *shovelerImagePngReadBuffer(const unsigned char *buffer, int bufferSize)
 {
 	GString *descriptionString = g_string_new("");
-	g_string_append_printf(descriptionString, "buffer (%u bytes)", size);
+	g_string_append_printf(descriptionString, "buffer (%d bytes)", bufferSize);
 
 	ReadInputValue readInputValue;
-	readInputValue.memoryStream = (MemoryStream){buffer, size, 0};
+	readInputValue.memoryStream = (MemoryStream){buffer, bufferSize, 0};
 	ReadInput readInput = {READ_INPUT_MEMORY_STREAM, readInputValue, descriptionString->str};
 	ShovelerImage *image = readPng(readInput);
 
@@ -272,7 +272,7 @@ static bool readPngData(png_structp png, png_infop info, png_infop endInfo, png_
 	*height = png_get_image_height(png, info);
 	*bitDepth = png_get_bit_depth(png, info);
 	png_byte colorType = png_get_color_type(png, info);
-	png_uint_32 rowbytes = png_get_rowbytes(png, info);
+	png_size_t rowbytes = png_get_rowbytes(png, info);
 
 	if(*bitDepth < 8) {
 		png_set_packing(png); // make sure bit depths below 8 bit are expanded to a char
@@ -315,17 +315,24 @@ static bool readPngData(png_structp png, png_infop info, png_infop endInfo, png_
 	return true;
 }
 
-static void readMemoryStream(png_structp png, png_bytep outBytes, png_size_t bytesToRead)
+static void readMemoryStream(png_structp png, png_bytep outBytes, png_size_t bytesToReadSize)
 {
+	if(bytesToReadSize > INT_MAX) {
+		shovelerLogWarning("Integer overflow when trying to read %zu bytes from memory stream.", bytesToReadSize);
+		return;
+	}
+	int bytesToRead = (int) bytesToReadSize;
+
 	MemoryStream *memoryStream = (MemoryStream *) png_get_io_ptr(png);
 
-	size_t bytesLeft = memoryStream->size - memoryStream->index;
+	int bytesLeft = memoryStream->size - memoryStream->index;
+	assert(bytesLeft > 0);
 	if(bytesToRead > bytesLeft) {
 		shovelerLogWarning("Tryed to read %u bytes from memory stream but only %u bytes are left - returning those.", bytesToRead, bytesLeft);
 		bytesToRead = bytesLeft;
 	}
 
-	memcpy(outBytes, memoryStream->buffer + memoryStream->index, bytesToRead);
+	memcpy(outBytes, memoryStream->buffer + memoryStream->index, (unsigned long) bytesToRead);
 	memoryStream->index += bytesToRead;
 }
 
