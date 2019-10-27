@@ -10,7 +10,7 @@
 typedef struct {
 	const char *typeId;
 	const unsigned char *buffer;
-	size_t bufferSize;
+	int bufferSize;
 } ShovelerViewResourceConfiguration;
 
 static const char *shovelerViewResourceComponentName = "resource";
