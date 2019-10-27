@@ -2,7 +2,7 @@
 #include "shoveler/image/png.h"
 #include "shoveler/log.h"
 
-static void *loadPng(ShovelerResourcesTypeLoader *typeLoader, const unsigned char *buffer, size_t bytes);
+static void *loadPng(ShovelerResourcesTypeLoader *typeLoader, const unsigned char *buffer, int bufferSize);
 static void freePng(ShovelerResourcesTypeLoader *typeLoader, void *resourceData);
 static void freeTypeLoader(ShovelerResourcesTypeLoader *typeLoader);
 static ShovelerImage *createDefaultImage();
@@ -19,9 +19,9 @@ bool shovelerResourcesImagePngRegister(ShovelerResources *resources)
 	return shovelerResourcesRegisterTypeLoader(resources, imagePngTypeLoader);
 }
 
-static void *loadPng(ShovelerResourcesTypeLoader *typeLoader, const unsigned char *buffer, size_t bytes)
+static void *loadPng(ShovelerResourcesTypeLoader *typeLoader, const unsigned char *buffer, int bufferSize)
 {
-	return shovelerImagePngReadBuffer(buffer, bytes);
+	return shovelerImagePngReadBuffer(buffer, bufferSize);
 }
 
 static void freePng(ShovelerResourcesTypeLoader *typeLoader, void *resourceData)

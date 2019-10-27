@@ -1,8 +1,6 @@
 #ifndef SHOVELER_RESOURCES_H
 #define SHOVELER_RESOURCES_H
 
-#include <stddef.h> // size_t
-
 #include <glib.h>
 
 struct ShovelerResourcesTypeLoaderStruct; // forward declaration
@@ -18,7 +16,7 @@ typedef struct {
 	void *data;
 } ShovelerResource;
 
-typedef void *(ShovelerResourcesTypeLoaderLoadFunction)(struct ShovelerResourcesTypeLoaderStruct *typeLoader, const unsigned char *buffer, size_t bytes);
+typedef void *(ShovelerResourcesTypeLoaderLoadFunction)(struct ShovelerResourcesTypeLoaderStruct *typeLoader, const unsigned char *buffer, int bufferSize);
 typedef void (ShovelerResourcesTypeLoaderFreeResourceFunction)(struct ShovelerResourcesTypeLoaderStruct *typeLoader, void *resourceData);
 typedef void (ShovelerResourcesTypeLoaderFreeFunction)(struct ShovelerResourcesTypeLoaderStruct *typeLoader);
 
@@ -46,7 +44,7 @@ typedef struct ShovelerResourcesStruct {
 ShovelerResources *shovelerResourcesCreate(ShovelerResourcesRequestFunction *request, void *userData);
 bool shovelerResourcesRegisterTypeLoader(ShovelerResources *resources, ShovelerResourcesTypeLoader typeLoader);
 ShovelerResource *shovelerResourcesGet(ShovelerResources *resources, const char *typeId, const char *resourceId);
-bool shovelerResourcesSet(ShovelerResources *resources, const char *typeId, const char *resourceId, const unsigned char *buffer, size_t bytes);
+bool shovelerResourcesSet(ShovelerResources *resources, const char *typeId, const char *resourceId, const unsigned char *buffer, int bufferSize);
 void shovelerResourcesFree(ShovelerResources *resources);
 
 #endif

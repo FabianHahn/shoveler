@@ -65,17 +65,19 @@ ShovelerResource *shovelerResourcesGet(ShovelerResources *resources, const char 
 	return resource;
 }
 
-bool shovelerResourcesSet(ShovelerResources *resources, const char *typeId, const char *resourceId, const unsigned char *buffer, size_t bytes)
+bool shovelerResourcesSet(ShovelerResources *resources, const char *typeId, const char *resourceId, const unsigned char *buffer, int bufferSize)
 {
+	assert(bufferSize > 0);
+
 	ShovelerResourcesTypeLoader *typeLoader = (ShovelerResourcesTypeLoader *) g_hash_table_lookup(resources->typeLoaders, typeId);
 	if(typeLoader == NULL) {
-		shovelerLogError("Failed to load resource '%s' of unknown type '%s' (%zu bytes).", resourceId, typeId, bytes);
+		shovelerLogError("Failed to load resource '%s' of unknown type '%s' (%d bytes).", resourceId, typeId, bufferSize);
 		return false;
 	}
 
 	ShovelerResource *resource = (ShovelerResource *) g_hash_table_lookup(resources->resources, resourceId);
 	if(resource == NULL) {
-		shovelerLogTrace("Loading unrequested resource '%s' of type '%s' (%zu bytes).", resourceId, typeId, bytes);
+		shovelerLogTrace("Loading unrequested resource '%s' of type '%s' (%d bytes).", resourceId, typeId, bufferSize);
 
 		resource = malloc(sizeof(ShovelerResource));
 		resource->resources = resources;
@@ -85,14 +87,14 @@ bool shovelerResourcesSet(ShovelerResources *resources, const char *typeId, cons
 
 		g_hash_table_insert(resources->resources, resource->id, resource);
 	} else {
-		shovelerLogTrace("Loading previously requested resource '%s' of type '%s' (%zu bytes).", resourceId, typeId, bytes);
+		shovelerLogTrace("Loading previously requested resource '%s' of type '%s' (%d bytes).", resourceId, typeId, bufferSize);
 	}
 
 	freeResourceData(typeLoader, resource);
 
-	resource->data = typeLoader->load(typeLoader, buffer, bytes);
+	resource->data = typeLoader->load(typeLoader, buffer, bufferSize);
 	if(resource->data == NULL) {
-		shovelerLogWarning("Failed to load resource '%s' of type '%s' (%zu bytes), reverting to default resource data.", resourceId, typeId, bytes);
+		shovelerLogWarning("Failed to load resource '%s' of type '%s' (%d bytes), reverting to default resource data.", resourceId, typeId, bufferSize);
 		resource->data = typeLoader->defaultResourceData;
 		return false;
 	}
