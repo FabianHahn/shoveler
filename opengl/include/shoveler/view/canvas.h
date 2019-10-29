@@ -3,20 +3,13 @@
 
 #include <stdbool.h> // bool
 
-#include <glib.h>
-
-#include <shoveler/material/canvas.h>
-#include <shoveler/canvas.h>
-#include <shoveler/tileset.h>
+#include <shoveler/component/canvas.h>
 #include <shoveler/view.h>
 
 typedef struct {
 	size_t numTileSprites;
 	const long long int *tileSpriteEntityIds;
 } ShovelerViewCanvasConfiguration;
-
-static const char *shovelerViewCanvasComponentTypeName = "canvas";
-static const char *shovelerViewCanvasTileSpritesOptionKey = "tile_sprites";
 
 /** Adds a canvas component to an entity, copying the supplied configuration. */
 ShovelerComponent *shovelerViewEntityAddCanvas(ShovelerViewEntity *entity, const ShovelerViewCanvasConfiguration *configuration);

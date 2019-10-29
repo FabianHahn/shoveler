@@ -24,7 +24,7 @@ typedef struct {
 	ShovelerVector4 color;
 } ShovelerCanvasTextSprite;
 
-typedef struct {
+typedef struct ShovelerCanvasTileSpriteStruct {
 	ShovelerTileset *tileset;
 	unsigned char tilesetColumn;
 	unsigned char tilesetRow;

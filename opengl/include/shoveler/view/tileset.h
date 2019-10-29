@@ -3,9 +3,7 @@
 
 #include <stdbool.h> // bool
 
-#include <glib.h>
-
-#include <shoveler/tileset.h>
+#include <shoveler/component/tileset.h>
 #include <shoveler/view.h>
 
 typedef struct {
@@ -14,12 +12,6 @@ typedef struct {
 	int numRows;
 	int padding;
 } ShovelerViewTilesetConfiguration;
-
-static const char *shovelerViewTilesetComponentTypeName = "tileset";
-static const char *shovelerViewTilesetImageResourceOptionKey = "image_resource";
-static const char *shovelerViewTilesetNumColumnsOptionKey = "num_columns";
-static const char *shovelerViewTilesetNumRowsOptionKey = "num_rows";
-static const char *shovelerViewTilesetPaddingOptionKey = "padding";
 
 /** Adds a tileset component to an entity, copying the supplied configuration. */
 ShovelerComponent *shovelerViewEntityAddTileset(ShovelerViewEntity *entity, const ShovelerViewTilesetConfiguration *configuration);

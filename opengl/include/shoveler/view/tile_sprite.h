@@ -3,8 +3,7 @@
 
 #include <stdbool.h> // bool
 
-#include <glib.h>
-
+#include <shoveler/component/tile_sprite.h>
 #include <shoveler/canvas.h>
 #include <shoveler/view.h>
 #include <shoveler/types.h>
@@ -18,15 +17,6 @@ typedef struct {
 	ShovelerCoordinateMapping positionMappingY;
 	ShovelerVector2 size;
 } ShovelerViewTileSpriteConfiguration;
-
-static const char *shovelerViewTileSpriteComponentTypeName = "tile_sprite";
-static const char *shovelerViewTileSpritePositionOptionKey = "position";
-static const char *shovelerViewTileSpriteTilesetOptionKey = "tileset";
-static const char *shovelerViewTileSpriteTilesetColumnOptionKey = "tileset_column";
-static const char *shovelerViewTileSpriteTilesetRowOptionKey = "tileset_row";
-static const char *shovelerViewTileSpritePositionMappingXOptionKey = "position_mapping_x";
-static const char *shovelerViewTileSpritePositionMappingYOptionKey = "position_mapping_y";
-static const char *shovelerViewTileSpriteSizeOptionKey = "size";
 
 /** Adds a tile sprite component to an entity, copying the supplied configuration. */
 ShovelerComponent *shovelerViewEntityAddTileSprite(ShovelerViewEntity *entity, const ShovelerViewTileSpriteConfiguration *configuration);
