@@ -3,15 +3,9 @@
 
 #include <stdbool.h> // bool
 
-#include <glib.h>
-
-#include <shoveler/view.h>
+#include <shoveler/component/position.h>
 #include <shoveler/types.h>
-
-typedef void (ShovelerViewPositionRequestUpdateFunction)(ShovelerComponent *component, ShovelerVector3 coordinates, void *userData);
-
-static const char *shovelerViewPositionComponentTypeName = "position";
-static const char *shovelerViewPositionCoordinatesOptionKey = "coordinates";
+#include <shoveler/view.h>
 
 ShovelerComponent *shovelerViewEntityAddPosition(ShovelerViewEntity *entity, ShovelerVector3 coordinates);
 const ShovelerVector3 *shovelerViewEntityGetPositionCoordinates(ShovelerViewEntity *entity);
@@ -19,7 +13,7 @@ bool shovelerViewEntityRemovePosition(ShovelerViewEntity *entity);
 
 static inline ShovelerComponent *shovelerViewEntityGetPositionComponent(ShovelerViewEntity *entity)
 {
-	return shovelerViewEntityGetComponent(entity, shovelerViewPositionComponentTypeName);
+	return shovelerViewEntityGetComponent(entity, shovelerComponentTypeNamePosition);
 }
 
 #endif

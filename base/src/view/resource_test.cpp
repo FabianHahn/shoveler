@@ -105,7 +105,7 @@ TEST_F(ShovelerViewResourcesTest, updateResource)
 	ShovelerResource *resource = shovelerResourcesGet(resources, testTypeId, testResourceId);
 	nextLoadResourceData = (void *) otherTestResourceData;
 
-	bool resourceComponentUpdated = shovelerComponentUpdateCanonicalConfigurationOptionString(testComponent, shovelerViewResourceTypeIdOptionKey, testTypeId);
+	bool resourceComponentUpdated = shovelerComponentUpdateCanonicalConfigurationOptionString(testComponent, shovelerComponentResourceOptionKeyTypeId, testTypeId);
 	ASSERT_TRUE(resourceComponentUpdated);
 	ASSERT_TRUE(resource->data == otherTestResourceData) << "resource data should have changed after component update";
 }

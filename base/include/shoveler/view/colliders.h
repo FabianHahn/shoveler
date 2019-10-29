@@ -2,28 +2,17 @@
 #define SHOVELER_VIEW_COLLIDERS_H
 
 #include <stdbool.h> // bool
-#include <stddef.h> // size_t
+#include <stddef.h> // NULL
 
-#include <shoveler/collider.h>
-#include <shoveler/view.h>
+typedef struct ShovelerCollidersStruct ShovelerColliders; // forward declaration: colliders.h
+typedef struct ShovelerViewStruct ShovelerView; // forward declaration: view.h
 
-struct ShovelerCollidersStruct; // forward declaration: colliders.h
-
-static const char *shovelerViewCollidersTargetName = "colliders";
-
-static inline bool shovelerViewSetColliders(ShovelerView *view, struct ShovelerCollidersStruct *colliders)
-{
-	return shovelerViewSetTarget(view, shovelerViewCollidersTargetName, colliders);
-}
-
-static inline struct ShovelerCollidersStruct *shovelerViewGetColliders(ShovelerView *view)
-{
-	return (struct ShovelerCollidersStruct *) shovelerViewGetTarget(view, shovelerViewCollidersTargetName);
-}
+bool shovelerViewSetColliders(ShovelerView *view, ShovelerColliders *colliders);
+ShovelerColliders *shovelerViewGetColliders(ShovelerView *view);
 
 static inline bool shovelerViewHasColliders(ShovelerView *view)
 {
-	return shovelerViewGetTarget(view, shovelerViewCollidersTargetName) != NULL;
+	return shovelerViewGetColliders(view) != NULL;
 }
 
 #endif

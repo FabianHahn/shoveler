@@ -4,6 +4,7 @@
 #include <stdbool.h> // bool
 #include <stddef.h> // size_t
 
+#include <shoveler/component/resource.h>
 #include <shoveler/view.h>
 
 typedef struct {
@@ -11,10 +12,6 @@ typedef struct {
 	const unsigned char *buffer;
 	int bufferSize;
 } ShovelerViewResourceConfiguration;
-
-static const char *shovelerViewResourceComponentTypeName = "resource";
-static const char *shovelerViewResourceTypeIdOptionKey = "type_id";
-static const char *shovelerViewResourceBufferOptionKey = "buffer";
 
 ShovelerComponent *shovelerViewEntityAddResource(ShovelerViewEntity *entity, const ShovelerViewResourceConfiguration *configuration);
 void *shovelerViewEntityGetResource(ShovelerViewEntity *entity);
@@ -24,7 +21,7 @@ bool shovelerViewEntityRemoveResource(ShovelerViewEntity *entity);
 
 static inline ShovelerComponent *shovelerViewEntityGetResourceComponent(ShovelerViewEntity *entity)
 {
-	return shovelerViewEntityGetComponent(entity, shovelerViewResourceComponentTypeName);
+	return shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameResource);
 }
 
 #endif
