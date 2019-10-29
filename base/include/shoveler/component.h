@@ -171,6 +171,8 @@ void shovelerComponentDelegate(ShovelerComponent *component);
 bool shovelerComponentIsAuthoritative(ShovelerComponent *component);
 void shovelerComponentUndelegate(ShovelerComponent *component);
 void *shovelerComponentGetViewTarget(ShovelerComponent *component, const char *targetName);
+ShovelerComponent *shovelerComponentGetDependency(ShovelerComponent *component, const char *optionKey);
+ShovelerComponent *shovelerComponentGetArrayDependency(ShovelerComponent *component, const char *optionKey, int index);
 void shovelerComponentFree(ShovelerComponent *component);
 
 /**

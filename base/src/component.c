@@ -284,6 +284,64 @@ void *shovelerComponentGetViewTarget(ShovelerComponent *component, const char *t
 	return component->viewAdapter->getTarget(component, targetName, component->viewAdapter->userData);
 }
 
+ShovelerComponent *shovelerComponentGetDependency(ShovelerComponent *component, const char *optionKey)
+{
+	if(!shovelerComponentIsActive(component)) {
+		return NULL;
+	}
+
+	ShovelerComponentTypeConfigurationOption *configurationOption = g_hash_table_lookup(component->type->configurationOptions, optionKey);
+	if(configurationOption == NULL) {
+		return NULL;
+	}
+
+	if(configurationOption->dependencyComponentTypeName == NULL) {
+		return NULL;
+	}
+
+	if(configurationOption->type != SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_ENTITY_ID) {
+		return NULL;
+	}
+
+	ShovelerComponentConfigurationValue *configurationValue = g_hash_table_lookup(component->configurationValues, optionKey);
+	if(configurationValue == NULL) {
+		return NULL;
+	}
+
+	return component->viewAdapter->getComponent(component, configurationValue->entityIdValue, configurationOption->dependencyComponentTypeName, component->viewAdapter->userData);
+}
+
+ShovelerComponent *shovelerComponentGetArrayDependency(ShovelerComponent *component, const char *optionKey, int index)
+{
+	if(!shovelerComponentIsActive(component)) {
+		return NULL;
+	}
+
+	ShovelerComponentTypeConfigurationOption *configurationOption = g_hash_table_lookup(component->type->configurationOptions, optionKey);
+	if(configurationOption == NULL) {
+		return NULL;
+	}
+
+	if(configurationOption->dependencyComponentTypeName == NULL) {
+		return NULL;
+	}
+
+	if(configurationOption->type != SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_ENTITY_ID_ARRAY) {
+		return NULL;
+	}
+
+	ShovelerComponentConfigurationValue *configurationValue = g_hash_table_lookup(component->configurationValues, optionKey);
+	if(configurationValue == NULL) {
+		return NULL;
+	}
+
+	if(index >= configurationValue->entityIdArrayValue.size) {
+		return NULL;
+	}
+
+	return component->viewAdapter->getComponent(component, configurationValue->entityIdArrayValue.entityIds[index], configurationOption->dependencyComponentTypeName, component->viewAdapter->userData);
+}
+
 void shovelerComponentFree(ShovelerComponent *component)
 {
 	if(component == NULL) {
