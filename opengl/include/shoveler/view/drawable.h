@@ -5,27 +5,16 @@
 
 #include <glib.h>
 
+#include <shoveler/component/drawable.h>
 #include <shoveler/drawable.h>
 #include <shoveler/types.h>
 #include <shoveler/view.h>
 
-typedef enum {
-	SHOVELER_VIEW_DRAWABLE_TYPE_CUBE,
-	SHOVELER_VIEW_DRAWABLE_TYPE_QUAD,
-	SHOVELER_VIEW_DRAWABLE_TYPE_POINT,
-	SHOVELER_VIEW_DRAWABLE_TYPE_TILES,
-} ShovelerViewDrawableType;
-
 typedef struct {
-	ShovelerViewDrawableType type;
+	ShovelerComponentDrawableType type;
 	unsigned int tilesWidth;
 	unsigned int tilesHeight;
 } ShovelerViewDrawableConfiguration;
-
-static const char *shovelerViewDrawableComponentTypeName = "drawable";
-static const char *shovelerViewDrawableTypeOptionKey = "type";
-static const char *shovelerViewDrawableTilesWidthOptionKey = "tiles_width";
-static const char *shovelerViewDrawableTilesHeightOptionKey = "tiles_height";
 
 /** Adds a drawable component to an entity, copying the supplied configuration. */
 ShovelerComponent *shovelerViewEntityAddDrawable(ShovelerViewEntity *entity, const ShovelerViewDrawableConfiguration *configuration);

@@ -3,6 +3,7 @@
 
 #include <stdbool.h> // bool
 
+#include <shoveler/component/chunk_layer.h>
 #include <shoveler/chunk.h>
 #include <shoveler/component.h>
 #include <shoveler/view.h>
@@ -13,11 +14,6 @@ typedef struct {
 	long long int canvasEntityId;
 	long long int tilemapEntityId;
 } ShovelerViewChunkLayerConfiguration;
-
-static const char *shovelerViewChunkLayerComponentTypeName = "chunk_layer";
-static const char *shovelerViewChunkLayerTypeOptionKey = "type";
-static const char *shovelerViewChunkLayerCanvasOptionKey = "canvas";
-static const char *shovelerViewChunkLayerTilemapOptionKey = "tilemap";
 
 /** Adds a chunk layer component to an entity, copying the supplied configuration. */
 ShovelerComponent *shovelerViewEntityAddChunkLayer(ShovelerViewEntity *entity, const ShovelerViewChunkLayerConfiguration *configuration);

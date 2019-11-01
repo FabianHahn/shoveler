@@ -5,7 +5,7 @@
 
 #include <glib.h>
 
-#include <shoveler/material/chunk.h>
+#include <shoveler/component/chunk.h>
 #include <shoveler/chunk.h>
 #include <shoveler/tileset.h>
 #include <shoveler/view.h>
@@ -19,13 +19,6 @@ typedef struct {
 	int numLayers;
 	const long long int *layerEntityIds;
 } ShovelerViewChunkConfiguration;
-
-static const char *shovelerViewChunkComponentTypeName = "chunk";
-static const char *shovelerViewChunkPositionOptionKey = "position";
-static const char *shovelerViewChunkPositionMappingXOptionKey = "position_mapping_x";
-static const char *shovelerViewChunkPositionMappingYOptionKey = "position_mapping_y";
-static const char *shovelerViewChunkSizeOptionKey = "size";
-static const char *shovelerViewChunkLayersOptionKey = "layers";
 
 /** Adds a chunk component to an entity, copying the supplied configuration. */
 ShovelerComponent *shovelerViewEntityAddChunk(ShovelerViewEntity *entity, const ShovelerViewChunkConfiguration *configuration);

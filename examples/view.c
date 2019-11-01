@@ -83,12 +83,12 @@ int main(int argc, char *argv[])
 	shovelerViewSetResources(game->view, resources);
 
 	ShovelerViewDrawableConfiguration cubeDrawableConfiguration;
-	cubeDrawableConfiguration.type = SHOVELER_VIEW_DRAWABLE_TYPE_CUBE;
+	cubeDrawableConfiguration.type = SHOVELER_COMPONENT_DRAWABLE_TYPE_CUBE;
 	ShovelerViewEntity *cubeDrawableEntity = shovelerViewAddEntity(game->view, 1);
 	shovelerViewEntityAddDrawable(cubeDrawableEntity, &cubeDrawableConfiguration);
 
 	ShovelerViewMaterialConfiguration grayColorMaterialConfiguration;
-	grayColorMaterialConfiguration.type = SHOVELER_VIEW_MATERIAL_TYPE_COLOR;
+	grayColorMaterialConfiguration.type = SHOVELER_COMPONENT_MATERIAL_TYPE_COLOR;
 	grayColorMaterialConfiguration.color = shovelerVector3(0.7, 0.7, 0.7);
 	ShovelerViewEntity *grayColorMaterialEntity = shovelerViewAddEntity(game->view, 2);
 	shovelerViewEntityAddMaterial(grayColorMaterialEntity, &grayColorMaterialConfiguration);
@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
 	shovelerViewEntityAddPosition(cubeEntity, shovelerVector3(0.0, 0.0, 5.0));
 
 	ShovelerViewDrawableConfiguration quadDrawableConfiguration;
-	quadDrawableConfiguration.type = SHOVELER_VIEW_DRAWABLE_TYPE_QUAD;
+	quadDrawableConfiguration.type = SHOVELER_COMPONENT_DRAWABLE_TYPE_QUAD;
 	ShovelerViewModelConfiguration planeModelConfiguration;
 	planeModelConfiguration.positionEntityId = 4;
 	planeModelConfiguration.drawableEntityId = 4;
@@ -125,9 +125,9 @@ int main(int argc, char *argv[])
 	shovelerViewEntityAddPosition(planeEntity, shovelerVector3(0.0, 0.0, 10.0));
 
 	ShovelerViewDrawableConfiguration pointDrawableConfiguration;
-	pointDrawableConfiguration.type = SHOVELER_VIEW_DRAWABLE_TYPE_POINT;
+	pointDrawableConfiguration.type = SHOVELER_COMPONENT_DRAWABLE_TYPE_POINT;
 	ShovelerViewMaterialConfiguration whiteParticleMaterialConfiguration;
-	whiteParticleMaterialConfiguration.type = SHOVELER_VIEW_MATERIAL_TYPE_PARTICLE;
+	whiteParticleMaterialConfiguration.type = SHOVELER_COMPONENT_MATERIAL_TYPE_PARTICLE;
 	whiteParticleMaterialConfiguration.color = shovelerVector3(1.0, 1.0, 1.0);
 	ShovelerViewModelConfiguration lightModelConfiguration;
 	lightModelConfiguration.positionEntityId = 5;
@@ -185,7 +185,7 @@ int main(int argc, char *argv[])
 	g_string_free(imageData, true);
 
 	ShovelerViewMaterialConfiguration textureMaterialConfiguration;
-	textureMaterialConfiguration.type = SHOVELER_VIEW_MATERIAL_TYPE_TEXTURE;
+	textureMaterialConfiguration.type = SHOVELER_COMPONENT_MATERIAL_TYPE_TEXTURE;
 	textureMaterialConfiguration.textureEntityId = 6;
 	textureMaterialConfiguration.textureSamplerEntityId = 6;
 	ShovelerViewEntity *textureMaterialEntity = shovelerViewAddEntity(game->view, 7);
@@ -357,7 +357,7 @@ int main(int argc, char *argv[])
 	tilemapMaterialModelConfiguration.castsShadow = true;
 	tilemapMaterialModelConfiguration.polygonMode = GL_FILL;
 	ShovelerViewMaterialConfiguration tilemapMaterialConfiguration;
-	tilemapMaterialConfiguration.type = SHOVELER_VIEW_MATERIAL_TYPE_TILEMAP;
+	tilemapMaterialConfiguration.type = SHOVELER_COMPONENT_MATERIAL_TYPE_TILEMAP;
 	tilemapMaterialConfiguration.tilemapEntityId = 12;
 	ShovelerViewEntity *tilemapMaterialEntity = shovelerViewAddEntity(game->view, 20);
 	shovelerViewEntitySetType(tilemapMaterialEntity, "tilemap");
@@ -376,7 +376,7 @@ int main(int argc, char *argv[])
 	canvasMaterialModelConfiguration.castsShadow = true;
 	canvasMaterialModelConfiguration.polygonMode = GL_FILL;
 	ShovelerViewMaterialConfiguration canvasMaterialConfiguration;
-	canvasMaterialConfiguration.type = SHOVELER_VIEW_MATERIAL_TYPE_CANVAS;
+	canvasMaterialConfiguration.type = SHOVELER_COMPONENT_MATERIAL_TYPE_CANVAS;
 	canvasMaterialConfiguration.canvasRegionPosition = shovelerVector2(5.0f, 5.0f);
 	canvasMaterialConfiguration.canvasRegionSize = shovelerVector2(10.0f, 10.0f);
 	canvasMaterialConfiguration.canvasEntityId = 15;
@@ -397,7 +397,7 @@ int main(int argc, char *argv[])
 	chunkMaterialModelConfiguration.castsShadow = true;
 	chunkMaterialModelConfiguration.polygonMode = GL_FILL;
 	ShovelerViewMaterialConfiguration chunkMaterialConfiguration;
-	chunkMaterialConfiguration.type = SHOVELER_VIEW_MATERIAL_TYPE_CHUNK;
+	chunkMaterialConfiguration.type = SHOVELER_COMPONENT_MATERIAL_TYPE_CHUNK;
 	chunkMaterialConfiguration.chunkEntityId = 19;
 	ShovelerViewEntity *chunkMaterialEntity = shovelerViewAddEntity(game->view, 22);
 	shovelerViewEntitySetType(chunkMaterialEntity, "chunk");

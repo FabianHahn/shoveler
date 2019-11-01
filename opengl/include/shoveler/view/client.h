@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 
+#include <shoveler/component/client.h>
 #include <shoveler/view.h>
 
 typedef struct {
@@ -11,10 +12,6 @@ typedef struct {
 	/** Optional: If nonzero, depends on the model component and disables its visibility. */
 	long long int modelEntityId;
 } ShovelerViewClientConfiguration;
-
-static const char *shovelerViewClientComponentTypeName = "client";
-static const char *shovelerViewClientPositionOptionKey = "position";
-static const char *shovelerViewClientModelOptionKey = "model";
 
 /** Adds a client component to an entity, copying the supplied configuration. */
 ShovelerComponent *shovelerViewEntityAddClient(ShovelerViewEntity *entity, const ShovelerViewClientConfiguration *configuration);

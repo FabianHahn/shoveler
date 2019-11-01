@@ -5,7 +5,7 @@
 
 #include <glib.h>
 
-#include <shoveler/material/tilemap.h>
+#include <shoveler/component/tilemap.h>
 #include <shoveler/tilemap.h>
 #include <shoveler/tileset.h>
 #include <shoveler/view.h>
@@ -16,11 +16,6 @@ typedef struct {
 	int numTilesets;
 	const long long int *tilesetEntityIds;
 } ShovelerViewTilemapConfiguration;
-
-static const char *shovelerViewTilemapComponentTypeName = "tilemap";
-static const char *shovelerViewTilemapTilesOptionKey = "tiles";
-static const char *shovelerViewTilemapCollidersOptionKey = "colliders";
-static const char *shovelerViewTilemapTilesetsOptionKey = "tilesets";
 
 /** Adds a tilemap component to an entity, copying the supplied configuration. */
 ShovelerComponent *shovelerViewEntityAddTilemap(ShovelerViewEntity *entity, const ShovelerViewTilemapConfiguration *configuration);

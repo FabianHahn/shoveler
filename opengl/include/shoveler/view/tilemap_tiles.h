@@ -5,6 +5,7 @@
 
 #include <glib.h>
 
+#include <shoveler/component/tilemap_tiles.h>
 #include <shoveler/texture.h>
 #include <shoveler/view.h>
 
@@ -24,14 +25,6 @@ typedef struct {
 	/** Array of tileset id bytes, where tile (column, row) is at position [row * numColumns + column] */
 	const unsigned char *tilesetIds;
 } ShovelerViewTilemapTilesConfiguration;
-
-static const char *shovelerViewTilemapTilesComponentTypeName = "tilemap_tiles";
-static const char *shovelerViewTilemapTilesImageResourceOptionKey = "image_resource";
-static const char *shovelerViewTilemapTilesNumColumnsOptionKey = "num_columns";
-static const char *shovelerViewTilemapTilesNumRowsOptionKey = "num_rows";
-static const char *shovelerViewTilemapTilesTilesetColumnsOptionKey = "tileset_columns";
-static const char *shovelerViewTilemapTilesTilesetRowsOptionKey = "tileset_rows";
-static const char *shovelerViewTilemapTilesTilesetIdsOptionKey = "tileset_ids";
 
 /** Adds a tilemap tiles component to an entity, copying the supplied configuration. */
 ShovelerComponent *shovelerViewEntityAddTilemapTiles(ShovelerViewEntity *entity, const ShovelerViewTilemapTilesConfiguration *configuration);

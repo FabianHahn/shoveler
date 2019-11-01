@@ -6,17 +6,10 @@
 #include "shoveler/log.h"
 #include "shoveler/view.h"
 
-static void *activateSamplerComponent(ShovelerComponent *component);
-static void deactivateSamplerComponent(ShovelerComponent *component);
-
 bool shovelerViewEntityAddSampler(ShovelerViewEntity *entity, const ShovelerViewSamplerConfiguration *configuration)
 {
 	if(!shovelerViewHasComponentType(entity->view, shovelerViewSamplerComponentTypeName)) {
-		ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerViewSamplerComponentTypeName, activateSamplerComponent, deactivateSamplerComponent, /* requiresAuthority */ false);
-		shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewSamplerInterpolateOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BOOL, /* isOptional */ false, /* liveUpdate */ NULL);
-		shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewSamplerUseMipmapsOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BOOL, /* isOptional */ false, /* liveUpdate */ NULL);
-		shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewSamplerClampOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BOOL, /* isOptional */ false, /* liveUpdate */ NULL);
-		shovelerViewAddComponentType(entity->view, componentType);
+		shovelerViewAddComponentType(entity->view, shovelerComponentCreateSamplerType());
 	}
 
 	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerViewSamplerComponentTypeName);
@@ -74,21 +67,4 @@ bool shovelerViewEntityRemoveSampler(ShovelerViewEntity *entity)
 	}
 
 	return shovelerViewEntityRemoveComponent(entity, shovelerViewSamplerComponentTypeName);
-}
-
-static void  *activateSamplerComponent(ShovelerComponent *component)
-{
-	bool interpolate = shovelerComponentGetConfigurationValueBool(component, shovelerViewSamplerInterpolateOptionKey);
-	bool useMipmaps = shovelerComponentGetConfigurationValueBool(component, shovelerViewSamplerUseMipmapsOptionKey);
-	bool clamp = shovelerComponentGetConfigurationValueBool(component, shovelerViewSamplerClampOptionKey);
-
-	ShovelerSampler *sampler = shovelerSamplerCreate(interpolate, useMipmaps, clamp);
-	return sampler;
-}
-
-static void deactivateSamplerComponent(ShovelerComponent *component)
-{
-	ShovelerSampler *sampler = (ShovelerSampler *) component->data;
-
-	shovelerSamplerFree(sampler);
 }

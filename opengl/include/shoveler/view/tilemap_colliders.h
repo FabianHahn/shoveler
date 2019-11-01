@@ -5,6 +5,7 @@
 
 #include <glib.h>
 
+#include <shoveler/component/tilemap_colliders.h>
 #include <shoveler/texture.h>
 #include <shoveler/view.h>
 
@@ -14,11 +15,6 @@ typedef struct {
 	/** Array of collider boolean bytes, where tile (column, row) is at position [row * numColumns + column] */
 	const unsigned char *colliders;
 } ShovelerViewTilemapCollidersConfiguration;
-
-static const char *shovelerViewTilemapCollidersComponentTypeName = "tilemap_colliders";
-static const char *shovelerViewTilemapCollidersNumColumnsOptionKey = "num_columns";
-static const char *shovelerViewTilemapCollidersNumRowsOptionKey = "num_rows";
-static const char *shovelerViewTilemapCollidersCollidersOptionKey = "colliders";
 
 /** Adds a tilemap colliders component to an entity, copying the supplied configuration. */
 ShovelerComponent *shovelerViewEntityAddTilemapColliders(ShovelerViewEntity *entity, const ShovelerViewTilemapCollidersConfiguration *configuration);
