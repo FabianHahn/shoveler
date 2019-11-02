@@ -19,6 +19,8 @@ ShovelerComponentType *shovelerComponentCreateTilemapType()
 	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerViewTilemapTilesOptionKey, shovelerViewTilemapTilesComponentTypeName, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
 	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerViewTilemapCollidersOptionKey, shovelerViewTilemapCollidersComponentTypeName, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
 	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerViewTilemapTilesetsOptionKey, shovelerViewTilesetComponentTypeName, /* isArray */ true, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+
+	return componentType;
 }
 
 ShovelerTilemap *shovelerComponentGetTilemap(ShovelerComponent *component)

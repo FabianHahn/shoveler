@@ -286,10 +286,6 @@ void *shovelerComponentGetViewTarget(ShovelerComponent *component, const char *t
 
 ShovelerComponent *shovelerComponentGetDependency(ShovelerComponent *component, const char *optionKey)
 {
-	if(!shovelerComponentIsActive(component)) {
-		return NULL;
-	}
-
 	ShovelerComponentTypeConfigurationOption *configurationOption = g_hash_table_lookup(component->type->configurationOptions, optionKey);
 	if(configurationOption == NULL) {
 		return NULL;
@@ -313,10 +309,6 @@ ShovelerComponent *shovelerComponentGetDependency(ShovelerComponent *component, 
 
 ShovelerComponent *shovelerComponentGetArrayDependency(ShovelerComponent *component, const char *optionKey, int index)
 {
-	if(!shovelerComponentIsActive(component)) {
-		return NULL;
-	}
-
 	ShovelerComponentTypeConfigurationOption *configurationOption = g_hash_table_lookup(component->type->configurationOptions, optionKey);
 	if(configurationOption == NULL) {
 		return NULL;

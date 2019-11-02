@@ -18,6 +18,7 @@
 #include <shoveler/view/material.h>
 #include <shoveler/view/model.h>
 #include <shoveler/view/position.h>
+#include <shoveler/view/resource.h>
 #include <shoveler/view/resources.h>
 #include <shoveler/view/sampler.h>
 #include <shoveler/view/texture.h>
@@ -141,7 +142,7 @@ int main(int argc, char *argv[])
 	lightModelConfiguration.polygonMode = GL_FILL;
 	ShovelerViewLightConfiguration lightConfiguration;
 	lightConfiguration.positionEntityId = 5;
-	lightConfiguration.type = SHOVELER_VIEW_LIGHT_TYPE_POINT;
+	lightConfiguration.type = SHOVELER_COMPONENT_LIGHT_TYPE_POINT;
 	lightConfiguration.width = 512;
 	lightConfiguration.height = 512;
 	lightConfiguration.samples = 1;
@@ -412,7 +413,7 @@ int main(int argc, char *argv[])
 	shovelerViewEntitySetType(clientEntity, "client");
 	shovelerViewEntityAddPosition(clientEntity, shovelerVector3(0.0, 0.0, 0.0));
 	shovelerViewEntityAddClient(clientEntity, &clientConfiguration);
-	shovelerViewEntityDelegate(clientEntity, shovelerViewPositionComponentTypeName);
+	shovelerViewEntityDelegate(clientEntity, shovelerComponentTypeNamePosition);
 	shovelerViewEntityDelegate(clientEntity, shovelerViewClientComponentTypeName);
 
 	shovelerOpenGLCheckSuccess();
@@ -453,11 +454,11 @@ static void updateGame(ShovelerGame *game, double dt)
 	time += dt;
 	ShovelerViewEntity *lightEntity = shovelerViewGetEntity(game->view, 5);
 	ShovelerComponent *lightPositionComponent = shovelerViewEntityGetPositionComponent(lightEntity);
-	shovelerComponentUpdateCanonicalConfigurationOptionVector3(lightPositionComponent, shovelerViewPositionCoordinatesOptionKey, shovelerVector3(2.0 * sin(time), 2.0 * cos(time), 0.0));
+	shovelerComponentUpdateCanonicalConfigurationOptionVector3(lightPositionComponent, shovelerComponentPositionOptionKeyCoordinates, shovelerVector3(2.0 * sin(time), 2.0 * cos(time), 0.0));
 
 	ShovelerViewEntity *tileSpriteEntity = shovelerViewGetEntity(game->view, 14);
 	ShovelerComponent *tileSpritePositionComponent = shovelerViewEntityGetPositionComponent(tileSpriteEntity);
-	shovelerComponentUpdateCanonicalConfigurationOptionVector3(tileSpritePositionComponent, shovelerViewPositionCoordinatesOptionKey, shovelerVector3(3.0 + 2.0 * sin(time), 4.0 + 2.0 * cos(time), 0.0));
+	shovelerComponentUpdateCanonicalConfigurationOptionVector3(tileSpritePositionComponent, shovelerComponentPositionOptionKeyCoordinates, shovelerVector3(3.0 + 2.0 * sin(time), 4.0 + 2.0 * cos(time), 0.0));
 
 	ShovelerViewEntity *tilemapEntity = shovelerViewGetEntity(game->view, 8);
 	ShovelerComponent *tilemapComponent = shovelerViewEntityGetTilemapTilesComponent(tilemapEntity);

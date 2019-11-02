@@ -5,7 +5,7 @@
 
 #include <glib.h>
 
-#include <shoveler/tile_sprite_animation.h>
+#include <shoveler/component/tile_sprite_animation.h>
 #include <shoveler/view.h>
 #include <shoveler/types.h>
 
@@ -16,13 +16,6 @@ typedef struct {
 	ShovelerCoordinateMapping positionMappingY;
 	float moveAmountThreshold;
 } ShovelerViewTileSpriteAnimationConfiguration;
-
-static const char *shovelerViewTileSpriteAnimationComponentTypeName = "tile_sprite_animation";
-static const char *shovelerViewTileSpriteAnimationPositionOptionKey = "position";
-static const char *shovelerViewTileSpriteAnimationTileSpriteOptionKey = "tile_sprite";
-static const char *shovelerViewTileSpriteAnimationPositionMappingXOptionKey = "position_mapping_x";
-static const char *shovelerViewTileSpriteAnimationPositionMappingYOptionKey = "position_mapping_y";
-static const char *shovelerViewTileSpriteAnimationMoveAmountThresholdOptionKey = "move_amount_threshold";
 
 /** Adds a canvas tile sprite animation component to an entity, copying the supplied configuration. */
 ShovelerComponent *shovelerViewEntityAddTileSpriteAnimation(ShovelerViewEntity *entity, const ShovelerViewTileSpriteAnimationConfiguration *configuration);

@@ -23,6 +23,8 @@ ShovelerComponentType *shovelerComponentCreateTileSpriteType()
 	shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewTileSpritePositionMappingXOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
 	shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewTileSpritePositionMappingYOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
 	shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewTileSpriteSizeOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_VECTOR2, /* isOptional */ false, /* liveUpdate */ NULL);
+
+	return componentType;
 }
 
 ShovelerCanvasTileSprite *shovelerComponentGetTileSprite(ShovelerComponent *component)

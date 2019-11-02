@@ -11,6 +11,7 @@ set(SHOVELER_OPENGL_SRC
 	src/component/client.c
 	src/component/controller.c
 	src/component/drawable.c
+	src/component/light.c
 	src/component/material.c
 	src/component/model.c
 	src/component/sampler.c
@@ -18,6 +19,7 @@ set(SHOVELER_OPENGL_SRC
 	src/component/shader_cache.c
 	src/component/texture.c
 	src/component/tile_sprite.c
+	src/component/tile_sprite_animation.c
 	src/component/tilemap_colliders.c
 	src/component/tilemap_tiles.c
 	src/component/tilemap.c
@@ -94,6 +96,7 @@ set(SHOVELER_OPENGL_SRC
 	include/shoveler/component/client.h
 	include/shoveler/component/controller.h
 	include/shoveler/component/drawable.h
+	include/shoveler/component/light.h
 	include/shoveler/component/material.h
 	include/shoveler/component/model.h
 	include/shoveler/component/sampler.h
@@ -101,6 +104,7 @@ set(SHOVELER_OPENGL_SRC
 	include/shoveler/component/shader_cache.h
 	include/shoveler/component/texture.h
 	include/shoveler/component/tile_sprite.h
+	include/shoveler/component/tile_sprite_animation.h
 	include/shoveler/component/tilemap_colliders.h
 	include/shoveler/component/tilemap_tiles.h
 	include/shoveler/component/tilemap.h

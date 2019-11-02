@@ -10,21 +10,10 @@
 #include "shoveler/types.h"
 #include "shoveler/view.h"
 
-static void *activateTileSpriteAnimationComponent(ShovelerComponent *component);
-static void deactivateTileSpriteAnimationComponent(ShovelerComponent *component);
-static void updateTileSpriteAnimationPositionDependency(ShovelerComponent *component, ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent);
-static ShovelerVector2 getTileSpriteAnimationPosition(ShovelerComponent *component);
-
 ShovelerComponent *shovelerViewEntityAddTileSpriteAnimation(ShovelerViewEntity *entity, const ShovelerViewTileSpriteAnimationConfiguration *configuration)
 {
 	if(!shovelerViewHasComponentType(entity->view, shovelerViewTileSpriteAnimationComponentTypeName)) {
-		ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerViewTileSpriteAnimationComponentTypeName, activateTileSpriteAnimationComponent, deactivateTileSpriteAnimationComponent, /* requiresAuthority */ false);
-		shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerViewTileSpriteAnimationPositionOptionKey, shovelerViewPositionComponentTypeName, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, updateTileSpriteAnimationPositionDependency);
-		shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerViewTileSpriteAnimationTileSpriteOptionKey, shovelerViewTileSpriteComponentTypeName, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
-		shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewTileSpriteAnimationPositionMappingXOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
-		shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewTileSpriteAnimationPositionMappingYOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
-		shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewTileSpriteAnimationMoveAmountThresholdOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_FLOAT, /* isOptional */ false, /* liveUpdate */ NULL);
-		shovelerViewAddComponentType(entity->view, componentType);
+		shovelerViewAddComponentType(entity->view, shovelerComponentCreateTileSpriteAnimationType());
 	}
 
 	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerViewTileSpriteAnimationComponentTypeName);
@@ -88,53 +77,4 @@ bool shovelerViewEntityRemoveTileSpriteAnimation(ShovelerViewEntity *entity)
 	}
 
 	return shovelerViewEntityRemoveComponent(entity, shovelerViewTileSpriteAnimationComponentTypeName);
-}
-
-static void *activateTileSpriteAnimationComponent(ShovelerComponent *component)
-{
-	long long int tileSpriteEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerViewTileSpriteAnimationTileSpriteOptionKey);
-	ShovelerViewEntity *tileSpriteEntity = shovelerViewGetEntity(component->entity->view, tileSpriteEntityId);
-	assert(tileSpriteEntity != NULL);
-	ShovelerCanvasTileSprite *tileSprite = shovelerViewEntityGetTileSprite(tileSpriteEntity);
-	assert(tileSprite != NULL);
-
-	if(tileSprite->tileset->columns < 4 || tileSprite->tileset->rows < 3) {
-		shovelerLogWarning("Failed to activate tile sprite animation of entity %lld because the tileset of dependency tile sprite on entity %lld doesn't have enough columns and rows.", component->entity->entityId, tileSpriteEntityId);
-		return false;
-	}
-
-	float moveAmountThreshold = shovelerComponentGetConfigurationValueFloat(component, shovelerViewTileSpriteAnimationMoveAmountThresholdOptionKey);
-	ShovelerTileSpriteAnimation *animation = shovelerTileSpriteAnimationCreate(tileSprite, getTileSpriteAnimationPosition(component), moveAmountThreshold);
-	return animation;
-}
-
-static void deactivateTileSpriteAnimationComponent(ShovelerComponent *component)
-{
-	ShovelerTileSpriteAnimation *animation = (ShovelerTileSpriteAnimation *) component->data;
-
-	shovelerTileSpriteAnimationFree(animation);
-}
-
-static void updateTileSpriteAnimationPositionDependency(ShovelerComponent *component, ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent)
-{
-	ShovelerTileSpriteAnimation *animation = (ShovelerTileSpriteAnimation *) component->data;
-	assert(animation != NULL);
-
-	shovelerTileSpriteAnimationUpdate(animation, getTileSpriteAnimationPosition(component));
-}
-
-static ShovelerVector2 getTileSpriteAnimationPosition(ShovelerComponent *component)
-{
-	long long int positionEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerViewTileSpriteAnimationPositionOptionKey);
-	ShovelerViewEntity *positionEntity = shovelerViewGetEntity(component->entity->view, positionEntityId);
-	assert(positionEntity != NULL);
-	const ShovelerVector3 *positionCoordinates = shovelerViewEntityGetPositionCoordinates(positionEntity);
-	assert(positionCoordinates != NULL);
-
-	ShovelerCoordinateMapping positionMappingX = shovelerComponentGetConfigurationValueInt(component, shovelerViewTileSpriteAnimationPositionMappingXOptionKey);
-	ShovelerCoordinateMapping positionMappingY = shovelerComponentGetConfigurationValueInt(component, shovelerViewTileSpriteAnimationPositionMappingYOptionKey);
-
-	return shovelerVector2(
-		shovelerCoordinateMap(*positionCoordinates, positionMappingX),
-		shovelerCoordinateMap(*positionCoordinates, positionMappingY));
 }

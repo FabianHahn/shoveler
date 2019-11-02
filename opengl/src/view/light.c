@@ -13,28 +13,10 @@
 #include "shoveler/scene.h"
 #include "shoveler/view.h"
 
-typedef struct {
-	ShovelerLight *light;
-	ShovelerViewComponentCallback *positionCallback;
-} LightComponentData;
-
-static void *activateLightComponent(ShovelerComponent *component);
-static void deactivateLightComponent(ShovelerComponent *component);
-static void updateLightPositionDependency(ShovelerComponent *component, ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent);
-
 ShovelerComponent *shovelerViewEntityAddLight(ShovelerViewEntity *entity, const ShovelerViewLightConfiguration *configuration)
 {
 	if(!shovelerViewHasComponentType(entity->view, shovelerViewLightComponentTypeName)) {
-		ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerViewLightComponentTypeName, activateLightComponent, deactivateLightComponent, /* requiresAuthority */ false);
-		shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerViewLightPositionOptionKey, shovelerViewPositionComponentTypeName, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, updateLightPositionDependency);
-		shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewLightTypeOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
-		shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewLightWidthOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
-		shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewLightHeightOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
-		shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewLightSamplesOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
-		shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewLightAmbientFactorOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_FLOAT, /* isOptional */ false, /* liveUpdate */ NULL);
-		shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewLightExponentialFactorOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_FLOAT, /* isOptional */ false, /* liveUpdate */ NULL);
-		shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewLightColorOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_VECTOR3, /* isOptional */ false, /* liveUpdate */ NULL);
-		shovelerViewAddComponentType(entity->view, componentType);
+		shovelerViewAddComponentType(entity->view, shovelerComponentCreateLightType());
 	}
 
 	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerViewLightComponentTypeName);
@@ -109,70 +91,4 @@ bool shovelerViewEntityRemoveLight(ShovelerViewEntity *entity)
 	}
 
 	return shovelerViewEntityRemoveComponent(entity, shovelerViewLightComponentTypeName);
-}
-
-static void *activateLightComponent(ShovelerComponent *component)
-{
-	assert(shovelerViewHasScene(component->entity->view));
-	assert(shovelerViewHasShaderCache(component->entity->view));
-
-	long long int positionEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerViewLightPositionOptionKey);
-	ShovelerViewEntity *positionEntity = shovelerViewGetEntity(component->entity->view, positionEntityId);
-	assert(positionEntity != NULL);
-	const ShovelerVector3 *positionCoordinates = shovelerViewEntityGetPositionCoordinates(positionEntity);
-	assert(positionCoordinates != NULL);
-
-	ShovelerViewLightType type = shovelerComponentGetConfigurationValueInt(component, shovelerViewLightTypeOptionKey);
-	ShovelerLight *light;
-	switch(type) {
-		case SHOVELER_VIEW_LIGHT_TYPE_SPOT:
-			shovelerLogWarning("Trying to create light with unsupported spot type, ignoring.");
-			return NULL;
-		case SHOVELER_VIEW_LIGHT_TYPE_POINT: {
-			ShovelerShaderCache *shaderCache = shovelerViewGetShaderCache(component->entity->view);
-
-			int width = shovelerComponentGetConfigurationValueInt(component, shovelerViewLightWidthOptionKey);
-			int height = shovelerComponentGetConfigurationValueInt(component, shovelerViewLightHeightOptionKey);
-			int samples = shovelerComponentGetConfigurationValueInt(component, shovelerViewLightSamplesOptionKey);
-			float ambientFactor = shovelerComponentGetConfigurationValueFloat(component, shovelerViewLightAmbientFactorOptionKey);
-			float exponentialFactor = shovelerComponentGetConfigurationValueFloat(component, shovelerViewLightExponentialFactorOptionKey);
-			ShovelerVector3 color = shovelerComponentGetConfigurationValueVector3(component, shovelerViewLightColorOptionKey);
-
-			light = shovelerLightPointCreate(shaderCache, *positionCoordinates, width, height, samples, ambientFactor, exponentialFactor, color);
-		} break;
-		default:
-			shovelerLogWarning("Trying to create light with unknown light type %d, ignoring.", type);
-			return NULL;
-	}
-
-	ShovelerScene *scene = shovelerViewGetScene(component->entity->view);
-	shovelerSceneAddLight(scene, light);
-	return light;
-}
-
-static void deactivateLightComponent(ShovelerComponent *component)
-{
-	assert(shovelerViewHasScene(component->entity->view));
-	assert(shovelerViewHasShaderCache(component->entity->view));
-
-	ShovelerLight *light = (ShovelerLight *) component->data;
-
-	ShovelerShaderCache *shaderCache = shovelerViewGetShaderCache(component->entity->view);
-	shovelerShaderCacheInvalidateLight(shaderCache, light);
-
-	ShovelerScene *scene = shovelerViewGetScene(component->entity->view);
-	shovelerSceneRemoveLight(scene, light);
-}
-
-static void updateLightPositionDependency(ShovelerComponent *component, ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent)
-{
-	ShovelerLight *light = (ShovelerLight *) component->data;
-
-	long long int positionEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerViewLightPositionOptionKey);
-	ShovelerViewEntity *positionEntity = shovelerViewGetEntity(component->entity->view, positionEntityId);
-	assert(positionEntity != NULL);
-	const ShovelerVector3 *positionCoordinates = shovelerViewEntityGetPositionCoordinates(positionEntity);
-	assert(positionCoordinates != NULL);
-
-	shovelerLightUpdatePosition(light, *positionCoordinates);
 }

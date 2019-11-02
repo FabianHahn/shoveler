@@ -1,7 +1,7 @@
 #ifndef SHOVELER_COMPONENT_TILE_SPRITE_H
 #define SHOVELER_COMPONENT_TILE_SPRITE_H
 
-typedef struct ShovelerCanvasTileSpriteStruct ShovelerCanvasTileSprite; // forward declaration: canvas.h
+typedef struct ShovelerCanvasTileSpriteStruct ShovelerCanvasTileSprite; // forward declaration: tile_sprite.h
 typedef struct ShovelerComponentTypeStruct ShovelerComponentType; // forward declaration: component.h
 typedef struct ShovelerComponentStruct ShovelerComponent; // forward declaration: component.h
 
