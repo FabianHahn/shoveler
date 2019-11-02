@@ -17,19 +17,19 @@ static ShovelerVector2 getChunkPosition(ShovelerComponent *component);
 
 ShovelerComponentType *shovelerComponentCreateChunkType()
 {
-	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerViewChunkComponentTypeName, activateChunkComponent, deactivateChunkComponent, /* requiresAuthority */ false);
-	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerViewChunkPositionOptionKey, shovelerComponentTypeNamePosition, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, updateChunkPositionDependency);
-	shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewChunkPositionMappingXOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
-	shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewChunkPositionMappingYOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
-	shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewChunkSizeOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_VECTOR2, /* isOptional */ false, /* liveUpdate */ NULL);
-	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerViewChunkLayersOptionKey, shovelerViewChunkLayerComponentTypeName, /* isArray */ true, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerComponentTypeNameChunk, activateChunkComponent, deactivateChunkComponent, /* requiresAuthority */ false);
+	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentChunkOptionKeyPosition, shovelerComponentTypeNamePosition, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, updateChunkPositionDependency);
+	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentChunkOptionKeyPositionMappingX, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
+	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentChunkOptionKeyPositionMappingY, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
+	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentChunkOptionKeySize, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_VECTOR2, /* isOptional */ false, /* liveUpdate */ NULL);
+	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentChunkOptionKeyLayers, shovelerComponentTypeNameChunkLayer, /* isArray */ true, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
 
 	return componentType;
 }
 
 ShovelerChunk *shovelerComponentGetChunk(ShovelerComponent *component)
 {
-	assert(strcmp(component->type->name, shovelerViewChunkComponentTypeName) == 0);
+	assert(strcmp(component->type->name, shovelerComponentTypeNameChunk) == 0);
 
 	return component->data;
 }
@@ -37,20 +37,20 @@ ShovelerChunk *shovelerComponentGetChunk(ShovelerComponent *component)
 static void *activateChunkComponent(ShovelerComponent *component)
 {
 	ShovelerVector2 chunkPosition = getChunkPosition(component);
-	ShovelerVector2 size = shovelerComponentGetConfigurationValueVector2(component, shovelerViewChunkSizeOptionKey);
+	ShovelerVector2 size = shovelerComponentGetConfigurationValueVector2(component, shovelerComponentChunkOptionKeySize);
 	ShovelerChunk *chunk = shovelerChunkCreate(chunkPosition, size);
 
-	const ShovelerComponentConfigurationValue *layersValue = shovelerComponentGetConfigurationValue(component, shovelerViewChunkLayersOptionKey);
+	const ShovelerComponentConfigurationValue *layersValue = shovelerComponentGetConfigurationValue(component, shovelerComponentChunkOptionKeyLayers);
 	assert(layersValue != NULL);
 
 	for(int i = 0; i < layersValue->entityIdArrayValue.size; i++) {
-		ShovelerComponent *layerComponent = shovelerComponentGetArrayDependency(component, shovelerViewChunkLayersOptionKey, i);
+		ShovelerComponent *layerComponent = shovelerComponentGetArrayDependency(component, shovelerComponentChunkOptionKeyLayers, i);
 		assert(layerComponent != NULL);
 
-		ShovelerChunkLayerType layerType = shovelerComponentGetConfigurationValueInt(layerComponent, shovelerViewChunkLayerTypeOptionKey);
+		ShovelerChunkLayerType layerType = shovelerComponentGetConfigurationValueInt(layerComponent, shovelerComponentChunkLayerOptionKeyType);
 		switch(layerType) {
 			case SHOVELER_CHUNK_LAYER_TYPE_CANVAS: {
-				ShovelerComponent *canvasComponent = shovelerComponentGetDependency(layerComponent, shovelerViewChunkLayerCanvasOptionKey);
+				ShovelerComponent *canvasComponent = shovelerComponentGetDependency(layerComponent, shovelerComponentChunkLayerOptionKeyCanvas);
 				assert(canvasComponent != NULL);
 				ShovelerCanvas *canvas = shovelerComponentGetCanvas(canvasComponent);
 				assert(canvas != NULL);
@@ -58,7 +58,7 @@ static void *activateChunkComponent(ShovelerComponent *component)
 				shovelerChunkAddCanvasLayer(chunk, canvas);
 			} break;
 			case SHOVELER_CHUNK_LAYER_TYPE_TILEMAP: {
-				ShovelerComponent *tilemapComponent = shovelerComponentGetDependency(layerComponent, shovelerViewChunkLayerTilemapOptionKey);
+				ShovelerComponent *tilemapComponent = shovelerComponentGetDependency(layerComponent, shovelerComponentChunkLayerOptionKeyTilemap);
 				assert(tilemapComponent != NULL);
 				ShovelerTilemap *tilemap = shovelerComponentGetTilemap(tilemapComponent);
 				assert(tilemap != NULL);
@@ -90,13 +90,13 @@ static void updateChunkPositionDependency(ShovelerComponent *component, Shoveler
 
 static ShovelerVector2 getChunkPosition(ShovelerComponent *component)
 {
-	ShovelerComponent *positionComponent = shovelerComponentGetDependency(component, shovelerViewChunkPositionOptionKey);
+	ShovelerComponent *positionComponent = shovelerComponentGetDependency(component, shovelerComponentChunkOptionKeyPosition);
 	assert(positionComponent != NULL);
 	const ShovelerVector3 *positionCoordinates = shovelerComponentGetPositionCoordinates(positionComponent);
 	assert(positionCoordinates != NULL);
 
-	ShovelerCoordinateMapping positionMappingX = shovelerComponentGetConfigurationValueInt(component, shovelerViewChunkPositionMappingXOptionKey);
-	ShovelerCoordinateMapping positionMappingY = shovelerComponentGetConfigurationValueInt(component, shovelerViewChunkPositionMappingYOptionKey);
+	ShovelerCoordinateMapping positionMappingX = shovelerComponentGetConfigurationValueInt(component, shovelerComponentChunkOptionKeyPositionMappingX);
+	ShovelerCoordinateMapping positionMappingY = shovelerComponentGetConfigurationValueInt(component, shovelerComponentChunkOptionKeyPositionMappingY);
 
 	return shovelerVector2(
 		shovelerCoordinateMap(*positionCoordinates, positionMappingX),

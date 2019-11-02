@@ -414,7 +414,7 @@ int main(int argc, char *argv[])
 	shovelerViewEntityAddPosition(clientEntity, shovelerVector3(0.0, 0.0, 0.0));
 	shovelerViewEntityAddClient(clientEntity, &clientConfiguration);
 	shovelerViewEntityDelegate(clientEntity, shovelerComponentTypeNamePosition);
-	shovelerViewEntityDelegate(clientEntity, shovelerViewClientComponentTypeName);
+	shovelerViewEntityDelegate(clientEntity, shovelerComponentTypeNameClient);
 
 	shovelerOpenGLCheckSuccess();
 
@@ -463,10 +463,10 @@ static void updateGame(ShovelerGame *game, double dt)
 	ShovelerViewEntity *tilemapEntity = shovelerViewGetEntity(game->view, 8);
 	ShovelerComponent *tilemapComponent = shovelerViewEntityGetTilemapTilesComponent(tilemapEntity);
 	const unsigned char *tilesetColumns;
-	shovelerComponentGetConfigurationValueBytes(tilemapComponent, shovelerViewTilemapTilesTilesetColumnsOptionKey, &tilesetColumns, /* outputSize */ NULL);
+	shovelerComponentGetConfigurationValueBytes(tilemapComponent, shovelerComponentTilemapTilesOptionKeyTilesetColumns, &tilesetColumns, /* outputSize */ NULL);
 	unsigned char updatedTilesetColumns[4];
 	memcpy(&updatedTilesetColumns, tilesetColumns, 4 * sizeof(unsigned char));
 	updatedTilesetColumns[0] = (unsigned char) ((int) time % 2);
 
-	shovelerComponentUpdateCanonicalConfigurationOptionBytes(tilemapComponent, shovelerViewTilemapTilesTilesetColumnsOptionKey, updatedTilesetColumns, 4);
+	shovelerComponentUpdateCanonicalConfigurationOptionBytes(tilemapComponent, shovelerComponentTilemapTilesOptionKeyTilesetColumns, updatedTilesetColumns, 4);
 }

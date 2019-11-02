@@ -30,7 +30,7 @@ bool shovelerViewEntityRemoveModel(ShovelerViewEntity *entity);
 
 static inline ShovelerComponent *shovelerViewEntityGetModelComponent(ShovelerViewEntity *entity)
 {
-	return shovelerViewEntityGetComponent(entity, shovelerViewModelComponentTypeName);
+	return shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameModel);
 }
 
 #endif

@@ -15,19 +15,19 @@
 
 ShovelerComponent *shovelerViewEntityAddLight(ShovelerViewEntity *entity, const ShovelerViewLightConfiguration *configuration)
 {
-	if(!shovelerViewHasComponentType(entity->view, shovelerViewLightComponentTypeName)) {
+	if(!shovelerViewHasComponentType(entity->view, shovelerComponentTypeNameLight)) {
 		shovelerViewAddComponentType(entity->view, shovelerComponentCreateLightType());
 	}
 
-	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerViewLightComponentTypeName);
-	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewLightPositionOptionKey, configuration->positionEntityId);
-	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerViewLightTypeOptionKey, configuration->type);
-	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerViewLightWidthOptionKey, configuration->width);
-	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerViewLightHeightOptionKey, configuration->height);
-	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerViewLightSamplesOptionKey, configuration->samples);
-	shovelerComponentUpdateCanonicalConfigurationOptionFloat(component, shovelerViewLightAmbientFactorOptionKey, configuration->ambientFactor);
-	shovelerComponentUpdateCanonicalConfigurationOptionFloat(component, shovelerViewLightExponentialFactorOptionKey, configuration->exponentialFactor);
-	shovelerComponentUpdateCanonicalConfigurationOptionVector3(component, shovelerViewLightColorOptionKey, configuration->color);
+	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerComponentTypeNameLight);
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerComponentLightOptionKeyPosition, configuration->positionEntityId);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerComponentLightOptionKeyType, configuration->type);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerComponentLightOptionKeyWidth, configuration->width);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerComponentLightOptionKeyHeight, configuration->height);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerComponentLightOptionKeySamples, configuration->samples);
+	shovelerComponentUpdateCanonicalConfigurationOptionFloat(component, shovelerComponentLightOptionKeyAmbientFactor, configuration->ambientFactor);
+	shovelerComponentUpdateCanonicalConfigurationOptionFloat(component, shovelerComponentLightOptionKeyExponentialFactor, configuration->exponentialFactor);
+	shovelerComponentUpdateCanonicalConfigurationOptionVector3(component, shovelerComponentLightOptionKeyColor, configuration->color);
 
 	shovelerComponentActivate(component);
 	return component;
@@ -35,7 +35,7 @@ ShovelerComponent *shovelerViewEntityAddLight(ShovelerViewEntity *entity, const 
 
 ShovelerLight *shovelerViewEntityGetLight(ShovelerViewEntity *entity)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewLightComponentTypeName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameLight);
 	if(component == NULL) {
 		return NULL;
 	}
@@ -45,38 +45,38 @@ ShovelerLight *shovelerViewEntityGetLight(ShovelerViewEntity *entity)
 
 bool shovelerViewEntityGetLightConfiguration(ShovelerViewEntity *entity, ShovelerViewLightConfiguration *outputConfiguration)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewLightComponentTypeName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameLight);
 	if(component == NULL) {
 		return NULL;
 	}
 
-	outputConfiguration->positionEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerViewLightPositionOptionKey);
-	outputConfiguration->type = shovelerComponentGetConfigurationValueInt(component, shovelerViewLightTypeOptionKey);
-	outputConfiguration->width = shovelerComponentGetConfigurationValueInt(component, shovelerViewLightWidthOptionKey);
-	outputConfiguration->height = shovelerComponentGetConfigurationValueInt(component, shovelerViewLightHeightOptionKey);
-	outputConfiguration->samples = shovelerComponentGetConfigurationValueInt(component, shovelerViewLightSamplesOptionKey);
-	outputConfiguration->ambientFactor = shovelerComponentGetConfigurationValueFloat(component, shovelerViewLightAmbientFactorOptionKey);
-	outputConfiguration->exponentialFactor = shovelerComponentGetConfigurationValueFloat(component, shovelerViewLightExponentialFactorOptionKey);
-	outputConfiguration->color = shovelerComponentGetConfigurationValueVector3(component, shovelerViewLightColorOptionKey);
+	outputConfiguration->positionEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerComponentLightOptionKeyPosition);
+	outputConfiguration->type = shovelerComponentGetConfigurationValueInt(component, shovelerComponentLightOptionKeyType);
+	outputConfiguration->width = shovelerComponentGetConfigurationValueInt(component, shovelerComponentLightOptionKeyWidth);
+	outputConfiguration->height = shovelerComponentGetConfigurationValueInt(component, shovelerComponentLightOptionKeyHeight);
+	outputConfiguration->samples = shovelerComponentGetConfigurationValueInt(component, shovelerComponentLightOptionKeySamples);
+	outputConfiguration->ambientFactor = shovelerComponentGetConfigurationValueFloat(component, shovelerComponentLightOptionKeyAmbientFactor);
+	outputConfiguration->exponentialFactor = shovelerComponentGetConfigurationValueFloat(component, shovelerComponentLightOptionKeyExponentialFactor);
+	outputConfiguration->color = shovelerComponentGetConfigurationValueVector3(component, shovelerComponentLightOptionKeyColor);
 	return true;
 }
 
 bool shovelerViewEntityUpdateLight(ShovelerViewEntity *entity, const ShovelerViewLightConfiguration *configuration)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewLightComponentTypeName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameLight);
 	if(component == NULL) {
 		shovelerLogWarning("Trying to update light of entity %lld which does not have a light, ignoring.", entity->id);
 		return false;
 	}
 
-	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewLightPositionOptionKey, configuration->positionEntityId);
-	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerViewLightTypeOptionKey, configuration->type);
-	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerViewLightWidthOptionKey, configuration->width);
-	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerViewLightHeightOptionKey, configuration->height);
-	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerViewLightSamplesOptionKey, configuration->samples);
-	shovelerComponentUpdateCanonicalConfigurationOptionFloat(component, shovelerViewLightAmbientFactorOptionKey, configuration->ambientFactor);
-	shovelerComponentUpdateCanonicalConfigurationOptionFloat(component, shovelerViewLightExponentialFactorOptionKey, configuration->exponentialFactor);
-	shovelerComponentUpdateCanonicalConfigurationOptionVector3(component, shovelerViewLightColorOptionKey, configuration->color);
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerComponentLightOptionKeyPosition, configuration->positionEntityId);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerComponentLightOptionKeyType, configuration->type);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerComponentLightOptionKeyWidth, configuration->width);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerComponentLightOptionKeyHeight, configuration->height);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerComponentLightOptionKeySamples, configuration->samples);
+	shovelerComponentUpdateCanonicalConfigurationOptionFloat(component, shovelerComponentLightOptionKeyAmbientFactor, configuration->ambientFactor);
+	shovelerComponentUpdateCanonicalConfigurationOptionFloat(component, shovelerComponentLightOptionKeyExponentialFactor, configuration->exponentialFactor);
+	shovelerComponentUpdateCanonicalConfigurationOptionVector3(component, shovelerComponentLightOptionKeyColor, configuration->color);
 	return true;
 }
 
@@ -84,11 +84,11 @@ bool shovelerViewEntityRemoveLight(ShovelerViewEntity *entity)
 {
 	assert(shovelerViewHasScene(entity->view));
 
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewLightComponentTypeName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameLight);
 	if(component == NULL) {
 		shovelerLogWarning("Trying to remove light from entity %lld which does not have a light, ignoring.", entity->id);
 		return false;
 	}
 
-	return shovelerViewEntityRemoveComponent(entity, shovelerViewLightComponentTypeName);
+	return shovelerViewEntityRemoveComponent(entity, shovelerComponentTypeNameLight);
 }

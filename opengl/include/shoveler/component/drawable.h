@@ -12,10 +12,10 @@ typedef enum {
 	SHOVELER_COMPONENT_DRAWABLE_TYPE_TILES,
 } ShovelerComponentDrawableType;
 
-static const char *shovelerViewDrawableComponentTypeName = "drawable";
-static const char *ShovelerComponentDrawableTypeOptionKey = "type";
-static const char *shovelerViewDrawableTilesWidthOptionKey = "tiles_width";
-static const char *shovelerViewDrawableTilesHeightOptionKey = "tiles_height";
+static const char *shovelerComponentTypeNameDrawable = "drawable";
+static const char *shovelerComponentDrawableOptionKeyType = "type";
+static const char *shovelerComponentDrawableOptionKeyTilesWidth = "tiles_width";
+static const char *shovelerComponentDrawableOptionKeyTilesHeight = "tiles_height";
 
 ShovelerComponentType *shovelerComponentCreateDrawableType();
 ShovelerDrawable *shovelerComponentGetDrawable(ShovelerComponent *component);

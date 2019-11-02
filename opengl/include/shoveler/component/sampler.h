@@ -5,10 +5,10 @@ typedef struct ShovelerSamplerStruct ShovelerSampler; // forward declaration: sa
 typedef struct ShovelerComponentTypeStruct ShovelerComponentType; // forward declaration: component.h
 typedef struct ShovelerComponentStruct ShovelerComponent; // forward declaration: component.h
 
-static const char *shovelerViewSamplerComponentTypeName = "sampler";
-static const char *shovelerViewSamplerInterpolateOptionKey = "interpolate";
-static const char *shovelerViewSamplerUseMipmapsOptionKey = "use_mipmaps";
-static const char *shovelerViewSamplerClampOptionKey = "clamp";
+static const char *shovelerComponentTypeNameSampler = "sampler";
+static const char *shovelerComponentSamplerOptionKeyInterpolate = "interpolate";
+static const char *shovelerComponentSamplerOptionKeyUseMipmaps = "use_mipmaps";
+static const char *shovelerComponentSamplerOptionKeyClamp = "clamp";
 
 ShovelerComponentType *shovelerComponentCreateSamplerType();
 ShovelerSampler *shovelerComponentGetSampler(ShovelerComponent *component);

@@ -17,20 +17,20 @@ static bool isComponentConfigurationOptionDefinition(ShovelerComponent *componen
 
 ShovelerComponentType *shovelerComponentCreateTilemapTilesType()
 {
-	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerViewTilemapTilesComponentTypeName, activateTilemapTilesComponent, deactivateTilemapTilesComponent, /* requiresAuthority */ false);
-	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerViewTilemapTilesImageResourceOptionKey, shovelerComponentTypeNameResource, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* updateDependency */ NULL);
-	shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewTilemapTilesNumColumnsOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ true, /* liveUpdate */ NULL);
-	shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewTilemapTilesNumRowsOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ true, /* liveUpdate */ NULL);
-	shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewTilemapTilesTilesetColumnsOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BYTES, /* isOptional */ true, liveUpdateTilesOption);
-	shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewTilemapTilesTilesetRowsOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BYTES, /* isOptional */ true, liveUpdateTilesOption);
-	shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewTilemapTilesTilesetIdsOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BYTES, /* isOptional */ true, liveUpdateTilesOption);
+	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerComponentTypeNameTilemapTiles, activateTilemapTilesComponent, deactivateTilemapTilesComponent, /* requiresAuthority */ false);
+	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentTilemapTilesOptionKeyImageResource, shovelerComponentTypeNameResource, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentTilemapTilesOptionKeyNumColumns, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ true, /* liveUpdate */ NULL);
+	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentTilemapTilesOptionKeyNumRows, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ true, /* liveUpdate */ NULL);
+	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentTilemapTilesOptionKeyTilesetColumns, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BYTES, /* isOptional */ true, liveUpdateTilesOption);
+	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentTilemapTilesOptionKeyTilesetRows, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BYTES, /* isOptional */ true, liveUpdateTilesOption);
+	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentTilemapTilesOptionKeyTilesetIds, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BYTES, /* isOptional */ true, liveUpdateTilesOption);
 
 	return componentType;
 }
 
 ShovelerTexture *shovelerComponentGetTilemapTiles(ShovelerComponent *component)
 {
-	assert(strcmp(component->type->name, shovelerViewTilemapTilesComponentTypeName) == 0);
+	assert(strcmp(component->type->name, shovelerComponentTypeNameTilemapTiles) == 0);
 
 	return component->data;
 }
@@ -42,7 +42,7 @@ static void *activateTilemapTilesComponent(ShovelerComponent *component)
 
 	ShovelerTexture *texture;
 	if(isImageResourceEntityDefinition && !isConfigurationOptionDefinition) {
-		ShovelerComponent *imageResourceComponent = shovelerComponentGetDependency(component, shovelerViewTilemapTilesImageResourceOptionKey);
+		ShovelerComponent *imageResourceComponent = shovelerComponentGetDependency(component, shovelerComponentTilemapTilesOptionKeyImageResource);
 		assert(imageResourceComponent != NULL);
 		ShovelerImage *image = shovelerComponentGetResource(imageResourceComponent);
 		assert(image != NULL);
@@ -50,8 +50,8 @@ static void *activateTilemapTilesComponent(ShovelerComponent *component)
 		texture = shovelerTextureCreate2d(image, false);
 		shovelerTextureUpdate(texture);
 	} else if(!isImageResourceEntityDefinition && isConfigurationOptionDefinition) {
-		int numColumns = shovelerComponentGetConfigurationValueInt(component, shovelerViewTilemapTilesNumColumnsOptionKey);
-		int numRows = shovelerComponentGetConfigurationValueInt(component, shovelerViewTilemapTilesNumRowsOptionKey);
+		int numColumns = shovelerComponentGetConfigurationValueInt(component, shovelerComponentTilemapTilesOptionKeyNumColumns);
+		int numRows = shovelerComponentGetConfigurationValueInt(component, shovelerComponentTilemapTilesOptionKeyNumRows);
 
 		ShovelerImage *tilemapImage = shovelerImageCreate(numColumns, numRows, /* channels */ 3);
 		texture = shovelerTextureCreate2d(tilemapImage, true);
@@ -86,9 +86,9 @@ static void updateTiles(ShovelerComponent *component, ShovelerTexture *texture)
 	const unsigned char *tilesetColumns;
 	const unsigned char *tilesetRows;
 	const unsigned char *tilesetIds;
-	shovelerComponentGetConfigurationValueBytes(component, shovelerViewTilemapTilesTilesetColumnsOptionKey, &tilesetColumns, /* outputSize */ NULL);
-	shovelerComponentGetConfigurationValueBytes(component, shovelerViewTilemapTilesTilesetRowsOptionKey, &tilesetRows, /* outputSize */ NULL);
-	shovelerComponentGetConfigurationValueBytes(component, shovelerViewTilemapTilesTilesetIdsOptionKey, &tilesetIds, /* outputSize */ NULL);
+	shovelerComponentGetConfigurationValueBytes(component, shovelerComponentTilemapTilesOptionKeyTilesetColumns, &tilesetColumns, /* outputSize */ NULL);
+	shovelerComponentGetConfigurationValueBytes(component, shovelerComponentTilemapTilesOptionKeyTilesetRows, &tilesetRows, /* outputSize */ NULL);
+	shovelerComponentGetConfigurationValueBytes(component, shovelerComponentTilemapTilesOptionKeyTilesetIds, &tilesetIds, /* outputSize */ NULL);
 	assert(tilesetColumns != NULL);
 	assert(tilesetRows != NULL);
 	assert(tilesetIds != NULL);
@@ -113,15 +113,15 @@ static void updateTiles(ShovelerComponent *component, ShovelerTexture *texture)
 
 static bool isComponentImageResourceEntityDefinition(ShovelerComponent *component)
 {
-	return shovelerComponentHasConfigurationValue(component, shovelerViewTilemapTilesImageResourceOptionKey);
+	return shovelerComponentHasConfigurationValue(component, shovelerComponentTilemapTilesOptionKeyImageResource);
 }
 
 static bool isComponentConfigurationOptionDefinition(ShovelerComponent *component)
 {
 	return
-		shovelerComponentHasConfigurationValue(component, shovelerViewTilemapTilesNumColumnsOptionKey) &&
-		shovelerComponentHasConfigurationValue(component, shovelerViewTilemapTilesNumRowsOptionKey) &&
-		shovelerComponentHasConfigurationValue(component, shovelerViewTilemapTilesTilesetColumnsOptionKey) &&
-		shovelerComponentHasConfigurationValue(component, shovelerViewTilemapTilesTilesetRowsOptionKey) &&
-		shovelerComponentHasConfigurationValue(component, shovelerViewTilemapTilesTilesetIdsOptionKey);
+		shovelerComponentHasConfigurationValue(component, shovelerComponentTilemapTilesOptionKeyNumColumns) &&
+		shovelerComponentHasConfigurationValue(component, shovelerComponentTilemapTilesOptionKeyNumRows) &&
+		shovelerComponentHasConfigurationValue(component, shovelerComponentTilemapTilesOptionKeyTilesetColumns) &&
+		shovelerComponentHasConfigurationValue(component, shovelerComponentTilemapTilesOptionKeyTilesetRows) &&
+		shovelerComponentHasConfigurationValue(component, shovelerComponentTilemapTilesOptionKeyTilesetIds);
 }

@@ -15,9 +15,9 @@ static void moveController(ShovelerController *controller, ShovelerVector3 posit
 
 ShovelerComponentType *shovelerComponentCreateClientType()
 {
-	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerViewClientComponentTypeName, activateClientComponent, deactivateClientComponent, /* requiresAuthority */ true);
-	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerViewClientPositionOptionKey, shovelerComponentTypeNamePosition, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
-	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerViewClientModelOptionKey, shovelerViewModelComponentTypeName, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerComponentTypeNameClient, activateClientComponent, deactivateClientComponent, /* requiresAuthority */ true);
+	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentClientOptionKeyPosition, shovelerComponentTypeNamePosition, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentClientOptionKeyModel, shovelerComponentTypeNameModel, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* updateDependency */ NULL);
 
 	return componentType;
 }
@@ -26,7 +26,7 @@ static void *activateClientComponent(ShovelerComponent *component)
 {
 	assert(shovelerComponentHasViewController(component));
 
-	ShovelerComponent *positionComponent = shovelerComponentGetDependency(component, shovelerViewClientPositionOptionKey);
+	ShovelerComponent *positionComponent = shovelerComponentGetDependency(component, shovelerComponentClientOptionKeyPosition);
 	assert(positionComponent != NULL);
 	const ShovelerVector3 *positionCoordinates = shovelerComponentGetPositionCoordinates(positionComponent);
 
@@ -37,8 +37,8 @@ static void *activateClientComponent(ShovelerComponent *component)
 
 	ShovelerControllerMoveCallback *moveCallback = shovelerControllerAddMoveCallback(controller, moveController, component);
 
-	if(shovelerComponentHasConfigurationValue(component, shovelerViewClientModelOptionKey)) {
-		ShovelerComponent *modelComponent = shovelerComponentGetDependency(component, shovelerViewClientModelOptionKey);
+	if(shovelerComponentHasConfigurationValue(component, shovelerComponentClientOptionKeyModel)) {
+		ShovelerComponent *modelComponent = shovelerComponentGetDependency(component, shovelerComponentClientOptionKeyModel);
 		assert(modelComponent != NULL);
 		ShovelerModel *model = shovelerComponentGetModel(modelComponent);
 		assert(model != NULL);
@@ -57,8 +57,8 @@ static void deactivateClientComponent(ShovelerComponent *component)
 	ShovelerController *controller = shovelerComponentGetViewController(component);
 	shovelerControllerRemoveMoveCallback(controller, moveCallback);
 
-	if(shovelerComponentHasConfigurationValue(component, shovelerViewClientModelOptionKey)) {
-		ShovelerComponent *modelComponent = shovelerComponentGetDependency(component, shovelerViewClientModelOptionKey);
+	if(shovelerComponentHasConfigurationValue(component, shovelerComponentClientOptionKeyModel)) {
+		ShovelerComponent *modelComponent = shovelerComponentGetDependency(component, shovelerComponentClientOptionKeyModel);
 		assert(modelComponent != NULL);
 		ShovelerModel *model = shovelerComponentGetModel(modelComponent);
 		assert(model != NULL);
@@ -71,7 +71,7 @@ static void moveController(ShovelerController *controller, ShovelerVector3 posit
 {
 	ShovelerComponent *component = componentPointer;
 
-	ShovelerComponent *positionComponent = shovelerComponentGetDependency(component, shovelerViewClientPositionOptionKey);
+	ShovelerComponent *positionComponent = shovelerComponentGetDependency(component, shovelerComponentClientOptionKeyPosition);
 	assert(positionComponent != NULL);
 	const ShovelerVector3 *positionCoordinates = shovelerComponentGetPositionCoordinates(positionComponent);
 	assert(positionComponent != NULL);

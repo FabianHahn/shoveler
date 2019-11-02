@@ -11,23 +11,23 @@ static void deactivateTextureComponent(ShovelerComponent *component);
 
 ShovelerComponentType *shovelerComponentCreateTextureType()
 {
-	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerViewTextureComponentTypeName, activateTextureComponent, deactivateTextureComponent, /* requiresAuthority */ false);
-	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerViewTextureImageResourceOptionKey, shovelerComponentTypeNameResource, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerComponentTypeNameTexture, activateTextureComponent, deactivateTextureComponent, /* requiresAuthority */ false);
+	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentTextureOptionKeyImageResource, shovelerComponentTypeNameResource, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
 
 	return componentType;
 }
 
 ShovelerTexture *shovelerComponentGetTexture(ShovelerComponent *component)
 {
-	assert(strcmp(component->type->name, shovelerViewTextureComponentTypeName) == 0);
+	assert(strcmp(component->type->name, shovelerComponentTypeNameTexture) == 0);
 
 	return component->data;
 }
 
 static void *activateTextureComponent(ShovelerComponent *component)
 {
-	long long int imageResourceEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerViewTextureImageResourceOptionKey);
-	ShovelerComponent *imageResourceComponent = shovelerComponentGetDependency(component, shovelerViewTextureImageResourceOptionKey);
+	long long int imageResourceEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerComponentTextureOptionKeyImageResource);
+	ShovelerComponent *imageResourceComponent = shovelerComponentGetDependency(component, shovelerComponentTextureOptionKeyImageResource);
 	assert(imageResourceComponent != NULL);
 	ShovelerImage *image = shovelerComponentGetResource(imageResourceComponent);
 	assert(image != NULL);

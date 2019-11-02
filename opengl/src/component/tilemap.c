@@ -15,36 +15,36 @@ static void deactivateTilemapComponent(ShovelerComponent *component);
 
 ShovelerComponentType *shovelerComponentCreateTilemapType()
 {
-	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerViewTilemapComponentTypeName, activateTilemapComponent, deactivateTilemapComponent, /* requiresAuthority */ false);
-	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerViewTilemapTilesOptionKey, shovelerViewTilemapTilesComponentTypeName, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
-	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerViewTilemapCollidersOptionKey, shovelerViewTilemapCollidersComponentTypeName, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
-	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerViewTilemapTilesetsOptionKey, shovelerViewTilesetComponentTypeName, /* isArray */ true, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerComponentTypeNameTilemap, activateTilemapComponent, deactivateTilemapComponent, /* requiresAuthority */ false);
+	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentTilemapOptionKeyTiles, shovelerComponentTypeNameTilemapTiles, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentTilemapOptionKeyColliders, shovelerComponentTypeNameTilemapColliders, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentTilemapOptionKeyTilesets, shovelerComponentTypeNameTileset, /* isArray */ true, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
 
 	return componentType;
 }
 
 ShovelerTilemap *shovelerComponentGetTilemap(ShovelerComponent *component)
 {
-	assert(strcmp(component->type->name, shovelerViewTilemapComponentTypeName) == 0);
+	assert(strcmp(component->type->name, shovelerComponentTypeNameTilemap) == 0);
 
 	return component->data;
 }
 
 static void *activateTilemapComponent(ShovelerComponent *component)
 {
-	ShovelerComponent *tilesComponent = shovelerComponentGetDependency(component, shovelerViewTilemapTilesOptionKey);
+	ShovelerComponent *tilesComponent = shovelerComponentGetDependency(component, shovelerComponentTilemapOptionKeyTiles);
 	assert(tilesComponent != NULL);
 	ShovelerTexture *tiles = shovelerComponentGetTilemapTiles(tilesComponent);
 	assert(tiles != NULL);
 	int numTilesColumns = tiles->width;
 	int numTilesRows = tiles->height;
 
-	ShovelerComponent *collidersComponent = shovelerComponentGetDependency(component, shovelerViewTilemapCollidersOptionKey);
+	ShovelerComponent *collidersComponent = shovelerComponentGetDependency(component, shovelerComponentTilemapOptionKeyColliders);
 	assert(collidersComponent != NULL);
 	const bool *colliders = shovelerComponentGetTilemapColliders(collidersComponent);
 	assert(colliders != NULL);
-	int numCollidersColumns = shovelerComponentGetConfigurationValueInt(collidersComponent, shovelerViewTilemapCollidersNumColumnsOptionKey);
-	int numCollidersRows = shovelerComponentGetConfigurationValueInt(collidersComponent, shovelerViewTilemapCollidersNumRowsOptionKey);
+	int numCollidersColumns = shovelerComponentGetConfigurationValueInt(collidersComponent, shovelerComponentTilemapCollidersOptionKeyNumColumns);
+	int numCollidersRows = shovelerComponentGetConfigurationValueInt(collidersComponent, shovelerComponentTilemapCollidersOptionKeyNumRows);
 
 	if(numTilesColumns != numCollidersColumns || numTilesRows != numCollidersRows) {
 		shovelerLogWarning("Failed to activate tilemap %lld because dependency tiles dimensions don't match dependency colliders dimensions.", component->entityId);
@@ -53,11 +53,11 @@ static void *activateTilemapComponent(ShovelerComponent *component)
 
 	ShovelerTilemap *tilemap = shovelerTilemapCreate(tiles, colliders);
 
-	const ShovelerComponentConfigurationValue *tilesetsValue = shovelerComponentGetConfigurationValue(component, shovelerViewTilemapTilesetsOptionKey);
+	const ShovelerComponentConfigurationValue *tilesetsValue = shovelerComponentGetConfigurationValue(component, shovelerComponentTilemapOptionKeyTilesets);
 	assert(tilesetsValue != NULL);
 
 	for(int i = 0; i < tilesetsValue->entityIdArrayValue.size; i++) {
-		ShovelerComponent *tilesetComponent = shovelerComponentGetArrayDependency(component, shovelerViewTilemapTilesetsOptionKey, i);
+		ShovelerComponent *tilesetComponent = shovelerComponentGetArrayDependency(component, shovelerComponentTilemapOptionKeyTilesets, i);
 		ShovelerTileset *tileset = shovelerComponentGetTileset(tilesetComponent);
 		assert(tileset != NULL);
 

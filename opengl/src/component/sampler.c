@@ -10,26 +10,26 @@ static void deactivateSamplerComponent(ShovelerComponent *component);
 
 ShovelerComponentType *shovelerComponentCreateSamplerType()
 {
-	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerViewSamplerComponentTypeName, activateSamplerComponent, deactivateSamplerComponent, /* requiresAuthority */ false);
-	shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewSamplerInterpolateOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BOOL, /* isOptional */ false, /* liveUpdate */ NULL);
-	shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewSamplerUseMipmapsOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BOOL, /* isOptional */ false, /* liveUpdate */ NULL);
-	shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewSamplerClampOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BOOL, /* isOptional */ false, /* liveUpdate */ NULL);
+	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerComponentTypeNameSampler, activateSamplerComponent, deactivateSamplerComponent, /* requiresAuthority */ false);
+	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentSamplerOptionKeyInterpolate, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BOOL, /* isOptional */ false, /* liveUpdate */ NULL);
+	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentSamplerOptionKeyUseMipmaps, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BOOL, /* isOptional */ false, /* liveUpdate */ NULL);
+	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentSamplerOptionKeyClamp, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BOOL, /* isOptional */ false, /* liveUpdate */ NULL);
 
 	return componentType;
 }
 
 ShovelerSampler *shovelerComponentGetSampler(ShovelerComponent *component)
 {
-	assert(strcmp(component->type->name, shovelerViewSamplerComponentTypeName) == 0);
+	assert(strcmp(component->type->name, shovelerComponentTypeNameSampler) == 0);
 
 	return component->data;
 }
 
 static void  *activateSamplerComponent(ShovelerComponent *component)
 {
-	bool interpolate = shovelerComponentGetConfigurationValueBool(component, shovelerViewSamplerInterpolateOptionKey);
-	bool useMipmaps = shovelerComponentGetConfigurationValueBool(component, shovelerViewSamplerUseMipmapsOptionKey);
-	bool clamp = shovelerComponentGetConfigurationValueBool(component, shovelerViewSamplerClampOptionKey);
+	bool interpolate = shovelerComponentGetConfigurationValueBool(component, shovelerComponentSamplerOptionKeyInterpolate);
+	bool useMipmaps = shovelerComponentGetConfigurationValueBool(component, shovelerComponentSamplerOptionKeyUseMipmaps);
+	bool clamp = shovelerComponentGetConfigurationValueBool(component, shovelerComponentSamplerOptionKeyClamp);
 
 	ShovelerSampler *sampler = shovelerSamplerCreate(interpolate, useMipmaps, clamp);
 	return sampler;

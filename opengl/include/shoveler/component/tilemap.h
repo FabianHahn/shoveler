@@ -5,10 +5,10 @@ typedef struct ShovelerTilemapStruct ShovelerTilemap; // forward declaration: ti
 typedef struct ShovelerComponentTypeStruct ShovelerComponentType; // forward declaration: component.h
 typedef struct ShovelerComponentStruct ShovelerComponent; // forward declaration: component.h
 
-static const char *shovelerViewTilemapComponentTypeName = "tilemap";
-static const char *shovelerViewTilemapTilesOptionKey = "tiles";
-static const char *shovelerViewTilemapCollidersOptionKey = "colliders";
-static const char *shovelerViewTilemapTilesetsOptionKey = "tilesets";
+static const char *shovelerComponentTypeNameTilemap = "tilemap";
+static const char *shovelerComponentTilemapOptionKeyTiles = "tiles";
+static const char *shovelerComponentTilemapOptionKeyColliders = "colliders";
+static const char *shovelerComponentTilemapOptionKeyTilesets = "tilesets";
 
 ShovelerComponentType *shovelerComponentCreateTilemapType();
 ShovelerTilemap *shovelerComponentGetTilemap(ShovelerComponent *component);

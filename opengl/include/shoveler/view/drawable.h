@@ -27,7 +27,7 @@ bool shovelerViewEntityRemoveDrawable(ShovelerViewEntity *entity);
 
 static inline ShovelerComponent *shovelerViewEntityGetDrawableComponent(ShovelerViewEntity *entity)
 {
-	return shovelerViewEntityGetComponent(entity, shovelerViewDrawableComponentTypeName);
+	return shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameDrawable);
 }
 
 #endif

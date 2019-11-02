@@ -9,14 +9,14 @@
 
 ShovelerComponent *shovelerViewEntityAddClient(ShovelerViewEntity *entity, const ShovelerViewClientConfiguration *configuration)
 {
-	if(!shovelerViewHasComponentType(entity->view, shovelerViewClientComponentTypeName)) {
+	if(!shovelerViewHasComponentType(entity->view, shovelerComponentTypeNameClient)) {
 		shovelerViewAddComponentType(entity->view, shovelerComponentCreateClientType());
 	}
 
-	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerViewClientComponentTypeName);
-	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewClientPositionOptionKey, configuration->positionEntityId);
+	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerComponentTypeNameClient);
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerComponentClientOptionKeyPosition, configuration->positionEntityId);
 	if(configuration->modelEntityId != 0) {
-		shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewClientModelOptionKey, configuration->modelEntityId);
+		shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerComponentClientOptionKeyModel, configuration->modelEntityId);
 	}
 
 	shovelerComponentActivate(component);
@@ -25,39 +25,39 @@ ShovelerComponent *shovelerViewEntityAddClient(ShovelerViewEntity *entity, const
 
 bool shovelerViewEntityGetClientConfiguration(ShovelerViewEntity *entity, ShovelerViewClientConfiguration *outputConfiguration)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewClientComponentTypeName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameClient);
 	if(component == NULL) {
 		return false;
 	}
 
-	outputConfiguration->positionEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerViewClientPositionOptionKey);
-	if(shovelerComponentHasConfigurationValue(component, shovelerViewClientModelOptionKey)) {
-		outputConfiguration->modelEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerViewClientModelOptionKey);
+	outputConfiguration->positionEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerComponentClientOptionKeyPosition);
+	if(shovelerComponentHasConfigurationValue(component, shovelerComponentClientOptionKeyModel)) {
+		outputConfiguration->modelEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerComponentClientOptionKeyModel);
 	}
 	return true;
 }
 
 bool shovelerViewEntityUpdateClient(ShovelerViewEntity *entity, const ShovelerViewClientConfiguration *configuration)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewClientComponentTypeName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameClient);
 	if(component == NULL) {
 		shovelerLogWarning("Trying to update client of entity %lld which does not have a client, ignoring.", entity->id);
 		return false;
 	}
 
-	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewClientPositionOptionKey, configuration->positionEntityId);
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerComponentClientOptionKeyPosition, configuration->positionEntityId);
 	if(configuration->modelEntityId != 0) {
-		shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewClientModelOptionKey, configuration->modelEntityId);
+		shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerComponentClientOptionKeyModel, configuration->modelEntityId);
 	}
 }
 
 bool shovelerViewEntityRemoveClient(ShovelerViewEntity *entity)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewClientComponentTypeName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameClient);
 	if(component == NULL) {
 		shovelerLogWarning("Trying to remove client from entity %lld which does not have a client, ignoring.", entity->id);
 		return false;
 	}
 
-	return shovelerViewEntityRemoveComponent(entity, shovelerViewClientComponentTypeName);
+	return shovelerViewEntityRemoveComponent(entity, shovelerComponentTypeNameClient);
 }

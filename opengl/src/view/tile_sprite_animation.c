@@ -12,16 +12,16 @@
 
 ShovelerComponent *shovelerViewEntityAddTileSpriteAnimation(ShovelerViewEntity *entity, const ShovelerViewTileSpriteAnimationConfiguration *configuration)
 {
-	if(!shovelerViewHasComponentType(entity->view, shovelerViewTileSpriteAnimationComponentTypeName)) {
+	if(!shovelerViewHasComponentType(entity->view, shovelerComponentTypeNameTileSpriteAnimation)) {
 		shovelerViewAddComponentType(entity->view, shovelerComponentCreateTileSpriteAnimationType());
 	}
 
-	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerViewTileSpriteAnimationComponentTypeName);
-	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewTileSpriteAnimationPositionOptionKey, configuration->positionEntityId);
-	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewTileSpriteAnimationTileSpriteOptionKey, configuration->tileSpriteEntityId);
-	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerViewTileSpriteAnimationPositionMappingXOptionKey, configuration->positionMappingX);
-	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerViewTileSpriteAnimationPositionMappingYOptionKey, configuration->positionMappingY);
-	shovelerComponentUpdateCanonicalConfigurationOptionFloat(component, shovelerViewTileSpriteAnimationMoveAmountThresholdOptionKey, configuration->moveAmountThreshold);
+	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerComponentTypeNameTileSpriteAnimation);
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerComponentTileSpriteAnimationOptionKeyPosition, configuration->positionEntityId);
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerComponentTileSpriteAnimationOptionKeyTileSprite, configuration->tileSpriteEntityId);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerComponentTileSpriteAnimationOptionKeyPositionMappingX, configuration->positionMappingX);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerComponentTileSpriteAnimationOptionKeyPositionMappingY, configuration->positionMappingY);
+	shovelerComponentUpdateCanonicalConfigurationOptionFloat(component, shovelerComponentTileSpriteAnimationOptionKeyMoveAmountThreshold, configuration->moveAmountThreshold);
 
 	shovelerComponentActivate(component);
 	return component;
@@ -29,7 +29,7 @@ ShovelerComponent *shovelerViewEntityAddTileSpriteAnimation(ShovelerViewEntity *
 
 ShovelerTileSpriteAnimation *shovelerViewEntityGetTileSpriteAnimation(ShovelerViewEntity *entity)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTileSpriteAnimationComponentTypeName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameTileSpriteAnimation);
 	if(component == NULL) {
 		return false;
 	}
@@ -39,42 +39,42 @@ ShovelerTileSpriteAnimation *shovelerViewEntityGetTileSpriteAnimation(ShovelerVi
 
 bool shovelerViewEntityGetTileSpriteAnimationConfiguration(ShovelerViewEntity *entity, ShovelerViewTileSpriteAnimationConfiguration *outputConfiguration)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTileSpriteAnimationComponentTypeName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameTileSpriteAnimation);
 	if(component == NULL) {
 		return false;
 	}
 
-	outputConfiguration->positionEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerViewTileSpriteAnimationPositionOptionKey);
-	outputConfiguration->tileSpriteEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerViewTileSpriteAnimationTileSpriteOptionKey);
-	outputConfiguration->positionMappingX = shovelerComponentGetConfigurationValueInt(component, shovelerViewTileSpriteAnimationPositionMappingXOptionKey);
-	outputConfiguration->positionMappingY = shovelerComponentGetConfigurationValueInt(component, shovelerViewTileSpriteAnimationPositionMappingYOptionKey);
-	outputConfiguration->moveAmountThreshold = shovelerComponentGetConfigurationValueFloat(component, shovelerViewTileSpriteAnimationMoveAmountThresholdOptionKey);
+	outputConfiguration->positionEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerComponentTileSpriteAnimationOptionKeyPosition);
+	outputConfiguration->tileSpriteEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerComponentTileSpriteAnimationOptionKeyTileSprite);
+	outputConfiguration->positionMappingX = shovelerComponentGetConfigurationValueInt(component, shovelerComponentTileSpriteAnimationOptionKeyPositionMappingX);
+	outputConfiguration->positionMappingY = shovelerComponentGetConfigurationValueInt(component, shovelerComponentTileSpriteAnimationOptionKeyPositionMappingY);
+	outputConfiguration->moveAmountThreshold = shovelerComponentGetConfigurationValueFloat(component, shovelerComponentTileSpriteAnimationOptionKeyMoveAmountThreshold);
 	return true;
 }
 
 bool shovelerViewEntityUpdateTileSpriteAnimation(ShovelerViewEntity *entity, const ShovelerViewTileSpriteAnimationConfiguration *configuration)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTileSpriteAnimationComponentTypeName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameTileSpriteAnimation);
 	if(component == NULL) {
 		shovelerLogWarning("Trying to update tile sprite animation of entity %lld which does not have a tile sprite animation, ignoring.", entity->id);
 		return false;
 	}
 
-	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewTileSpriteAnimationPositionOptionKey, configuration->positionEntityId);
-	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewTileSpriteAnimationTileSpriteOptionKey, configuration->tileSpriteEntityId);
-	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerViewTileSpriteAnimationPositionMappingXOptionKey, configuration->positionMappingX);
-	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerViewTileSpriteAnimationPositionMappingYOptionKey, configuration->positionMappingY);
-	shovelerComponentUpdateCanonicalConfigurationOptionFloat(component, shovelerViewTileSpriteAnimationMoveAmountThresholdOptionKey, configuration->moveAmountThreshold);
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerComponentTileSpriteAnimationOptionKeyPosition, configuration->positionEntityId);
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerComponentTileSpriteAnimationOptionKeyTileSprite, configuration->tileSpriteEntityId);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerComponentTileSpriteAnimationOptionKeyPositionMappingX, configuration->positionMappingX);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerComponentTileSpriteAnimationOptionKeyPositionMappingY, configuration->positionMappingY);
+	shovelerComponentUpdateCanonicalConfigurationOptionFloat(component, shovelerComponentTileSpriteAnimationOptionKeyMoveAmountThreshold, configuration->moveAmountThreshold);
 	return true;
 }
 
 bool shovelerViewEntityRemoveTileSpriteAnimation(ShovelerViewEntity *entity)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTileSpriteAnimationComponentTypeName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameTileSpriteAnimation);
 	if(component == NULL) {
 		shovelerLogWarning("Trying to remove tile sprite animation from entity %lld which does not have a tile sprite animation, ignoring.", entity->id);
 		return false;
 	}
 
-	return shovelerViewEntityRemoveComponent(entity, shovelerViewTileSpriteAnimationComponentTypeName);
+	return shovelerViewEntityRemoveComponent(entity, shovelerComponentTypeNameTileSpriteAnimation);
 }

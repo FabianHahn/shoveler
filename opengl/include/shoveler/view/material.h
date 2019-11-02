@@ -31,7 +31,7 @@ bool shovelerViewEntityRemoveMaterial(ShovelerViewEntity *entity);
 
 static inline ShovelerComponent *shovelerViewEntityGetMaterialComponent(ShovelerViewEntity *entity)
 {
-	return shovelerViewEntityGetComponent(entity, shovelerViewMaterialComponentTypeName);
+	return shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameMaterial);
 }
 
 #endif

@@ -10,14 +10,14 @@
 
 ShovelerComponent *shovelerViewEntityAddTilemapColliders(ShovelerViewEntity *entity, const ShovelerViewTilemapCollidersConfiguration *configuration)
 {
-	if(!shovelerViewHasComponentType(entity->view, shovelerViewTilemapCollidersComponentTypeName)) {
+	if(!shovelerViewHasComponentType(entity->view, shovelerComponentTypeNameTilemapColliders)) {
 		shovelerViewAddComponentType(entity->view, shovelerComponentCreateTilemapColliders());
 	}
 
-	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerViewTilemapCollidersComponentTypeName);
-	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerViewTilemapCollidersNumColumnsOptionKey, configuration->numColumns);
-	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerViewTilemapCollidersNumRowsOptionKey, configuration->numRows);
-	shovelerComponentUpdateCanonicalConfigurationOptionBytes(component, shovelerViewTilemapCollidersCollidersOptionKey, configuration->colliders, configuration->numColumns * configuration->numRows);
+	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerComponentTypeNameTilemapColliders);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerComponentTilemapCollidersOptionKeyNumColumns, configuration->numColumns);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerComponentTilemapCollidersOptionKeyNumRows, configuration->numRows);
+	shovelerComponentUpdateCanonicalConfigurationOptionBytes(component, shovelerComponentTilemapCollidersOptionKeyColliders, configuration->colliders, configuration->numColumns * configuration->numRows);
 
 	shovelerComponentActivate(component);
 	return component;
@@ -25,7 +25,7 @@ ShovelerComponent *shovelerViewEntityAddTilemapColliders(ShovelerViewEntity *ent
 
 const bool *shovelerViewEntityGetTilemapColliders(ShovelerViewEntity *entity)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTilemapCollidersComponentTypeName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameTilemapColliders);
 	if(component == NULL) {
 		return NULL;
 	}
@@ -35,39 +35,39 @@ const bool *shovelerViewEntityGetTilemapColliders(ShovelerViewEntity *entity)
 
 bool shovelerViewEntityGetTilemapCollidersConfiguration(ShovelerViewEntity *entity, ShovelerViewTilemapCollidersConfiguration *outputConfiguration)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTilemapCollidersComponentTypeName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameTilemapColliders);
 	if(component == NULL) {
 		return false;
 	}
 
-	outputConfiguration->numColumns = shovelerComponentGetConfigurationValueInt(component, shovelerViewTilemapCollidersNumColumnsOptionKey);
-	outputConfiguration->numRows = shovelerComponentGetConfigurationValueInt(component, shovelerViewTilemapCollidersNumRowsOptionKey);
-	shovelerComponentGetConfigurationValueBytes(component, shovelerViewTilemapCollidersCollidersOptionKey, &outputConfiguration->colliders, /* outputSize */ NULL);
+	outputConfiguration->numColumns = shovelerComponentGetConfigurationValueInt(component, shovelerComponentTilemapCollidersOptionKeyNumColumns);
+	outputConfiguration->numRows = shovelerComponentGetConfigurationValueInt(component, shovelerComponentTilemapCollidersOptionKeyNumRows);
+	shovelerComponentGetConfigurationValueBytes(component, shovelerComponentTilemapCollidersOptionKeyColliders, &outputConfiguration->colliders, /* outputSize */ NULL);
 
 	return true;
 }
 
 bool shovelerViewEntityUpdateTilemapColliders(ShovelerViewEntity *entity, const ShovelerViewTilemapCollidersConfiguration *configuration)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTilemapCollidersComponentTypeName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameTilemapColliders);
 	if(component == NULL) {
 		shovelerLogWarning("Trying to update tilemap colliders of entity %lld which does not have a tilemap colliders, ignoring.", entity->id);
 		return false;
 	}
 
-	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerViewTilemapCollidersNumColumnsOptionKey, configuration->numColumns);
-	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerViewTilemapCollidersNumRowsOptionKey, configuration->numRows);
-	shovelerComponentUpdateCanonicalConfigurationOptionBytes(component, shovelerViewTilemapCollidersCollidersOptionKey, configuration->colliders, configuration->numColumns * configuration->numRows);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerComponentTilemapCollidersOptionKeyNumColumns, configuration->numColumns);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerComponentTilemapCollidersOptionKeyNumRows, configuration->numRows);
+	shovelerComponentUpdateCanonicalConfigurationOptionBytes(component, shovelerComponentTilemapCollidersOptionKeyColliders, configuration->colliders, configuration->numColumns * configuration->numRows);
 	return true;
 }
 
 bool shovelerViewEntityRemoveTilemapColliders(ShovelerViewEntity *entity)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTilemapCollidersComponentTypeName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameTilemapColliders);
 	if(component == NULL) {
 		shovelerLogWarning("Trying to remove tilemap colliders from entity %lld which does not have a tilemap colliders, ignoring.", entity->id);
 		return false;
 	}
 
-	return shovelerViewEntityRemoveComponent(entity, shovelerViewTilemapCollidersComponentTypeName);
+	return shovelerViewEntityRemoveComponent(entity, shovelerComponentTypeNameTilemapColliders);
 }

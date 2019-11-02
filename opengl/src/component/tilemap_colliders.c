@@ -12,25 +12,25 @@ static void updateColliders(ShovelerComponent *component, bool *colliders);
 
 ShovelerComponentType *shovelerComponentCreateTilemapColliders()
 {
-	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerViewTilemapCollidersComponentTypeName, activateTilemapCollidersComponent, deactivateTilemapCollidersComponent, /* requiresAuthority */ false);
-	shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewTilemapCollidersNumColumnsOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ true, /* liveUpdate */ NULL);
-	shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewTilemapCollidersNumRowsOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ true, /* liveUpdate */ NULL);
-	shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewTilemapCollidersCollidersOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BYTES, /* isOptional */ false, liveUpdateCollidersOption);
+	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerComponentTypeNameTilemapColliders, activateTilemapCollidersComponent, deactivateTilemapCollidersComponent, /* requiresAuthority */ false);
+	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentTilemapCollidersOptionKeyNumColumns, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ true, /* liveUpdate */ NULL);
+	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentTilemapCollidersOptionKeyNumRows, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ true, /* liveUpdate */ NULL);
+	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentTilemapCollidersOptionKeyColliders, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BYTES, /* isOptional */ false, liveUpdateCollidersOption);
 
 	return componentType;
 }
 
 const bool *shovelerComponentGetTilemapColliders(ShovelerComponent *component)
 {
-	assert(strcmp(component->type->name, shovelerViewTilemapCollidersComponentTypeName) == 0);
+	assert(strcmp(component->type->name, shovelerComponentTypeNameTilemapColliders) == 0);
 
 	return component->data;
 }
 
 static void *activateTilemapCollidersComponent(ShovelerComponent *component)
 {
-	int numColumns = shovelerComponentGetConfigurationValueInt(component, shovelerViewTilemapCollidersNumColumnsOptionKey);
-	int numRows = shovelerComponentGetConfigurationValueInt(component, shovelerViewTilemapCollidersNumRowsOptionKey);
+	int numColumns = shovelerComponentGetConfigurationValueInt(component, shovelerComponentTilemapCollidersOptionKeyNumColumns);
+	int numRows = shovelerComponentGetConfigurationValueInt(component, shovelerComponentTilemapCollidersOptionKeyNumRows);
 
 	bool *colliders = malloc(numColumns * numRows * sizeof(bool));
 	updateColliders(component, colliders);
@@ -55,11 +55,11 @@ static void liveUpdateCollidersOption(ShovelerComponent *component, ShovelerComp
 
 static void updateColliders(ShovelerComponent *component, bool *colliders)
 {
-	int numColumns = shovelerComponentGetConfigurationValueInt(component, shovelerViewTilemapCollidersNumColumnsOptionKey);
-	int numRows = shovelerComponentGetConfigurationValueInt(component, shovelerViewTilemapCollidersNumRowsOptionKey);
+	int numColumns = shovelerComponentGetConfigurationValueInt(component, shovelerComponentTilemapCollidersOptionKeyNumColumns);
+	int numRows = shovelerComponentGetConfigurationValueInt(component, shovelerComponentTilemapCollidersOptionKeyNumRows);
 
 	const unsigned char *collidersOption;
-	shovelerComponentGetConfigurationValueBytes(component, shovelerViewTilemapCollidersCollidersOptionKey, &collidersOption, /* outputSize */ NULL);
+	shovelerComponentGetConfigurationValueBytes(component, shovelerComponentTilemapCollidersOptionKeyColliders, &collidersOption, /* outputSize */ NULL);
 	assert(collidersOption != NULL);
 
 	for(int row = 0; row < numRows; ++row) {

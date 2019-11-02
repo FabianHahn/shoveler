@@ -4,10 +4,10 @@
 typedef struct ShovelerComponentTypeStruct ShovelerComponentType; // forward declaration: component.h
 typedef struct ShovelerComponentStruct ShovelerComponent; // forward declaration: component.h
 
-static const char *shovelerViewChunkLayerComponentTypeName = "chunk_layer";
-static const char *shovelerViewChunkLayerTypeOptionKey = "type";
-static const char *shovelerViewChunkLayerCanvasOptionKey = "canvas";
-static const char *shovelerViewChunkLayerTilemapOptionKey = "tilemap";
+static const char *shovelerComponentTypeNameChunkLayer = "chunk_layer";
+static const char *shovelerComponentChunkLayerOptionKeyType = "type";
+static const char *shovelerComponentChunkLayerOptionKeyCanvas = "canvas";
+static const char *shovelerComponentChunkLayerOptionKeyTilemap = "tilemap";
 
 ShovelerComponentType *shovelerComponentCreateChunkLayerType();
 

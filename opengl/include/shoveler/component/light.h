@@ -10,15 +10,15 @@ typedef enum {
 	SHOVELER_COMPONENT_LIGHT_TYPE_POINT
 } ShovelerComponentLightType;
 
-static const char *shovelerViewLightComponentTypeName = "light";
-static const char *shovelerViewLightPositionOptionKey = "position";
-static const char *shovelerViewLightTypeOptionKey = "type";
-static const char *shovelerViewLightWidthOptionKey = "width";
-static const char *shovelerViewLightHeightOptionKey = "height";
-static const char *shovelerViewLightSamplesOptionKey = "samples";
-static const char *shovelerViewLightAmbientFactorOptionKey = "ambientFactor";
-static const char *shovelerViewLightExponentialFactorOptionKey = "exponentialFactor";
-static const char *shovelerViewLightColorOptionKey = "color";
+static const char *shovelerComponentTypeNameLight = "light";
+static const char *shovelerComponentLightOptionKeyPosition = "position";
+static const char *shovelerComponentLightOptionKeyType = "type";
+static const char *shovelerComponentLightOptionKeyWidth = "width";
+static const char *shovelerComponentLightOptionKeyHeight = "height";
+static const char *shovelerComponentLightOptionKeySamples = "samples";
+static const char *shovelerComponentLightOptionKeyAmbientFactor = "ambientFactor";
+static const char *shovelerComponentLightOptionKeyExponentialFactor = "exponentialFactor";
+static const char *shovelerComponentLightOptionKeyColor = "color";
 
 ShovelerComponentType *shovelerComponentCreateLightType();
 ShovelerLight *shovelerComponentGetLight(ShovelerComponent *component);

@@ -22,7 +22,7 @@ bool shovelerViewEntityRemoveCanvas(ShovelerViewEntity *entity);
 
 static inline ShovelerComponent *shovelerViewEntityGetCanvasComponent(ShovelerViewEntity *entity)
 {
-	return shovelerViewEntityGetComponent(entity, shovelerViewCanvasComponentTypeName);
+	return shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameCanvas);
 }
 
 #endif

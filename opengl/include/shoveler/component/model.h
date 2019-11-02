@@ -5,16 +5,16 @@ typedef struct ShovelerModelStruct ShovelerModel; // forward declaration: model.
 typedef struct ShovelerComponentTypeStruct ShovelerComponentType; // forward declaration: component.h
 typedef struct ShovelerComponentStruct ShovelerComponent; // forward declaration: component.h
 
-static const char *shovelerViewModelComponentTypeName = "model";
-static const char *shovelerViewModelPositionOptionKey = "position";
-static const char *shovelerViewModelDrawableOptionKey = "drawable";
-static const char *shovelerViewModelMaterialOptionKey = "material";
-static const char *shovelerViewModelRotationOptionKey = "rotation";
-static const char *shovelerViewModelScaleOptionKey = "scale";
-static const char *shovelerViewModelVisibleOptionKey = "visible";
-static const char *shovelerViewModelEmitterOptionKey = "emitter";
-static const char *shovelerViewModelCastsShadowOptionKey = "castsShadow";
-static const char *shovelerViewModelPolygonModeOptionKey = "polygonMode";
+static const char *shovelerComponentTypeNameModel = "model";
+static const char *shovelerComponentModelOptionKeyPosition = "position";
+static const char *shovelerComponentModelOptionKeyDrawable = "drawable";
+static const char *shovelerComponentModelOptionKeyMaterial = "material";
+static const char *shovelerComponentModelOptionKeyRotation = "rotation";
+static const char *shovelerComponentModelOptionKeyScale = "scale";
+static const char *shovelerComponentModelOptionKeyVisible = "visible";
+static const char *shovelerComponentModelOptionKeyEmitter = "emitter";
+static const char *shovelerComponentModelOptionKeyCastsShadow = "castsShadow";
+static const char *shovelerComponentModelOptionKeyPolygonMode = "polygonMode";
 
 ShovelerComponentType *shovelerComponentCreateModelType();
 ShovelerModel *shovelerComponentGetModel(ShovelerComponent *component);

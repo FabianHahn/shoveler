@@ -18,23 +18,23 @@ static void updateModelPositionDependency(ShovelerComponent *component, Shoveler
 
 ShovelerComponentType *shovelerComponentCreateModelType()
 {
-	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerViewModelComponentTypeName, activateModelComponent, deactivateModelComponent, /* requiresAuthority */ false);
-	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerViewModelPositionOptionKey, shovelerComponentTypeNamePosition, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, updateModelPositionDependency);
-	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerViewModelDrawableOptionKey, shovelerViewDrawableComponentTypeName, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
-	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerViewModelMaterialOptionKey, shovelerViewMaterialComponentTypeName, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
-	shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewModelRotationOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_VECTOR3, /* isOptional */ false, /* liveUpdate */ NULL);
-	shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewModelScaleOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_VECTOR3, /* isOptional */ false, /* liveUpdate */ NULL);
-	shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewModelVisibleOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BOOL, /* isOptional */ false, /* liveUpdate */ NULL);
-	shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewModelEmitterOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BOOL, /* isOptional */ false, /* liveUpdate */ NULL);
-	shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewModelCastsShadowOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BOOL, /* isOptional */ false, /* liveUpdate */ NULL);
-	shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewModelPolygonModeOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
+	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerComponentTypeNameModel, activateModelComponent, deactivateModelComponent, /* requiresAuthority */ false);
+	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentModelOptionKeyPosition, shovelerComponentTypeNamePosition, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, updateModelPositionDependency);
+	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentModelOptionKeyDrawable, shovelerComponentTypeNameDrawable, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentModelOptionKeyMaterial, shovelerComponentTypeNameMaterial, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentModelOptionKeyRotation, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_VECTOR3, /* isOptional */ false, /* liveUpdate */ NULL);
+	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentModelOptionKeyScale, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_VECTOR3, /* isOptional */ false, /* liveUpdate */ NULL);
+	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentModelOptionKeyVisible, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BOOL, /* isOptional */ false, /* liveUpdate */ NULL);
+	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentModelOptionKeyEmitter, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BOOL, /* isOptional */ false, /* liveUpdate */ NULL);
+	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentModelOptionKeyCastsShadow, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BOOL, /* isOptional */ false, /* liveUpdate */ NULL);
+	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentModelOptionKeyPolygonMode, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
 
 	return componentType;
 }
 
 ShovelerModel *shovelerComponentGetModel(ShovelerComponent *component)
 {
-	assert(strcmp(component->type->name, shovelerViewModelComponentTypeName) == 0);
+	assert(strcmp(component->type->name, shovelerComponentTypeNameModel) == 0);
 
 	return component->data;
 }
@@ -43,29 +43,29 @@ static void *activateModelComponent(ShovelerComponent *component)
 {
 	assert(shovelerComponentHasViewScene(component));
 
-	ShovelerComponent *positionComponent = shovelerComponentGetDependency(component, shovelerViewModelPositionOptionKey);
+	ShovelerComponent *positionComponent = shovelerComponentGetDependency(component, shovelerComponentModelOptionKeyPosition);
 	assert(positionComponent != NULL);
 	const ShovelerVector3 *positionCoordinates = shovelerComponentGetPositionCoordinates(positionComponent);
 	assert(positionCoordinates != NULL);
 
-	ShovelerComponent *drawableComponent = shovelerComponentGetDependency(component, shovelerViewModelDrawableOptionKey);
+	ShovelerComponent *drawableComponent = shovelerComponentGetDependency(component, shovelerComponentModelOptionKeyDrawable);
 	assert(drawableComponent != NULL);
 	ShovelerDrawable *drawable = shovelerComponentGetDrawable(drawableComponent);
 	assert(drawable != NULL);
 
-	ShovelerComponent *materialComponent = shovelerComponentGetDependency(component, shovelerViewModelMaterialOptionKey);
+	ShovelerComponent *materialComponent = shovelerComponentGetDependency(component, shovelerComponentModelOptionKeyMaterial);
 	assert(materialComponent != NULL);
 	ShovelerMaterial *material = shovelerComponentGetMaterial(materialComponent);
 	assert(material != NULL);
 
 	ShovelerModel *model = shovelerModelCreate(drawable, material);
 	model->translation = *positionCoordinates;
-	model->rotation = shovelerComponentGetConfigurationValueVector3(component, shovelerViewModelRotationOptionKey);
-	model->scale = shovelerComponentGetConfigurationValueVector3(component, shovelerViewModelScaleOptionKey);
-	model->visible = shovelerComponentGetConfigurationValueBool(component, shovelerViewModelVisibleOptionKey);
-	model->emitter = shovelerComponentGetConfigurationValueBool(component, shovelerViewModelEmitterOptionKey);
-	model->castsShadow = shovelerComponentGetConfigurationValueBool(component, shovelerViewModelCastsShadowOptionKey);
-	model->polygonMode = shovelerComponentGetConfigurationValueInt(component, shovelerViewModelPolygonModeOptionKey);
+	model->rotation = shovelerComponentGetConfigurationValueVector3(component, shovelerComponentModelOptionKeyRotation);
+	model->scale = shovelerComponentGetConfigurationValueVector3(component, shovelerComponentModelOptionKeyScale);
+	model->visible = shovelerComponentGetConfigurationValueBool(component, shovelerComponentModelOptionKeyVisible);
+	model->emitter = shovelerComponentGetConfigurationValueBool(component, shovelerComponentModelOptionKeyEmitter);
+	model->castsShadow = shovelerComponentGetConfigurationValueBool(component, shovelerComponentModelOptionKeyCastsShadow);
+	model->polygonMode = shovelerComponentGetConfigurationValueInt(component, shovelerComponentModelOptionKeyPolygonMode);
 	shovelerModelUpdateTransformation(model);
 
 	ShovelerScene *scene = shovelerComponentGetViewScene(component);
@@ -92,7 +92,7 @@ static void updateModelPositionDependency(ShovelerComponent *component, Shoveler
 {
 	ShovelerModel *model = (ShovelerModel *) component->data;
 
-	ShovelerComponent *positionComponent = shovelerComponentGetDependency(component, shovelerViewModelPositionOptionKey);
+	ShovelerComponent *positionComponent = shovelerComponentGetDependency(component, shovelerComponentModelOptionKeyPosition);
 	assert(positionComponent != NULL);
 	const ShovelerVector3 *positionCoordinates = shovelerComponentGetPositionCoordinates(positionComponent);
 	assert(positionCoordinates != NULL);

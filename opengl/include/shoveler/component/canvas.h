@@ -5,8 +5,8 @@ typedef struct ShovelerCanvasStruct ShovelerCanvas; // forward declaration: canv
 typedef struct ShovelerComponentTypeStruct ShovelerComponentType; // forward declaration: component.h
 typedef struct ShovelerComponentStruct ShovelerComponent; // forward declaration: component.h
 
-static const char *shovelerViewCanvasComponentTypeName = "canvas";
-static const char *shovelerViewCanvasTileSpritesOptionKey = "tile_sprites";
+static const char *shovelerComponentTypeNameCanvas = "canvas";
+static const char *shovelerComponentCanvasOptionKeyTileSprites = "tile_sprites";
 
 ShovelerComponentType *shovelerComponentCreateCanvasType();
 ShovelerCanvas *shovelerComponentGetCanvas(ShovelerComponent *component);

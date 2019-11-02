@@ -29,7 +29,7 @@ bool shovelerViewEntityRemoveTileSprite(ShovelerViewEntity *entity);
 
 static inline ShovelerComponent *shovelerViewEntityGetTileSpriteComponent(ShovelerViewEntity *entity)
 {
-	return shovelerViewEntityGetComponent(entity, shovelerViewTileSpriteComponentTypeName);
+	return shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameTileSprite);
 }
 
 #endif

@@ -15,24 +15,24 @@ static void deactivateDrawableComponent(ShovelerComponent *component);
 
 ShovelerComponentType *shovelerComponentCreateDrawableType()
 {
-	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerViewDrawableComponentTypeName, activateDrawableComponent, deactivateDrawableComponent, /* requiresAuthority */ false);
-	shovelerComponentTypeAddConfigurationOption(componentType, ShovelerComponentDrawableTypeOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
-	shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewDrawableTilesWidthOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ true, /* liveUpdate */ NULL);
-	shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewDrawableTilesHeightOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ true, /* liveUpdate */ NULL);
+	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerComponentTypeNameDrawable, activateDrawableComponent, deactivateDrawableComponent, /* requiresAuthority */ false);
+	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentDrawableOptionKeyType, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
+	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentDrawableOptionKeyTilesWidth, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ true, /* liveUpdate */ NULL);
+	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentDrawableOptionKeyTilesHeight, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ true, /* liveUpdate */ NULL);
 
 	return componentType;
 }
 
 ShovelerDrawable *shovelerComponentGetDrawable(ShovelerComponent *component)
 {
-	assert(strcmp(component->type->name, shovelerViewDrawableComponentTypeName) == 0);
+	assert(strcmp(component->type->name, shovelerComponentTypeNameDrawable) == 0);
 
 	return component->data;
 }
 
 static void *activateDrawableComponent(ShovelerComponent *component)
 {
-	ShovelerComponentDrawableType type = shovelerComponentGetConfigurationValueInt(component, ShovelerComponentDrawableTypeOptionKey);
+	ShovelerComponentDrawableType type = shovelerComponentGetConfigurationValueInt(component, shovelerComponentDrawableOptionKeyType);
 	switch(type) {
 		case SHOVELER_COMPONENT_DRAWABLE_TYPE_CUBE:
 			return shovelerDrawableCubeCreate();
@@ -41,8 +41,8 @@ static void *activateDrawableComponent(ShovelerComponent *component)
 		case SHOVELER_COMPONENT_DRAWABLE_TYPE_POINT:
 			return shovelerDrawablePointCreate();
 		case SHOVELER_COMPONENT_DRAWABLE_TYPE_TILES: {
-			int tilesWidth = shovelerComponentGetConfigurationValueInt(component, shovelerViewDrawableTilesWidthOptionKey);
-			int tilesHeight = shovelerComponentGetConfigurationValueInt(component, shovelerViewDrawableTilesHeightOptionKey);
+			int tilesWidth = shovelerComponentGetConfigurationValueInt(component, shovelerComponentDrawableOptionKeyTilesWidth);
+			int tilesHeight = shovelerComponentGetConfigurationValueInt(component, shovelerComponentDrawableOptionKeyTilesHeight);
 			return shovelerDrawableTilesCreate(tilesWidth, tilesHeight);
 		}
 		default:

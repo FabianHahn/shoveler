@@ -15,26 +15,26 @@ static ShovelerVector2 getTileSpriteAnimationPosition(ShovelerComponent *compone
 
 ShovelerComponentType *shovelerComponentCreateTileSpriteAnimationType()
 {
-	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerViewTileSpriteAnimationComponentTypeName, activateTileSpriteAnimationComponent, deactivateTileSpriteAnimationComponent, /* requiresAuthority */ false);
-	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerViewTileSpriteAnimationPositionOptionKey, shovelerComponentTypeNamePosition, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, updateTileSpriteAnimationPositionDependency);
-	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerViewTileSpriteAnimationTileSpriteOptionKey, shovelerViewTileSpriteComponentTypeName, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
-	shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewTileSpriteAnimationPositionMappingXOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
-	shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewTileSpriteAnimationPositionMappingYOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
-	shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewTileSpriteAnimationMoveAmountThresholdOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_FLOAT, /* isOptional */ false, /* liveUpdate */ NULL);
+	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerComponentTypeNameTileSpriteAnimation, activateTileSpriteAnimationComponent, deactivateTileSpriteAnimationComponent, /* requiresAuthority */ false);
+	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentTileSpriteAnimationOptionKeyPosition, shovelerComponentTypeNamePosition, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, updateTileSpriteAnimationPositionDependency);
+	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentTileSpriteAnimationOptionKeyTileSprite, shovelerComponentTypeNameTileSprite, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentTileSpriteAnimationOptionKeyPositionMappingX, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
+	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentTileSpriteAnimationOptionKeyPositionMappingY, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
+	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentTileSpriteAnimationOptionKeyMoveAmountThreshold, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_FLOAT, /* isOptional */ false, /* liveUpdate */ NULL);
 
 	return componentType;
 }
 
 ShovelerTileSpriteAnimation *shovelerComponentGetTileSpriteAnimation(ShovelerComponent *component)
 {
-	assert(strcmp(component->type->name, shovelerViewTileSpriteAnimationComponentTypeName) == 0);
+	assert(strcmp(component->type->name, shovelerComponentTypeNameTileSpriteAnimation) == 0);
 
 	return component->data;
 }
 
 static void *activateTileSpriteAnimationComponent(ShovelerComponent *component)
 {
-	ShovelerComponent *tileSpriteComponent = shovelerComponentGetDependency(component, shovelerViewTileSpriteAnimationTileSpriteOptionKey);
+	ShovelerComponent *tileSpriteComponent = shovelerComponentGetDependency(component, shovelerComponentTileSpriteAnimationOptionKeyTileSprite);
 	assert(tileSpriteComponent != NULL);
 	ShovelerCanvasTileSprite *tileSprite = shovelerComponentGetTileSprite(tileSpriteComponent);
 	assert(tileSprite != NULL);
@@ -44,7 +44,7 @@ static void *activateTileSpriteAnimationComponent(ShovelerComponent *component)
 		return false;
 	}
 
-	float moveAmountThreshold = shovelerComponentGetConfigurationValueFloat(component, shovelerViewTileSpriteAnimationMoveAmountThresholdOptionKey);
+	float moveAmountThreshold = shovelerComponentGetConfigurationValueFloat(component, shovelerComponentTileSpriteAnimationOptionKeyMoveAmountThreshold);
 	ShovelerTileSpriteAnimation *animation = shovelerTileSpriteAnimationCreate(tileSprite, getTileSpriteAnimationPosition(component), moveAmountThreshold);
 	return animation;
 }
@@ -66,13 +66,13 @@ static void updateTileSpriteAnimationPositionDependency(ShovelerComponent *compo
 
 static ShovelerVector2 getTileSpriteAnimationPosition(ShovelerComponent *component)
 {
-	ShovelerComponent *positionComponent = shovelerComponentGetDependency(component, shovelerViewTileSpriteAnimationPositionOptionKey);
+	ShovelerComponent *positionComponent = shovelerComponentGetDependency(component, shovelerComponentTileSpriteAnimationOptionKeyPosition);
 	assert(positionComponent != NULL);
 	const ShovelerVector3 *positionCoordinates = shovelerComponentGetPositionCoordinates(positionComponent);
 	assert(positionCoordinates != NULL);
 
-	ShovelerCoordinateMapping positionMappingX = shovelerComponentGetConfigurationValueInt(component, shovelerViewTileSpriteAnimationPositionMappingXOptionKey);
-	ShovelerCoordinateMapping positionMappingY = shovelerComponentGetConfigurationValueInt(component, shovelerViewTileSpriteAnimationPositionMappingYOptionKey);
+	ShovelerCoordinateMapping positionMappingX = shovelerComponentGetConfigurationValueInt(component, shovelerComponentTileSpriteAnimationOptionKeyPositionMappingX);
+	ShovelerCoordinateMapping positionMappingY = shovelerComponentGetConfigurationValueInt(component, shovelerComponentTileSpriteAnimationOptionKeyPositionMappingY);
 
 	return shovelerVector2(
 		shovelerCoordinateMap(*positionCoordinates, positionMappingX),

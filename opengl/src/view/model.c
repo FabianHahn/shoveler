@@ -14,20 +14,20 @@
 
 bool shovelerViewEntityAddModel(ShovelerViewEntity *entity, const ShovelerViewModelConfiguration *configuration)
 {
-	if(!shovelerViewHasComponentType(entity->view, shovelerViewModelComponentTypeName)) {
+	if(!shovelerViewHasComponentType(entity->view, shovelerComponentTypeNameModel)) {
 		shovelerViewAddComponentType(entity->view, shovelerComponentCreateModelType());
 	}
 
-	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerViewModelComponentTypeName);
-	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewModelPositionOptionKey, configuration->positionEntityId);
-	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewModelDrawableOptionKey, configuration->drawableEntityId);
-	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewModelMaterialOptionKey, configuration->materialEntityId);
-	shovelerComponentUpdateCanonicalConfigurationOptionVector3(component, shovelerViewModelRotationOptionKey, configuration->rotation);
-	shovelerComponentUpdateCanonicalConfigurationOptionVector3(component, shovelerViewModelScaleOptionKey, configuration->scale);
-	shovelerComponentUpdateCanonicalConfigurationOptionBool(component, shovelerViewModelVisibleOptionKey, configuration->visible);
-	shovelerComponentUpdateCanonicalConfigurationOptionBool(component, shovelerViewModelEmitterOptionKey, configuration->emitter);
-	shovelerComponentUpdateCanonicalConfigurationOptionBool(component, shovelerViewModelCastsShadowOptionKey, configuration->castsShadow);
-	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerViewModelPolygonModeOptionKey, configuration->polygonMode);
+	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerComponentTypeNameModel);
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerComponentModelOptionKeyPosition, configuration->positionEntityId);
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerComponentModelOptionKeyDrawable, configuration->drawableEntityId);
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerComponentModelOptionKeyMaterial, configuration->materialEntityId);
+	shovelerComponentUpdateCanonicalConfigurationOptionVector3(component, shovelerComponentModelOptionKeyRotation, configuration->rotation);
+	shovelerComponentUpdateCanonicalConfigurationOptionVector3(component, shovelerComponentModelOptionKeyScale, configuration->scale);
+	shovelerComponentUpdateCanonicalConfigurationOptionBool(component, shovelerComponentModelOptionKeyVisible, configuration->visible);
+	shovelerComponentUpdateCanonicalConfigurationOptionBool(component, shovelerComponentModelOptionKeyEmitter, configuration->emitter);
+	shovelerComponentUpdateCanonicalConfigurationOptionBool(component, shovelerComponentModelOptionKeyCastsShadow, configuration->castsShadow);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerComponentModelOptionKeyPolygonMode, configuration->polygonMode);
 
 	shovelerComponentActivate(component);
 	return component;
@@ -35,7 +35,7 @@ bool shovelerViewEntityAddModel(ShovelerViewEntity *entity, const ShovelerViewMo
 
 ShovelerModel *shovelerViewEntityGetModel(ShovelerViewEntity *entity)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewModelComponentTypeName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameModel);
 	if(component == NULL) {
 		return NULL;
 	}
@@ -45,30 +45,30 @@ ShovelerModel *shovelerViewEntityGetModel(ShovelerViewEntity *entity)
 
 bool shovelerViewEntityGetModelConfiguration(ShovelerViewEntity *entity, ShovelerViewModelConfiguration *outputConfiguration)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewModelComponentTypeName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameModel);
 	if(component == NULL) {
 		return NULL;
 	}
 
-	outputConfiguration->positionEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerViewModelPositionOptionKey);
-	outputConfiguration->drawableEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerViewModelDrawableOptionKey);
-	outputConfiguration->materialEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerViewModelMaterialOptionKey);
-	outputConfiguration->rotation = shovelerComponentGetConfigurationValueVector3(component, shovelerViewModelRotationOptionKey);
-	outputConfiguration->scale = shovelerComponentGetConfigurationValueVector3(component, shovelerViewModelScaleOptionKey);
-	outputConfiguration->visible = shovelerComponentGetConfigurationValueBool(component, shovelerViewModelVisibleOptionKey);
-	outputConfiguration->emitter = shovelerComponentGetConfigurationValueBool(component, shovelerViewModelEmitterOptionKey);
-	outputConfiguration->castsShadow = shovelerComponentGetConfigurationValueBool(component, shovelerViewModelCastsShadowOptionKey);
-	outputConfiguration->polygonMode = shovelerComponentGetConfigurationValueInt(component, shovelerViewModelPolygonModeOptionKey);
+	outputConfiguration->positionEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerComponentModelOptionKeyPosition);
+	outputConfiguration->drawableEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerComponentModelOptionKeyDrawable);
+	outputConfiguration->materialEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerComponentModelOptionKeyMaterial);
+	outputConfiguration->rotation = shovelerComponentGetConfigurationValueVector3(component, shovelerComponentModelOptionKeyRotation);
+	outputConfiguration->scale = shovelerComponentGetConfigurationValueVector3(component, shovelerComponentModelOptionKeyScale);
+	outputConfiguration->visible = shovelerComponentGetConfigurationValueBool(component, shovelerComponentModelOptionKeyVisible);
+	outputConfiguration->emitter = shovelerComponentGetConfigurationValueBool(component, shovelerComponentModelOptionKeyEmitter);
+	outputConfiguration->castsShadow = shovelerComponentGetConfigurationValueBool(component, shovelerComponentModelOptionKeyCastsShadow);
+	outputConfiguration->polygonMode = shovelerComponentGetConfigurationValueInt(component, shovelerComponentModelOptionKeyPolygonMode);
 	return true;
 }
 
 bool shovelerViewEntityRemoveModel(ShovelerViewEntity *entity)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewModelComponentTypeName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameModel);
 	if(component == NULL) {
 		shovelerLogWarning("Trying to remove model from entity %lld which does not have a model, ignoring.", entity->id);
 		return false;
 	}
 
-	return shovelerViewEntityRemoveComponent(entity, shovelerViewModelComponentTypeName);
+	return shovelerViewEntityRemoveComponent(entity, shovelerComponentTypeNameModel);
 }

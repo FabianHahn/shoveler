@@ -26,7 +26,7 @@ bool shovelerViewEntityRemoveSampler(ShovelerViewEntity *entity);
 
 static inline ShovelerComponent *shovelerViewEntityGetSamplerComponent(ShovelerViewEntity *entity)
 {
-	return shovelerViewEntityGetComponent(entity, shovelerViewSamplerComponentTypeName);
+	return shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameSampler);
 }
 
 #endif

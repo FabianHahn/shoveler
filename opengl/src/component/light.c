@@ -19,22 +19,22 @@ static void updateLightPositionDependency(ShovelerComponent *component, Shoveler
 
 ShovelerComponentType *shovelerComponentCreateLightType()
 {
-	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerViewLightComponentTypeName, activateLightComponent, deactivateLightComponent, /* requiresAuthority */ false);
-	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerViewLightPositionOptionKey, shovelerComponentTypeNamePosition, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, updateLightPositionDependency);
-	shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewLightTypeOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
-	shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewLightWidthOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
-	shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewLightHeightOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
-	shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewLightSamplesOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
-	shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewLightAmbientFactorOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_FLOAT, /* isOptional */ false, /* liveUpdate */ NULL);
-	shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewLightExponentialFactorOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_FLOAT, /* isOptional */ false, /* liveUpdate */ NULL);
-	shovelerComponentTypeAddConfigurationOption(componentType, shovelerViewLightColorOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_VECTOR3, /* isOptional */ false, /* liveUpdate */ NULL);
+	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerComponentTypeNameLight, activateLightComponent, deactivateLightComponent, /* requiresAuthority */ false);
+	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentLightOptionKeyPosition, shovelerComponentTypeNamePosition, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, updateLightPositionDependency);
+	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentLightOptionKeyType, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
+	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentLightOptionKeyWidth, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
+	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentLightOptionKeyHeight, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
+	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentLightOptionKeySamples, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
+	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentLightOptionKeyAmbientFactor, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_FLOAT, /* isOptional */ false, /* liveUpdate */ NULL);
+	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentLightOptionKeyExponentialFactor, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_FLOAT, /* isOptional */ false, /* liveUpdate */ NULL);
+	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentLightOptionKeyColor, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_VECTOR3, /* isOptional */ false, /* liveUpdate */ NULL);
 
 	return componentType;
 }
 
 ShovelerLight *shovelerComponentGetLight(ShovelerComponent *component)
 {
-	assert(strcmp(component->type->name, shovelerViewLightComponentTypeName) == 0);
+	assert(strcmp(component->type->name, shovelerComponentTypeNameLight) == 0);
 
 	return component->data;
 }
@@ -45,12 +45,12 @@ static void *activateLightComponent(ShovelerComponent *component)
 	assert(shovelerComponentHasViewScene(component));
 	assert(shovelerComponentHasViewShaderCache(component));
 
-	ShovelerComponent *positionComponent = shovelerComponentGetDependency(component, shovelerViewLightPositionOptionKey);
+	ShovelerComponent *positionComponent = shovelerComponentGetDependency(component, shovelerComponentLightOptionKeyPosition);
 	assert(positionComponent != NULL);
 	const ShovelerVector3 *positionCoordinates = shovelerComponentGetPositionCoordinates(positionComponent);
 	assert(positionCoordinates != NULL);
 
-	ShovelerComponentLightType type = shovelerComponentGetConfigurationValueInt(component, shovelerViewLightTypeOptionKey);
+	ShovelerComponentLightType type = shovelerComponentGetConfigurationValueInt(component, shovelerComponentLightOptionKeyType);
 	ShovelerLight *light;
 	switch(type) {
 		case SHOVELER_COMPONENT_LIGHT_TYPE_SPOT:
@@ -59,12 +59,12 @@ static void *activateLightComponent(ShovelerComponent *component)
 		case SHOVELER_COMPONENT_LIGHT_TYPE_POINT: {
 			ShovelerShaderCache *shaderCache = shovelerComponentGetViewShaderCache(component);
 
-			int width = shovelerComponentGetConfigurationValueInt(component, shovelerViewLightWidthOptionKey);
-			int height = shovelerComponentGetConfigurationValueInt(component, shovelerViewLightHeightOptionKey);
-			int samples = shovelerComponentGetConfigurationValueInt(component, shovelerViewLightSamplesOptionKey);
-			float ambientFactor = shovelerComponentGetConfigurationValueFloat(component, shovelerViewLightAmbientFactorOptionKey);
-			float exponentialFactor = shovelerComponentGetConfigurationValueFloat(component, shovelerViewLightExponentialFactorOptionKey);
-			ShovelerVector3 color = shovelerComponentGetConfigurationValueVector3(component, shovelerViewLightColorOptionKey);
+			int width = shovelerComponentGetConfigurationValueInt(component, shovelerComponentLightOptionKeyWidth);
+			int height = shovelerComponentGetConfigurationValueInt(component, shovelerComponentLightOptionKeyHeight);
+			int samples = shovelerComponentGetConfigurationValueInt(component, shovelerComponentLightOptionKeySamples);
+			float ambientFactor = shovelerComponentGetConfigurationValueFloat(component, shovelerComponentLightOptionKeyAmbientFactor);
+			float exponentialFactor = shovelerComponentGetConfigurationValueFloat(component, shovelerComponentLightOptionKeyExponentialFactor);
+			ShovelerVector3 color = shovelerComponentGetConfigurationValueVector3(component, shovelerComponentLightOptionKeyColor);
 
 			light = shovelerLightPointCreate(shaderCache, *positionCoordinates, width, height, samples, ambientFactor, exponentialFactor, color);
 		} break;
@@ -96,7 +96,7 @@ static void updateLightPositionDependency(ShovelerComponent *component, Shoveler
 {
 	ShovelerLight *light = (ShovelerLight *) component->data;
 
-	ShovelerComponent *positionComponent = shovelerComponentGetDependency(component, shovelerViewLightPositionOptionKey);
+	ShovelerComponent *positionComponent = shovelerComponentGetDependency(component, shovelerComponentLightOptionKeyPosition);
 	assert(positionComponent != NULL);
 	const ShovelerVector3 *positionCoordinates = shovelerComponentGetPositionCoordinates(positionComponent);
 	assert(positionCoordinates != NULL);

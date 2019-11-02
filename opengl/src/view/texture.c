@@ -9,12 +9,12 @@
 
 bool shovelerViewEntityAddTexture(ShovelerViewEntity *entity, const ShovelerViewTextureConfiguration *configuration)
 {
-	if(!shovelerViewHasComponentType(entity->view, shovelerViewTextureComponentTypeName)) {
+	if(!shovelerViewHasComponentType(entity->view, shovelerComponentTypeNameTexture)) {
 		shovelerViewAddComponentType(entity->view, shovelerComponentCreateTextureType());
 	}
 
-	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerViewTextureComponentTypeName);
-	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewTextureImageResourceOptionKey, configuration->imageResourceEntityId);
+	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerComponentTypeNameTexture);
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerComponentTextureOptionKeyImageResource, configuration->imageResourceEntityId);
 
 	shovelerComponentActivate(component);
 	return component;
@@ -22,7 +22,7 @@ bool shovelerViewEntityAddTexture(ShovelerViewEntity *entity, const ShovelerView
 
 ShovelerTexture *shovelerViewEntityGetTexture(ShovelerViewEntity *entity)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTextureComponentTypeName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameTexture);
 	if(component == NULL) {
 		return NULL;
 	}
@@ -32,34 +32,34 @@ ShovelerTexture *shovelerViewEntityGetTexture(ShovelerViewEntity *entity)
 
 bool shovelerViewEntityGetTextureConfiguration(ShovelerViewEntity *entity, ShovelerViewTextureConfiguration *outputConfiguration)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTextureComponentTypeName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameTexture);
 	if(component == NULL) {
 		return false;
 	}
 
-	outputConfiguration->imageResourceEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerViewTextureImageResourceOptionKey);
+	outputConfiguration->imageResourceEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerComponentTextureOptionKeyImageResource);
 	return true;
 }
 
 bool shovelerViewEntityUpdateTexture(ShovelerViewEntity *entity, const ShovelerViewTextureConfiguration *configuration)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTextureComponentTypeName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameTexture);
 	if(component == NULL) {
 		shovelerLogWarning("Trying to update texture of entity %lld which does not have a texture, ignoring.", entity->id);
 		return false;
 	}
 
-	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewTextureImageResourceOptionKey, configuration->imageResourceEntityId);
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerComponentTextureOptionKeyImageResource, configuration->imageResourceEntityId);
 	return true;
 }
 
 bool shovelerViewEntityRemoveTexture(ShovelerViewEntity *entity)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewTextureComponentTypeName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameTexture);
 	if(component == NULL) {
 		shovelerLogWarning("Trying to remove texture from entity %lld which does not have a texture, ignoring.", entity->id);
 		return false;
 	}
 
-	return shovelerViewEntityRemoveComponent(entity, shovelerViewTextureComponentTypeName);
+	return shovelerViewEntityRemoveComponent(entity, shovelerComponentTypeNameTexture);
 }

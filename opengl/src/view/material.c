@@ -11,32 +11,32 @@
 
 ShovelerComponent *shovelerViewEntityAddMaterial(ShovelerViewEntity *entity, const ShovelerViewMaterialConfiguration *configuration)
 {
-	if(!shovelerViewHasComponentType(entity->view, shovelerViewMaterialComponentTypeName)) {
+	if(!shovelerViewHasComponentType(entity->view, shovelerComponentTypeNameMaterial)) {
 		shovelerViewAddComponentType(entity->view, shovelerComponentCreateMaterialType());
 	}
 
-	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerViewMaterialComponentTypeName);
-	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, ShovelerComponentMaterialTypeOptionKey, configuration->type);
+	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerComponentTypeNameMaterial);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerComponentMaterialOptionKeyType, configuration->type);
 
 	switch(configuration->type) {
 		case SHOVELER_COMPONENT_MATERIAL_TYPE_COLOR:
 		case SHOVELER_COMPONENT_MATERIAL_TYPE_PARTICLE:
-			shovelerComponentUpdateCanonicalConfigurationOptionVector3(component, shovelerViewMaterialColorOptionKey, configuration->color);
+			shovelerComponentUpdateCanonicalConfigurationOptionVector3(component, shovelerComponentMaterialOptionKeyColor, configuration->color);
 			break;
 		case SHOVELER_COMPONENT_MATERIAL_TYPE_TEXTURE:
-			shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewMaterialTextureOptionKey, configuration->textureEntityId);
-			shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewMaterialTextureSamplerOptionKey, configuration->textureSamplerEntityId);
+			shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerComponentMaterialOptionKeyTexture, configuration->textureEntityId);
+			shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerComponentMaterialOptionKeyTextureSampler, configuration->textureSamplerEntityId);
 			break;
 		case SHOVELER_COMPONENT_MATERIAL_TYPE_TILEMAP:
-			shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewMaterialTilemapOptionKey, configuration->tilemapEntityId);
+			shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerComponentMaterialOptionKeyTilemap, configuration->tilemapEntityId);
 			break;
 		case SHOVELER_COMPONENT_MATERIAL_TYPE_CANVAS:
-			shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewMaterialCanvasOptionKey, configuration->canvasEntityId);
-			shovelerComponentUpdateCanonicalConfigurationOptionVector2(component, shovelerViewMaterialCanvasRegionPositionOptionKey, configuration->canvasRegionPosition);
-			shovelerComponentUpdateCanonicalConfigurationOptionVector2(component, shovelerViewMaterialCanvasRegionSizeOptionKey, configuration->canvasRegionSize);
+			shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerComponentMaterialOptionKeyCanvas, configuration->canvasEntityId);
+			shovelerComponentUpdateCanonicalConfigurationOptionVector2(component, shovelerComponentMaterialOptionKeyCanvasRegionPosition, configuration->canvasRegionPosition);
+			shovelerComponentUpdateCanonicalConfigurationOptionVector2(component, shovelerComponentMaterialOptionKeyCanvasRegionSize, configuration->canvasRegionSize);
 			break;
 		case SHOVELER_COMPONENT_MATERIAL_TYPE_CHUNK:
-			shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewMaterialChunkOptionKey, configuration->chunkEntityId);
+			shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerComponentMaterialOptionKeyChunk, configuration->chunkEntityId);
 			break;
 		default:
 			break;
@@ -48,7 +48,7 @@ ShovelerComponent *shovelerViewEntityAddMaterial(ShovelerViewEntity *entity, con
 
 ShovelerMaterial *shovelerViewEntityGetMaterial(ShovelerViewEntity *entity)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewMaterialComponentTypeName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameMaterial);
 	if(component == NULL) {
 		return NULL;
 	}
@@ -58,31 +58,31 @@ ShovelerMaterial *shovelerViewEntityGetMaterial(ShovelerViewEntity *entity)
 
 bool shovelerViewEntityGetMaterialConfiguration(ShovelerViewEntity *entity, ShovelerViewMaterialConfiguration *outputConfiguration)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewMaterialComponentTypeName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameMaterial);
 	if(component == NULL) {
 		return NULL;
 	}
 
-	outputConfiguration->type = shovelerComponentGetConfigurationValueInt(component, ShovelerComponentMaterialTypeOptionKey);
+	outputConfiguration->type = shovelerComponentGetConfigurationValueInt(component, shovelerComponentMaterialOptionKeyType);
 	switch(outputConfiguration->type) {
 		case SHOVELER_COMPONENT_MATERIAL_TYPE_COLOR:
 		case SHOVELER_COMPONENT_MATERIAL_TYPE_PARTICLE:
-			outputConfiguration->color = shovelerComponentGetConfigurationValueVector3(component, shovelerViewMaterialColorOptionKey);
+			outputConfiguration->color = shovelerComponentGetConfigurationValueVector3(component, shovelerComponentMaterialOptionKeyColor);
 			break;
 		case SHOVELER_COMPONENT_MATERIAL_TYPE_TEXTURE:
-			outputConfiguration->textureEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerViewMaterialTextureOptionKey);
-			outputConfiguration->textureSamplerEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerViewMaterialTextureSamplerOptionKey);
+			outputConfiguration->textureEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerComponentMaterialOptionKeyTexture);
+			outputConfiguration->textureSamplerEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerComponentMaterialOptionKeyTextureSampler);
 			break;
 		case SHOVELER_COMPONENT_MATERIAL_TYPE_TILEMAP:
-			outputConfiguration->tilemapEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerViewMaterialTilemapOptionKey);
+			outputConfiguration->tilemapEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerComponentMaterialOptionKeyTilemap);
 			break;
 		case SHOVELER_COMPONENT_MATERIAL_TYPE_CANVAS:
-			outputConfiguration->canvasEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerViewMaterialCanvasOptionKey);
-			outputConfiguration->canvasRegionPosition = shovelerComponentGetConfigurationValueVector2(component, shovelerViewMaterialCanvasRegionPositionOptionKey);
-			outputConfiguration->canvasRegionSize = shovelerComponentGetConfigurationValueVector2(component, shovelerViewMaterialCanvasRegionSizeOptionKey);
+			outputConfiguration->canvasEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerComponentMaterialOptionKeyCanvas);
+			outputConfiguration->canvasRegionPosition = shovelerComponentGetConfigurationValueVector2(component, shovelerComponentMaterialOptionKeyCanvasRegionPosition);
+			outputConfiguration->canvasRegionSize = shovelerComponentGetConfigurationValueVector2(component, shovelerComponentMaterialOptionKeyCanvasRegionSize);
 			break;
 		case SHOVELER_COMPONENT_MATERIAL_TYPE_CHUNK:
-			outputConfiguration->chunkEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerViewMaterialChunkOptionKey);
+			outputConfiguration->chunkEntityId = shovelerComponentGetConfigurationValueEntityId(component, shovelerComponentMaterialOptionKeyChunk);
 			break;
 		default:
 			break;
@@ -92,33 +92,33 @@ bool shovelerViewEntityGetMaterialConfiguration(ShovelerViewEntity *entity, Shov
 
 bool shovelerViewEntityUpdateMaterial(ShovelerViewEntity *entity, const ShovelerViewMaterialConfiguration *configuration)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewMaterialComponentTypeName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameMaterial);
 	if(component == NULL) {
 		shovelerLogWarning("Trying to update material of entity %lld which does not have a material, ignoring.", entity->id);
 		return false;
 	}
 
-	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, ShovelerComponentMaterialTypeOptionKey, configuration->type);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerComponentMaterialOptionKeyType, configuration->type);
 
 	switch(configuration->type) {
 		case SHOVELER_COMPONENT_MATERIAL_TYPE_COLOR:
 		case SHOVELER_COMPONENT_MATERIAL_TYPE_PARTICLE:
-			shovelerComponentUpdateCanonicalConfigurationOptionVector3(component, shovelerViewMaterialColorOptionKey, configuration->color);
+			shovelerComponentUpdateCanonicalConfigurationOptionVector3(component, shovelerComponentMaterialOptionKeyColor, configuration->color);
 			break;
 		case SHOVELER_COMPONENT_MATERIAL_TYPE_TEXTURE:
-			shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewMaterialTextureOptionKey, configuration->textureEntityId);
-			shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewMaterialTextureSamplerOptionKey, configuration->textureSamplerEntityId);
+			shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerComponentMaterialOptionKeyTexture, configuration->textureEntityId);
+			shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerComponentMaterialOptionKeyTextureSampler, configuration->textureSamplerEntityId);
 			break;
 		case SHOVELER_COMPONENT_MATERIAL_TYPE_TILEMAP:
-			shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewMaterialTilemapOptionKey, configuration->tilemapEntityId);
+			shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerComponentMaterialOptionKeyTilemap, configuration->tilemapEntityId);
 			break;
 		case SHOVELER_COMPONENT_MATERIAL_TYPE_CANVAS:
-			shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewMaterialCanvasOptionKey, configuration->canvasEntityId);
-			shovelerComponentUpdateCanonicalConfigurationOptionVector2(component, shovelerViewMaterialCanvasRegionPositionOptionKey, configuration->canvasRegionPosition);
-			shovelerComponentUpdateCanonicalConfigurationOptionVector2(component, shovelerViewMaterialCanvasRegionSizeOptionKey, configuration->canvasRegionSize);
+			shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerComponentMaterialOptionKeyCanvas, configuration->canvasEntityId);
+			shovelerComponentUpdateCanonicalConfigurationOptionVector2(component, shovelerComponentMaterialOptionKeyCanvasRegionPosition, configuration->canvasRegionPosition);
+			shovelerComponentUpdateCanonicalConfigurationOptionVector2(component, shovelerComponentMaterialOptionKeyCanvasRegionSize, configuration->canvasRegionSize);
 			break;
 		case SHOVELER_COMPONENT_MATERIAL_TYPE_CHUNK:
-			shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerViewMaterialChunkOptionKey, configuration->chunkEntityId);
+			shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerComponentMaterialOptionKeyChunk, configuration->chunkEntityId);
 			break;
 		default:
 			break;
@@ -128,11 +128,11 @@ bool shovelerViewEntityUpdateMaterial(ShovelerViewEntity *entity, const Shoveler
 
 bool shovelerViewEntityRemoveMaterial(ShovelerViewEntity *entity)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewMaterialComponentTypeName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameMaterial);
 	if(component == NULL) {
 		shovelerLogWarning("Trying to remove material from entity %lld which does not have a material, ignoring.", entity->id);
 		return false;
 	}
 
-	return shovelerViewEntityRemoveComponent(entity, shovelerViewMaterialComponentTypeName);
+	return shovelerViewEntityRemoveComponent(entity, shovelerComponentTypeNameMaterial);
 }
