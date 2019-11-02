@@ -27,7 +27,7 @@ bool shovelerViewEntityRemoveTilemapColliders(ShovelerViewEntity *entity);
 
 static inline ShovelerComponent *shovelerViewEntityGetTilemapCollidersComponent(ShovelerViewEntity *entity)
 {
-	return shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameTilemapColliders);
+	return shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdTilemapColliders);
 }
 
 #endif

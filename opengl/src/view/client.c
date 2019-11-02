@@ -9,11 +9,11 @@
 
 ShovelerComponent *shovelerViewEntityAddClient(ShovelerViewEntity *entity, const ShovelerViewClientConfiguration *configuration)
 {
-	if(!shovelerViewHasComponentType(entity->view, shovelerComponentTypeNameClient)) {
+	if(!shovelerViewHasComponentType(entity->view, shovelerComponentTypeIdClient)) {
 		shovelerViewAddComponentType(entity->view, shovelerComponentCreateClientType());
 	}
 
-	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerComponentTypeNameClient);
+	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerComponentTypeIdClient);
 	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerComponentClientOptionKeyPosition, configuration->positionEntityId);
 	if(configuration->modelEntityId != 0) {
 		shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerComponentClientOptionKeyModel, configuration->modelEntityId);
@@ -25,7 +25,7 @@ ShovelerComponent *shovelerViewEntityAddClient(ShovelerViewEntity *entity, const
 
 bool shovelerViewEntityGetClientConfiguration(ShovelerViewEntity *entity, ShovelerViewClientConfiguration *outputConfiguration)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameClient);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdClient);
 	if(component == NULL) {
 		return false;
 	}
@@ -39,7 +39,7 @@ bool shovelerViewEntityGetClientConfiguration(ShovelerViewEntity *entity, Shovel
 
 bool shovelerViewEntityUpdateClient(ShovelerViewEntity *entity, const ShovelerViewClientConfiguration *configuration)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameClient);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdClient);
 	if(component == NULL) {
 		shovelerLogWarning("Trying to update client of entity %lld which does not have a client, ignoring.", entity->id);
 		return false;
@@ -53,11 +53,11 @@ bool shovelerViewEntityUpdateClient(ShovelerViewEntity *entity, const ShovelerVi
 
 bool shovelerViewEntityRemoveClient(ShovelerViewEntity *entity)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameClient);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdClient);
 	if(component == NULL) {
 		shovelerLogWarning("Trying to remove client from entity %lld which does not have a client, ignoring.", entity->id);
 		return false;
 	}
 
-	return shovelerViewEntityRemoveComponent(entity, shovelerComponentTypeNameClient);
+	return shovelerViewEntityRemoveComponent(entity, shovelerComponentTypeIdClient);
 }

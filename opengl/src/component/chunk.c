@@ -10,6 +10,8 @@
 #include "shoveler/component.h"
 #include "shoveler/log.h"
 
+const char *const shovelerComponentTypeIdChunk = "chunk";
+
 static void *activateChunkComponent(ShovelerComponent *component);
 static void deactivateChunkComponent(ShovelerComponent *component);
 static void updateChunkPositionDependency(ShovelerComponent *component, ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent);
@@ -17,19 +19,19 @@ static ShovelerVector2 getChunkPosition(ShovelerComponent *component);
 
 ShovelerComponentType *shovelerComponentCreateChunkType()
 {
-	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerComponentTypeNameChunk, activateChunkComponent, deactivateChunkComponent, /* requiresAuthority */ false);
-	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentChunkOptionKeyPosition, shovelerComponentTypeNamePosition, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, updateChunkPositionDependency);
+	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerComponentTypeIdChunk, activateChunkComponent, deactivateChunkComponent, /* requiresAuthority */ false);
+	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentChunkOptionKeyPosition, shovelerComponentTypeIdPosition, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, updateChunkPositionDependency);
 	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentChunkOptionKeyPositionMappingX, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
 	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentChunkOptionKeyPositionMappingY, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
 	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentChunkOptionKeySize, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_VECTOR2, /* isOptional */ false, /* liveUpdate */ NULL);
-	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentChunkOptionKeyLayers, shovelerComponentTypeNameChunkLayer, /* isArray */ true, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentChunkOptionKeyLayers, shovelerComponentTypeIdChunkLayer, /* isArray */ true, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
 
 	return componentType;
 }
 
 ShovelerChunk *shovelerComponentGetChunk(ShovelerComponent *component)
 {
-	assert(strcmp(component->type->name, shovelerComponentTypeNameChunk) == 0);
+	assert(strcmp(component->type->id, shovelerComponentTypeIdChunk) == 0);
 
 	return component->data;
 }

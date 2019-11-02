@@ -7,7 +7,7 @@ typedef struct ShovelerTilesetStruct ShovelerTileset; // forward declaration: ti
 typedef struct ShovelerComponentTypeStruct ShovelerComponentType; // forward declaration: component.h
 typedef struct ShovelerComponentStruct ShovelerComponent; // forward declaration: component.h
 
-static const char *shovelerComponentTypeNameTileset = "tileset";
+extern const char *const shovelerComponentTypeIdTileset;
 static const char *shovelerComponentTilesetOptionKeyImageResource = "image_resource";
 static const char *shovelerComponentTilesetOptionKeyNumColumns = "num_columns";
 static const char *shovelerComponentTilesetOptionKeyNumRows = "num_rows";

@@ -9,11 +9,11 @@
 
 ShovelerComponent *shovelerViewEntityAddTileSprite(ShovelerViewEntity *entity, const ShovelerViewTileSpriteConfiguration *configuration)
 {
-	if(!shovelerViewHasComponentType(entity->view, shovelerComponentTypeNameTileSprite)) {
+	if(!shovelerViewHasComponentType(entity->view, shovelerComponentTypeIdTileSprite)) {
 		shovelerViewAddComponentType(entity->view, shovelerComponentCreateTileSpriteType());
 	}
 
-	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerComponentTypeNameTileSprite);
+	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerComponentTypeIdTileSprite);
 	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerComponentTileSpriteOptionKeyPosition, configuration->positionEntityId);
 	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerComponentTileSpriteOptionKeyTileset, configuration->tilesetEntityId);
 	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerComponentTileSpriteOptionKeyTilesetColumn, configuration->tilesetColumn);
@@ -28,7 +28,7 @@ ShovelerComponent *shovelerViewEntityAddTileSprite(ShovelerViewEntity *entity, c
 
 ShovelerCanvasTileSprite *shovelerViewEntityGetTileSprite(ShovelerViewEntity *entity)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameTileSprite);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdTileSprite);
 	if(component == NULL) {
 		return false;
 	}
@@ -38,7 +38,7 @@ ShovelerCanvasTileSprite *shovelerViewEntityGetTileSprite(ShovelerViewEntity *en
 
 bool shovelerViewEntityGetTileSpriteConfiguration(ShovelerViewEntity *entity, ShovelerViewTileSpriteConfiguration *outputConfiguration)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameTileSprite);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdTileSprite);
 	if(component == NULL) {
 		return false;
 	}
@@ -55,7 +55,7 @@ bool shovelerViewEntityGetTileSpriteConfiguration(ShovelerViewEntity *entity, Sh
 
 bool shovelerViewEntityUpdateTileSprite(ShovelerViewEntity *entity, const ShovelerViewTileSpriteConfiguration *configuration)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameTileSprite);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdTileSprite);
 	if(component == NULL) {
 		shovelerLogWarning("Trying to update canvas tile sprite of entity %lld which does not have a canvas tile sprite, ignoring.", entity->id);
 		return false;
@@ -73,11 +73,11 @@ bool shovelerViewEntityUpdateTileSprite(ShovelerViewEntity *entity, const Shovel
 
 bool shovelerViewEntityRemoveTileSprite(ShovelerViewEntity *entity)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameTileSprite);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdTileSprite);
 	if(component == NULL) {
 		shovelerLogWarning("Trying to remove canvas tile sprite from entity %lld which does not have a canvas tile sprite, ignoring.", entity->id);
 		return false;
 	}
 
-	return shovelerViewEntityRemoveComponent(entity, shovelerComponentTypeNameTileSprite);
+	return shovelerViewEntityRemoveComponent(entity, shovelerComponentTypeIdTileSprite);
 }

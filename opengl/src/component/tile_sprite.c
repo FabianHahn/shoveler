@@ -8,6 +8,8 @@
 #include "shoveler/canvas.h"
 #include "shoveler/component.h"
 
+const char *const shovelerComponentTypeIdTileSprite = "tile_sprite";
+
 static void *activateTileSpriteComponent(ShovelerComponent *component);
 static void deactivateTileSpriteComponent(ShovelerComponent *component);
 static void updateTileSpritePositionDependency(ShovelerComponent *component, ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent);
@@ -15,9 +17,9 @@ static ShovelerVector2 getTileSpritePosition(ShovelerComponent *component);
 
 ShovelerComponentType *shovelerComponentCreateTileSpriteType()
 {
-	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerComponentTypeNameTileSprite, activateTileSpriteComponent, deactivateTileSpriteComponent, /* requiresAuthority */ false);
-	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentTileSpriteOptionKeyPosition, shovelerComponentTypeNamePosition, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, updateTileSpritePositionDependency);
-	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentTileSpriteOptionKeyTileset, shovelerComponentTypeNameTileset, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerComponentTypeIdTileSprite, activateTileSpriteComponent, deactivateTileSpriteComponent, /* requiresAuthority */ false);
+	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentTileSpriteOptionKeyPosition, shovelerComponentTypeIdPosition, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, updateTileSpritePositionDependency);
+	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentTileSpriteOptionKeyTileset, shovelerComponentTypeIdTileset, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
 	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentTileSpriteOptionKeyTilesetColumn, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
 	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentTileSpriteOptionKeyTilesetRow, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
 	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentTileSpriteOptionKeyPositionMappingX, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
@@ -29,7 +31,7 @@ ShovelerComponentType *shovelerComponentCreateTileSpriteType()
 
 ShovelerCanvasTileSprite *shovelerComponentGetTileSprite(ShovelerComponent *component)
 {
-	assert(strcmp(component->type->name, shovelerComponentTypeNameTileSprite) == 0);
+	assert(strcmp(component->type->id, shovelerComponentTypeIdTileSprite) == 0);
 
 	return component->data;
 }

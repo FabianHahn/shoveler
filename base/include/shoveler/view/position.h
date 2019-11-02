@@ -13,7 +13,7 @@ bool shovelerViewEntityRemovePosition(ShovelerViewEntity *entity);
 
 static inline ShovelerComponent *shovelerViewEntityGetPositionComponent(ShovelerViewEntity *entity)
 {
-	return shovelerViewEntityGetComponent(entity, shovelerComponentTypeNamePosition);
+	return shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdPosition);
 }
 
 #endif

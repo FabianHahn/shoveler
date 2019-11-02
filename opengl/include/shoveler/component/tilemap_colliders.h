@@ -6,7 +6,7 @@
 typedef struct ShovelerComponentTypeStruct ShovelerComponentType; // forward declaration: component.h
 typedef struct ShovelerComponentStruct ShovelerComponent; // forward declaration: component.h
 
-static const char *shovelerComponentTypeNameTilemapColliders = "tilemap_colliders";
+extern const char *const shovelerComponentTypeIdTilemapColliders;
 static const char *shovelerComponentTilemapCollidersOptionKeyNumColumns = "num_columns";
 static const char *shovelerComponentTilemapCollidersOptionKeyNumRows = "num_rows";
 static const char *shovelerComponentTilemapCollidersOptionKeyColliders = "colliders";

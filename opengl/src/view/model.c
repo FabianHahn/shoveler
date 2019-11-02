@@ -14,11 +14,11 @@
 
 bool shovelerViewEntityAddModel(ShovelerViewEntity *entity, const ShovelerViewModelConfiguration *configuration)
 {
-	if(!shovelerViewHasComponentType(entity->view, shovelerComponentTypeNameModel)) {
+	if(!shovelerViewHasComponentType(entity->view, shovelerComponentTypeIdModel)) {
 		shovelerViewAddComponentType(entity->view, shovelerComponentCreateModelType());
 	}
 
-	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerComponentTypeNameModel);
+	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerComponentTypeIdModel);
 	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerComponentModelOptionKeyPosition, configuration->positionEntityId);
 	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerComponentModelOptionKeyDrawable, configuration->drawableEntityId);
 	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerComponentModelOptionKeyMaterial, configuration->materialEntityId);
@@ -35,7 +35,7 @@ bool shovelerViewEntityAddModel(ShovelerViewEntity *entity, const ShovelerViewMo
 
 ShovelerModel *shovelerViewEntityGetModel(ShovelerViewEntity *entity)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameModel);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdModel);
 	if(component == NULL) {
 		return NULL;
 	}
@@ -45,7 +45,7 @@ ShovelerModel *shovelerViewEntityGetModel(ShovelerViewEntity *entity)
 
 bool shovelerViewEntityGetModelConfiguration(ShovelerViewEntity *entity, ShovelerViewModelConfiguration *outputConfiguration)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameModel);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdModel);
 	if(component == NULL) {
 		return NULL;
 	}
@@ -64,11 +64,11 @@ bool shovelerViewEntityGetModelConfiguration(ShovelerViewEntity *entity, Shovele
 
 bool shovelerViewEntityRemoveModel(ShovelerViewEntity *entity)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameModel);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdModel);
 	if(component == NULL) {
 		shovelerLogWarning("Trying to remove model from entity %lld which does not have a model, ignoring.", entity->id);
 		return false;
 	}
 
-	return shovelerViewEntityRemoveComponent(entity, shovelerComponentTypeNameModel);
+	return shovelerViewEntityRemoveComponent(entity, shovelerComponentTypeIdModel);
 }

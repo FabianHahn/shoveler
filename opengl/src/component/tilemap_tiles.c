@@ -8,6 +8,8 @@
 #include "shoveler/log.h"
 #include "shoveler/texture.h"
 
+const char *const shovelerComponentTypeIdTilemapTiles = "tilemap_tiles";
+
 static void *activateTilemapTilesComponent(ShovelerComponent *component);
 static void deactivateTilemapTilesComponent(ShovelerComponent *component);
 static void liveUpdateTilesOption(ShovelerComponent *component, ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *value);
@@ -17,8 +19,8 @@ static bool isComponentConfigurationOptionDefinition(ShovelerComponent *componen
 
 ShovelerComponentType *shovelerComponentCreateTilemapTilesType()
 {
-	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerComponentTypeNameTilemapTiles, activateTilemapTilesComponent, deactivateTilemapTilesComponent, /* requiresAuthority */ false);
-	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentTilemapTilesOptionKeyImageResource, shovelerComponentTypeNameResource, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerComponentTypeIdTilemapTiles, activateTilemapTilesComponent, deactivateTilemapTilesComponent, /* requiresAuthority */ false);
+	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentTilemapTilesOptionKeyImageResource, shovelerComponentTypeIdResource, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* updateDependency */ NULL);
 	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentTilemapTilesOptionKeyNumColumns, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ true, /* liveUpdate */ NULL);
 	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentTilemapTilesOptionKeyNumRows, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ true, /* liveUpdate */ NULL);
 	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentTilemapTilesOptionKeyTilesetColumns, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BYTES, /* isOptional */ true, liveUpdateTilesOption);
@@ -30,7 +32,7 @@ ShovelerComponentType *shovelerComponentCreateTilemapTilesType()
 
 ShovelerTexture *shovelerComponentGetTilemapTiles(ShovelerComponent *component)
 {
-	assert(strcmp(component->type->name, shovelerComponentTypeNameTilemapTiles) == 0);
+	assert(strcmp(component->type->id, shovelerComponentTypeIdTilemapTiles) == 0);
 
 	return component->data;
 }

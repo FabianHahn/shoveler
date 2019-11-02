@@ -5,7 +5,7 @@ typedef struct ShovelerTileSpriteAnimationStruct ShovelerTileSpriteAnimation; //
 typedef struct ShovelerComponentTypeStruct ShovelerComponentType; // forward declaration: component.h
 typedef struct ShovelerComponentStruct ShovelerComponent; // forward declaration: component.h
 
-static const char *shovelerComponentTypeNameTileSpriteAnimation = "tile_sprite_animation";
+extern const char *const shovelerComponentTypeIdTileSpriteAnimation;
 static const char *shovelerComponentTileSpriteAnimationOptionKeyPosition = "position";
 static const char *shovelerComponentTileSpriteAnimationOptionKeyTileSprite = "tile_sprite";
 static const char *shovelerComponentTileSpriteAnimationOptionKeyPositionMappingX = "position_mapping_x";

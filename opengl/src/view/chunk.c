@@ -11,11 +11,11 @@
 
 ShovelerComponent *shovelerViewEntityAddChunk(ShovelerViewEntity *entity, const ShovelerViewChunkConfiguration *configuration)
 {
-	if(!shovelerViewHasComponentType(entity->view, shovelerComponentTypeNameChunk)) {
+	if(!shovelerViewHasComponentType(entity->view, shovelerComponentTypeIdChunk)) {
 		shovelerViewAddComponentType(entity->view, shovelerComponentCreateChunkType());
 	}
 
-	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerComponentTypeNameChunk);
+	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerComponentTypeIdChunk);
 	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerComponentChunkOptionKeyPosition, configuration->positionEntityId);
 	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerComponentChunkOptionKeyPositionMappingX, configuration->positionMappingX);
 	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerComponentChunkOptionKeyPositionMappingX, configuration->positionMappingY);
@@ -28,7 +28,7 @@ ShovelerComponent *shovelerViewEntityAddChunk(ShovelerViewEntity *entity, const 
 
 ShovelerChunk *shovelerViewEntityGetChunk(ShovelerViewEntity *entity)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameChunk);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdChunk);
 	if(component == NULL) {
 		return NULL;
 	}
@@ -38,7 +38,7 @@ ShovelerChunk *shovelerViewEntityGetChunk(ShovelerViewEntity *entity)
 
 bool shovelerViewEntityGetChunkConfiguration(ShovelerViewEntity *entity, ShovelerViewChunkConfiguration *outputConfiguration)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameChunk);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdChunk);
 	if(component == NULL) {
 		return false;
 	}
@@ -58,7 +58,7 @@ bool shovelerViewEntityGetChunkConfiguration(ShovelerViewEntity *entity, Shovele
 
 bool shovelerViewEntityUpdateChunk(ShovelerViewEntity *entity, const ShovelerViewChunkConfiguration *configuration)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameChunk);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdChunk);
 	if(component == NULL) {
 		shovelerLogWarning("Trying to update chunk of entity %lld which does not have a chunk, ignoring.", entity->id);
 		return false;
@@ -73,11 +73,11 @@ bool shovelerViewEntityUpdateChunk(ShovelerViewEntity *entity, const ShovelerVie
 
 bool shovelerViewEntityRemoveChunk(ShovelerViewEntity *entity)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameChunk);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdChunk);
 	if(component == NULL) {
 		shovelerLogWarning("Trying to remove chunk from entity %lld which does not have a chunk, ignoring.", entity->id);
 		return false;
 	}
 
-	return shovelerViewEntityRemoveComponent(entity, shovelerComponentTypeNameChunk);
+	return shovelerViewEntityRemoveComponent(entity, shovelerComponentTypeIdChunk);
 }

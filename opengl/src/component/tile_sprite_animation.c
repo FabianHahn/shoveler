@@ -8,6 +8,8 @@
 #include "shoveler/log.h"
 #include "shoveler/tile_sprite_animation.h"
 
+const char *const shovelerComponentTypeIdTileSpriteAnimation = "tile_sprite_animation";
+
 static void *activateTileSpriteAnimationComponent(ShovelerComponent *component);
 static void deactivateTileSpriteAnimationComponent(ShovelerComponent *component);
 static void updateTileSpriteAnimationPositionDependency(ShovelerComponent *component, ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent);
@@ -15,9 +17,9 @@ static ShovelerVector2 getTileSpriteAnimationPosition(ShovelerComponent *compone
 
 ShovelerComponentType *shovelerComponentCreateTileSpriteAnimationType()
 {
-	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerComponentTypeNameTileSpriteAnimation, activateTileSpriteAnimationComponent, deactivateTileSpriteAnimationComponent, /* requiresAuthority */ false);
-	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentTileSpriteAnimationOptionKeyPosition, shovelerComponentTypeNamePosition, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, updateTileSpriteAnimationPositionDependency);
-	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentTileSpriteAnimationOptionKeyTileSprite, shovelerComponentTypeNameTileSprite, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerComponentTypeIdTileSpriteAnimation, activateTileSpriteAnimationComponent, deactivateTileSpriteAnimationComponent, /* requiresAuthority */ false);
+	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentTileSpriteAnimationOptionKeyPosition, shovelerComponentTypeIdPosition, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, updateTileSpriteAnimationPositionDependency);
+	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentTileSpriteAnimationOptionKeyTileSprite, shovelerComponentTypeIdTileSprite, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
 	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentTileSpriteAnimationOptionKeyPositionMappingX, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
 	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentTileSpriteAnimationOptionKeyPositionMappingY, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
 	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentTileSpriteAnimationOptionKeyMoveAmountThreshold, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_FLOAT, /* isOptional */ false, /* liveUpdate */ NULL);
@@ -27,7 +29,7 @@ ShovelerComponentType *shovelerComponentCreateTileSpriteAnimationType()
 
 ShovelerTileSpriteAnimation *shovelerComponentGetTileSpriteAnimation(ShovelerComponent *component)
 {
-	assert(strcmp(component->type->name, shovelerComponentTypeNameTileSpriteAnimation) == 0);
+	assert(strcmp(component->type->id, shovelerComponentTypeIdTileSpriteAnimation) == 0);
 
 	return component->data;
 }

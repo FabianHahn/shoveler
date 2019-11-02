@@ -8,11 +8,11 @@
 
 bool shovelerViewEntityAddSampler(ShovelerViewEntity *entity, const ShovelerViewSamplerConfiguration *configuration)
 {
-	if(!shovelerViewHasComponentType(entity->view, shovelerComponentTypeNameSampler)) {
+	if(!shovelerViewHasComponentType(entity->view, shovelerComponentTypeIdSampler)) {
 		shovelerViewAddComponentType(entity->view, shovelerComponentCreateSamplerType());
 	}
 
-	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerComponentTypeNameSampler);
+	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerComponentTypeIdSampler);
 	shovelerComponentUpdateCanonicalConfigurationOptionBool(component, shovelerComponentSamplerOptionKeyInterpolate, configuration->interpolate);
 	shovelerComponentUpdateCanonicalConfigurationOptionBool(component, shovelerComponentSamplerOptionKeyUseMipmaps, configuration->useMipmaps);
 	shovelerComponentUpdateCanonicalConfigurationOptionBool(component, shovelerComponentSamplerOptionKeyClamp, configuration->clamp);
@@ -23,7 +23,7 @@ bool shovelerViewEntityAddSampler(ShovelerViewEntity *entity, const ShovelerView
 
 ShovelerSampler *shovelerViewEntityGetSampler(ShovelerViewEntity *entity)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameSampler);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdSampler);
 	if(component == NULL) {
 		return NULL;
 	}
@@ -33,7 +33,7 @@ ShovelerSampler *shovelerViewEntityGetSampler(ShovelerViewEntity *entity)
 
 bool shovelerViewEntityGetSamplerConfiguration(ShovelerViewEntity *entity, ShovelerViewSamplerConfiguration *outputConfiguration)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameSampler);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdSampler);
 	if(component == NULL) {
 		return NULL;
 	}
@@ -46,7 +46,7 @@ bool shovelerViewEntityGetSamplerConfiguration(ShovelerViewEntity *entity, Shove
 
 bool shovelerViewEntityUpdateSampler(ShovelerViewEntity *entity, const ShovelerViewSamplerConfiguration *configuration)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameSampler);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdSampler);
 	if(component == NULL) {
 		shovelerLogWarning("Trying to update sampler of entity %lld which does not have a sampler, ignoring.", entity->id);
 		return false;
@@ -60,11 +60,11 @@ bool shovelerViewEntityUpdateSampler(ShovelerViewEntity *entity, const ShovelerV
 
 bool shovelerViewEntityRemoveSampler(ShovelerViewEntity *entity)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameSampler);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdSampler);
 	if(component == NULL) {
 		shovelerLogWarning("Trying to remove sampler from entity %lld which does not have a sampler, ignoring.", entity->id);
 		return false;
 	}
 
-	return shovelerViewEntityRemoveComponent(entity, shovelerComponentTypeNameSampler);
+	return shovelerViewEntityRemoveComponent(entity, shovelerComponentTypeIdSampler);
 }

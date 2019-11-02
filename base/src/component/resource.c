@@ -11,7 +11,7 @@ static void deactivateResourceComponent(ShovelerComponent *component);
 
 ShovelerComponentType *shovelerComponentCreateResourceType()
 {
-	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerComponentTypeNameResource, activateResourceComponent, deactivateResourceComponent, /* requiresAuthority */ false);
+	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerComponentTypeIdResource, activateResourceComponent, deactivateResourceComponent, /* requiresAuthority */ false);
 	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentResourceOptionKeyTypeId, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_STRING, /* isOptional */ false, /* liveUpdate */ NULL);
 	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentResourceOptionKeyBuffer, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BYTES, /* isOptional */ false, /* liveUpdate */ NULL);
 
@@ -20,7 +20,7 @@ ShovelerComponentType *shovelerComponentCreateResourceType()
 
 void *shovelerComponentGetResource(ShovelerComponent *component)
 {
-	assert(strcmp(component->type->name, shovelerComponentTypeNameResource) == 0);
+	assert(strcmp(component->type->id, shovelerComponentTypeIdResource) == 0);
 
 	return component->data;
 }

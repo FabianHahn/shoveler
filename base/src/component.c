@@ -7,7 +7,7 @@
 
 typedef struct {
 	long long int entityId;
-	const char *componentTypeName;
+	const char *componentTypeId;
 } Dependency;
 
 static ShovelerComponentConfigurationValue *createConfigurationValue(ShovelerComponentConfigurationOptionType type);
@@ -20,16 +20,16 @@ static void activateReverseDependency(ShovelerComponent *sourceComponent, Shovel
 static void deactivateReverseDependency(ShovelerComponent *sourceComponent, ShovelerComponent *targetComponent, void *unused);
 static void addConfigurationOptionDependencies(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *configurationValue);
 static void removeConfigurationOptionDependencies(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *configurationValue);
-static void addDependency(ShovelerComponent *component, long long int targetEntityId, const char *targetComponentTypeName);
-static void removeDependency(ShovelerComponent *component, long long int targetEntityId, const char *targetComponentTypeName);
+static void addDependency(ShovelerComponent *component, long long int targetEntityId, const char *targetComponentTypeId);
+static void removeDependency(ShovelerComponent *component, long long int targetEntityId, const char *targetComponentTypeId);
 static bool checkDependenciesActive(ShovelerComponent *component);
 static long long int toDependencyTargetEntityId(ShovelerComponent *component, long long int entityIdValue);
 static void freeConfigurationOption(void *configurationOptionPointer);
 
-ShovelerComponentType *shovelerComponentTypeCreate(const char *name, ShovelerComponentTypeActivationFunction *activate, ShovelerComponentTypeDeactivationFunction *deactivate, bool requiresAuthority)
+ShovelerComponentType *shovelerComponentTypeCreate(const char *id, ShovelerComponentTypeActivationFunction *activate, ShovelerComponentTypeDeactivationFunction *deactivate, bool requiresAuthority)
 {
 	ShovelerComponentType *componentType = malloc(sizeof(ShovelerComponentType));
-	componentType->name = strdup(name);
+	componentType->id = id;
 	componentType->configurationOptions = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, freeConfigurationOption);
 	componentType->activate = activate;
 	componentType->deactivate = deactivate;
@@ -50,13 +50,13 @@ bool shovelerComponentTypeAddConfigurationOption(ShovelerComponentType *componen
 	configurationOption->isOptional = isOptional;
 	configurationOption->liveUpdate = liveUpdate;
 	configurationOption->updateDependency = NULL;
-	configurationOption->dependencyComponentTypeName = NULL;
+	configurationOption->dependencyComponentTypeId = NULL;
 
 	g_hash_table_insert(componentType->configurationOptions, configurationOption->key, configurationOption);
 	return true;
 }
 
-bool shovelerComponentTypeAddDependencyConfigurationOption(ShovelerComponentType *componentType, const char *key, const char *dependencyComponentTypeName, bool isArray, bool isOptional, ShovelerComponentTypeConfigurationOptionLiveUpdateFunction *liveUpdate, ShovelerComponentTypeConfigurationOptionUpdateDependencyFunction *updateDependency)
+bool shovelerComponentTypeAddDependencyConfigurationOption(ShovelerComponentType *componentType, const char *key, const char *dependencyComponentTypeId, bool isArray, bool isOptional, ShovelerComponentTypeConfigurationOptionLiveUpdateFunction *liveUpdate, ShovelerComponentTypeConfigurationOptionUpdateDependencyFunction *updateDependency)
 {
 	if(g_hash_table_lookup(componentType->configurationOptions, key) != NULL) {
 		return false;
@@ -68,7 +68,7 @@ bool shovelerComponentTypeAddDependencyConfigurationOption(ShovelerComponentType
 	configurationOption->isOptional = isOptional;
 	configurationOption->liveUpdate = liveUpdate;
 	configurationOption->updateDependency = updateDependency;
-	configurationOption->dependencyComponentTypeName = strdup(dependencyComponentTypeName);
+	configurationOption->dependencyComponentTypeId = dependencyComponentTypeId;
 
 	g_hash_table_insert(componentType->configurationOptions, configurationOption->key, configurationOption);
 	return true;
@@ -86,7 +86,6 @@ void shovelerComponentTypeFree(ShovelerComponentType *componentType)
 	}
 
 	g_hash_table_destroy(componentType->configurationOptions);
-	free(componentType->name);
 	free(componentType);
 }
 
@@ -143,7 +142,7 @@ bool shovelerComponentUpdateConfigurationOption(ShovelerComponent *component, co
 
 	bool wasActive = component->data != NULL;
 	bool canLiveUpdate = configurationOption->liveUpdate != NULL;
-	bool isDependencyUpdate = configurationOption->dependencyComponentTypeName != NULL;
+	bool isDependencyUpdate = configurationOption->dependencyComponentTypeId != NULL;
 
 	if(wasActive && !canLiveUpdate) {
 		// cannot live update, so deactivate before updating
@@ -231,7 +230,7 @@ bool shovelerComponentActivate(ShovelerComponent *component)
 	}
 
 	component->viewAdapter->reportActivation(component, /* diff */ 1, component->viewAdapter->userData);
-	shovelerLogTrace("Activated component '%s' of entity %lld.", component->type->name, component->entityId);
+	shovelerLogTrace("Activated component '%s' of entity %lld.", component->type->id, component->entityId);
 
 	component->viewAdapter->forEachReverseDependency(component, activateReverseDependency, /* callbackUserData */ NULL, component->viewAdapter->userData);
 
@@ -257,7 +256,7 @@ void shovelerComponentDeactivate(ShovelerComponent *component)
 	component->data = NULL;
 
 	component->viewAdapter->reportActivation(component, /* delta */ -1, component->viewAdapter->userData);
-	shovelerLogTrace("Deactivated component '%s' of entity %lld.", component->type->name, component->entityId);
+	shovelerLogTrace("Deactivated component '%s' of entity %lld.", component->type->id, component->entityId);
 }
 
 void shovelerComponentDelegate(ShovelerComponent *component)
@@ -291,7 +290,7 @@ ShovelerComponent *shovelerComponentGetDependency(ShovelerComponent *component, 
 		return NULL;
 	}
 
-	if(configurationOption->dependencyComponentTypeName == NULL) {
+	if(configurationOption->dependencyComponentTypeId == NULL) {
 		return NULL;
 	}
 
@@ -304,7 +303,7 @@ ShovelerComponent *shovelerComponentGetDependency(ShovelerComponent *component, 
 		return NULL;
 	}
 
-	return component->viewAdapter->getComponent(component, configurationValue->entityIdValue, configurationOption->dependencyComponentTypeName, component->viewAdapter->userData);
+	return component->viewAdapter->getComponent(component, configurationValue->entityIdValue, configurationOption->dependencyComponentTypeId, component->viewAdapter->userData);
 }
 
 ShovelerComponent *shovelerComponentGetArrayDependency(ShovelerComponent *component, const char *optionKey, int index)
@@ -314,7 +313,7 @@ ShovelerComponent *shovelerComponentGetArrayDependency(ShovelerComponent *compon
 		return NULL;
 	}
 
-	if(configurationOption->dependencyComponentTypeName == NULL) {
+	if(configurationOption->dependencyComponentTypeId == NULL) {
 		return NULL;
 	}
 
@@ -331,7 +330,7 @@ ShovelerComponent *shovelerComponentGetArrayDependency(ShovelerComponent *compon
 		return NULL;
 	}
 
-	return component->viewAdapter->getComponent(component, configurationValue->entityIdArrayValue.entityIds[index], configurationOption->dependencyComponentTypeName, component->viewAdapter->userData);
+	return component->viewAdapter->getComponent(component, configurationValue->entityIdArrayValue.entityIds[index], configurationOption->dependencyComponentTypeId, component->viewAdapter->userData);
 }
 
 void shovelerComponentFree(ShovelerComponent *component)
@@ -347,7 +346,7 @@ void shovelerComponentFree(ShovelerComponent *component)
 	ShovelerComponentTypeConfigurationOption *configurationOption = NULL;
 	g_hash_table_iter_init(&iter, component->type->configurationOptions);
 	while(g_hash_table_iter_next(&iter, (gpointer *) &key, (gpointer *) &configurationOption)) {
-		if(configurationOption->dependencyComponentTypeName != NULL) {
+		if(configurationOption->dependencyComponentTypeId != NULL) {
 			ShovelerComponentConfigurationValue *configurationValue = g_hash_table_lookup(component->configurationValues, key);
 			removeConfigurationOptionDependencies(component, configurationOption, configurationValue);
 		}
@@ -498,7 +497,7 @@ static void updateReverseDependency(ShovelerComponent *sourceComponent, Shoveler
 	ShovelerComponentTypeConfigurationOption *configurationOption;
 	while(g_hash_table_iter_next(&configurationOptionIter, (gpointer *) &key, (gpointer *) &configurationOption)) {
 		// check if this option is a dependency pointing to the target
-		if(configurationOption->dependencyComponentTypeName == NULL || strcmp(configurationOption->dependencyComponentTypeName, targetComponent->type->name) != 0) {
+		if(configurationOption->dependencyComponentTypeId != targetComponent->type->id) {
 			continue;
 		}
 
@@ -557,7 +556,7 @@ static void addConfigurationOptionDependencies(ShovelerComponent *component, con
 		return;
 	}
 
-	if(configurationOption->dependencyComponentTypeName == NULL) {
+	if(configurationOption->dependencyComponentTypeId == NULL) {
 		// this configuration option isn't a dependency
 		return;
 	}
@@ -568,13 +567,13 @@ static void addConfigurationOptionDependencies(ShovelerComponent *component, con
 		addDependency(
 			component,
 			/* targetEntityId */ toDependencyTargetEntityId(component, configurationValue->entityIdValue),
-			/* targetComponentTypeName */ configurationOption->dependencyComponentTypeName);
+			/* targetComponentTypeId */ configurationOption->dependencyComponentTypeId);
 	} else if(configurationOption->type == SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_ENTITY_ID_ARRAY) {
 		for(int i = 0; i < configurationValue->entityIdArrayValue.size; i++) {
 			addDependency(
 				component,
 				/* targetEntityId */ toDependencyTargetEntityId(component, configurationValue->entityIdArrayValue.entityIds[i]),
-				/* targetComponentTypeName */ configurationOption->dependencyComponentTypeName);
+				/* targetComponentTypeId */ configurationOption->dependencyComponentTypeId);
 		}
 	}
 
@@ -594,7 +593,7 @@ static void removeConfigurationOptionDependencies(ShovelerComponent *component, 
 		return;
 	}
 
-	if(configurationOption->dependencyComponentTypeName == NULL) {
+	if(configurationOption->dependencyComponentTypeId == NULL) {
 		// this configuration option isn't a dependency
 		return;
 	}
@@ -605,32 +604,32 @@ static void removeConfigurationOptionDependencies(ShovelerComponent *component, 
 		removeDependency(
 			component,
 			/* targetEntityId */ toDependencyTargetEntityId(component, configurationValue->entityIdValue),
-			/* targetComponentTypeName */ configurationOption->dependencyComponentTypeName);
+			/* targetComponentTypeId */ configurationOption->dependencyComponentTypeId);
 	} else if(configurationOption->type == SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_ENTITY_ID_ARRAY) {
 		for(int i = 0; i < configurationValue->entityIdArrayValue.size; i++) {
 			removeDependency(
 				component,
 				/* targetEntityId */ toDependencyTargetEntityId(component, configurationValue->entityIdArrayValue.entityIds[i]),
-				/* targetComponentTypeName */ configurationOption->dependencyComponentTypeName);
+				/* targetComponentTypeId */ configurationOption->dependencyComponentTypeId);
 		}
 	}
 }
 
-static void addDependency(ShovelerComponent *component, long long int targetEntityId, const char *targetComponentTypeName)
+static void addDependency(ShovelerComponent *component, long long int targetEntityId, const char *targetComponentTypeId)
 {
 	Dependency *dependency = malloc(sizeof(Dependency));
 	dependency->entityId = targetEntityId;
-	dependency->componentTypeName = targetComponentTypeName;
+	dependency->componentTypeId = targetComponentTypeId;
 	g_queue_push_tail(component->dependencies, dependency);
 
-	component->viewAdapter->addDependency(component, targetEntityId, targetComponentTypeName, component->viewAdapter->userData);
+	component->viewAdapter->addDependency(component, targetEntityId, targetComponentTypeId, component->viewAdapter->userData);
 }
 
-static void removeDependency(ShovelerComponent *component, long long int targetEntityId, const char *targetComponentTypeName)
+static void removeDependency(ShovelerComponent *component, long long int targetEntityId, const char *targetComponentTypeId)
 {
 	for(GList *iter = component->dependencies->head; iter != NULL; iter = iter->next) {
 		Dependency *dependency = iter->data;
-		if(dependency->entityId == targetEntityId && strcmp(dependency->componentTypeName, targetComponentTypeName) == 0) {
+		if(dependency->entityId == targetEntityId && dependency->componentTypeId == targetComponentTypeId) {
 			g_queue_unlink(component->dependencies, iter);
 			g_list_free(iter);
 			free(dependency);
@@ -638,7 +637,7 @@ static void removeDependency(ShovelerComponent *component, long long int targetE
 		}
 	}
 
-	bool dependencyRemoved = component->viewAdapter->removeDependency(component, targetEntityId, targetComponentTypeName, component->viewAdapter->userData);
+	bool dependencyRemoved = component->viewAdapter->removeDependency(component, targetEntityId, targetComponentTypeId, component->viewAdapter->userData);
 	assert(dependencyRemoved);
 }
 
@@ -646,7 +645,7 @@ static bool checkDependenciesActive(ShovelerComponent *component)
 {
 	for(GList *iter = component->dependencies->head; iter != NULL; iter = iter->next) {
 		Dependency *dependency = iter->data;
-		ShovelerComponent *targetComponent = component->viewAdapter->getComponent(component, dependency->entityId, dependency->componentTypeName, component->viewAdapter->userData);
+		ShovelerComponent *targetComponent = component->viewAdapter->getComponent(component, dependency->entityId, dependency->componentTypeId, component->viewAdapter->userData);
 		if(targetComponent == NULL) {
 			return false;
 		}
@@ -672,7 +671,6 @@ static void freeConfigurationOption(void *configurationOptionPointer)
 {
 	ShovelerComponentTypeConfigurationOption *configurationOption = configurationOptionPointer;
 
-	free(configurationOption->dependencyComponentTypeName);
 	free(configurationOption->key);
 	free(configurationOption);
 }

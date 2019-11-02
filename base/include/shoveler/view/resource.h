@@ -21,7 +21,7 @@ bool shovelerViewEntityRemoveResource(ShovelerViewEntity *entity);
 
 static inline ShovelerComponent *shovelerViewEntityGetResourceComponent(ShovelerViewEntity *entity)
 {
-	return shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameResource);
+	return shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdResource);
 }
 
 #endif

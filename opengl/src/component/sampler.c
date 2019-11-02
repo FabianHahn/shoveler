@@ -5,12 +5,14 @@
 #include "shoveler/component.h"
 #include "shoveler/sampler.h"
 
+const char *const shovelerComponentTypeIdSampler = "sampler";
+
 static void *activateSamplerComponent(ShovelerComponent *component);
 static void deactivateSamplerComponent(ShovelerComponent *component);
 
 ShovelerComponentType *shovelerComponentCreateSamplerType()
 {
-	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerComponentTypeNameSampler, activateSamplerComponent, deactivateSamplerComponent, /* requiresAuthority */ false);
+	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerComponentTypeIdSampler, activateSamplerComponent, deactivateSamplerComponent, /* requiresAuthority */ false);
 	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentSamplerOptionKeyInterpolate, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BOOL, /* isOptional */ false, /* liveUpdate */ NULL);
 	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentSamplerOptionKeyUseMipmaps, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BOOL, /* isOptional */ false, /* liveUpdate */ NULL);
 	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentSamplerOptionKeyClamp, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BOOL, /* isOptional */ false, /* liveUpdate */ NULL);
@@ -20,7 +22,7 @@ ShovelerComponentType *shovelerComponentCreateSamplerType()
 
 ShovelerSampler *shovelerComponentGetSampler(ShovelerComponent *component)
 {
-	assert(strcmp(component->type->name, shovelerComponentTypeNameSampler) == 0);
+	assert(strcmp(component->type->id, shovelerComponentTypeIdSampler) == 0);
 
 	return component->data;
 }

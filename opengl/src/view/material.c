@@ -11,11 +11,11 @@
 
 ShovelerComponent *shovelerViewEntityAddMaterial(ShovelerViewEntity *entity, const ShovelerViewMaterialConfiguration *configuration)
 {
-	if(!shovelerViewHasComponentType(entity->view, shovelerComponentTypeNameMaterial)) {
+	if(!shovelerViewHasComponentType(entity->view, shovelerComponentTypeIdMaterial)) {
 		shovelerViewAddComponentType(entity->view, shovelerComponentCreateMaterialType());
 	}
 
-	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerComponentTypeNameMaterial);
+	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerComponentTypeIdMaterial);
 	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerComponentMaterialOptionKeyType, configuration->type);
 
 	switch(configuration->type) {
@@ -48,7 +48,7 @@ ShovelerComponent *shovelerViewEntityAddMaterial(ShovelerViewEntity *entity, con
 
 ShovelerMaterial *shovelerViewEntityGetMaterial(ShovelerViewEntity *entity)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameMaterial);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdMaterial);
 	if(component == NULL) {
 		return NULL;
 	}
@@ -58,7 +58,7 @@ ShovelerMaterial *shovelerViewEntityGetMaterial(ShovelerViewEntity *entity)
 
 bool shovelerViewEntityGetMaterialConfiguration(ShovelerViewEntity *entity, ShovelerViewMaterialConfiguration *outputConfiguration)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameMaterial);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdMaterial);
 	if(component == NULL) {
 		return NULL;
 	}
@@ -92,7 +92,7 @@ bool shovelerViewEntityGetMaterialConfiguration(ShovelerViewEntity *entity, Shov
 
 bool shovelerViewEntityUpdateMaterial(ShovelerViewEntity *entity, const ShovelerViewMaterialConfiguration *configuration)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameMaterial);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdMaterial);
 	if(component == NULL) {
 		shovelerLogWarning("Trying to update material of entity %lld which does not have a material, ignoring.", entity->id);
 		return false;
@@ -128,11 +128,11 @@ bool shovelerViewEntityUpdateMaterial(ShovelerViewEntity *entity, const Shoveler
 
 bool shovelerViewEntityRemoveMaterial(ShovelerViewEntity *entity)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameMaterial);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdMaterial);
 	if(component == NULL) {
 		shovelerLogWarning("Trying to remove material from entity %lld which does not have a material, ignoring.", entity->id);
 		return false;
 	}
 
-	return shovelerViewEntityRemoveComponent(entity, shovelerComponentTypeNameMaterial);
+	return shovelerViewEntityRemoveComponent(entity, shovelerComponentTypeIdMaterial);
 }

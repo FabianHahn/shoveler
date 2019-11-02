@@ -61,14 +61,14 @@ typedef struct ShovelerComponentTypeConfigurationOptionStruct {
 	bool isOptional;
 	ShovelerComponentTypeConfigurationOptionLiveUpdateFunction *liveUpdate;
 	ShovelerComponentTypeConfigurationOptionUpdateDependencyFunction *updateDependency;
-	char *dependencyComponentTypeName;
+	const char *dependencyComponentTypeId;
 } ShovelerComponentTypeConfigurationOption;
 
 typedef void *(ShovelerComponentTypeActivationFunction)(ShovelerComponent *component);
 typedef void (ShovelerComponentTypeDeactivationFunction)(ShovelerComponent *component);
 
 typedef struct ShovelerComponentTypeStruct {
-	char *name;
+	const char *id;
 	/* map from string configuration option keys to (ShovelerComponentTypeConfigurationOption *) */
 	GHashTable *configurationOptions;
 	ShovelerComponentTypeActivationFunction *activate;
@@ -78,10 +78,10 @@ typedef struct ShovelerComponentTypeStruct {
 
 typedef void (ShovelerComponentAdapterViewForEachReverseDependencyCallbackFunction)(ShovelerComponent *sourceComponent, ShovelerComponent *targetComponent, void *userData);
 
-typedef ShovelerComponent *(ShovelerComponentViewAdapterGetComponentFunction)(ShovelerComponent *component, long long int entityId, const char *componentTypeName, void *userData);
+typedef ShovelerComponent *(ShovelerComponentViewAdapterGetComponentFunction)(ShovelerComponent *component, long long int entityId, const char *componentTypeId, void *userData);
 typedef void *(ShovelerComponentViewAdapterGetTargetFunction)(ShovelerComponent *component, const char *targetName, void *userData);
-typedef void (ShovelerComponentViewAdapterAddDependencyFunction)(ShovelerComponent *component, long long int targetEntityId, const char *targetComponentTypeName, void *userData);
-typedef bool (ShovelerComponentViewAdapterRemoveDependencyFunction)(ShovelerComponent *component, long long int targetEntityId, const char *targetComponentTypeName, void *userData);
+typedef void (ShovelerComponentViewAdapterAddDependencyFunction)(ShovelerComponent *component, long long int targetEntityId, const char *targetComponentTypeId, void *userData);
+typedef bool (ShovelerComponentViewAdapterRemoveDependencyFunction)(ShovelerComponent *component, long long int targetEntityId, const char *targetComponentTypeId, void *userData);
 typedef void (ShovelerComponentViewAdapterForEachReverseDependencyFunction)(ShovelerComponent *component, ShovelerComponentAdapterViewForEachReverseDependencyCallbackFunction *callbackFunction, void *callbackUserData, void *adapterUserData);
 typedef void (ShovelerComponentViewAdapterReportActivationFunction)(ShovelerComponent *component, int delta, void *userData);
 
@@ -107,7 +107,7 @@ typedef struct ShovelerComponentStruct {
 	void *data;
 } ShovelerComponent;
 
-ShovelerComponentType *shovelerComponentTypeCreate(const char *name, ShovelerComponentTypeActivationFunction *activate, ShovelerComponentTypeDeactivationFunction *deactivate, bool requiresAuthority);
+ShovelerComponentType *shovelerComponentTypeCreate(const char *id, ShovelerComponentTypeActivationFunction *activate, ShovelerComponentTypeDeactivationFunction *deactivate, bool requiresAuthority);
 /**
  * Adds a new configuration option to the component type.
  *
@@ -129,7 +129,7 @@ bool shovelerComponentTypeAddConfigurationOption(ShovelerComponentType *componen
  * called whenever the dependency this component value points to is live updated. This includes
  * updates to the dependency's transitive dependencies.
  */
-bool shovelerComponentTypeAddDependencyConfigurationOption(ShovelerComponentType *componentType, const char *key, const char *dependencyComponentTypeName, bool isArray, bool isOptional, ShovelerComponentTypeConfigurationOptionLiveUpdateFunction *liveUpdate, ShovelerComponentTypeConfigurationOptionUpdateDependencyFunction *updateDependency);
+bool shovelerComponentTypeAddDependencyConfigurationOption(ShovelerComponentType *componentType, const char *key, const char *dependencyComponentTypeId, bool isArray, bool isOptional, ShovelerComponentTypeConfigurationOptionLiveUpdateFunction *liveUpdate, ShovelerComponentTypeConfigurationOptionUpdateDependencyFunction *updateDependency);
 bool shovelerComponentTypeRemoveConfigurationOption(ShovelerComponentType *componentType, const char *key);
 void shovelerComponentTypeFree(ShovelerComponentType *componentType);
 

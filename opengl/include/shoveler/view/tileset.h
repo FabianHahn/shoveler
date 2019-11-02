@@ -24,7 +24,7 @@ bool shovelerViewEntityRemoveTileset(ShovelerViewEntity *entity);
 
 static inline ShovelerComponent *shovelerViewEntityGetTilesetComponent(ShovelerViewEntity *entity)
 {
-	return shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameTileset);
+	return shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdTileset);
 }
 
 #endif

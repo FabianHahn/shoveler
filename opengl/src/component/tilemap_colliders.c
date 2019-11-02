@@ -5,6 +5,8 @@
 
 #include "shoveler/component.h"
 
+const char *const shovelerComponentTypeIdTilemapColliders = "tilemap_colliders";
+
 static void *activateTilemapCollidersComponent(ShovelerComponent *component);
 static void deactivateTilemapCollidersComponent(ShovelerComponent *component);
 static void liveUpdateCollidersOption(ShovelerComponent *component, ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *value);
@@ -12,7 +14,7 @@ static void updateColliders(ShovelerComponent *component, bool *colliders);
 
 ShovelerComponentType *shovelerComponentCreateTilemapColliders()
 {
-	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerComponentTypeNameTilemapColliders, activateTilemapCollidersComponent, deactivateTilemapCollidersComponent, /* requiresAuthority */ false);
+	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerComponentTypeIdTilemapColliders, activateTilemapCollidersComponent, deactivateTilemapCollidersComponent, /* requiresAuthority */ false);
 	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentTilemapCollidersOptionKeyNumColumns, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ true, /* liveUpdate */ NULL);
 	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentTilemapCollidersOptionKeyNumRows, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ true, /* liveUpdate */ NULL);
 	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentTilemapCollidersOptionKeyColliders, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BYTES, /* isOptional */ false, liveUpdateCollidersOption);
@@ -22,7 +24,7 @@ ShovelerComponentType *shovelerComponentCreateTilemapColliders()
 
 const bool *shovelerComponentGetTilemapColliders(ShovelerComponent *component)
 {
-	assert(strcmp(component->type->name, shovelerComponentTypeNameTilemapColliders) == 0);
+	assert(strcmp(component->type->id, shovelerComponentTypeIdTilemapColliders) == 0);
 
 	return component->data;
 }

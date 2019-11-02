@@ -5,11 +5,11 @@
 
 ShovelerComponent *shovelerViewEntityAddChunkLayer(ShovelerViewEntity *entity, const ShovelerViewChunkLayerConfiguration *configuration)
 {
-	if(!shovelerViewHasComponentType(entity->view, shovelerComponentTypeNameChunkLayer)) {
+	if(!shovelerViewHasComponentType(entity->view, shovelerComponentTypeIdChunkLayer)) {
 		shovelerViewAddComponentType(entity->view, shovelerComponentCreateChunkLayerType());
 	}
 
-	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerComponentTypeNameChunkLayer);
+	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerComponentTypeIdChunkLayer);
 	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerComponentChunkLayerOptionKeyType, configuration->type);
 
 	switch(configuration->type) {
@@ -30,7 +30,7 @@ ShovelerComponent *shovelerViewEntityAddChunkLayer(ShovelerViewEntity *entity, c
 
 bool shovelerViewEntityGetChunkLayerConfiguration(ShovelerViewEntity *entity, ShovelerViewChunkLayerConfiguration *outputConfiguration)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameChunkLayer);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdChunkLayer);
 	if(component == NULL) {
 		return false;
 	}
@@ -52,7 +52,7 @@ bool shovelerViewEntityGetChunkLayerConfiguration(ShovelerViewEntity *entity, Sh
 
 bool shovelerViewEntityUpdateChunkLayer(ShovelerViewEntity *entity, const ShovelerViewChunkLayerConfiguration *configuration)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameChunkLayer);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdChunkLayer);
 	if(component == NULL) {
 		shovelerLogWarning("Trying to update chunk layer of entity %lld which does not have a chunk layer, ignoring.", entity->id);
 		return false;
@@ -78,11 +78,11 @@ bool shovelerViewEntityUpdateChunkLayer(ShovelerViewEntity *entity, const Shovel
 
 bool shovelerViewEntityRemoveChunkLayer(ShovelerViewEntity *entity)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameChunkLayer);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdChunkLayer);
 	if(component == NULL) {
 		shovelerLogWarning("Trying to remove chunk layer from entity %lld which does not have a chunk layer, ignoring.", entity->id);
 		return false;
 	}
 
-	return shovelerViewEntityRemoveComponent(entity, shovelerComponentTypeNameChunkLayer);
+	return shovelerViewEntityRemoveComponent(entity, shovelerComponentTypeIdChunkLayer);
 }

@@ -7,11 +7,11 @@
 
 ShovelerComponent *shovelerViewEntityAddTileset(ShovelerViewEntity *entity, const ShovelerViewTilesetConfiguration *configuration)
 {
-	if(!shovelerViewHasComponentType(entity->view, shovelerComponentTypeNameTileset)) {
+	if(!shovelerViewHasComponentType(entity->view, shovelerComponentTypeIdTileset)) {
 		shovelerViewAddComponentType(entity->view, shovelerComponentCreateTilesetType());
 	}
 
-	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerComponentTypeNameTileset);
+	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerComponentTypeIdTileset);
 	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerComponentTilesetOptionKeyImageResource, configuration->imageResourceEntityId);
 	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerComponentTilesetOptionKeyNumColumns, configuration->numColumns);
 	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerComponentTilesetOptionKeyNumRows, configuration->numRows);
@@ -23,7 +23,7 @@ ShovelerComponent *shovelerViewEntityAddTileset(ShovelerViewEntity *entity, cons
 
 ShovelerTileset *shovelerViewEntityGetTileset(ShovelerViewEntity *entity)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameTileset);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdTileset);
 	if(component == NULL) {
 		return NULL;
 	}
@@ -33,7 +33,7 @@ ShovelerTileset *shovelerViewEntityGetTileset(ShovelerViewEntity *entity)
 
 bool shovelerViewEntityGetTilesetConfiguration(ShovelerViewEntity *entity, ShovelerViewTilesetConfiguration *outputConfiguration)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameTileset);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdTileset);
 	if(component == NULL) {
 		return NULL;
 	}
@@ -47,7 +47,7 @@ bool shovelerViewEntityGetTilesetConfiguration(ShovelerViewEntity *entity, Shove
 
 bool shovelerViewEntityUpdateTileset(ShovelerViewEntity *entity, const ShovelerViewTilesetConfiguration *configuration)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameTileset);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdTileset);
 	if(component == NULL) {
 		shovelerLogWarning("Trying to update tileset of entity %lld which does not have a tileset, ignoring.", entity->id);
 		return false;
@@ -62,11 +62,11 @@ bool shovelerViewEntityUpdateTileset(ShovelerViewEntity *entity, const ShovelerV
 
 bool shovelerViewEntityRemoveTileset(ShovelerViewEntity *entity)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameTileset);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdTileset);
 	if(component == NULL) {
 		shovelerLogWarning("Trying to remove tileset from entity %lld which does not have a tileset, ignoring.", entity->id);
 		return false;
 	}
 
-	return shovelerViewEntityRemoveComponent(entity, shovelerComponentTypeNameTileset);
+	return shovelerViewEntityRemoveComponent(entity, shovelerComponentTypeIdTileset);
 }

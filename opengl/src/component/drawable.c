@@ -10,12 +10,14 @@
 #include "shoveler/drawable.h"
 #include "shoveler/log.h"
 
+const char *const shovelerComponentTypeIdDrawable = "drawable";
+
 static void *activateDrawableComponent(ShovelerComponent *component);
 static void deactivateDrawableComponent(ShovelerComponent *component);
 
 ShovelerComponentType *shovelerComponentCreateDrawableType()
 {
-	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerComponentTypeNameDrawable, activateDrawableComponent, deactivateDrawableComponent, /* requiresAuthority */ false);
+	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerComponentTypeIdDrawable, activateDrawableComponent, deactivateDrawableComponent, /* requiresAuthority */ false);
 	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentDrawableOptionKeyType, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
 	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentDrawableOptionKeyTilesWidth, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ true, /* liveUpdate */ NULL);
 	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentDrawableOptionKeyTilesHeight, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ true, /* liveUpdate */ NULL);
@@ -25,7 +27,7 @@ ShovelerComponentType *shovelerComponentCreateDrawableType()
 
 ShovelerDrawable *shovelerComponentGetDrawable(ShovelerComponent *component)
 {
-	assert(strcmp(component->type->name, shovelerComponentTypeNameDrawable) == 0);
+	assert(strcmp(component->type->id, shovelerComponentTypeIdDrawable) == 0);
 
 	return component->data;
 }

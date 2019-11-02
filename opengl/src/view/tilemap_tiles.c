@@ -11,11 +11,11 @@
 
 ShovelerComponent *shovelerViewEntityAddTilemapTiles(ShovelerViewEntity *entity, const ShovelerViewTilemapTilesConfiguration *configuration)
 {
-	if(!shovelerViewHasComponentType(entity->view, shovelerComponentTypeNameTilemapTiles)) {
+	if(!shovelerViewHasComponentType(entity->view, shovelerComponentTypeIdTilemapTiles)) {
 		shovelerViewAddComponentType(entity->view, shovelerComponentCreateTilemapTilesType());
 	}
 
-	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerComponentTypeNameTilemapTiles);
+	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerComponentTypeIdTilemapTiles);
 
 	if(configuration->isImageResourceEntityDefinition) {
 		shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerComponentTilemapTilesOptionKeyImageResource, configuration->imageResourceEntityId);
@@ -33,7 +33,7 @@ ShovelerComponent *shovelerViewEntityAddTilemapTiles(ShovelerViewEntity *entity,
 
 ShovelerTexture *shovelerViewEntityGetTilemapTiles(ShovelerViewEntity *entity)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameTilemapTiles);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdTilemapTiles);
 	if(component == NULL) {
 		return NULL;
 	}
@@ -43,7 +43,7 @@ ShovelerTexture *shovelerViewEntityGetTilemapTiles(ShovelerViewEntity *entity)
 
 bool shovelerViewEntityGetTilemapTilesConfiguration(ShovelerViewEntity *entity, ShovelerViewTilemapTilesConfiguration *outputConfiguration)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameTilemapTiles);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdTilemapTiles);
 	if(component == NULL) {
 		return false;
 	}
@@ -65,7 +65,7 @@ bool shovelerViewEntityGetTilemapTilesConfiguration(ShovelerViewEntity *entity, 
 
 bool shovelerViewEntityUpdateTilemapTiles(ShovelerViewEntity *entity, const ShovelerViewTilemapTilesConfiguration *configuration)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameTilemapTiles);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdTilemapTiles);
 	if(component == NULL) {
 		shovelerLogWarning("Trying to update tilemap tiles of entity %lld which does not have a tilemap tiles, ignoring.", entity->id);
 		return false;
@@ -92,11 +92,11 @@ bool shovelerViewEntityUpdateTilemapTiles(ShovelerViewEntity *entity, const Shov
 
 bool shovelerViewEntityRemoveTilemapTiles(ShovelerViewEntity *entity)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameTilemapTiles);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdTilemapTiles);
 	if(component == NULL) {
 		shovelerLogWarning("Trying to remove tilemap tiles from entity %lld which does not have a tilemap tiles, ignoring.", entity->id);
 		return false;
 	}
 
-	return shovelerViewEntityRemoveComponent(entity, shovelerComponentTypeNameTilemapTiles);
+	return shovelerViewEntityRemoveComponent(entity, shovelerComponentTypeIdTilemapTiles);
 }

@@ -10,7 +10,7 @@ typedef enum {
 	SHOVELER_COMPONENT_LIGHT_TYPE_POINT
 } ShovelerComponentLightType;
 
-static const char *shovelerComponentTypeNameLight = "light";
+extern const char *const shovelerComponentTypeIdLight;
 static const char *shovelerComponentLightOptionKeyPosition = "position";
 static const char *shovelerComponentLightOptionKeyType = "type";
 static const char *shovelerComponentLightOptionKeyWidth = "width";

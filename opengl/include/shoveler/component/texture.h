@@ -5,7 +5,7 @@ typedef struct ShovelerTextureStruct ShovelerTexture; // forward declaration: te
 typedef struct ShovelerComponentTypeStruct ShovelerComponentType; // forward declaration: component.h
 typedef struct ShovelerComponentStruct ShovelerComponent; // forward declaration: component.h
 
-static const char *shovelerComponentTypeNameTexture = "texture";
+extern const char *const shovelerComponentTypeIdTexture;
 static const char *shovelerComponentTextureOptionKeyImageResource = "image_resource";
 
 ShovelerComponentType *shovelerComponentCreateTextureType();

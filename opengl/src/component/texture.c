@@ -6,20 +6,22 @@
 #include "shoveler/component.h"
 #include "shoveler/texture.h"
 
+const char *const shovelerComponentTypeIdTexture = "texture";
+
 static void *activateTextureComponent(ShovelerComponent *component);
 static void deactivateTextureComponent(ShovelerComponent *component);
 
 ShovelerComponentType *shovelerComponentCreateTextureType()
 {
-	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerComponentTypeNameTexture, activateTextureComponent, deactivateTextureComponent, /* requiresAuthority */ false);
-	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentTextureOptionKeyImageResource, shovelerComponentTypeNameResource, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerComponentTypeIdTexture, activateTextureComponent, deactivateTextureComponent, /* requiresAuthority */ false);
+	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentTextureOptionKeyImageResource, shovelerComponentTypeIdResource, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
 
 	return componentType;
 }
 
 ShovelerTexture *shovelerComponentGetTexture(ShovelerComponent *component)
 {
-	assert(strcmp(component->type->name, shovelerComponentTypeNameTexture) == 0);
+	assert(strcmp(component->type->id, shovelerComponentTypeIdTexture) == 0);
 
 	return component->data;
 }

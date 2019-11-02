@@ -10,22 +10,24 @@
 #include "shoveler/texture.h"
 #include "shoveler/tilemap.h"
 
+const char *const shovelerComponentTypeIdTilemap = "tilemap";
+
 static void *activateTilemapComponent(ShovelerComponent *component);
 static void deactivateTilemapComponent(ShovelerComponent *component);
 
 ShovelerComponentType *shovelerComponentCreateTilemapType()
 {
-	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerComponentTypeNameTilemap, activateTilemapComponent, deactivateTilemapComponent, /* requiresAuthority */ false);
-	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentTilemapOptionKeyTiles, shovelerComponentTypeNameTilemapTiles, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
-	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentTilemapOptionKeyColliders, shovelerComponentTypeNameTilemapColliders, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
-	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentTilemapOptionKeyTilesets, shovelerComponentTypeNameTileset, /* isArray */ true, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerComponentTypeIdTilemap, activateTilemapComponent, deactivateTilemapComponent, /* requiresAuthority */ false);
+	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentTilemapOptionKeyTiles, shovelerComponentTypeIdTilemapTiles, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentTilemapOptionKeyColliders, shovelerComponentTypeIdTilemapColliders, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentTilemapOptionKeyTilesets, shovelerComponentTypeIdTileset, /* isArray */ true, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
 
 	return componentType;
 }
 
 ShovelerTilemap *shovelerComponentGetTilemap(ShovelerComponent *component)
 {
-	assert(strcmp(component->type->name, shovelerComponentTypeNameTilemap) == 0);
+	assert(strcmp(component->type->id, shovelerComponentTypeIdTilemap) == 0);
 
 	return component->data;
 }

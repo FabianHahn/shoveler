@@ -9,15 +9,17 @@
 #include "shoveler/controller.h"
 #include "shoveler/model.h"
 
+const char *const shovelerComponentTypeIdClient = "client";
+
 static void *activateClientComponent(ShovelerComponent *component);
 static void deactivateClientComponent(ShovelerComponent *component);
 static void moveController(ShovelerController *controller, ShovelerVector3 position, void *componentPointer);
 
 ShovelerComponentType *shovelerComponentCreateClientType()
 {
-	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerComponentTypeNameClient, activateClientComponent, deactivateClientComponent, /* requiresAuthority */ true);
-	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentClientOptionKeyPosition, shovelerComponentTypeNamePosition, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
-	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentClientOptionKeyModel, shovelerComponentTypeNameModel, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerComponentTypeIdClient, activateClientComponent, deactivateClientComponent, /* requiresAuthority */ true);
+	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentClientOptionKeyPosition, shovelerComponentTypeIdPosition, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentClientOptionKeyModel, shovelerComponentTypeIdModel, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* updateDependency */ NULL);
 
 	return componentType;
 }

@@ -31,7 +31,7 @@ bool shovelerViewEntityRemoveChunk(ShovelerViewEntity *entity);
 
 static inline ShovelerComponent *shovelerViewEntityGetChunkComponent(ShovelerViewEntity *entity)
 {
-	return shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameChunk);
+	return shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdChunk);
 }
 
 #endif

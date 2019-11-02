@@ -10,8 +10,8 @@ static const char *testTargetName = "test";
 
 static ShovelerComponent *getComponent(ShovelerComponent *component, long long int entityId, const char *componentName, void *testPointer);
 static void *getTarget(ShovelerComponent *component, const char *targetName, void *testPointer);
-static void addDependency(ShovelerComponent *component, long long int targetEntityId, const char *targetComponentTypeName, void *testPointer);
-static bool removeDependency(ShovelerComponent *component, long long int targetEntityId, const char *targetComponentTypeName, void *testPointer);
+static void addDependency(ShovelerComponent *component, long long int targetEntityId, const char *targetComponentTypeId, void *testPointer);
+static bool removeDependency(ShovelerComponent *component, long long int targetEntityId, const char *targetComponentTypeId, void *testPointer);
 static void forEachReverseDependency(ShovelerComponent *component, ShovelerComponentAdapterViewForEachReverseDependencyCallbackFunction *callbackFunction, void *callbackUserData, void *testPointer);
 static void reportActivation(ShovelerComponent *component, int delta, void *testPointer);
 
@@ -32,11 +32,11 @@ public:
 		viewAdapter.reportActivation = reportActivation;
 		viewAdapter.userData = this;
 
-		componentType = shovelerComponentTypeCreate(componentTypeName, activateComponent, deactivateComponent, /* requiresAuthority */ false);
+		componentType = shovelerComponentTypeCreate(componentTypeId, activateComponent, deactivateComponent, /* requiresAuthority */ false);
 		shovelerComponentTypeAddConfigurationOption(componentType, configurationOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
-		shovelerComponentTypeAddDependencyConfigurationOption(componentType, dependencyConfigurationOptionKey, otherComponentTypeName, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, updateDependencyComponent);
+		shovelerComponentTypeAddDependencyConfigurationOption(componentType, dependencyConfigurationOptionKey, otherComponentTypeId, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, updateDependencyComponent);
 
-		otherComponentType = shovelerComponentTypeCreate(otherComponentTypeName, /* activate */ NULL, /* deactivate */ NULL, /* requiresAuthority */ true);
+		otherComponentType = shovelerComponentTypeCreate(otherComponentTypeId, /* activate */ NULL, /* deactivate */ NULL, /* requiresAuthority */ true);
 		shovelerComponentTypeAddConfigurationOption(otherComponentType, liveUpdateConfigurationOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_STRING, /* isOptional */ false, liveUpdateComponent);
 
 		component = shovelerComponentCreate(&viewAdapter, entityId, componentType);
@@ -60,8 +60,8 @@ public:
 		shovelerComponentTypeFree(otherComponentType);
 	}
 
-	const char *componentTypeName = "component type";
-	const char *otherComponentTypeName = "other component type";
+	const char *componentTypeId = "component type";
+	const char *otherComponentTypeId = "other component type";
 
 	const char *configurationOptionKey = "configuration option key";
 	const char *dependencyConfigurationOptionKey = "dependency configuration option key";
@@ -216,15 +216,15 @@ TEST_F(ShovelerComponentTest, updateConfigurationLiveNotifiesReverseDependency) 
 	ASSERT_EQ(lastUpdateDependencyComponent, otherComponent);
 }
 
-static ShovelerComponent *getComponent(ShovelerComponent *component, long long int entityId, const char *componentTypeName, void *testPointer)
+static ShovelerComponent *getComponent(ShovelerComponent *component, long long int entityId, const char *componentTypeId, void *testPointer)
 {
 	ShovelerComponentTest *test = (ShovelerComponentTest *) testPointer;
 
-	if(entityId == test->entityId && strcmp(componentTypeName, test->componentTypeName) == 0) {
+	if(entityId == test->entityId && strcmp(componentTypeId, test->componentTypeId) == 0) {
 		return test->component;
 	}
 
-	if(entityId == test->otherEntityId && strcmp(componentTypeName, test->otherComponentTypeName) == 0) {
+	if(entityId == test->otherEntityId && strcmp(componentTypeId, test->otherComponentTypeId) == 0) {
 		return test->otherComponent;
 	}
 
@@ -242,19 +242,19 @@ static void *getTarget(ShovelerComponent *component, const char *targetName, voi
 	return NULL;
 }
 
-static void addDependency(ShovelerComponent *component, long long int targetEntityId, const char *targetComponentTypeName, void *testPointer)
+static void addDependency(ShovelerComponent *component, long long int targetEntityId, const char *targetComponentTypeId, void *testPointer)
 {
 	ShovelerComponentTest *test = (ShovelerComponentTest *) testPointer;
 
-	auto dependencyTarget = std::make_pair(targetEntityId, targetComponentTypeName);
+	auto dependencyTarget = std::make_pair(targetEntityId, targetComponentTypeId);
 	test->reverseDependencies[dependencyTarget].insert(component);
 }
 
-static bool removeDependency(ShovelerComponent *component, long long int targetEntityId, const char *targetComponentTypeName, void *testPointer)
+static bool removeDependency(ShovelerComponent *component, long long int targetEntityId, const char *targetComponentTypeId, void *testPointer)
 {
 	ShovelerComponentTest *test = (ShovelerComponentTest *) testPointer;
 
-	auto dependencyTarget = std::make_pair(targetEntityId, targetComponentTypeName);
+	auto dependencyTarget = std::make_pair(targetEntityId, targetComponentTypeId);
 	test->reverseDependencies[dependencyTarget].erase(component);
 	return true;
 }
@@ -263,7 +263,7 @@ static void forEachReverseDependency(ShovelerComponent *component, ShovelerCompo
 {
 	ShovelerComponentTest *test = (ShovelerComponentTest *) testPointer;
 
-	auto dependencyTarget = std::make_pair(component->entityId, component->type->name);
+	auto dependencyTarget = std::make_pair(component->entityId, component->type->id);
 	for(ShovelerComponent *sourceComponent : test->reverseDependencies[dependencyTarget]) {
 		if(sourceComponent != NULL) {
 			callbackFunction(sourceComponent, component, callbackUserData);

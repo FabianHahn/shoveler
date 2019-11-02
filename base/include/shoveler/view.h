@@ -40,26 +40,26 @@ typedef struct ShovelerViewEntityStruct {
 
 typedef struct ShovelerViewQualifiedComponentStruct {
 	long long int entityId;
-	char *componentTypeName;
+	const char *componentTypeId;
 } ShovelerViewQualifiedComponent;
 
 ShovelerView *shovelerViewCreate();
 /** Adds a component type to the view, with the view taking ownership over it. */
 bool shovelerViewAddComponentType(ShovelerView *view, ShovelerComponentType *componentType);
-ShovelerComponentType *shovelerViewGetComponentType(ShovelerView *view, const char *componentTypeName);
+ShovelerComponentType *shovelerViewGetComponentType(ShovelerView *view, const char *componentTypeId);
 /** Adds a new dependency for a component, potentially deactivating it if the dependency isn't active. */
-void shovelerViewAddDependency(ShovelerView *view, long long int sourceEntityId, const char *sourceComponentTypeName, long long int targetEntityId, const char *targetComponentTypeName);
+void shovelerViewAddDependency(ShovelerView *view, long long int sourceEntityId, const char *sourceComponentTypeId, long long int targetEntityId, const char *targetComponentTypeId);
 /** Removes an existing dependency from a component, but doesn't automatically activate it even if this was the only unsatisfied one. */
-bool shovelerViewRemoveDependency(ShovelerView *view, long long int sourceEntityId, const char *sourceComponentTypeName, long long int targetEntityId, const char *targetComponentTypeName);
+bool shovelerViewRemoveDependency(ShovelerView *view, long long int sourceEntityId, const char *sourceComponentTypeId, long long int targetEntityId, const char *targetComponentTypeId);
 ShovelerViewEntity *shovelerViewAddEntity(ShovelerView *view, long long int entityId);
 bool shovelerViewRemoveEntity(ShovelerView *view, long long int entityId);
-void shovelerViewEntityDelegate(ShovelerViewEntity *entity, const char *componentTypeName);
-bool shovelerViewEntityIsAuthoritative(ShovelerViewEntity *entity, const char *componentTypeName);
-void shovelerViewEntityUndelegate(ShovelerViewEntity *entity, const char *componentTypeName);
+void shovelerViewEntityDelegate(ShovelerViewEntity *entity, const char *componentTypeId);
+bool shovelerViewEntityIsAuthoritative(ShovelerViewEntity *entity, const char *componentTypeId);
+void shovelerViewEntityUndelegate(ShovelerViewEntity *entity, const char *componentTypeId);
 /** Sets an entity's type, which is an arbitrary string without semantic meaning. */
 void shovelerViewEntitySetType(ShovelerViewEntity *entity, const char *type);
-ShovelerComponent *shovelerViewEntityAddComponent(ShovelerViewEntity *entity, const char *componentTypeName);
-bool shovelerViewEntityRemoveComponent(ShovelerViewEntity *entity, const char *componentTypeName);
+ShovelerComponent *shovelerViewEntityAddComponent(ShovelerViewEntity *entity, const char *componentTypeId);
+bool shovelerViewEntityRemoveComponent(ShovelerViewEntity *entity, const char *componentTypeId);
 /** Sets a target that is expected to be freed by the caller. */
 bool shovelerViewSetTarget(ShovelerView *view, const char *targetName, void *target);
 /** Creates the view's dependency graph to as a graphviz dot digraph string. */
@@ -68,9 +68,9 @@ GString *shovelerViewCreateDependencyGraph(ShovelerView *view);
 bool shovelerViewWriteDependencyGraph(ShovelerView *view, const char *filename);
 void shovelerViewFree(ShovelerView *view);
 
-static inline bool shovelerViewHasComponentType(ShovelerView *view, const char *componentTypeName)
+static inline bool shovelerViewHasComponentType(ShovelerView *view, const char *componentTypeId)
 {
-	return shovelerViewGetComponentType(view, componentTypeName) != NULL;
+	return shovelerViewGetComponentType(view, componentTypeId) != NULL;
 }
 
 static inline ShovelerViewEntity *shovelerViewGetEntity(ShovelerView *view, long long int entityId)
@@ -78,9 +78,9 @@ static inline ShovelerViewEntity *shovelerViewGetEntity(ShovelerView *view, long
 	return (ShovelerViewEntity *) g_hash_table_lookup(view->entities, &entityId);
 }
 
-static inline ShovelerComponent *shovelerViewEntityGetComponent(ShovelerViewEntity *entity, const char *componentTypeName)
+static inline ShovelerComponent *shovelerViewEntityGetComponent(ShovelerViewEntity *entity, const char *componentTypeId)
 {
-	return (ShovelerComponent *) g_hash_table_lookup(entity->components, componentTypeName);
+	return (ShovelerComponent *) g_hash_table_lookup(entity->components, componentTypeId);
 }
 
 static inline void *shovelerViewGetTarget(ShovelerView *view, const char *targetName)

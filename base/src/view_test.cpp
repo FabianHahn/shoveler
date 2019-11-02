@@ -21,13 +21,13 @@ public:
 		view = shovelerViewCreate();
 		shovelerViewSetTarget(view, testTargetName, this);
 
-		ShovelerComponentType *componentType = shovelerComponentTypeCreate(componentTypeName, activateComponent, deactivateComponent, /* requiresAuthority */ false);
+		ShovelerComponentType *componentType = shovelerComponentTypeCreate(componentTypeId, activateComponent, deactivateComponent, /* requiresAuthority */ false);
 		shovelerComponentTypeAddConfigurationOption(componentType, configurationOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
-		shovelerComponentTypeAddDependencyConfigurationOption(componentType, dependencyConfigurationOptionKey, otherComponentTypeName, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, updateDependencyComponent);
+		shovelerComponentTypeAddDependencyConfigurationOption(componentType, dependencyConfigurationOptionKey, otherComponentTypeId, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, updateDependencyComponent);
 		bool componentTypeAdded = shovelerViewAddComponentType(view, componentType);
 		ASSERT_TRUE(componentTypeAdded);
 
-		ShovelerComponentType *otherComponentType = shovelerComponentTypeCreate(otherComponentTypeName, NULL, NULL, /* requiresAuthority */ true);
+		ShovelerComponentType *otherComponentType = shovelerComponentTypeCreate(otherComponentTypeId, NULL, NULL, /* requiresAuthority */ true);
 		shovelerComponentTypeAddConfigurationOption(otherComponentType, liveUpdateConfigurationOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_STRING, /* isOptional */ false, liveUpdateComponent);
 		bool otherComponentTypeAdded = shovelerViewAddComponentType(view, otherComponentType);
 		ASSERT_TRUE(otherComponentTypeAdded);
@@ -38,9 +38,9 @@ public:
 		lastLiveUpdateConfigurationOption = NULL;
 		lastLiveUpdateValue = NULL;
 		lastDependencySource.entityId = 0;
-		lastDependencySource.componentTypeName = NULL;
+		lastDependencySource.componentTypeId = NULL;
 		lastDependencyTarget.entityId = 0;
-		lastDependencyTarget.componentTypeName = NULL;
+		lastDependencyTarget.componentTypeId = NULL;
 		lastDependencyAdded = false;
 	}
 
@@ -52,18 +52,15 @@ public:
 
 	void clearDependencyCallback()
 	{
-		free(lastDependencySource.componentTypeName);
-		free(lastDependencyTarget.componentTypeName);
-
 		lastDependencySource.entityId = 0;
-		lastDependencySource.componentTypeName = NULL;
+		lastDependencySource.componentTypeId = NULL;
 		lastDependencyTarget.entityId = 0;
-		lastDependencyTarget.componentTypeName = NULL;
+		lastDependencyTarget.componentTypeId = NULL;
 		lastDependencyAdded = false;
 	}
 
-	const char *componentTypeName = "component type";
-	const char *otherComponentTypeName = "other component type";
+	const char *componentTypeId = "component type";
+	const char *otherComponentTypeId = "other component type";
 
 	const char *configurationOptionKey = "configuration option key";
 	const char *dependencyConfigurationOptionKey = "dependency configuration option key";
@@ -92,7 +89,7 @@ TEST_F(ShovelerViewTest, activateThroughDependencyActivation)
 	ShovelerViewEntity *testEntity = shovelerViewAddEntity(view, testEntityId);
 	ASSERT_TRUE(testEntity != NULL);
 
-	ShovelerComponent *testComponent = shovelerViewEntityAddComponent(testEntity, componentTypeName);
+	ShovelerComponent *testComponent = shovelerViewEntityAddComponent(testEntity, componentTypeId);
 	ASSERT_TRUE(testComponent != NULL);
 
 	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(testComponent, dependencyConfigurationOptionKey, testDependencyEntityId);
@@ -104,13 +101,13 @@ TEST_F(ShovelerViewTest, activateThroughDependencyActivation)
 	ShovelerViewEntity *testDependencyEntity = shovelerViewAddEntity(view, testDependencyEntityId);
 	ASSERT_TRUE(testDependencyEntity != NULL);
 
-	ShovelerComponent *testDependencyComponent = shovelerViewEntityAddComponent(testDependencyEntity, otherComponentTypeName);
+	ShovelerComponent *testDependencyComponent = shovelerViewEntityAddComponent(testDependencyEntity, otherComponentTypeId);
 	ASSERT_TRUE(testDependencyComponent != NULL);
 
 	bool dependencyActivatedBeforeDelegation = shovelerComponentActivate(testDependencyComponent);
 	ASSERT_FALSE(dependencyActivatedBeforeDelegation);
 
-	shovelerViewEntityDelegate(testDependencyEntity, otherComponentTypeName);
+	shovelerViewEntityDelegate(testDependencyEntity, otherComponentTypeId);
 	bool dependencyActivated = shovelerComponentActivate(testDependencyComponent);
 	ASSERT_TRUE(dependencyActivated);
 	ASSERT_TRUE(shovelerComponentIsActive(testDependencyComponent));
@@ -126,7 +123,7 @@ TEST_F(ShovelerViewTest, deactivateWhenAddingUnsatisfiedDependency)
 	ShovelerViewEntity *testEntity = shovelerViewAddEntity(view, testEntityId);
 	ASSERT_TRUE(testEntity != NULL);
 
-	ShovelerComponent *testComponent = shovelerViewEntityAddComponent(testEntity, componentTypeName);
+	ShovelerComponent *testComponent = shovelerViewEntityAddComponent(testEntity, componentTypeId);
 	ASSERT_TRUE(testComponent != NULL);
 
 	bool activated = shovelerComponentActivate(testComponent);
@@ -146,13 +143,13 @@ TEST_F(ShovelerViewTest, deactivateReverseDependencies)
 
 	ShovelerViewEntity *testEntity = shovelerViewAddEntity(view, testEntityId);
 	ASSERT_TRUE(testEntity != NULL);
-	ShovelerComponent *testComponent = shovelerViewEntityAddComponent(testEntity, componentTypeName);
+	ShovelerComponent *testComponent = shovelerViewEntityAddComponent(testEntity, componentTypeId);
 	ASSERT_TRUE(testComponent != NULL);
 	shovelerComponentActivate(testComponent);
 
 	ShovelerViewEntity *testDependencyEntity = shovelerViewAddEntity(view, testDependencyEntityId);
 	ASSERT_TRUE(testDependencyEntity != NULL);
-	ShovelerComponent *testDependencyComponent = shovelerViewEntityAddComponent(testDependencyEntity, otherComponentTypeName);
+	ShovelerComponent *testDependencyComponent = shovelerViewEntityAddComponent(testDependencyEntity, otherComponentTypeId);
 	ASSERT_TRUE(testDependencyComponent != NULL);
 	shovelerComponentActivate(testDependencyComponent);
 
@@ -169,11 +166,11 @@ TEST_F(ShovelerViewTest, deactivateRemovedComponent)
 
 	ShovelerViewEntity *testEntity = shovelerViewAddEntity(view, testEntityId);
 	ASSERT_TRUE(testEntity != NULL);
-	ShovelerComponent *testComponent = shovelerViewEntityAddComponent(testEntity, componentTypeName);
+	ShovelerComponent *testComponent = shovelerViewEntityAddComponent(testEntity, componentTypeId);
 	ASSERT_TRUE(testComponent != NULL);
 	shovelerComponentActivate(testComponent);
 
-	bool removed = shovelerViewEntityRemoveComponent(testEntity, componentTypeName);
+	bool removed = shovelerViewEntityRemoveComponent(testEntity, componentTypeId);
 	ASSERT_TRUE(removed);
 	ASSERT_TRUE(deactivateCalled);
 }
@@ -184,7 +181,7 @@ TEST_F(ShovelerViewTest, removeEntityRemovesComponents)
 
 	ShovelerViewEntity *testEntity = shovelerViewAddEntity(view, testEntityId);
 	ASSERT_TRUE(testEntity != NULL);
-	ShovelerComponent *testComponent = shovelerViewEntityAddComponent(testEntity, componentTypeName);
+	ShovelerComponent *testComponent = shovelerViewEntityAddComponent(testEntity, componentTypeId);
 	ASSERT_TRUE(testComponent != NULL);
 	shovelerComponentActivate(testComponent);
 
@@ -200,16 +197,16 @@ TEST_F(ShovelerViewTest, updateConfigurationLiveNotifiesReverseDependency) {
 
 	ShovelerViewEntity *testEntity = shovelerViewAddEntity(view, testEntityId);
 	ASSERT_TRUE(testEntity != NULL);
-	ShovelerComponent *testComponent = shovelerViewEntityAddComponent(testEntity, componentTypeName);
+	ShovelerComponent *testComponent = shovelerViewEntityAddComponent(testEntity, componentTypeId);
 	ASSERT_TRUE(testComponent != NULL);
 
 	ShovelerViewEntity *testDependencyEntity = shovelerViewAddEntity(view, testDependencyEntityId);
 	ASSERT_TRUE(testDependencyEntity != NULL);
-	ShovelerComponent *testDependencyComponent = shovelerViewEntityAddComponent(testDependencyEntity, otherComponentTypeName);
+	ShovelerComponent *testDependencyComponent = shovelerViewEntityAddComponent(testDependencyEntity, otherComponentTypeId);
 	ASSERT_TRUE(testDependencyComponent != NULL);
 
 	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(testComponent, dependencyConfigurationOptionKey, testDependencyEntityId);
-	shovelerViewEntityDelegate(testDependencyEntity, otherComponentTypeName);
+	shovelerViewEntityDelegate(testDependencyEntity, otherComponentTypeId);
 	bool dependencyActivated = shovelerComponentActivate(testDependencyComponent);
 	ASSERT_TRUE(dependencyActivated);
 	bool activated = shovelerComponentActivate(testComponent);

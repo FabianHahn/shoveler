@@ -18,18 +18,20 @@
 #include "shoveler/log.h"
 #include "shoveler/shader_cache.h"
 
+const char *const shovelerComponentTypeIdMaterial = "material";
+
 static void *activateMaterialComponent(ShovelerComponent *component);
 static void deactivateMaterialComponent(ShovelerComponent *component);
 
 ShovelerComponentType *shovelerComponentCreateMaterialType()
 {
-	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerComponentTypeNameMaterial, activateMaterialComponent, deactivateMaterialComponent, /* requiresAuthority */ false);
+	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerComponentTypeIdMaterial, activateMaterialComponent, deactivateMaterialComponent, /* requiresAuthority */ false);
 	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentMaterialOptionKeyType, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
-	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentMaterialOptionKeyTexture, shovelerComponentTypeNameTexture, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* updateDependency */ NULL);
-	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentMaterialOptionKeyTextureSampler, shovelerComponentTypeNameSampler, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* updateDependency */ NULL);
-	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentMaterialOptionKeyTilemap, shovelerComponentTypeNameTilemap, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* updateDependency */ NULL);
-	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentMaterialOptionKeyCanvas, shovelerComponentTypeNameCanvas, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* updateDependency */ NULL);
-	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentMaterialOptionKeyChunk, shovelerComponentTypeNameChunk, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentMaterialOptionKeyTexture, shovelerComponentTypeIdTexture, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentMaterialOptionKeyTextureSampler, shovelerComponentTypeIdSampler, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentMaterialOptionKeyTilemap, shovelerComponentTypeIdTilemap, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentMaterialOptionKeyCanvas, shovelerComponentTypeIdCanvas, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentMaterialOptionKeyChunk, shovelerComponentTypeIdChunk, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* updateDependency */ NULL);
 	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentMaterialOptionKeyColor, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_VECTOR3, /* isOptional */ true, /* liveUpdate */ NULL);
 	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentMaterialOptionKeyCanvasRegionPosition, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_VECTOR2, /* isOptional */ true, /* liveUpdate */ NULL);
 	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentMaterialOptionKeyCanvasRegionSize, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_VECTOR2, /* isOptional */ true, /* liveUpdate */ NULL);
@@ -39,7 +41,7 @@ ShovelerComponentType *shovelerComponentCreateMaterialType()
 
 ShovelerMaterial *shovelerComponentGetMaterial(ShovelerComponent *component)
 {
-	assert(strcmp(component->type->name, shovelerComponentTypeNameMaterial) == 0);
+	assert(strcmp(component->type->id, shovelerComponentTypeIdMaterial) == 0);
 
 	return component->data;
 }

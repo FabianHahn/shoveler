@@ -413,8 +413,8 @@ int main(int argc, char *argv[])
 	shovelerViewEntitySetType(clientEntity, "client");
 	shovelerViewEntityAddPosition(clientEntity, shovelerVector3(0.0, 0.0, 0.0));
 	shovelerViewEntityAddClient(clientEntity, &clientConfiguration);
-	shovelerViewEntityDelegate(clientEntity, shovelerComponentTypeNamePosition);
-	shovelerViewEntityDelegate(clientEntity, shovelerComponentTypeNameClient);
+	shovelerViewEntityDelegate(clientEntity, shovelerComponentTypeIdPosition);
+	shovelerViewEntityDelegate(clientEntity, shovelerComponentTypeIdClient);
 
 	shovelerOpenGLCheckSuccess();
 

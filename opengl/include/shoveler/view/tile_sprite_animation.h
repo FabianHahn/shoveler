@@ -28,7 +28,7 @@ bool shovelerViewEntityRemoveTileSpriteAnimation(ShovelerViewEntity *entity);
 
 static inline ShovelerComponent *shovelerViewEntityGetTileSpriteAnimationComponent(ShovelerViewEntity *entity)
 {
-	return shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameTileSpriteAnimation);
+	return shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdTileSpriteAnimation);
 }
 
 #endif

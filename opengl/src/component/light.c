@@ -13,14 +13,16 @@
 #include "shoveler/scene.h"
 #include "shoveler/shader_cache.h"
 
+const char *const shovelerComponentTypeIdLight = "light";
+
 static void *activateLightComponent(ShovelerComponent *component);
 static void deactivateLightComponent(ShovelerComponent *component);
 static void updateLightPositionDependency(ShovelerComponent *component, ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent);
 
 ShovelerComponentType *shovelerComponentCreateLightType()
 {
-	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerComponentTypeNameLight, activateLightComponent, deactivateLightComponent, /* requiresAuthority */ false);
-	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentLightOptionKeyPosition, shovelerComponentTypeNamePosition, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, updateLightPositionDependency);
+	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerComponentTypeIdLight, activateLightComponent, deactivateLightComponent, /* requiresAuthority */ false);
+	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentLightOptionKeyPosition, shovelerComponentTypeIdPosition, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, updateLightPositionDependency);
 	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentLightOptionKeyType, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
 	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentLightOptionKeyWidth, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
 	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentLightOptionKeyHeight, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
@@ -34,7 +36,7 @@ ShovelerComponentType *shovelerComponentCreateLightType()
 
 ShovelerLight *shovelerComponentGetLight(ShovelerComponent *component)
 {
-	assert(strcmp(component->type->name, shovelerComponentTypeNameLight) == 0);
+	assert(strcmp(component->type->id, shovelerComponentTypeIdLight) == 0);
 
 	return component->data;
 }

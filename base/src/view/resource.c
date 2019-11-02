@@ -11,13 +11,15 @@
 #include "shoveler/log.h"
 #include "shoveler/resources.h"
 
+const char *const shovelerComponentTypeIdResource = "resource";
+
 ShovelerComponent *shovelerViewEntityAddResource(ShovelerViewEntity *entity, const ShovelerViewResourceConfiguration *configuration)
 {
-	if(!shovelerViewHasComponentType(entity->view, shovelerComponentTypeNameResource)) {
+	if(!shovelerViewHasComponentType(entity->view, shovelerComponentTypeIdResource)) {
 		shovelerViewAddComponentType(entity->view, shovelerComponentCreateResourceType());
 	}
 
-	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerComponentTypeNameResource);
+	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerComponentTypeIdResource);
 	shovelerComponentUpdateCanonicalConfigurationOptionString(component, shovelerComponentResourceOptionKeyTypeId, configuration->typeId);
 	shovelerComponentUpdateCanonicalConfigurationOptionBytes(component, shovelerComponentResourceOptionKeyBuffer, configuration->buffer, configuration->bufferSize);
 
@@ -27,7 +29,7 @@ ShovelerComponent *shovelerViewEntityAddResource(ShovelerViewEntity *entity, con
 
 void *shovelerViewEntityGetResource(ShovelerViewEntity *entity)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameResource);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdResource);
 	if(component == NULL) {
 		return NULL;
 	}
@@ -37,7 +39,7 @@ void *shovelerViewEntityGetResource(ShovelerViewEntity *entity)
 
 bool shovelerViewEntityGetResourceConfiguration(ShovelerViewEntity *entity, ShovelerViewResourceConfiguration *outputConfiguration)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameResource);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdResource);
 	if(component == NULL) {
 		return false;
 	}
@@ -49,7 +51,7 @@ bool shovelerViewEntityGetResourceConfiguration(ShovelerViewEntity *entity, Shov
 
 bool shovelerViewEntityUpdateResourceConfiguration(ShovelerViewEntity *entity, const ShovelerViewResourceConfiguration *configuration)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameResource);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdResource);
 	if(component == NULL) {
 		return false;
 	}
@@ -61,11 +63,11 @@ bool shovelerViewEntityUpdateResourceConfiguration(ShovelerViewEntity *entity, c
 
 bool shovelerViewEntityRemoveResource(ShovelerViewEntity *entity)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameResource);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdResource);
 	if(component == NULL) {
 		shovelerLogWarning("Trying to remove resource from entity %lld which does not have a resource, ignoring.", entity->id);
 		return false;
 	}
 
-	return shovelerViewEntityRemoveComponent(entity, shovelerComponentTypeNameResource);
+	return shovelerViewEntityRemoveComponent(entity, shovelerComponentTypeIdResource);
 }

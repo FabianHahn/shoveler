@@ -24,7 +24,7 @@ bool shovelerViewEntityRemoveChunkLayer(ShovelerViewEntity *entity);
 
 static inline ShovelerComponent *shovelerViewEntityGetChunkLayerComponent(ShovelerViewEntity *entity)
 {
-	return shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameChunkLayer);
+	return shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdChunkLayer);
 }
 
 #endif

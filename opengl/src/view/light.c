@@ -15,11 +15,11 @@
 
 ShovelerComponent *shovelerViewEntityAddLight(ShovelerViewEntity *entity, const ShovelerViewLightConfiguration *configuration)
 {
-	if(!shovelerViewHasComponentType(entity->view, shovelerComponentTypeNameLight)) {
+	if(!shovelerViewHasComponentType(entity->view, shovelerComponentTypeIdLight)) {
 		shovelerViewAddComponentType(entity->view, shovelerComponentCreateLightType());
 	}
 
-	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerComponentTypeNameLight);
+	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerComponentTypeIdLight);
 	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerComponentLightOptionKeyPosition, configuration->positionEntityId);
 	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerComponentLightOptionKeyType, configuration->type);
 	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, shovelerComponentLightOptionKeyWidth, configuration->width);
@@ -35,7 +35,7 @@ ShovelerComponent *shovelerViewEntityAddLight(ShovelerViewEntity *entity, const 
 
 ShovelerLight *shovelerViewEntityGetLight(ShovelerViewEntity *entity)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameLight);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdLight);
 	if(component == NULL) {
 		return NULL;
 	}
@@ -45,7 +45,7 @@ ShovelerLight *shovelerViewEntityGetLight(ShovelerViewEntity *entity)
 
 bool shovelerViewEntityGetLightConfiguration(ShovelerViewEntity *entity, ShovelerViewLightConfiguration *outputConfiguration)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameLight);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdLight);
 	if(component == NULL) {
 		return NULL;
 	}
@@ -63,7 +63,7 @@ bool shovelerViewEntityGetLightConfiguration(ShovelerViewEntity *entity, Shovele
 
 bool shovelerViewEntityUpdateLight(ShovelerViewEntity *entity, const ShovelerViewLightConfiguration *configuration)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameLight);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdLight);
 	if(component == NULL) {
 		shovelerLogWarning("Trying to update light of entity %lld which does not have a light, ignoring.", entity->id);
 		return false;
@@ -84,11 +84,11 @@ bool shovelerViewEntityRemoveLight(ShovelerViewEntity *entity)
 {
 	assert(shovelerViewHasScene(entity->view));
 
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameLight);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdLight);
 	if(component == NULL) {
 		shovelerLogWarning("Trying to remove light from entity %lld which does not have a light, ignoring.", entity->id);
 		return false;
 	}
 
-	return shovelerViewEntityRemoveComponent(entity, shovelerComponentTypeNameLight);
+	return shovelerViewEntityRemoveComponent(entity, shovelerComponentTypeIdLight);
 }

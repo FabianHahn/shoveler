@@ -37,7 +37,7 @@ bool shovelerViewEntityRemoveTilemapTiles(ShovelerViewEntity *entity);
 
 static inline ShovelerComponent *shovelerViewEntityGetTilemapTilesComponent(ShovelerViewEntity *entity)
 {
-	return shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameTilemapTiles);
+	return shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdTilemapTiles);
 }
 
 #endif

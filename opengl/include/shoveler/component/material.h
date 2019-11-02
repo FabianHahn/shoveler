@@ -14,7 +14,7 @@ typedef enum {
 	SHOVELER_COMPONENT_MATERIAL_TYPE_CHUNK,
 } ShovelerComponentMaterialType;
 
-static const char *shovelerComponentTypeNameMaterial = "material";
+extern const char *const shovelerComponentTypeIdMaterial;
 static const char *shovelerComponentMaterialOptionKeyType = "type";
 static const char *shovelerComponentMaterialOptionKeyTexture = "texture";
 static const char *shovelerComponentMaterialOptionKeyTextureSampler = "texture_sampler";

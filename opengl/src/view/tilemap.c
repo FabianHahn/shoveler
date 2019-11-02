@@ -12,11 +12,11 @@
 
 ShovelerComponent *shovelerViewEntityAddTilemap(ShovelerViewEntity *entity, const ShovelerViewTilemapConfiguration *configuration)
 {
-	if(!shovelerViewHasComponentType(entity->view, shovelerComponentTypeNameTilemap)) {
+	if(!shovelerViewHasComponentType(entity->view, shovelerComponentTypeIdTilemap)) {
 		shovelerViewAddComponentType(entity->view, shovelerComponentCreateTilemapType());
 	}
 
-	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerComponentTypeNameTilemap);
+	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerComponentTypeIdTilemap);
 	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerComponentTilemapOptionKeyTiles, configuration->tilesEntityId);
 	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, shovelerComponentTilemapOptionKeyColliders, configuration->collidersEntityId);
 	shovelerComponentUpdateCanonicalConfigurationOptionEntityIdArray(component, shovelerComponentTilemapOptionKeyTilesets, configuration->tilesetEntityIds, configuration->numTilesets);
@@ -27,7 +27,7 @@ ShovelerComponent *shovelerViewEntityAddTilemap(ShovelerViewEntity *entity, cons
 
 ShovelerTilemap *shovelerViewEntityGetTilemap(ShovelerViewEntity *entity)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameTilemap);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdTilemap);
 	if(component == NULL) {
 		return NULL;
 	}
@@ -37,7 +37,7 @@ ShovelerTilemap *shovelerViewEntityGetTilemap(ShovelerViewEntity *entity)
 
 bool shovelerViewEntityGetTilemapConfiguration(ShovelerViewEntity *entity, ShovelerViewTilemapConfiguration *outputConfiguration)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameTilemap);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdTilemap);
 	if(component == NULL) {
 		return false;
 	}
@@ -55,7 +55,7 @@ bool shovelerViewEntityGetTilemapConfiguration(ShovelerViewEntity *entity, Shove
 
 bool shovelerViewEntityUpdateTilemap(ShovelerViewEntity *entity, const ShovelerViewTilemapConfiguration *configuration)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameTilemap);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdTilemap);
 	if(component == NULL) {
 		shovelerLogWarning("Trying to update tilemap of entity %lld which does not have a tilemap, ignoring.", entity->id);
 		return false;
@@ -69,11 +69,11 @@ bool shovelerViewEntityUpdateTilemap(ShovelerViewEntity *entity, const ShovelerV
 
 bool shovelerViewEntityRemoveTilemap(ShovelerViewEntity *entity)
 {
-	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameTilemap);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdTilemap);
 	if(component == NULL) {
 		shovelerLogWarning("Trying to remove tilemap from entity %lld which does not have a tilemap, ignoring.", entity->id);
 		return false;
 	}
 
-	return shovelerViewEntityRemoveComponent(entity, shovelerComponentTypeNameTilemap);
+	return shovelerViewEntityRemoveComponent(entity, shovelerComponentTypeIdTilemap);
 }

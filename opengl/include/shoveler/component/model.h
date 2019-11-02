@@ -5,7 +5,7 @@ typedef struct ShovelerModelStruct ShovelerModel; // forward declaration: model.
 typedef struct ShovelerComponentTypeStruct ShovelerComponentType; // forward declaration: component.h
 typedef struct ShovelerComponentStruct ShovelerComponent; // forward declaration: component.h
 
-static const char *shovelerComponentTypeNameModel = "model";
+extern const char *const shovelerComponentTypeIdModel;
 static const char *shovelerComponentModelOptionKeyPosition = "position";
 static const char *shovelerComponentModelOptionKeyDrawable = "drawable";
 static const char *shovelerComponentModelOptionKeyMaterial = "material";

@@ -24,7 +24,7 @@ bool shovelerViewEntityRemoveTexture(ShovelerViewEntity *entity);
 
 static inline ShovelerComponent *shovelerViewEntityGetTextureComponent(ShovelerViewEntity *entity)
 {
-	return shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameTexture);
+	return shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdTexture);
 }
 
 #endif

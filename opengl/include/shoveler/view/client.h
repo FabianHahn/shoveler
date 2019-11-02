@@ -22,7 +22,7 @@ bool shovelerViewEntityRemoveClient(ShovelerViewEntity *entity);
 
 static inline ShovelerComponent *shovelerViewEntityGetClientComponent(ShovelerViewEntity *entity)
 {
-	return shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameClient);
+	return shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdClient);
 }
 
 #endif

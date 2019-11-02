@@ -4,7 +4,7 @@
 typedef struct ShovelerComponentTypeStruct ShovelerComponentType; // forward declaration: component.h
 typedef struct ShovelerComponentStruct ShovelerComponent; // forward declaration: component.h
 
-static const char *shovelerComponentTypeNameResource = "resource";
+extern const char *const shovelerComponentTypeIdResource;
 static const char *shovelerComponentResourceOptionKeyTypeId = "type_id";
 static const char *shovelerComponentResourceOptionKeyBuffer = "buffer";
 

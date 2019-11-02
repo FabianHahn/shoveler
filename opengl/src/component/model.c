@@ -12,16 +12,18 @@
 #include "shoveler/scene.h"
 #include "shoveler/shader_cache.h"
 
+const char *const shovelerComponentTypeIdModel = "model";
+
 static void *activateModelComponent(ShovelerComponent *component);
 static void deactivateModelComponent(ShovelerComponent *component);
 static void updateModelPositionDependency(ShovelerComponent *component, ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent);
 
 ShovelerComponentType *shovelerComponentCreateModelType()
 {
-	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerComponentTypeNameModel, activateModelComponent, deactivateModelComponent, /* requiresAuthority */ false);
-	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentModelOptionKeyPosition, shovelerComponentTypeNamePosition, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, updateModelPositionDependency);
-	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentModelOptionKeyDrawable, shovelerComponentTypeNameDrawable, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
-	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentModelOptionKeyMaterial, shovelerComponentTypeNameMaterial, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerComponentTypeIdModel, activateModelComponent, deactivateModelComponent, /* requiresAuthority */ false);
+	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentModelOptionKeyPosition, shovelerComponentTypeIdPosition, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, updateModelPositionDependency);
+	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentModelOptionKeyDrawable, shovelerComponentTypeIdDrawable, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+	shovelerComponentTypeAddDependencyConfigurationOption(componentType, shovelerComponentModelOptionKeyMaterial, shovelerComponentTypeIdMaterial, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
 	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentModelOptionKeyRotation, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_VECTOR3, /* isOptional */ false, /* liveUpdate */ NULL);
 	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentModelOptionKeyScale, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_VECTOR3, /* isOptional */ false, /* liveUpdate */ NULL);
 	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentModelOptionKeyVisible, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BOOL, /* isOptional */ false, /* liveUpdate */ NULL);
@@ -34,7 +36,7 @@ ShovelerComponentType *shovelerComponentCreateModelType()
 
 ShovelerModel *shovelerComponentGetModel(ShovelerComponent *component)
 {
-	assert(strcmp(component->type->name, shovelerComponentTypeNameModel) == 0);
+	assert(strcmp(component->type->id, shovelerComponentTypeIdModel) == 0);
 
 	return component->data;
 }

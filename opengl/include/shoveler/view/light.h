@@ -32,7 +32,7 @@ bool shovelerViewEntityRemoveLight(ShovelerViewEntity *entity);
 
 static inline ShovelerComponent *shovelerViewEntityGetLightComponent(ShovelerViewEntity *entity)
 {
-	return shovelerViewEntityGetComponent(entity, shovelerComponentTypeNameLight);
+	return shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdLight);
 }
 
 #endif
