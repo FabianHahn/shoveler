@@ -7,12 +7,21 @@ extern "C" {
 #include "shoveler/view.h"
 }
 
+typedef enum {
+	COMPONENT_CONFIGURATION_OPTION,
+	COMPONENT_CONFIGURATION_OPTION_DEPENDENCY,
+} ComponentConfigurationOption;
+
+typedef enum {
+	COMPONENT_CONFIGURATION_OPTION_LIVE_UPDATE,
+} OtherComponentConfigurationOption;
+
 static const char *testTargetName = "test";
 
 static void *activateComponent(ShovelerComponent *component);
 static void deactivateComponent(ShovelerComponent *component);
-static void liveUpdateComponent(ShovelerComponent *component, ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *value);
-static void updateDependencyComponent(ShovelerComponent *component, ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent);
+static void liveUpdateComponent(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *value);
+static void updateDependencyComponent(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent);
 
 class ShovelerViewTest : public ::testing::Test {
 public:
@@ -21,14 +30,16 @@ public:
 		view = shovelerViewCreate();
 		shovelerViewSetTarget(view, testTargetName, this);
 
-		ShovelerComponentType *componentType = shovelerComponentTypeCreate(componentTypeId, activateComponent, deactivateComponent, /* requiresAuthority */ false);
-		shovelerComponentTypeAddConfigurationOption(componentType, configurationOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
-		shovelerComponentTypeAddDependencyConfigurationOption(componentType, dependencyConfigurationOptionKey, otherComponentTypeId, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, updateDependencyComponent);
+		configurationOptions[COMPONENT_CONFIGURATION_OPTION] = shovelerComponentTypeConfigurationOption(configurationOptionName, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
+		configurationOptions[COMPONENT_CONFIGURATION_OPTION_DEPENDENCY] = shovelerComponentTypeConfigurationOptionDependency(dependencyConfigurationOptionName, otherComponentTypeId, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, updateDependencyComponent);
+
+		otherConfigurationOptions[COMPONENT_CONFIGURATION_OPTION_LIVE_UPDATE] = shovelerComponentTypeConfigurationOption(liveUpdateConfigurationOptionName, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_STRING, /* isOptional */ false, liveUpdateComponent);
+
+		ShovelerComponentType *componentType = shovelerComponentTypeCreate(componentTypeId, activateComponent, deactivateComponent, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
 		bool componentTypeAdded = shovelerViewAddComponentType(view, componentType);
 		ASSERT_TRUE(componentTypeAdded);
 
-		ShovelerComponentType *otherComponentType = shovelerComponentTypeCreate(otherComponentTypeId, NULL, NULL, /* requiresAuthority */ true);
-		shovelerComponentTypeAddConfigurationOption(otherComponentType, liveUpdateConfigurationOptionKey, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_STRING, /* isOptional */ false, liveUpdateComponent);
+		ShovelerComponentType *otherComponentType = shovelerComponentTypeCreate(otherComponentTypeId, NULL, NULL, /* requiresAuthority */ true, sizeof(otherConfigurationOptions) / sizeof(otherConfigurationOptions[0]), otherConfigurationOptions);
 		bool otherComponentTypeAdded = shovelerViewAddComponentType(view, otherComponentType);
 		ASSERT_TRUE(otherComponentTypeAdded);
 
@@ -62,19 +73,22 @@ public:
 	const char *componentTypeId = "component type";
 	const char *otherComponentTypeId = "other component type";
 
-	const char *configurationOptionKey = "configuration option key";
-	const char *dependencyConfigurationOptionKey = "dependency configuration option key";
-	const char *liveUpdateConfigurationOptionKey = "live update configuration option key";
+	const char *configurationOptionName = "option";
+	const char *dependencyConfigurationOptionName = "dependency";
+	const char *liveUpdateConfigurationOptionName = "live update";
 
 	ShovelerView *view;
+
+	ShovelerComponentTypeConfigurationOption configurationOptions[2];
+	ShovelerComponentTypeConfigurationOption otherConfigurationOptions[1];
 
 	bool activateCalled;
 	bool deactivateCalled;
 	bool liveUpdateCalled;
 	bool updateDependencyCalled;
-	ShovelerComponentTypeConfigurationOption *lastLiveUpdateConfigurationOption;
+	const ShovelerComponentTypeConfigurationOption *lastLiveUpdateConfigurationOption;
 	const ShovelerComponentConfigurationValue *lastLiveUpdateValue;
-	ShovelerComponentTypeConfigurationOption *lastUpdateDependencyConfigurationOption;
+	const ShovelerComponentTypeConfigurationOption *lastUpdateDependencyConfigurationOption;
 	ShovelerComponent *lastUpdateDependencyComponent;
 	ShovelerViewQualifiedComponent lastDependencySource;
 	ShovelerViewQualifiedComponent lastDependencyTarget;
@@ -92,7 +106,7 @@ TEST_F(ShovelerViewTest, activateThroughDependencyActivation)
 	ShovelerComponent *testComponent = shovelerViewEntityAddComponent(testEntity, componentTypeId);
 	ASSERT_TRUE(testComponent != NULL);
 
-	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(testComponent, dependencyConfigurationOptionKey, testDependencyEntityId);
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(testComponent, COMPONENT_CONFIGURATION_OPTION_DEPENDENCY, testDependencyEntityId);
 
 	bool activated = shovelerComponentActivate(testComponent);
 	ASSERT_FALSE(activated);
@@ -131,7 +145,7 @@ TEST_F(ShovelerViewTest, deactivateWhenAddingUnsatisfiedDependency)
 	ASSERT_TRUE(shovelerComponentIsActive(testComponent));
 	ASSERT_TRUE(activateCalled);
 
-	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(testComponent, dependencyConfigurationOptionKey, testDependencyEntityId);
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(testComponent, COMPONENT_CONFIGURATION_OPTION_DEPENDENCY, testDependencyEntityId);
 	ASSERT_TRUE(deactivateCalled) << "test component should be deactivated after adding unsatisfied dependency";
 	ASSERT_FALSE(shovelerComponentIsActive(testComponent));
 }
@@ -153,7 +167,7 @@ TEST_F(ShovelerViewTest, deactivateReverseDependencies)
 	ASSERT_TRUE(testDependencyComponent != NULL);
 	shovelerComponentActivate(testDependencyComponent);
 
-	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(testComponent, dependencyConfigurationOptionKey, testDependencyEntityId);
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(testComponent, COMPONENT_CONFIGURATION_OPTION_DEPENDENCY, testDependencyEntityId);
 
 	shovelerComponentDeactivate(testDependencyComponent);
 	ASSERT_TRUE(deactivateCalled) << "test component has also been deactivated after deactivating its dependency";
@@ -205,7 +219,7 @@ TEST_F(ShovelerViewTest, updateConfigurationLiveNotifiesReverseDependency) {
 	ShovelerComponent *testDependencyComponent = shovelerViewEntityAddComponent(testDependencyEntity, otherComponentTypeId);
 	ASSERT_TRUE(testDependencyComponent != NULL);
 
-	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(testComponent, dependencyConfigurationOptionKey, testDependencyEntityId);
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(testComponent, COMPONENT_CONFIGURATION_OPTION_DEPENDENCY, testDependencyEntityId);
 	shovelerViewEntityDelegate(testDependencyEntity, otherComponentTypeId);
 	bool dependencyActivated = shovelerComponentActivate(testDependencyComponent);
 	ASSERT_TRUE(dependencyActivated);
@@ -213,10 +227,10 @@ TEST_F(ShovelerViewTest, updateConfigurationLiveNotifiesReverseDependency) {
 	ASSERT_TRUE(activated);
 	activateCalled = false;
 
-	bool updated = shovelerComponentUpdateCanonicalConfigurationOptionString(testDependencyComponent, liveUpdateConfigurationOptionKey, newConfigurationValue);
+	bool updated = shovelerComponentUpdateCanonicalConfigurationOptionString(testDependencyComponent, COMPONENT_CONFIGURATION_OPTION_LIVE_UPDATE, newConfigurationValue);
 	ASSERT_TRUE(updated);
 	ASSERT_TRUE(updateDependencyCalled);
-	ASSERT_STREQ(lastUpdateDependencyConfigurationOption->key, dependencyConfigurationOptionKey);
+	ASSERT_EQ(lastUpdateDependencyConfigurationOption->name, dependencyConfigurationOptionName);
 	ASSERT_EQ(lastUpdateDependencyComponent, testDependencyComponent);
 }
 
@@ -233,7 +247,7 @@ static void deactivateComponent(ShovelerComponent *component)
 	test->deactivateCalled = true;
 }
 
-static void liveUpdateComponent(ShovelerComponent *component, ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *value)
+static void liveUpdateComponent(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *value)
 {
 	ShovelerViewTest *test = (ShovelerViewTest *) shovelerComponentGetViewTarget(component, testTargetName);
 	test->liveUpdateCalled = true;
@@ -241,7 +255,7 @@ static void liveUpdateComponent(ShovelerComponent *component, ShovelerComponentT
 	test->lastLiveUpdateValue = value;
 }
 
-static void updateDependencyComponent(ShovelerComponent *component, ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent)
+static void updateDependencyComponent(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent)
 {
 	ShovelerViewTest *test = (ShovelerViewTest *) shovelerComponentGetViewTarget(component, testTargetName);
 	test->updateDependencyCalled = true;

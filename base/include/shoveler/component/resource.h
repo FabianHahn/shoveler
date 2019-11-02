@@ -5,8 +5,11 @@ typedef struct ShovelerComponentTypeStruct ShovelerComponentType; // forward dec
 typedef struct ShovelerComponentStruct ShovelerComponent; // forward declaration: component.h
 
 extern const char *const shovelerComponentTypeIdResource;
-static const char *shovelerComponentResourceOptionKeyTypeId = "type_id";
-static const char *shovelerComponentResourceOptionKeyBuffer = "buffer";
+
+typedef enum {
+	SHOVELER_COMPONENT_RESOURCE_OPTION_TYPE_ID,
+	SHOVELER_COMPONENT_RESOURCE_OPTION_BUFFER,
+} ShovelerComponentPositionOptionId;
 
 ShovelerComponentType *shovelerComponentCreateResourceType();
 void *shovelerComponentGetResource(ShovelerComponent *component);

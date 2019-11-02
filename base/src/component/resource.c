@@ -11,11 +11,11 @@ static void deactivateResourceComponent(ShovelerComponent *component);
 
 ShovelerComponentType *shovelerComponentCreateResourceType()
 {
-	ShovelerComponentType *componentType = shovelerComponentTypeCreate(shovelerComponentTypeIdResource, activateResourceComponent, deactivateResourceComponent, /* requiresAuthority */ false);
-	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentResourceOptionKeyTypeId, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_STRING, /* isOptional */ false, /* liveUpdate */ NULL);
-	shovelerComponentTypeAddConfigurationOption(componentType, shovelerComponentResourceOptionKeyBuffer, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BYTES, /* isOptional */ false, /* liveUpdate */ NULL);
+	ShovelerComponentTypeConfigurationOption configurationOptions[2];
+	configurationOptions[SHOVELER_COMPONENT_RESOURCE_OPTION_TYPE_ID] = shovelerComponentTypeConfigurationOption("type_id", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_STRING, /* isOptional */ false, /* liveUpdate */ NULL);
+	configurationOptions[SHOVELER_COMPONENT_RESOURCE_OPTION_BUFFER] = shovelerComponentTypeConfigurationOption("type_id", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BYTES, /* isOptional */ false, /* liveUpdate */ NULL);
 
-	return componentType;
+	return shovelerComponentTypeCreate(shovelerComponentTypeIdResource, activateResourceComponent, deactivateResourceComponent, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
 }
 
 void *shovelerComponentGetResource(ShovelerComponent *component)
@@ -34,10 +34,10 @@ static void *activateResourceComponent(ShovelerComponent *component)
 	GString *resourceId = g_string_new("");
 	g_string_append_printf(resourceId, "%lld", component->entityId);
 
-	const char *typeId = shovelerComponentGetConfigurationValueString(component, shovelerComponentResourceOptionKeyTypeId);
+	const char *typeId = shovelerComponentGetConfigurationValueString(component, SHOVELER_COMPONENT_RESOURCE_OPTION_TYPE_ID);
 	const unsigned char *bufferData;
 	int bufferSize;
-	shovelerComponentGetConfigurationValueBytes(component, shovelerComponentResourceOptionKeyBuffer, &bufferData, &bufferSize);
+	shovelerComponentGetConfigurationValueBytes(component, SHOVELER_COMPONENT_RESOURCE_OPTION_BUFFER, &bufferData, &bufferSize);
 	if(!shovelerResourcesSet(resources, typeId, resourceId->str, bufferData, bufferSize)) {
 		g_string_free(resourceId, true);
 		return NULL;

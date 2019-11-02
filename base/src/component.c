@@ -11,6 +11,7 @@ typedef struct {
 } Dependency;
 
 static ShovelerComponentConfigurationValue *createConfigurationValue(ShovelerComponentConfigurationOptionType type);
+static void initConfigurationValue(ShovelerComponentConfigurationValue *configurationValue, ShovelerComponentConfigurationOptionType type);
 static void clearConfigurationValue(ShovelerComponentConfigurationValue *configurationValue);
 static ShovelerComponentConfigurationValue *copyConfigurationValue(const ShovelerComponentConfigurationValue *reference);
 static void assignConfigurationValue(ShovelerComponentConfigurationValue *target, const ShovelerComponentConfigurationValue *source);
@@ -24,59 +25,53 @@ static void addDependency(ShovelerComponent *component, long long int targetEnti
 static void removeDependency(ShovelerComponent *component, long long int targetEntityId, const char *targetComponentTypeId);
 static bool checkDependenciesActive(ShovelerComponent *component);
 static long long int toDependencyTargetEntityId(ShovelerComponent *component, long long int entityIdValue);
-static void freeConfigurationOption(void *configurationOptionPointer);
 
-ShovelerComponentType *shovelerComponentTypeCreate(const char *id, ShovelerComponentTypeActivationFunction *activate, ShovelerComponentTypeDeactivationFunction *deactivate, bool requiresAuthority)
+ShovelerComponentTypeConfigurationOption shovelerComponentTypeConfigurationOption(const char *name, ShovelerComponentConfigurationOptionType type, bool isOptional, ShovelerComponentTypeConfigurationOptionLiveUpdateFunction *liveUpdate)
 {
+	ShovelerComponentTypeConfigurationOption configurationOption;
+	configurationOption.name = name;
+	configurationOption.type = type;
+	configurationOption.isOptional = isOptional;
+	configurationOption.liveUpdate = liveUpdate;
+	configurationOption.updateDependency = NULL;
+	configurationOption.dependencyComponentTypeId = NULL;
+
+	return configurationOption;
+}
+
+ShovelerComponentTypeConfigurationOption shovelerComponentTypeConfigurationOptionDependency(const char *name, const char *dependencyComponentTypeId, bool isArray, bool isOptional, ShovelerComponentTypeConfigurationOptionLiveUpdateFunction *liveUpdate, ShovelerComponentTypeConfigurationOptionUpdateDependencyFunction *updateDependency)
+{
+	ShovelerComponentTypeConfigurationOption configurationOption;
+	configurationOption.name = name;
+	configurationOption.type = isArray ? SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_ENTITY_ID_ARRAY : SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_ENTITY_ID;
+	configurationOption.isOptional = isOptional;
+	configurationOption.liveUpdate = liveUpdate;
+	configurationOption.updateDependency = updateDependency;
+	configurationOption.dependencyComponentTypeId = dependencyComponentTypeId;
+
+	return configurationOption;
+}
+
+ShovelerComponentType *shovelerComponentTypeCreate(const char *id, ShovelerComponentTypeActivationFunction *activate, ShovelerComponentTypeDeactivationFunction *deactivate, bool requiresAuthority, int numConfigurationOptions, const ShovelerComponentTypeConfigurationOption *configuratioOptions)
+{
+	assert(numConfigurationOptions >= 0);
+
 	ShovelerComponentType *componentType = malloc(sizeof(ShovelerComponentType));
 	componentType->id = id;
-	componentType->configurationOptions = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, freeConfigurationOption);
+	componentType->numConfigurationOptions = numConfigurationOptions;
+	componentType->configurationOptions = NULL;
 	componentType->activate = activate;
 	componentType->deactivate = deactivate;
 	componentType->requiresAuthority = requiresAuthority;
 
+	if(numConfigurationOptions > 0) {
+		 componentType->configurationOptions = malloc((size_t) numConfigurationOptions * sizeof(ShovelerComponentTypeConfigurationOption));
+		 for(int id = 0; id < numConfigurationOptions; id++) {
+			 componentType->configurationOptions[id] = configuratioOptions[id];
+		 }
+	}
+
 	return componentType;
-}
-
-bool shovelerComponentTypeAddConfigurationOption(ShovelerComponentType *componentType, const char *key, ShovelerComponentConfigurationOptionType type, bool isOptional, ShovelerComponentTypeConfigurationOptionLiveUpdateFunction *liveUpdate)
-{
-	if(g_hash_table_lookup(componentType->configurationOptions, key) != NULL) {
-		return false;
-	}
-
-	ShovelerComponentTypeConfigurationOption *configurationOption = malloc(sizeof(ShovelerComponentTypeConfigurationOption));
-	configurationOption->key = strdup(key);
-	configurationOption->type = type;
-	configurationOption->isOptional = isOptional;
-	configurationOption->liveUpdate = liveUpdate;
-	configurationOption->updateDependency = NULL;
-	configurationOption->dependencyComponentTypeId = NULL;
-
-	g_hash_table_insert(componentType->configurationOptions, configurationOption->key, configurationOption);
-	return true;
-}
-
-bool shovelerComponentTypeAddDependencyConfigurationOption(ShovelerComponentType *componentType, const char *key, const char *dependencyComponentTypeId, bool isArray, bool isOptional, ShovelerComponentTypeConfigurationOptionLiveUpdateFunction *liveUpdate, ShovelerComponentTypeConfigurationOptionUpdateDependencyFunction *updateDependency)
-{
-	if(g_hash_table_lookup(componentType->configurationOptions, key) != NULL) {
-		return false;
-	}
-
-	ShovelerComponentTypeConfigurationOption *configurationOption = malloc(sizeof(ShovelerComponentTypeConfigurationOption));
-	configurationOption->key = strdup(key);
-	configurationOption->type = isArray ? SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_ENTITY_ID_ARRAY : SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_ENTITY_ID;
-	configurationOption->isOptional = isOptional;
-	configurationOption->liveUpdate = liveUpdate;
-	configurationOption->updateDependency = updateDependency;
-	configurationOption->dependencyComponentTypeId = dependencyComponentTypeId;
-
-	g_hash_table_insert(componentType->configurationOptions, configurationOption->key, configurationOption);
-	return true;
-}
-
-bool shovelerComponentTypeRemoveConfigurationOption(ShovelerComponentType *componentType, const char *key)
-{
-	return g_hash_table_remove(componentType->configurationOptions, key);
 }
 
 void shovelerComponentTypeFree(ShovelerComponentType *componentType)
@@ -85,7 +80,7 @@ void shovelerComponentTypeFree(ShovelerComponentType *componentType)
 		return;
 	}
 
-	g_hash_table_destroy(componentType->configurationOptions);
+	free(componentType->configurationOptions);
 	free(componentType);
 }
 
@@ -97,34 +92,37 @@ ShovelerComponent *shovelerComponentCreate(ShovelerComponentViewAdapter *viewAda
 	component->type = componentType;
 	component->type = componentType;
 	component->isAuthoritative = false;
-	component->configurationValues = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, freeConfigurationValue);
+	component->configurationValues = NULL;
 	component->dependencies = g_queue_new();
 	component->data = NULL;
 
-	GHashTableIter iter;
-	const char *key = NULL;
-	ShovelerComponentTypeConfigurationOption *configurationOption = NULL;
-	g_hash_table_iter_init(&iter, componentType->configurationOptions);
-	while(g_hash_table_iter_next(&iter, (gpointer *) &key, (gpointer *) &configurationOption)) {
-		if(configurationOption->isOptional) {
-			continue;
+	if(component->type->numConfigurationOptions > 0) {
+		component->configurationValues = malloc((size_t) component->type->numConfigurationOptions * sizeof(ShovelerComponentConfigurationValue));
+
+		for(int id = 0; id < component->type->numConfigurationOptions; id++) {
+			const ShovelerComponentTypeConfigurationOption *configurationOption = &component->type->configurationOptions[id];
+			ShovelerComponentConfigurationValue *configurationValue = &component->configurationValues[id];
+
+			initConfigurationValue(configurationValue, configurationOption->type);
+
+			if(!configurationOption->isOptional) {
+				configurationValue->isSet = true; // initialize with default value
+			}
+
+			addConfigurationOptionDependencies(component, configurationOption, configurationValue);
 		}
-
-		ShovelerComponentConfigurationValue *configurationValue = createConfigurationValue(configurationOption->type);
-		g_hash_table_insert(component->configurationValues, configurationOption->key, configurationValue);
-
-		addConfigurationOptionDependencies(component, configurationOption, configurationValue);
 	}
 
 	return component;
 }
 
-bool shovelerComponentUpdateConfigurationOption(ShovelerComponent *component, const char *key, const ShovelerComponentConfigurationValue *value, bool isCanonical)
+bool shovelerComponentUpdateConfigurationOption(ShovelerComponent *component, int id, const ShovelerComponentConfigurationValue *value, bool isCanonical)
 {
-	ShovelerComponentTypeConfigurationOption *configurationOption = g_hash_table_lookup(component->type->configurationOptions, key);
-	if(configurationOption == NULL) {
-		return false;
-	}
+	assert(id >= 0);
+	assert(id < component->type->numConfigurationOptions);
+
+	const ShovelerComponentTypeConfigurationOption *configurationOption = &component->type->configurationOptions[id];
+	ShovelerComponentConfigurationValue *configurationValue = &component->configurationValues[id];
 
 	if(value != NULL && configurationOption->type != value->type) {
 		return false;
@@ -138,8 +136,6 @@ bool shovelerComponentUpdateConfigurationOption(ShovelerComponent *component, co
 		// TODO: invoke authoritative update listener
 	}
 
-	ShovelerComponentConfigurationValue *configurationValue = g_hash_table_lookup(component->configurationValues, key);
-
 	bool wasActive = component->data != NULL;
 	bool canLiveUpdate = configurationOption->liveUpdate != NULL;
 	bool isDependencyUpdate = configurationOption->dependencyComponentTypeId != NULL;
@@ -149,34 +145,15 @@ bool shovelerComponentUpdateConfigurationOption(ShovelerComponent *component, co
 		shovelerComponentDeactivate(component);
 	}
 
-	if(isDependencyUpdate && configurationValue != NULL) {
+	if(isDependencyUpdate) {
 		// remove the dependencies from the previous configuration value
 		removeConfigurationOptionDependencies(component, configurationOption, configurationValue);
 	}
 
 	// update option to its new value
-	if(configurationValue != NULL) {
-		if(value != NULL) { // present option updated to new value
-			assignConfigurationValue(configurationValue, value);
-		} else { // present option being cleared
-			if(configurationOption->isOptional) { // unset optional value
-				bool removed = g_hash_table_remove(component->configurationValues, configurationOption->key);
-				assert(removed);
-				configurationValue = NULL;
-			} else { // clear value
-				clearConfigurationValue(configurationValue);
-			}
-		}
-	} else {
-		if(value != NULL) { // unset option being set
-			configurationValue = copyConfigurationValue(value);
-			g_hash_table_insert(component->configurationValues, configurationOption->key, configurationValue);
-		} else { // unset option being unset
-			// nothing to do
-		}
-	}
+	assignConfigurationValue(configurationValue, value);
 
-	if(isDependencyUpdate && configurationValue != NULL) {
+	if(isDependencyUpdate) {
 		// Add the new dependencies, which might deactivate the component if the dependency isn't
 		// satisfied.
 		addConfigurationOptionDependencies(component, configurationOption, configurationValue);
@@ -201,9 +178,25 @@ bool shovelerComponentUpdateConfigurationOption(ShovelerComponent *component, co
 	return true;
 }
 
-const ShovelerComponentConfigurationValue *shovelerComponentGetConfigurationValue(ShovelerComponent *component, const char *key)
+bool shovelerComponentClearConfigurationOption(ShovelerComponent *component, int id, bool isCanonical)
 {
-	return g_hash_table_lookup(component->configurationValues, key);
+	assert(id >= 0);
+	assert(id < component->type->numConfigurationOptions);
+
+	const ShovelerComponentTypeConfigurationOption *configurationOption = &component->type->configurationOptions[id];
+
+	ShovelerComponentConfigurationValue configurationValue;
+	initConfigurationValue(&configurationValue, configurationOption->type);
+
+	return shovelerComponentUpdateConfigurationOption(component, id, &configurationValue, isCanonical);
+}
+
+const ShovelerComponentConfigurationValue *shovelerComponentGetConfigurationValue(ShovelerComponent *component, int id)
+{
+	assert(id >= 0);
+	assert(id < component->type->numConfigurationOptions);
+
+	return &component->configurationValues[id];
 }
 
 bool shovelerComponentActivate(ShovelerComponent *component)
@@ -283,12 +276,13 @@ void *shovelerComponentGetViewTarget(ShovelerComponent *component, const char *t
 	return component->viewAdapter->getTarget(component, targetName, component->viewAdapter->userData);
 }
 
-ShovelerComponent *shovelerComponentGetDependency(ShovelerComponent *component, const char *optionKey)
+ShovelerComponent *shovelerComponentGetDependency(ShovelerComponent *component, int id)
 {
-	ShovelerComponentTypeConfigurationOption *configurationOption = g_hash_table_lookup(component->type->configurationOptions, optionKey);
-	if(configurationOption == NULL) {
-		return NULL;
-	}
+	assert(id >= 0);
+	assert(id < component->type->numConfigurationOptions);
+
+	const ShovelerComponentTypeConfigurationOption *configurationOption = &component->type->configurationOptions[id];
+	ShovelerComponentConfigurationValue *configurationValue = &component->configurationValues[id];
 
 	if(configurationOption->dependencyComponentTypeId == NULL) {
 		return NULL;
@@ -298,31 +292,22 @@ ShovelerComponent *shovelerComponentGetDependency(ShovelerComponent *component, 
 		return NULL;
 	}
 
-	ShovelerComponentConfigurationValue *configurationValue = g_hash_table_lookup(component->configurationValues, optionKey);
-	if(configurationValue == NULL) {
-		return NULL;
-	}
-
 	return component->viewAdapter->getComponent(component, configurationValue->entityIdValue, configurationOption->dependencyComponentTypeId, component->viewAdapter->userData);
 }
 
-ShovelerComponent *shovelerComponentGetArrayDependency(ShovelerComponent *component, const char *optionKey, int index)
+ShovelerComponent *shovelerComponentGetArrayDependency(ShovelerComponent *component, int id, int index)
 {
-	ShovelerComponentTypeConfigurationOption *configurationOption = g_hash_table_lookup(component->type->configurationOptions, optionKey);
-	if(configurationOption == NULL) {
-		return NULL;
-	}
+	assert(id >= 0);
+	assert(id < component->type->numConfigurationOptions);
+
+	const ShovelerComponentTypeConfigurationOption *configurationOption = &component->type->configurationOptions[id];
+	ShovelerComponentConfigurationValue *configurationValue = &component->configurationValues[id];
 
 	if(configurationOption->dependencyComponentTypeId == NULL) {
 		return NULL;
 	}
 
 	if(configurationOption->type != SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_ENTITY_ID_ARRAY) {
-		return NULL;
-	}
-
-	ShovelerComponentConfigurationValue *configurationValue = g_hash_table_lookup(component->configurationValues, optionKey);
-	if(configurationValue == NULL) {
 		return NULL;
 	}
 
@@ -341,37 +326,41 @@ void shovelerComponentFree(ShovelerComponent *component)
 
 	shovelerComponentDeactivate(component);
 
-	GHashTableIter iter;
-	const char *key = NULL;
-	ShovelerComponentTypeConfigurationOption *configurationOption = NULL;
-	g_hash_table_iter_init(&iter, component->type->configurationOptions);
-	while(g_hash_table_iter_next(&iter, (gpointer *) &key, (gpointer *) &configurationOption)) {
-		if(configurationOption->dependencyComponentTypeId != NULL) {
-			ShovelerComponentConfigurationValue *configurationValue = g_hash_table_lookup(component->configurationValues, key);
-			removeConfigurationOptionDependencies(component, configurationOption, configurationValue);
-		}
-	}
+	for(int id = 0; id < component->type->numConfigurationOptions; id++) {
+		const ShovelerComponentTypeConfigurationOption *configurationOption = &component->type->configurationOptions[id];
+		ShovelerComponentConfigurationValue *configurationValue = &component->configurationValues[id];
 
+		removeConfigurationOptionDependencies(component, configurationOption, configurationValue);
+	}
 	assert(component->dependencies->length == 0);
 	g_queue_free(component->dependencies);
-	g_hash_table_destroy(component->configurationValues);
+
+	for(int id = 0; id < component->type->numConfigurationOptions; id++) {
+		ShovelerComponentConfigurationValue *configurationValue = &component->configurationValues[id];
+
+		clearConfigurationValue(configurationValue);
+	}
+	free(component->configurationValues);
+
 	free(component);
 }
 
 static ShovelerComponentConfigurationValue *createConfigurationValue(ShovelerComponentConfigurationOptionType type)
 {
-	ShovelerComponentConfigurationValue *copy = malloc(sizeof(ShovelerComponentConfigurationValue));
-	memset(copy, 0, sizeof(ShovelerComponentConfigurationValue));
-	copy->type = type;
-	return copy;
+	ShovelerComponentConfigurationValue *configurationValue = malloc(sizeof(ShovelerComponentConfigurationValue));
+	initConfigurationValue(configurationValue, type);
+	return configurationValue;
+}
+
+static void initConfigurationValue(ShovelerComponentConfigurationValue *configurationValue, ShovelerComponentConfigurationOptionType type)
+{
+	memset(configurationValue, 0, sizeof(ShovelerComponentConfigurationValue));
+	configurationValue->type = type;
+	configurationValue->isSet = false;
 }
 
 static ShovelerComponentConfigurationValue *copyConfigurationValue(const ShovelerComponentConfigurationValue *reference)
 {
-	if(reference == NULL) {
-		return NULL;
-	}
-
 	ShovelerComponentConfigurationValue *copy = createConfigurationValue(reference->type);
 	assignConfigurationValue(copy, reference);
 	return copy;
@@ -379,9 +368,7 @@ static ShovelerComponentConfigurationValue *copyConfigurationValue(const Shovele
 
 static void clearConfigurationValue(ShovelerComponentConfigurationValue *configurationValue)
 {
-	if(configurationValue == NULL) {
-		return;
-	}
+	configurationValue->isSet = false;
 
 	switch(configurationValue->type) {
 		case SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_ENTITY_ID:
@@ -429,6 +416,11 @@ static void assignConfigurationValue(ShovelerComponentConfigurationValue *target
 	assert(target->type == source->type);
 
 	clearConfigurationValue(target);
+
+	target->isSet = source->isSet;
+	if(!target->isSet) {
+		return;
+	}
 
 	switch(target->type) {
 		case SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_ENTITY_ID:
@@ -491,19 +483,16 @@ static void updateReverseDependency(ShovelerComponent *sourceComponent, Shoveler
 		return;
 	}
 
-	GHashTableIter configurationOptionIter;
-	g_hash_table_iter_init(&configurationOptionIter, sourceComponent->type->configurationOptions);
-	const char *key;
-	ShovelerComponentTypeConfigurationOption *configurationOption;
-	while(g_hash_table_iter_next(&configurationOptionIter, (gpointer *) &key, (gpointer *) &configurationOption)) {
+	for(int id = 0; id < sourceComponent->type->numConfigurationOptions; id++) {
+		const ShovelerComponentTypeConfigurationOption *configurationOption = &sourceComponent->type->configurationOptions[id];
+		ShovelerComponentConfigurationValue *configurationValue = &sourceComponent->configurationValues[id];
+
 		// check if this option is a dependency pointing to the target
 		if(configurationOption->dependencyComponentTypeId != targetComponent->type->id) {
 			continue;
 		}
 
-		ShovelerComponentConfigurationValue *configurationValue = g_hash_table_lookup(sourceComponent->configurationValues, key);
-		if(configurationValue == NULL) {
-			// value is optional and isn't set
+		if(!configurationValue->isSet) {
 			assert(configurationOption->isOptional);
 			continue;
 		}
@@ -550,7 +539,7 @@ static void deactivateReverseDependency(ShovelerComponent *sourceComponent, Shov
 
 static void addConfigurationOptionDependencies(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *configurationValue)
 {
-	if(configurationValue == NULL) {
+	if(!configurationValue->isSet) {
 		// this configuration option is optional
 		assert(configurationOption->isOptional);
 		return;
@@ -587,7 +576,7 @@ static void addConfigurationOptionDependencies(ShovelerComponent *component, con
 
 static void removeConfigurationOptionDependencies(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *configurationValue)
 {
-	if(configurationValue == NULL) {
+	if(!configurationValue->isSet) {
 		// this configuration option is optional
 		assert(configurationOption->isOptional);
 		return;
@@ -665,12 +654,4 @@ static long long int toDependencyTargetEntityId(ShovelerComponent *component, lo
 	} else {
 		return component->entityId;
 	}
-}
-
-static void freeConfigurationOption(void *configurationOptionPointer)
-{
-	ShovelerComponentTypeConfigurationOption *configurationOption = configurationOptionPointer;
-
-	free(configurationOption->key);
-	free(configurationOption);
 }

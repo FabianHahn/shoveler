@@ -20,8 +20,8 @@ ShovelerComponent *shovelerViewEntityAddResource(ShovelerViewEntity *entity, con
 	}
 
 	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerComponentTypeIdResource);
-	shovelerComponentUpdateCanonicalConfigurationOptionString(component, shovelerComponentResourceOptionKeyTypeId, configuration->typeId);
-	shovelerComponentUpdateCanonicalConfigurationOptionBytes(component, shovelerComponentResourceOptionKeyBuffer, configuration->buffer, configuration->bufferSize);
+	shovelerComponentUpdateCanonicalConfigurationOptionString(component, SHOVELER_COMPONENT_RESOURCE_OPTION_TYPE_ID, configuration->typeId);
+	shovelerComponentUpdateCanonicalConfigurationOptionBytes(component, SHOVELER_COMPONENT_RESOURCE_OPTION_BUFFER, configuration->buffer, configuration->bufferSize);
 
 	shovelerComponentActivate(component);
 	return component;
@@ -44,8 +44,8 @@ bool shovelerViewEntityGetResourceConfiguration(ShovelerViewEntity *entity, Shov
 		return false;
 	}
 
-	outputConfiguration->typeId = shovelerComponentGetConfigurationValueString(component, shovelerComponentResourceOptionKeyTypeId);
-	shovelerComponentGetConfigurationValueBytes(component, shovelerComponentResourceOptionKeyBuffer, &outputConfiguration->buffer, &outputConfiguration->bufferSize);
+	outputConfiguration->typeId = shovelerComponentGetConfigurationValueString(component, SHOVELER_COMPONENT_RESOURCE_OPTION_TYPE_ID);
+	shovelerComponentGetConfigurationValueBytes(component, SHOVELER_COMPONENT_RESOURCE_OPTION_BUFFER, &outputConfiguration->buffer, &outputConfiguration->bufferSize);
 	return true;
 }
 
@@ -56,8 +56,8 @@ bool shovelerViewEntityUpdateResourceConfiguration(ShovelerViewEntity *entity, c
 		return false;
 	}
 
-	shovelerComponentUpdateCanonicalConfigurationOptionString(component, shovelerComponentResourceOptionKeyTypeId, configuration->typeId);
-	shovelerComponentUpdateCanonicalConfigurationOptionBytes(component, shovelerComponentResourceOptionKeyBuffer, configuration->buffer, configuration->bufferSize);
+	shovelerComponentUpdateCanonicalConfigurationOptionString(component, SHOVELER_COMPONENT_RESOURCE_OPTION_TYPE_ID, configuration->typeId);
+	shovelerComponentUpdateCanonicalConfigurationOptionBytes(component, SHOVELER_COMPONENT_RESOURCE_OPTION_BUFFER, configuration->buffer, configuration->bufferSize);
 	return true;
 }
 

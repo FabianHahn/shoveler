@@ -7,7 +7,10 @@ typedef struct ShovelerComponentTypeStruct ShovelerComponentType; // forward dec
 typedef struct ShovelerComponentStruct ShovelerComponent; // forward declaration: component.h
 
 extern const char *const shovelerComponentTypeIdPosition;
-static const char *shovelerComponentPositionOptionKeyCoordinates = "coordinates";
+
+typedef enum {
+	SHOVELER_COMPONENT_POSITION_OPTION_COORDINATES,
+} ShovelerComponentPositionOptionId;
 
 ShovelerComponentType *shovelerComponentCreatePositionType();
 const ShovelerVector3 *shovelerComponentGetPositionCoordinates(ShovelerComponent *component);

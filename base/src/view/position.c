@@ -15,7 +15,7 @@ ShovelerComponent *shovelerViewEntityAddPosition(ShovelerViewEntity *entity, Sho
 	}
 
 	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerComponentTypeIdPosition);
-	shovelerComponentUpdateCanonicalConfigurationOptionVector3(component, shovelerComponentPositionOptionKeyCoordinates, coordinates);
+	shovelerComponentUpdateCanonicalConfigurationOptionVector3(component, SHOVELER_COMPONENT_POSITION_OPTION_COORDINATES, coordinates);
 
 	shovelerComponentActivate(component);
 	return component;
@@ -28,7 +28,7 @@ const ShovelerVector3 *shovelerViewEntityGetPositionCoordinates(ShovelerViewEnti
 		return NULL;
 	}
 
-	const ShovelerComponentConfigurationValue *value = shovelerComponentGetConfigurationValue(component, shovelerComponentPositionOptionKeyCoordinates);
+	const ShovelerComponentConfigurationValue *value = shovelerComponentGetConfigurationValue(component, SHOVELER_COMPONENT_POSITION_OPTION_COORDINATES);
 	return &value->vector3Value;
 }
 
