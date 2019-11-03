@@ -2,6 +2,7 @@ set(SHOVELER_OPENGL_SRC
 	src/camera/identity.c
 	src/camera/perspective.c
 	src/collider/chunk.c
+	src/component/controller.c
 	src/drawable/cube.c
 	src/drawable/quad.c
 	src/drawable/point.c
@@ -65,6 +66,7 @@ set(SHOVELER_OPENGL_SRC
 	include/shoveler/camera/identity.h
 	include/shoveler/camera/perspective.h
 	include/shoveler/collider/chunk.h
+	include/shoveler/component/controller.h
 	include/shoveler/drawable/cube.h
 	include/shoveler/drawable/point.h
 	include/shoveler/drawable/quad.h
