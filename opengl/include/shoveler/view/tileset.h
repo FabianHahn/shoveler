@@ -3,24 +3,28 @@
 
 #include <stdbool.h> // bool
 
-#include <glib.h>
-
-#include <shoveler/tileset.h>
+#include <shoveler/component/tileset.h>
 #include <shoveler/view.h>
 
 typedef struct {
 	long long int imageResourceEntityId;
-	unsigned char columns;
-	unsigned char rows;
-	unsigned char padding;
+	int numColumns;
+	int numRows;
+	int padding;
 } ShovelerViewTilesetConfiguration;
 
-static const char *shovelerViewTilesetComponentName = "tileset";
-
-bool shovelerViewEntityAddTileset(ShovelerViewEntity *entity, ShovelerViewTilesetConfiguration configuration);
+/** Adds a tileset component to an entity, copying the supplied configuration. */
+ShovelerComponent *shovelerViewEntityAddTileset(ShovelerViewEntity *entity, const ShovelerViewTilesetConfiguration *configuration);
 ShovelerTileset *shovelerViewEntityGetTileset(ShovelerViewEntity *entity);
-const ShovelerViewTilesetConfiguration *shovelerViewEntityGetTilesetConfiguration(ShovelerViewEntity *entity);
-bool shovelerViewEntityUpdateTileset(ShovelerViewEntity *entity, ShovelerViewTilesetConfiguration configuration);
+/** Returns the current tileset configuration, retaining ownership over returned fields. */
+bool shovelerViewEntityGetTilesetConfiguration(ShovelerViewEntity *entity, ShovelerViewTilesetConfiguration *outputConfiguration);
+/** Updates a tileset component of an entity, copying the supplied configuration. */
+bool shovelerViewEntityUpdateTileset(ShovelerViewEntity *entity, const ShovelerViewTilesetConfiguration *configuration);
 bool shovelerViewEntityRemoveTileset(ShovelerViewEntity *entity);
+
+static inline ShovelerComponent *shovelerViewEntityGetTilesetComponent(ShovelerViewEntity *entity)
+{
+	return shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdTileset);
+}
 
 #endif

@@ -4,17 +4,8 @@
 #include <shoveler/shader_cache.h>
 #include <shoveler/view.h>
 
-static const char *shovelerViewShaderCacheTargetName = "shader_cache";
-
-static inline void shovelerViewSetShaderCache(ShovelerView *view, ShovelerShaderCache *cache)
-{
-	shovelerViewSetTarget(view, shovelerViewShaderCacheTargetName, cache);
-}
-
-static inline ShovelerShaderCache *shovelerViewGetShaderCache(ShovelerView *view)
-{
-	return (ShovelerShaderCache *) shovelerViewGetTarget(view, shovelerViewShaderCacheTargetName);
-}
+bool shovelerViewSetShaderCache(ShovelerView *view, ShovelerShaderCache *shaderCache);
+ShovelerShaderCache *shovelerViewGetShaderCache(ShovelerView *view);
 
 static inline bool shovelerViewHasShaderCache(ShovelerView *view)
 {

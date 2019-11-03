@@ -1,210 +1,138 @@
 #include <assert.h> // assert
 #include <stdlib.h> // malloc free
-#include <shoveler/view.h>
 
-#include "shoveler/material/color.h"
-#include "shoveler/material/particle.h"
-#include "shoveler/material/texture.h"
-#include "shoveler/material/tilemap.h"
-#include "shoveler/view/canvas.h"
 #include "shoveler/view/chunk.h"
 #include "shoveler/view/material.h"
 #include "shoveler/view/shader_cache.h"
-#include "shoveler/view/texture.h"
-#include "shoveler/view/tilemap.h"
-#include "shoveler/texture.h"
+#include "shoveler/component.h"
 #include "shoveler/log.h"
+#include "shoveler/texture.h"
+#include "shoveler/view.h"
 
-typedef struct {
-	ShovelerViewMaterialConfiguration configuration;
-	ShovelerMaterial *material;
-} ComponentData;
-
-static bool activateComponent(ShovelerViewComponent *component, void *componentDataPointer);
-static void deactivateComponent(ShovelerViewComponent *component, void *componentDataPointer);
-static void freeComponent(ShovelerViewComponent *component, void *componentDataPointer);
-static const char *materialTypeToDataComponentName(ShovelerViewMaterialType type);
-
-bool shovelerViewEntityAddMaterial(ShovelerViewEntity *entity, ShovelerViewMaterialConfiguration configuration)
+ShovelerComponent *shovelerViewEntityAddMaterial(ShovelerViewEntity *entity, const ShovelerViewMaterialConfiguration *configuration)
 {
-	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewMaterialComponentName);
-	if(component != NULL) {
-		shovelerLogWarning("Trying to add material to entity %lld which already has a material, ignoring.", entity->entityId);
-		return false;
+	if(!shovelerViewHasComponentType(entity->view, shovelerComponentTypeIdMaterial)) {
+		shovelerViewAddComponentType(entity->view, shovelerComponentCreateMaterialType());
 	}
 
-	ComponentData *componentData = malloc(sizeof(ComponentData));
-	componentData->configuration = configuration;
-	componentData->material = NULL;
+	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerComponentTypeIdMaterial);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TYPE, configuration->type);
 
-	component = shovelerViewEntityAddComponent(entity, shovelerViewMaterialComponentName, componentData, activateComponent, deactivateComponent, freeComponent);
-	assert(component != NULL);
-
-	const char *dataComponentName = materialTypeToDataComponentName(componentData->configuration.type);
-	if(dataComponentName != NULL) {
-		shovelerViewComponentAddDependency(component, configuration.dataEntityId, dataComponentName);
+	switch(configuration->type) {
+		case SHOVELER_COMPONENT_MATERIAL_TYPE_COLOR:
+		case SHOVELER_COMPONENT_MATERIAL_TYPE_PARTICLE:
+			shovelerComponentUpdateCanonicalConfigurationOptionVector3(component, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_COLOR, configuration->color);
+			break;
+		case SHOVELER_COMPONENT_MATERIAL_TYPE_TEXTURE:
+			shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TEXTURE, configuration->textureEntityId);
+			shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TEXTURE_SAMPLER, configuration->textureSamplerEntityId);
+			break;
+		case SHOVELER_COMPONENT_MATERIAL_TYPE_TILEMAP:
+			shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TILEMAP, configuration->tilemapEntityId);
+			break;
+		case SHOVELER_COMPONENT_MATERIAL_TYPE_CANVAS:
+			shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_CANVAS, configuration->canvasEntityId);
+			shovelerComponentUpdateCanonicalConfigurationOptionVector2(component, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_CANVAS_REGION_POSITION, configuration->canvasRegionPosition);
+			shovelerComponentUpdateCanonicalConfigurationOptionVector2(component, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_CANVAS_REGION_SIZE, configuration->canvasRegionSize);
+			break;
+		case SHOVELER_COMPONENT_MATERIAL_TYPE_CHUNK:
+			shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_CHUNK, configuration->chunkEntityId);
+			break;
+		default:
+			break;
 	}
 
-	shovelerViewComponentActivate(component);
-	return true;
+	shovelerComponentActivate(component);
+	return component;
 }
 
 ShovelerMaterial *shovelerViewEntityGetMaterial(ShovelerViewEntity *entity)
 {
-	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewMaterialComponentName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdMaterial);
 	if(component == NULL) {
 		return NULL;
 	}
 
-	ComponentData *componentData = component->data;
-	return componentData->material;
+	return component->data;
 }
 
-const ShovelerViewMaterialConfiguration *shovelerViewEntityGetMaterialConfiguration(ShovelerViewEntity *entity)
+bool shovelerViewEntityGetMaterialConfiguration(ShovelerViewEntity *entity, ShovelerViewMaterialConfiguration *outputConfiguration)
 {
-	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewMaterialComponentName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdMaterial);
 	if(component == NULL) {
 		return NULL;
 	}
 
-	ComponentData *componentData = component->data;
-	return &componentData->configuration;
+	outputConfiguration->type = shovelerComponentGetConfigurationValueInt(component, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TYPE);
+	switch(outputConfiguration->type) {
+		case SHOVELER_COMPONENT_MATERIAL_TYPE_COLOR:
+		case SHOVELER_COMPONENT_MATERIAL_TYPE_PARTICLE:
+			outputConfiguration->color = shovelerComponentGetConfigurationValueVector3(component, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_COLOR);
+			break;
+		case SHOVELER_COMPONENT_MATERIAL_TYPE_TEXTURE:
+			outputConfiguration->textureEntityId = shovelerComponentGetConfigurationValueEntityId(component, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TEXTURE);
+			outputConfiguration->textureSamplerEntityId = shovelerComponentGetConfigurationValueEntityId(component, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TEXTURE_SAMPLER);
+			break;
+		case SHOVELER_COMPONENT_MATERIAL_TYPE_TILEMAP:
+			outputConfiguration->tilemapEntityId = shovelerComponentGetConfigurationValueEntityId(component, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TILEMAP);
+			break;
+		case SHOVELER_COMPONENT_MATERIAL_TYPE_CANVAS:
+			outputConfiguration->canvasEntityId = shovelerComponentGetConfigurationValueEntityId(component, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_CANVAS);
+			outputConfiguration->canvasRegionPosition = shovelerComponentGetConfigurationValueVector2(component, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_CANVAS_REGION_POSITION);
+			outputConfiguration->canvasRegionSize = shovelerComponentGetConfigurationValueVector2(component, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_CANVAS_REGION_SIZE);
+			break;
+		case SHOVELER_COMPONENT_MATERIAL_TYPE_CHUNK:
+			outputConfiguration->chunkEntityId = shovelerComponentGetConfigurationValueEntityId(component, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_CHUNK);
+			break;
+		default:
+			break;
+	}
+	return true;
 }
 
-bool shovelerViewEntityUpdateMaterial(ShovelerViewEntity *entity, ShovelerViewMaterialConfiguration configuration)
+bool shovelerViewEntityUpdateMaterial(ShovelerViewEntity *entity, const ShovelerViewMaterialConfiguration *configuration)
 {
-	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewMaterialComponentName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdMaterial);
 	if(component == NULL) {
-		shovelerLogWarning("Trying to update material of entity %lld which does not have a material, ignoring.", entity->entityId);
+		shovelerLogWarning("Trying to update material of entity %lld which does not have a material, ignoring.", entity->id);
 		return false;
 	}
 
-	ComponentData *componentData = component->data;
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TYPE, configuration->type);
 
-	shovelerViewComponentDeactivate(component);
-
-	const char *dataComponentName = materialTypeToDataComponentName(componentData->configuration.type);
-	if(dataComponentName != NULL) {
-		if(!shovelerViewComponentRemoveDependency(component, configuration.dataEntityId, dataComponentName)) {
-			return false;
-		}
+	switch(configuration->type) {
+		case SHOVELER_COMPONENT_MATERIAL_TYPE_COLOR:
+		case SHOVELER_COMPONENT_MATERIAL_TYPE_PARTICLE:
+			shovelerComponentUpdateCanonicalConfigurationOptionVector3(component, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_COLOR, configuration->color);
+			break;
+		case SHOVELER_COMPONENT_MATERIAL_TYPE_TEXTURE:
+			shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TEXTURE, configuration->textureEntityId);
+			shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TEXTURE_SAMPLER, configuration->textureSamplerEntityId);
+			break;
+		case SHOVELER_COMPONENT_MATERIAL_TYPE_TILEMAP:
+			shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TILEMAP, configuration->tilemapEntityId);
+			break;
+		case SHOVELER_COMPONENT_MATERIAL_TYPE_CANVAS:
+			shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_CANVAS, configuration->canvasEntityId);
+			shovelerComponentUpdateCanonicalConfigurationOptionVector2(component, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_CANVAS_REGION_POSITION, configuration->canvasRegionPosition);
+			shovelerComponentUpdateCanonicalConfigurationOptionVector2(component, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_CANVAS_REGION_SIZE, configuration->canvasRegionSize);
+			break;
+		case SHOVELER_COMPONENT_MATERIAL_TYPE_CHUNK:
+			shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_CHUNK, configuration->chunkEntityId);
+			break;
+		default:
+			break;
 	}
-
-	componentData->configuration = configuration;
-
-	dataComponentName = materialTypeToDataComponentName(componentData->configuration.type);
-	if(dataComponentName != NULL) {
-		shovelerViewComponentAddDependency(component, configuration.dataEntityId, dataComponentName);
-	}
-
-	shovelerViewComponentActivate(component);
-
-	shovelerViewComponentUpdate(component);
 	return true;
 }
 
 bool shovelerViewEntityRemoveMaterial(ShovelerViewEntity *entity)
 {
-	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewMaterialComponentName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdMaterial);
 	if(component == NULL) {
-		shovelerLogWarning("Trying to remove material from entity %lld which does not have a material, ignoring.", entity->entityId);
+		shovelerLogWarning("Trying to remove material from entity %lld which does not have a material, ignoring.", entity->id);
 		return false;
 	}
 
-	return shovelerViewEntityRemoveComponent(entity, shovelerViewMaterialComponentName);
-}
-
-static bool activateComponent(ShovelerViewComponent *component, void *componentDataPointer)
-{
-	ComponentData *componentData = componentDataPointer;
-	assert(shovelerViewHasShaderCache(component->entity->view));
-
-	ShovelerShaderCache *shaderCache = shovelerViewGetShaderCache(component->entity->view);
-
-	switch (componentData->configuration.type) {
-		case SHOVELER_VIEW_MATERIAL_TYPE_COLOR:
-			componentData->material = shovelerMaterialColorCreate(shaderCache, /* screenspace */ false, componentData->configuration.color);
-			break;
-		case SHOVELER_VIEW_MATERIAL_TYPE_TEXTURE: {
-			ShovelerViewEntity *textureEntity = shovelerViewGetEntity(component->entity->view, componentData->configuration.dataEntityId);
-			assert(textureEntity != NULL);
-			ShovelerTexture *texture = shovelerViewEntityGetTexture(textureEntity);
-			assert(texture != NULL);
-			ShovelerSampler *sampler = shovelerViewEntityGetTextureSampler(textureEntity);
-			assert(sampler != NULL);
-
-			componentData->material = shovelerMaterialTextureCreate(shaderCache, /* screenspace */ false, texture, false, sampler, false);
-		} break;
-		case SHOVELER_VIEW_MATERIAL_TYPE_PARTICLE:
-			componentData->material = shovelerMaterialParticleCreate(shaderCache, componentData->configuration.color);
-			break;
-		case SHOVELER_VIEW_MATERIAL_TYPE_TILEMAP: {
-			ShovelerViewEntity *tilemapEntity = shovelerViewGetEntity(component->entity->view, componentData->configuration.dataEntityId);
-			assert(tilemapEntity != NULL);
-			ShovelerTilemap *tilemap = shovelerViewEntityGetTilemap(tilemapEntity);
-			assert(tilemap != NULL);
-
-			componentData->material = shovelerMaterialTilemapCreate(shaderCache, /* screenspace */ false);
-			shovelerMaterialTilemapSetActive(componentData->material, tilemap);
-		} break;
-		case SHOVELER_VIEW_MATERIAL_TYPE_CANVAS: {
-			ShovelerViewEntity *canvasEntity = shovelerViewGetEntity(component->entity->view, componentData->configuration.dataEntityId);
-			assert(canvasEntity != NULL);
-			ShovelerCanvas *canvas = shovelerViewEntityGetCanvas(canvasEntity);
-			assert(canvas != NULL);
-
-			componentData->material = shovelerMaterialCanvasCreate(shaderCache, /* screenspace */ false);
-			shovelerMaterialCanvasSetActive(componentData->material, canvas);
-			shovelerMaterialCanvasSetActiveRegion(componentData->material, componentData->configuration.canvasRegionPosition, componentData->configuration.canvasRegionSize);
-		} break;
-		case SHOVELER_VIEW_MATERIAL_TYPE_CHUNK: {
-			ShovelerViewEntity *chunkEntity = shovelerViewGetEntity(component->entity->view, componentData->configuration.dataEntityId);
-			assert(chunkEntity != NULL);
-			ShovelerChunk *chunk = shovelerViewEntityGetChunk(chunkEntity);
-			assert(chunk != NULL);
-
-			componentData->material = shovelerMaterialChunkCreate(shaderCache, /* screenspace */ false);
-			shovelerMaterialChunkSetActive(componentData->material, chunk);
-		} break;
-		default:
-			shovelerLogWarning("Trying to activate material with unknown material type %d, ignoring.", componentData->configuration.type);
-			return false;
-	}
-
-	return true;
-}
-
-static void deactivateComponent(ShovelerViewComponent *component, void *componentDataPointer)
-{
-	ComponentData *componentData = componentDataPointer;
-
-	shovelerMaterialFree(componentData->material);
-	componentData->material = NULL;
-}
-
-static void freeComponent(ShovelerViewComponent *component, void *componentDataPointer)
-{
-	ComponentData *componentData = componentDataPointer;
-
-	if(componentData->material != NULL) {
-		shovelerMaterialFree(componentData->material);
-	}
-
-	free(componentData);
-}
-
-static const char *materialTypeToDataComponentName(ShovelerViewMaterialType type)
-{
-	switch(type) {
-		case SHOVELER_VIEW_MATERIAL_TYPE_TEXTURE:
-			return shovelerViewTextureComponentName;
-		case SHOVELER_VIEW_MATERIAL_TYPE_TILEMAP:
-			return shovelerViewTilemapComponentName;
-		case SHOVELER_VIEW_MATERIAL_TYPE_CANVAS:
-			return shovelerViewCanvasComponentName;
-		case SHOVELER_VIEW_MATERIAL_TYPE_CHUNK:
-			return shovelerViewChunkComponentName;
-		default:
-			return NULL;
-	}
+	return shovelerViewEntityRemoveComponent(entity, shovelerComponentTypeIdMaterial);
 }

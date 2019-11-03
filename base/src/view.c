@@ -2,6 +2,7 @@
 #include <stdlib.h> // malloc free
 #include <string.h> // strdup, memcmp, memcpy
 
+#include "shoveler/component.h"
 #include "shoveler/file.h"
 #include "shoveler/hash.h"
 #include "shoveler/log.h"
@@ -9,22 +10,35 @@
 
 guint qualifiedComponentHash(gconstpointer qualifiedComponentPointer);
 gboolean qualifiedComponentEqual(gconstpointer firstQualifiedComponentPointer, gconstpointer secondQualifiedComponentPointer);
-static void triggerComponentCallback(ShovelerViewComponent *component, ShovelerViewComponentCallbackType callbackType);
 static ShovelerViewQualifiedComponent *copyQualifiedComponent(ShovelerViewQualifiedComponent *qualifiedComponent);
-static bool removeDependency(GQueue *dependencies, long long int dependencyEntityId, const char *dependencyComponentName);
+static ShovelerComponent *getComponent(ShovelerComponent *component, long long int entityId, const char *componentTypeId, void *viewPointer);
+static void *getTarget(ShovelerComponent *component, const char *targetName, void *viewPointer);
+static void addComponentDependency(ShovelerComponent *component, long long int targetEntityId, const char *targetComponentTypeId, void *viewPointer);
+static bool removeComponentDependency(ShovelerComponent *component, long long int targetEntityId, const char *targetComponentTypeId, void *viewPointer);
+static void forEachComponentReverseDependency(ShovelerComponent *targetComponent, ShovelerComponentAdapterViewForEachReverseDependencyCallbackFunction *callbackFunction, void *callbackUserData, void *viewPointer);
+static void reportComponentActivation(ShovelerComponent *component, int delta, void *viewPointer);
+static bool removeDependency(GQueue *dependencies, const ShovelerViewQualifiedComponent *dependency);
+static void freeComponentType(void *componentTypePointer);
 static void freeEntity(void *entityPointer);
 static void freeComponent(void *componentPointer);
-static void freeCallbacks(void *callbacksPointer);
 static void freeQualifiedComponents(void *qualifiedComponentsPointer);
-static void freeQualifiedComponent(void *qualifiedComponentPointer);
 
 ShovelerView *shovelerViewCreate()
 {
 	ShovelerView *view = malloc(sizeof(ShovelerView));
+	view->componentTypes = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, freeComponentType);
 	view->entities = g_hash_table_new_full(g_int64_hash, g_int64_equal, NULL, freeEntity);
-	view->targets = g_hash_table_new_full(&g_str_hash, &g_str_equal, &free, NULL);
-	view->reverseDependencies = g_hash_table_new_full(qualifiedComponentHash, qualifiedComponentEqual, freeQualifiedComponent, freeQualifiedComponents);
-	view->dependencyCallbacks = g_queue_new();
+	view->targets = g_hash_table_new(g_direct_hash, g_direct_equal);
+	view->dependencies = g_hash_table_new_full(qualifiedComponentHash, qualifiedComponentEqual, free, freeQualifiedComponents);
+	view->reverseDependencies = g_hash_table_new_full(qualifiedComponentHash, qualifiedComponentEqual, free, freeQualifiedComponents);
+	view->adapter = malloc(sizeof(ShovelerComponentViewAdapter));
+	view->adapter->getComponent = getComponent;
+	view->adapter->getTarget = getTarget;
+	view->adapter->addDependency = addComponentDependency;
+	view->adapter->removeDependency = removeComponentDependency;
+	view->adapter->forEachReverseDependency = forEachComponentReverseDependency;
+	view->adapter->reportActivation = reportComponentActivation;
+	view->adapter->userData = view;
 	view->numEntities = 0;
 	view->numComponents = 0;
 	view->numComponentDependencies = 0;
@@ -34,22 +48,94 @@ ShovelerView *shovelerViewCreate()
 	return view;
 }
 
+bool shovelerViewAddComponentType(ShovelerView *view, ShovelerComponentType *componentType)
+{
+	return g_hash_table_insert(view->componentTypes, (gpointer) componentType->id, componentType);
+}
+
+ShovelerComponentType *shovelerViewGetComponentType(ShovelerView *view, const char *componentTypeId)
+{
+	return g_hash_table_lookup(view->componentTypes, componentTypeId);
+}
+
+void shovelerViewAddDependency(ShovelerView *view, long long int sourceEntityId, const char *sourceComponentTypeId, long long int targetEntityId, const char *targetComponentTypeId)
+{
+	ShovelerViewQualifiedComponent *dependencySource = malloc(sizeof(ShovelerViewQualifiedComponent));
+	dependencySource->entityId = sourceEntityId;
+	dependencySource->componentTypeId = sourceComponentTypeId;
+
+	ShovelerViewQualifiedComponent *dependencyTarget = malloc(sizeof(ShovelerViewQualifiedComponent));
+	dependencyTarget->entityId = targetEntityId;
+	dependencyTarget->componentTypeId = targetComponentTypeId;
+
+	GQueue *dependencies = g_hash_table_lookup(view->dependencies, dependencySource);
+	if(dependencies == NULL) {
+		ShovelerViewQualifiedComponent *dependenciesKey = copyQualifiedComponent(dependencySource);
+		dependencies = g_queue_new();
+		g_hash_table_insert(view->dependencies, dependenciesKey, dependencies);
+	}
+
+	GQueue *reverseDependencies = g_hash_table_lookup(view->reverseDependencies, dependencyTarget);
+	if(reverseDependencies == NULL) {
+		ShovelerViewQualifiedComponent *reverseDependenciesKey = copyQualifiedComponent(dependencyTarget);
+		reverseDependencies = g_queue_new();
+		g_hash_table_insert(view->reverseDependencies, reverseDependenciesKey, reverseDependencies);
+	}
+
+	g_queue_push_tail(dependencies, dependencyTarget);
+	g_queue_push_tail(reverseDependencies, dependencySource);
+
+	view->numComponentDependencies++;
+	shovelerLogTrace("Added dependency from component '%s' of entity %lld to component '%s' of entity %lld.", sourceComponentTypeId, sourceEntityId, targetComponentTypeId, targetEntityId);
+}
+
+bool shovelerViewRemoveDependency(ShovelerView *view, long long int sourceEntityId, const char *sourceComponentTypeId, long long int targetEntityId, const char *targetComponentTypeId)
+{
+	ShovelerViewQualifiedComponent dependencySource;
+	dependencySource.entityId = sourceEntityId;
+	dependencySource.componentTypeId = sourceComponentTypeId;
+
+	ShovelerViewQualifiedComponent dependencyTarget;
+	dependencyTarget.entityId = targetEntityId;
+	dependencyTarget.componentTypeId = targetComponentTypeId;
+
+	GQueue *dependencies = g_hash_table_lookup(view->dependencies, &dependencySource);
+	if(dependencies == NULL) {
+		return false;
+	}
+
+	GQueue *reverseDependencies = g_hash_table_lookup(view->reverseDependencies, &dependencyTarget);
+	assert(reverseDependencies != NULL);
+
+	if(!removeDependency(dependencies, &dependencyTarget)) {
+		return false;
+	}
+
+	bool reverseDependencyRemoved = removeDependency(reverseDependencies, &dependencySource);
+	assert(reverseDependencyRemoved);
+
+	view->numComponentDependencies--;
+	shovelerLogTrace("Removed dependency from component '%s' of entity %lld to component '%s' of entity %lld.", sourceComponentTypeId, sourceEntityId, targetComponentTypeId, targetEntityId);
+
+	return true;
+}
+
 ShovelerViewEntity *shovelerViewAddEntity(ShovelerView *view, long long int entityId)
 {
 	ShovelerViewEntity *entity = malloc(sizeof(ShovelerViewEntity));
 	entity->view = view;
-	entity->entityId = entityId;
+	entity->id = entityId;
 	entity->type = NULL;
-	entity->components = g_hash_table_new_full(&g_str_hash, &g_str_equal, NULL, &freeComponent);
-	entity->callbacks = g_hash_table_new_full(&g_str_hash, &g_str_equal, &free, &freeCallbacks);
+	entity->components = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, freeComponent);
+	entity->authoritativeComponents = g_hash_table_new(g_direct_hash, g_direct_equal);
 
-	if(!g_hash_table_insert(view->entities, &entity->entityId, entity)) {
+	if(!g_hash_table_insert(view->entities, &entity->id, entity)) {
 		freeEntity(entity);
 		return NULL;
 	}
 
 	view->numEntities++;
-	shovelerLogTrace("Added entity %lld.", entity->entityId);
+	shovelerLogTrace("Added entity %lld.", entity->id);
 	return entity;
 }
 
@@ -60,12 +146,12 @@ bool shovelerViewRemoveEntity(ShovelerView *view, long long int entityId)
 		return false;
 	}
 
-	GList *componentNames = g_hash_table_get_keys(entity->components);
-	for(GList *iter = componentNames; iter != NULL; iter = iter->next) {
-		char *componentName = iter->data;
-		shovelerViewEntityRemoveComponent(entity, componentName);
+	GList *componentTypeIds = g_hash_table_get_keys(entity->components);
+	for(GList *iter = componentTypeIds; iter != NULL; iter = iter->next) {
+		char *componentTypeId = iter->data;
+		shovelerViewEntityRemoveComponent(entity, componentTypeId);
 	}
-	g_list_free(componentNames);
+	g_list_free(componentTypeIds);
 
 	assert(g_hash_table_size(entity->components) == 0);
 
@@ -76,6 +162,31 @@ bool shovelerViewRemoveEntity(ShovelerView *view, long long int entityId)
 	view->numEntities--;
 	shovelerLogTrace("Removed entity %lld.", entityId);
 	return true;
+}
+
+void shovelerViewEntityDelegate(ShovelerViewEntity *entity, const char *componentTypeId)
+{
+	g_hash_table_add(entity->authoritativeComponents, (gpointer) componentTypeId);
+
+	ShovelerComponent *component = g_hash_table_lookup(entity->components, componentTypeId);
+	if(component != NULL) {
+		shovelerComponentDelegate(component);
+	}
+}
+
+bool shovelerViewEntityIsAuthoritative(ShovelerViewEntity *entity, const char *componentTypeId)
+{
+	return g_hash_table_contains(entity->authoritativeComponents, componentTypeId);
+}
+
+void shovelerViewEntityUndelegate(ShovelerViewEntity *entity, const char *componentTypeId)
+{
+	g_hash_table_remove(entity->authoritativeComponents, componentTypeId);
+
+	ShovelerComponent *component = g_hash_table_lookup(entity->components, componentTypeId);
+	if(component != NULL) {
+		shovelerComponentUndelegate(component);
+	}
 }
 
 void shovelerViewEntitySetType(ShovelerViewEntity *entity, const char *type)
@@ -89,305 +200,45 @@ void shovelerViewEntitySetType(ShovelerViewEntity *entity, const char *type)
 	}
 }
 
-ShovelerViewComponent *shovelerViewEntityAddComponent(ShovelerViewEntity *entity, const char *componentName, void *data, ShovelerViewComponentActivateFunction *activate, ShovelerViewComponentDeactivateFunction *deactivate, ShovelerViewComponentFreeFunction *freeFunction)
+ShovelerComponent *shovelerViewEntityAddComponent(ShovelerViewEntity *entity, const char *componentTypeId)
 {
-	ShovelerViewComponent *component = malloc(sizeof(ShovelerViewComponent));
-	component->entity = entity;
-	component->name = strdup(componentName);
-	component->data = data;
-	component->active = false;
-	component->authoritative = false;
-	component->dependencies = g_queue_new();
-	component->activate = activate;
-	component->deactivate = deactivate;
-	component->free = freeFunction;
-
-	if(!g_hash_table_insert(entity->components, component->name, component)) {
-		freeComponent(component);
+	ShovelerComponentType *componentType = g_hash_table_lookup(entity->view->componentTypes, componentTypeId);
+	if(componentType == NULL) {
 		return NULL;
 	}
 
-	triggerComponentCallback(component, SHOVELER_VIEW_COMPONENT_CALLBACK_ADD);
+	ShovelerComponent *component = shovelerComponentCreate(entity->view->adapter, entity->id, componentType);
+	if(component == NULL) {
+		return NULL;
+	}
+
+	if(!g_hash_table_insert(entity->components, (gpointer) component->type->id, component)) {
+		shovelerComponentFree(component);
+		return NULL;
+	}
 
 	entity->view->numComponents++;
-	shovelerLogTrace("Added component '%s' to entity %lld.", componentName, entity->entityId);
+	shovelerLogTrace("Added component '%s' to entity %lld.", componentTypeId, entity->id);
 	return component;
 }
 
-void shovelerViewComponentUpdate(ShovelerViewComponent *component)
+bool shovelerViewEntityRemoveComponent(ShovelerViewEntity *entity, const char *componentTypeId)
 {
-	triggerComponentCallback(component, SHOVELER_VIEW_COMPONENT_CALLBACK_UPDATE);
-}
-
-void shovelerViewComponentDelegate(ShovelerViewComponent *component)
-{
-	component->authoritative = true;
-	component->entity->view->numDelegatedComponents++;
-	triggerComponentCallback(component, SHOVELER_VIEW_COMPONENT_CALLBACK_DELEGATE);
-}
-
-void shovelerViewComponentUndelegate(ShovelerViewComponent *component)
-{
-	component->authoritative = false;
-	component->entity->view->numDelegatedComponents--;
-	triggerComponentCallback(component, SHOVELER_VIEW_COMPONENT_CALLBACK_UNDELEGATE);
-}
-
-void shovelerViewComponentAddDependency(ShovelerViewComponent *component, long long int dependencyEntityId, const char *dependencyComponentName)
-{
-	ShovelerViewQualifiedComponent *dependencySource = malloc(sizeof(ShovelerViewQualifiedComponent));
-	dependencySource->entityId = component->entity->entityId;
-	dependencySource->componentName = strdup(component->name);
-
-	ShovelerViewQualifiedComponent *dependencyTarget = malloc(sizeof(ShovelerViewQualifiedComponent));
-	dependencyTarget->entityId = dependencyEntityId;
-	dependencyTarget->componentName = strdup(dependencyComponentName);
-
-	GQueue *reverseDependencies = g_hash_table_lookup(component->entity->view->reverseDependencies, dependencyTarget);
-	if(reverseDependencies == NULL) {
-		ShovelerViewQualifiedComponent *reverseDependenciesKey = copyQualifiedComponent(dependencyTarget);
-		reverseDependencies = g_queue_new();
-		g_hash_table_insert(component->entity->view->reverseDependencies, reverseDependenciesKey, reverseDependencies);
-	}
-
-	g_queue_push_tail(component->dependencies, dependencyTarget);
-	g_queue_push_tail(reverseDependencies, dependencySource);
-
-	component->entity->view->numComponentDependencies++;
-	shovelerLogTrace("Added component dependency on component '%s' of entity %lld to component '%s' of entity %lld.", dependencyComponentName, dependencyEntityId, component->name, component->entity->entityId);
-
-	// if the component is already active, we need to check if the new dependency is active and deactivate in case it isn't
-	if(component->active) {
-		bool needsDeactivation = true;
-		ShovelerViewEntity *dependencyEntity = g_hash_table_lookup(component->entity->view->entities, &dependencyTarget->entityId);
-		if(dependencyEntity != NULL) {
-			ShovelerViewComponent *dependencyComponent = g_hash_table_lookup(dependencyEntity->components, &dependencyTarget->componentName);
-			if(dependencyComponent != NULL) {
-				if(dependencyComponent->active) {
-					needsDeactivation = false;
-				}
-			}
-		}
-
-		if(needsDeactivation) {
-			shovelerViewComponentDeactivate(component);
-		}
-	}
-
-	for(GList *iter = component->entity->view->dependencyCallbacks->head; iter != NULL; iter = iter->next) {
-		ShovelerViewDependencyCallback *callback = iter->data;
-		callback->function(component->entity->view, dependencySource, dependencyTarget, true, callback->userData);
-	}
-}
-
-bool shovelerViewComponentRemoveDependency(ShovelerViewComponent *component, long long int dependencyEntityId, const char *dependencyComponentName)
-{
-	ShovelerViewQualifiedComponent dependencyTarget;
-	dependencyTarget.entityId = dependencyEntityId;
-	dependencyTarget.componentName = strdup(dependencyComponentName);
-
-	GQueue *reverseDependencies = g_hash_table_lookup(component->entity->view->reverseDependencies, &dependencyTarget);
-	assert(reverseDependencies != NULL);
-
-	if(!removeDependency(reverseDependencies, component->entity->entityId, component->name)) {
-		free(dependencyTarget.componentName);
-		return false;
-	}
-
-	if(!removeDependency(component->dependencies, dependencyEntityId, dependencyTarget.componentName)) {
-		free(dependencyTarget.componentName);
-		return false;
-	}
-
-	component->entity->view->numComponentDependencies--;
-	shovelerLogTrace("Removed component dependency on component '%s' of entity %lld from component '%s' of entity %lld.", dependencyTarget.componentName, dependencyEntityId, component->name, component->entity->entityId);
-
-	ShovelerViewQualifiedComponent dependencySource;
-	dependencySource.entityId = component->entity->entityId;
-	dependencySource.componentName = component->name;
-
-	for(GList *iter = component->entity->view->dependencyCallbacks->head; iter != NULL; iter = iter->next) {
-		ShovelerViewDependencyCallback *callback = iter->data;
-		callback->function(component->entity->view, &dependencySource, &dependencyTarget, false, callback->userData);
-	}
-
-	free(dependencyTarget.componentName);
-	return true;
-}
-
-bool shovelerViewComponentActivate(ShovelerViewComponent *component)
-{
-	if(component->active) {
-		return false;
-	}
-
-	// check if dependencies are active
-	for(GList *iter = component->dependencies->head; iter != NULL; iter = iter->next) {
-		ShovelerViewQualifiedComponent *dependencyTarget = iter->data;
-
-		ShovelerViewEntity *dependencyEntity = g_hash_table_lookup(component->entity->view->entities, &dependencyTarget->entityId);
-		if(dependencyEntity == NULL) {
-			shovelerLogTrace("Couldn't activate component '%s' of entity %lld because dependency entity %lld is not in view.", component->name, component->entity->entityId, dependencyTarget->entityId);
-			return false;
-		}
-
-		ShovelerViewComponent *dependencyComponent = g_hash_table_lookup(dependencyEntity->components, dependencyTarget->componentName);
-		if(dependencyComponent == NULL) {
-			shovelerLogTrace("Couldn't activate component '%s' of entity %lld because dependency entity %lld doesn't contain required component '%s'.", component->name, component->entity->entityId, dependencyTarget->entityId, dependencyTarget->componentName);
-			return false;
-		}
-
-		if(!dependencyComponent->active) {
-			shovelerLogTrace("Couldn't activate component '%s' of entity %lld because dependency component '%s' of entity %lld isn't active.", component->name, component->entity->entityId, dependencyTarget->componentName, dependencyTarget->entityId);
-			return false;
-		}
-	}
-
-	// activate the component
-	if(component->activate != NULL) {
-		if(!component->activate(component, component->data)) {
-			shovelerLogTrace("Failed to activate component '%s' of entity %lld.", component->name, component->entity->entityId);
-			return false;
-		}
-	}
-	component->active = true;
-
-	component->entity->view->numActiveComponents++;
-	shovelerLogTrace("Activated component '%s' of entity %lld.", component->name, component->entity->entityId);
-
-	// activate reverse dependencies
-	ShovelerViewQualifiedComponent qualifiedComponent;
-	qualifiedComponent.entityId = component->entity->entityId;
-	qualifiedComponent.componentName = component->name;
-
-	GQueue *reverseDependencies = g_hash_table_lookup(component->entity->view->reverseDependencies, &qualifiedComponent);
-	if(reverseDependencies != NULL) {
-		for(GList *iter = reverseDependencies->head; iter != NULL; iter = iter->next) {
-			ShovelerViewQualifiedComponent *reverseDependency = iter->data;
-
-			ShovelerViewEntity *reverseDependencyEntity = g_hash_table_lookup(component->entity->view->entities, &reverseDependency->entityId);
-			assert(reverseDependencyEntity != NULL);
-
-			ShovelerViewComponent *reverseDependencyComponent = g_hash_table_lookup(reverseDependencyEntity->components, reverseDependency->componentName);
-			assert(reverseDependencyComponent != NULL);
-
-			// An earlier reverse dependency could have already recursively activated the component, so only try to activate if necessary.
-			if(!reverseDependencyComponent->active) {
-				shovelerViewComponentActivate(reverseDependencyComponent);
-			}
-		}
-	}
-
-	return true;
-}
-
-void shovelerViewComponentDeactivate(ShovelerViewComponent *component)
-{
-	if(!component->active) {
-		return;
-	}
-
-	// deactivate reverse dependencies
-	ShovelerViewQualifiedComponent qualifiedComponent;
-	qualifiedComponent.entityId = component->entity->entityId;
-	qualifiedComponent.componentName = component->name;
-
-	GQueue *reverseDependencies = g_hash_table_lookup(component->entity->view->reverseDependencies, &qualifiedComponent);
-	if(reverseDependencies != NULL) {
-		for(GList *iter = reverseDependencies->head; iter != NULL; iter = iter->next) {
-			ShovelerViewQualifiedComponent *reverseDependency = iter->data;
-
-			ShovelerViewEntity *reverseDependencyEntity = g_hash_table_lookup(component->entity->view->entities, &reverseDependency->entityId);
-			assert(reverseDependencyEntity != NULL);
-
-			shovelerLogTrace("Deactivating component '%s' of entity %lld because its dependency component '%s' of entity %lld is being deactivated.", reverseDependency->componentName, reverseDependency->entityId, component->name, component->entity->entityId);
-
-			ShovelerViewComponent *reverseDependencyComponent = g_hash_table_lookup(reverseDependencyEntity->components, reverseDependency->componentName);
-			assert(reverseDependencyComponent != NULL);
-
-			shovelerViewComponentDeactivate(reverseDependencyComponent);
-		}
-	}
-
-	// deactivate the component
-	component->active = false;
-
-	if(component->deactivate != NULL) {
-		component->deactivate(component, component->data);
-	}
-
-	component->entity->view->numActiveComponents--;
-	shovelerLogTrace("Deactivated component '%s' of entity %lld.", component->name, component->entity->entityId);
-}
-
-bool shovelerViewEntityRemoveComponent(ShovelerViewEntity *entity, const char *componentName)
-{
-	ShovelerViewComponent *component = g_hash_table_lookup(entity->components, componentName);
+	ShovelerComponent *component = g_hash_table_lookup(entity->components, componentTypeId);
 	if(component == NULL) {
 		return false;
 	}
 
-	if(component->active) {
-		shovelerViewComponentDeactivate(component);
-	}
+	entity->view->numComponents--;
+	shovelerLogTrace("Removed component '%s' from entity %lld.", componentTypeId, entity->id);
 
-	// copy dependencies queue because we are removing from it as we iterate over it
-	GQueue *dependenciesCopy = g_queue_copy(component->dependencies);
-	for(GList *iter = dependenciesCopy->head; iter != NULL; iter = iter->next) {
-		ShovelerViewQualifiedComponent *dependencyTarget = iter->data;
-		shovelerViewComponentRemoveDependency(component, dependencyTarget->entityId, dependencyTarget->componentName);
-	}
-	g_queue_free(dependenciesCopy);
-
-	triggerComponentCallback(component, SHOVELER_VIEW_COMPONENT_CALLBACK_REMOVE);
-
-	component->entity->view->numComponents--;
-	shovelerLogTrace("Removed component '%s' from entity %lld.", componentName, entity->entityId);
-
-	g_hash_table_remove(entity->components, componentName);
+	g_hash_table_remove(entity->components, componentTypeId);
 	return true;
-}
-
-ShovelerViewComponentCallback *shovelerViewEntityAddCallback(ShovelerViewEntity *entity, const char *componentName, ShovelerViewComponentCallbackFunction *function, void *userData)
-{
-	GQueue *callbacks = g_hash_table_lookup(entity->callbacks, componentName);
-	if(callbacks == NULL) {
-		callbacks = g_queue_new();
-		g_hash_table_insert(entity->callbacks, strdup(componentName), callbacks);
-	}
-
-	ShovelerViewComponentCallback *callback = malloc(sizeof(ShovelerViewComponentCallback));
-	callback->function = function;
-	callback->userData = userData;
-	g_queue_push_tail(callbacks, callback);
-
-	// if the target component is already there, trigger the add callback directly
-	ShovelerViewComponent *component = g_hash_table_lookup(entity->components, componentName);
-	if(component != NULL) {
-		callback->function(component, SHOVELER_VIEW_COMPONENT_CALLBACK_ADD, callback->userData);
-	}
-
-	return callback;
 }
 
 bool shovelerViewSetTarget(ShovelerView *view, const char *targetName, void *target)
 {
-	return g_hash_table_insert(view->targets, strdup(targetName), target);
-}
-
-bool shovelerViewEntityRemoveCallback(ShovelerViewEntity *entity, const char *componentName, ShovelerViewComponentCallback *callback)
-{
-	GQueue *callbacks = g_hash_table_lookup(entity->callbacks, componentName);
-	if(callbacks == NULL) {
-		return false;
-	}
-
-	if(!g_queue_remove(callbacks, callback)) {
-		return false;
-	}
-
-	free(callback);
-	return true;
+	return g_hash_table_insert(view->targets, (gpointer) targetName, target);
 }
 
 GString *shovelerViewCreateDependencyGraph(ShovelerView *view)
@@ -412,23 +263,29 @@ GString *shovelerViewCreateDependencyGraph(ShovelerView *view)
 		}
 
 		GHashTableIter componentIter;
-		const char *componentName;
-		ShovelerViewComponent *component;
+		const char *componentTypeId;
+		ShovelerComponent *component;
 		g_hash_table_iter_init(&componentIter, entity->components);
-		while(g_hash_table_iter_next(&componentIter, (gpointer *) &componentName, (gpointer *) &component)) {
-			const char *color = component->active ? "green" : "red";
-			g_string_append_printf(graph, "		entity%lld_%s [label = <<font color='%s'>%s</font>>];\n", entityId, componentName, color, componentName);
+		while(g_hash_table_iter_next(&componentIter, (gpointer *) &componentTypeId, (gpointer *) &component)) {
+			const char *color = shovelerComponentIsActive(component) ? "green" : "red";
+			g_string_append_printf(graph, "		entity%lld_%s [label = <<font color='%s'>%s</font>>];\n", entityId, componentTypeId, color, componentTypeId);
 		}
 
 		g_string_append(graph, "	}\n");
 
 		g_hash_table_iter_init(&componentIter, entity->components);
-		while(g_hash_table_iter_next(&componentIter, (gpointer *) &componentName, (gpointer *) &component)) {
-			for(GList *dependencyIter = component->dependencies->head; dependencyIter != NULL; dependencyIter = dependencyIter->next) {
-				const ShovelerViewQualifiedComponent *dependencyTarget = (ShovelerViewQualifiedComponent *) dependencyIter->data;
-				g_string_append_printf(graph, "	entity%lld_%s -> entity%lld_%s;\n", entityId, componentName, dependencyTarget->entityId, dependencyTarget->componentName);
-			}
+		while(g_hash_table_iter_next(&componentIter, (gpointer *) &componentTypeId, (gpointer *) &component)) {
+			ShovelerViewQualifiedComponent dependencySource;
+			dependencySource.entityId = entity->id;
+			dependencySource.componentTypeId = (char *) componentTypeId; // won't be modified
 
+			GQueue *dependencies = g_hash_table_lookup(view->dependencies, &dependencySource);
+			if(dependencies != NULL) {
+				for(GList *dependencyIter = dependencies->head; dependencyIter != NULL; dependencyIter = dependencyIter->next) {
+					const ShovelerViewQualifiedComponent *dependencyTarget = (ShovelerViewQualifiedComponent *) dependencyIter->data;
+					g_string_append_printf(graph, "	entity%lld_%s -> entity%lld_%s;\n", entityId, componentTypeId, dependencyTarget->entityId, dependencyTarget->componentTypeId);
+				}
+			}
 		}
 	}
 
@@ -444,80 +301,115 @@ bool shovelerViewWriteDependencyGraph(ShovelerView *view, const char *filename)
 	return success;
 }
 
-ShovelerViewDependencyCallback *shovelerViewAddDependencyCallback(ShovelerView *view, ShovelerViewDependencyCallbackFunction *function, void *userData)
-{
-	ShovelerViewDependencyCallback *callback = malloc(sizeof(ShovelerViewDependencyCallback));
-	callback->function = function;
-	callback->userData = userData;
-	g_queue_push_tail(view->dependencyCallbacks, callback);
-
-	return callback;
-}
-
-bool shovelerViewRemoveDependencyCallback(ShovelerView *view, ShovelerViewDependencyCallback *callback)
-{
-	if(!g_queue_remove(view->dependencyCallbacks, callback)) {
-		return false;
-	}
-
-	free(callback);
-	return true;
-}
-
 void shovelerViewFree(ShovelerView *view)
 {
-	g_queue_free_full(view->dependencyCallbacks, free);
 	g_hash_table_destroy(view->entities);
 	g_hash_table_destroy(view->targets);
 	g_hash_table_destroy(view->reverseDependencies);
+	g_hash_table_destroy(view->dependencies);
+	g_hash_table_destroy(view->componentTypes);
+	free(view->adapter);
 	free(view);
 }
 
 guint qualifiedComponentHash(gconstpointer qualifiedComponentPointer)
 {
-	ShovelerViewQualifiedComponent *qualifiedComponent = (ShovelerViewQualifiedComponent *) qualifiedComponentPointer;
+	const ShovelerViewQualifiedComponent *qualifiedComponent = (const ShovelerViewQualifiedComponent *) qualifiedComponentPointer;
 
 	guint entityIdHash = g_int64_hash(&qualifiedComponent->entityId);
-	guint componentNameHash = g_str_hash(qualifiedComponent->componentName);
+	guint componentTypeIdHash = g_str_hash(qualifiedComponent->componentTypeId);
 
-	return shovelerHashCombine(entityIdHash, componentNameHash);
+	return shovelerHashCombine(entityIdHash, componentTypeIdHash);
 }
 
 gboolean qualifiedComponentEqual(gconstpointer firstQualifiedComponentPointer, gconstpointer secondQualifiedComponentPointer)
 {
-	ShovelerViewQualifiedComponent *firstQualifiedComponent = (ShovelerViewQualifiedComponent *) firstQualifiedComponentPointer;
-	ShovelerViewQualifiedComponent *secondQualifiedComponent = (ShovelerViewQualifiedComponent *) secondQualifiedComponentPointer;
+	const ShovelerViewQualifiedComponent *firstQualifiedComponent = (const ShovelerViewQualifiedComponent *) firstQualifiedComponentPointer;
+	const ShovelerViewQualifiedComponent *secondQualifiedComponent = (const ShovelerViewQualifiedComponent *) secondQualifiedComponentPointer;
 
 	return firstQualifiedComponent->entityId == secondQualifiedComponent->entityId
-		&& strcmp(firstQualifiedComponent->componentName, secondQualifiedComponent->componentName) == 0;
-}
-
-static void triggerComponentCallback(ShovelerViewComponent *component, ShovelerViewComponentCallbackType callbackType)
-{
-	GQueue *callbacks = g_hash_table_lookup(component->entity->callbacks, component->name);
-	if(callbacks != NULL) {
-		for(GList *iter = callbacks->head; iter != NULL; iter = iter->next) {
-			ShovelerViewComponentCallback *callback = iter->data;
-			callback->function(component, callbackType, callback->userData);
-		}
-	}
+		&& firstQualifiedComponent->componentTypeId == secondQualifiedComponent->componentTypeId;
 }
 
 static ShovelerViewQualifiedComponent *copyQualifiedComponent(ShovelerViewQualifiedComponent *qualifiedComponent)
 {
 	ShovelerViewQualifiedComponent *copiedQualifiedComponent = malloc(sizeof(ShovelerViewQualifiedComponent));
 	copiedQualifiedComponent->entityId = qualifiedComponent->entityId;
-	copiedQualifiedComponent->componentName = strdup(qualifiedComponent->componentName);
+	copiedQualifiedComponent->componentTypeId = qualifiedComponent->componentTypeId;
 	return copiedQualifiedComponent;
 }
 
-static bool removeDependency(GQueue *dependencies, long long int dependencyEntityId, const char *dependencyComponentName)
+static ShovelerComponent *getComponent(ShovelerComponent *component, long long int entityId, const char *componentTypeId, void *viewPointer)
+{
+	ShovelerView *view = (ShovelerView *) viewPointer;
+
+	ShovelerViewEntity *entity = g_hash_table_lookup(view->entities, &entityId);
+	if(entity == NULL) {
+		return NULL;
+	}
+
+	return g_hash_table_lookup(entity->components, componentTypeId);
+}
+
+static void *getTarget(ShovelerComponent *component, const char *targetName, void *viewPointer)
+{
+	ShovelerView *view = (ShovelerView *) viewPointer;
+
+	return g_hash_table_lookup(view->targets, targetName);
+}
+
+static void addComponentDependency(ShovelerComponent *component, long long int targetEntityId, const char *targetComponentTypeId, void *viewPointer)
+{
+	ShovelerView *view = (ShovelerView *) viewPointer;
+
+	shovelerViewAddDependency(view, component->entityId, component->type->id, targetEntityId, targetComponentTypeId);
+}
+
+static bool removeComponentDependency(ShovelerComponent *component, long long int targetEntityId, const char *targetComponentTypeId, void *viewPointer)
+{
+	ShovelerView *view = (ShovelerView *) viewPointer;
+
+	return shovelerViewRemoveDependency(view, component->entityId, component->type->id, targetEntityId, targetComponentTypeId);
+}
+
+static void forEachComponentReverseDependency(ShovelerComponent *targetComponent, ShovelerComponentAdapterViewForEachReverseDependencyCallbackFunction *callbackFunction, void *callbackUserData, void *viewPointer) {
+	ShovelerView *view = (ShovelerView *) viewPointer;
+
+	ShovelerViewQualifiedComponent dependencyTarget;
+	dependencyTarget.entityId = targetComponent->entityId;
+	dependencyTarget.componentTypeId = targetComponent->type->id;
+
+	GQueue *reverseDependencies = g_hash_table_lookup(view->reverseDependencies, &dependencyTarget);
+	if(reverseDependencies != NULL) {
+		for(GList *iter = reverseDependencies->head; iter != NULL; iter = iter->next) {
+			const ShovelerViewQualifiedComponent *dependencySource = iter->data;
+
+			ShovelerViewEntity *sourceEntity = g_hash_table_lookup(view->entities, &dependencySource->entityId);
+			if(sourceEntity != NULL) {
+				ShovelerComponent *sourceComponent = g_hash_table_lookup(sourceEntity->components, dependencySource->componentTypeId);
+				if(sourceComponent != NULL) {
+					callbackFunction(sourceComponent, targetComponent, callbackUserData);
+				}
+			}
+		}
+	}
+}
+
+static void reportComponentActivation(ShovelerComponent *component, int delta, void *viewPointer)
+{
+	ShovelerView *view = (ShovelerView *) viewPointer;
+
+	view->numActiveComponents += delta;
+}
+
+static bool removeDependency(GQueue *dependencies, const ShovelerViewQualifiedComponent *dependency)
 {
 	for(GList *iter = dependencies->head; iter != NULL; iter = iter->next) {
-		ShovelerViewQualifiedComponent *dependencyTarget = iter->data;
-		if(dependencyTarget->entityId == dependencyEntityId && strcmp(dependencyTarget->componentName, dependencyComponentName) == 0) {
+		ShovelerViewQualifiedComponent *currentDependency = iter->data;
+		if(currentDependency->entityId == dependency->entityId
+			&& strcmp(currentDependency->componentTypeId, dependency->componentTypeId) == 0) {
 			g_queue_delete_link(dependencies, iter);
-			freeQualifiedComponent(dependencyTarget);
+			free(currentDependency);
 			return true;
 		}
 	}
@@ -525,27 +417,26 @@ static bool removeDependency(GQueue *dependencies, long long int dependencyEntit
 	return false;
 }
 
+static void freeComponentType(void *componentTypePointer)
+{
+	ShovelerComponentType *componentType = componentTypePointer;
+	shovelerComponentTypeFree(componentType);
+}
+
 static void freeEntity(void *entityPointer)
 {
 	ShovelerViewEntity *entity = entityPointer;
+
+	g_hash_table_destroy(entity->authoritativeComponents);
 	g_hash_table_destroy(entity->components);
-	g_hash_table_destroy(entity->callbacks);
 	free(entity->type);
 	free(entity);
 }
 
 static void freeComponent(void *componentPointer)
 {
-	ShovelerViewComponent *component = componentPointer;
-
-	if(component->free != NULL) {
-		component->free(component, component->data);
-	}
-
-	g_queue_free_full(component->dependencies, freeQualifiedComponent);
-
-	free(component->name);
-	free(component);
+	ShovelerComponent *component = componentPointer;
+	shovelerComponentFree(component);
 }
 
 static void freeCallbacks(void *callbacksPointer)
@@ -557,12 +448,5 @@ static void freeCallbacks(void *callbacksPointer)
 static void freeQualifiedComponents(void *qualifiedComponentsPointer)
 {
 	GQueue *qualifiedComponents = (GQueue *) qualifiedComponentsPointer;
-	g_queue_free_full(qualifiedComponents, freeQualifiedComponent);
-}
-
-static void freeQualifiedComponent(void *qualifiedComponentPointer)
-{
-	ShovelerViewQualifiedComponent *qualifiedComponent = (ShovelerViewQualifiedComponent *) qualifiedComponentPointer;
-	free(qualifiedComponent->componentName);
-	free(qualifiedComponent);
+	g_queue_free_full(qualifiedComponents, free);
 }

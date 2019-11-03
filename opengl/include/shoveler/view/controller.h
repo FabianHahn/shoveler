@@ -4,10 +4,8 @@
 #include <shoveler/controller.h>
 #include <shoveler/view.h>
 
-static inline ShovelerController *shovelerViewGetController(ShovelerView *view)
-{
-	return (ShovelerController *) shovelerViewGetTarget(view, "controller");
-}
+bool shovelerViewSetController(ShovelerView *view, ShovelerController *controller);
+ShovelerController *shovelerViewGetController(ShovelerView *view);
 
 static inline bool shovelerViewHasController(ShovelerView *view)
 {

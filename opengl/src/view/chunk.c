@@ -2,243 +2,82 @@
 #include <stdlib.h> // malloc free
 #include <string.h> // memcpy
 
-#include "shoveler/collider/chunk.h"
 #include "shoveler/view/canvas.h"
 #include "shoveler/view/chunk.h"
-#include "shoveler/view/colliders.h"
+#include "shoveler/view/chunk_layer.h"
 #include "shoveler/view/position.h"
 #include "shoveler/view/tilemap.h"
-#include "shoveler/colliders.h"
 #include "shoveler/log.h"
 
-typedef struct {
-	ShovelerViewChunkConfiguration configuration;
-	ShovelerChunk *chunk;
-	ShovelerCollider2 *collider;
-} ComponentData;
-
-static void assignConfiguration(ShovelerViewChunkConfiguration *destination, const ShovelerViewChunkConfiguration *source);
-static void clearConfiguration(ShovelerViewChunkConfiguration *configuration);
-static bool activateComponent(ShovelerViewComponent *component, void *componentDataPointer);
-static void deactivateComponent(ShovelerViewComponent *component, void *componentDataPointer);
-static void freeComponent(ShovelerViewComponent *component, void *componentDataPointer);
-static void positionCallback(ShovelerViewComponent *positionComponent, ShovelerViewComponentCallbackType callbackType, void *componentDataPointer);
-static const char *layerTypeToComponentName(ShovelerChunkLayerType type);
-
-bool shovelerViewEntityAddChunk(ShovelerViewEntity *entity, const ShovelerViewChunkConfiguration *configuration)
+ShovelerComponent *shovelerViewEntityAddChunk(ShovelerViewEntity *entity, const ShovelerViewChunkConfiguration *configuration)
 {
-	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewChunkComponentName);
-	if(component != NULL) {
-		shovelerLogWarning("Trying to add chunk to entity %lld which already has a chunk, ignoring.", entity->entityId);
-		return false;
+	if(!shovelerViewHasComponentType(entity->view, shovelerComponentTypeIdChunk)) {
+		shovelerViewAddComponentType(entity->view, shovelerComponentCreateChunkType());
 	}
 
-	ComponentData *componentData = malloc(sizeof(ComponentData));
-	componentData->configuration.positionMappingX = SHOVELER_COORDINATE_MAPPING_POSITIVE_X;
-	componentData->configuration.positionMappingY = SHOVELER_COORDINATE_MAPPING_POSITIVE_Y;
-	componentData->configuration.size = shovelerVector2(0.0f, 0.0f);
-	componentData->configuration.collider = false;
-	componentData->configuration.numLayers = 0;
-	componentData->configuration.layers = NULL;
-	componentData->chunk = NULL;
-	componentData->collider = NULL;
+	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerComponentTypeIdChunk);
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, SHOVELER_COMPONENT_CHUNK_OPTION_ID_POSITION, configuration->positionEntityId);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, SHOVELER_COMPONENT_CHUNK_OPTION_ID_POSITION_MAPPING_X, configuration->positionMappingX);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, SHOVELER_COMPONENT_CHUNK_OPTION_ID_POSITION_MAPPING_X, configuration->positionMappingY);
+	shovelerComponentUpdateCanonicalConfigurationOptionVector2(component, SHOVELER_COMPONENT_CHUNK_OPTION_ID_SIZE, configuration->size);
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityIdArray(component, SHOVELER_COMPONENT_CHUNK_OPTION_ID_LAYERS, configuration->layerEntityIds, configuration->numLayers);
 
-	assignConfiguration(&componentData->configuration, configuration);
-
-	component = shovelerViewEntityAddComponent(entity, shovelerViewChunkComponentName, componentData, activateComponent, deactivateComponent, freeComponent);
-	assert(component != NULL);
-
-	shovelerViewComponentAddDependency(component, entity->entityId, shovelerViewPositionComponentName);
-
-	for(int i = 0; i < componentData->configuration.numLayers; i++) {
-		const ShovelerViewChunkLayerConfiguration *layerConfiguration = &componentData->configuration.layers[i];
-		shovelerViewComponentAddDependency(component, layerConfiguration->valueEntityId, layerTypeToComponentName(layerConfiguration->type));
-	}
-
-	shovelerViewComponentActivate(component);
-	return true;
+	shovelerComponentActivate(component);
+	return component;
 }
 
 ShovelerChunk *shovelerViewEntityGetChunk(ShovelerViewEntity *entity)
 {
-	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewChunkComponentName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdChunk);
 	if(component == NULL) {
 		return NULL;
 	}
 
-	ComponentData *componentData = component->data;
-	return componentData->chunk;
+	return component->data;
 }
 
-const ShovelerViewChunkConfiguration *shovelerViewEntityGetChunkConfiguration(ShovelerViewEntity *entity)
+bool shovelerViewEntityGetChunkConfiguration(ShovelerViewEntity *entity, ShovelerViewChunkConfiguration *outputConfiguration)
 {
-	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewChunkComponentName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdChunk);
 	if(component == NULL) {
 		return false;
 	}
 
-	ComponentData *componentData = component->data;
-	return &componentData->configuration;
+	outputConfiguration->positionEntityId = shovelerComponentGetConfigurationValueEntityId(component, SHOVELER_COMPONENT_CHUNK_OPTION_ID_POSITION);
+	outputConfiguration->positionMappingX = shovelerComponentGetConfigurationValueInt(component, SHOVELER_COMPONENT_CHUNK_OPTION_ID_POSITION_MAPPING_X);
+	outputConfiguration->positionMappingY = shovelerComponentGetConfigurationValueInt(component, SHOVELER_COMPONENT_CHUNK_OPTION_ID_POSITION_MAPPING_Y);
+	outputConfiguration->size = shovelerComponentGetConfigurationValueVector2(component, SHOVELER_COMPONENT_CHUNK_OPTION_ID_SIZE);
+
+	const ShovelerComponentConfigurationValue *layersValue = shovelerComponentGetConfigurationValue(component, SHOVELER_COMPONENT_CHUNK_OPTION_ID_LAYERS);
+	assert(layersValue != NULL);
+	outputConfiguration->layerEntityIds = layersValue->entityIdArrayValue.entityIds;
+	outputConfiguration->numLayers = layersValue->entityIdArrayValue.size;
+
+	return true;
 }
 
-bool shovelerViewEntityUpdateChunk(ShovelerViewEntity *entity, ShovelerViewChunkConfiguration configuration)
+bool shovelerViewEntityUpdateChunk(ShovelerViewEntity *entity, const ShovelerViewChunkConfiguration *configuration)
 {
-	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewChunkComponentName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdChunk);
 	if(component == NULL) {
-		shovelerLogWarning("Trying to update chunk of entity %lld which does not have a chunk, ignoring.", entity->entityId);
+		shovelerLogWarning("Trying to update chunk of entity %lld which does not have a chunk, ignoring.", entity->id);
 		return false;
 	}
 
-	ComponentData *componentData = component->data;
-
-	shovelerViewComponentDeactivate(component);
-
-	for(int i = 0; i < componentData->configuration.numLayers; i++) {
-		const ShovelerViewChunkLayerConfiguration *layerConfiguration = &componentData->configuration.layers[i];
-		if(!shovelerViewComponentRemoveDependency(component, layerConfiguration->valueEntityId, layerTypeToComponentName(layerConfiguration->type))) {
-			return false;
-		}
-	}
-
-	assignConfiguration(&componentData->configuration, &configuration);
-
-	for(int i = 0; i < componentData->configuration.numLayers; i++) {
-		const ShovelerViewChunkLayerConfiguration *layerConfiguration = &componentData->configuration.layers[i];
-		shovelerViewComponentAddDependency(component, layerConfiguration->valueEntityId, layerTypeToComponentName(layerConfiguration->type));
-	}
-
-	shovelerViewComponentActivate(component);
-
-	shovelerViewComponentUpdate(component);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, SHOVELER_COMPONENT_CHUNK_OPTION_ID_POSITION_MAPPING_X, configuration->positionMappingX);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, SHOVELER_COMPONENT_CHUNK_OPTION_ID_POSITION_MAPPING_X, configuration->positionMappingY);
+	shovelerComponentUpdateCanonicalConfigurationOptionVector2(component, SHOVELER_COMPONENT_CHUNK_OPTION_ID_POSITION_MAPPING_X, configuration->size);
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityIdArray(component, SHOVELER_COMPONENT_CHUNK_OPTION_ID_LAYERS, configuration->layerEntityIds, configuration->numLayers);
 	return true;
 }
 
 bool shovelerViewEntityRemoveChunk(ShovelerViewEntity *entity)
 {
-	ShovelerViewComponent *component = shovelerViewEntityGetComponent(entity, shovelerViewChunkComponentName);
+	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdChunk);
 	if(component == NULL) {
-		shovelerLogWarning("Trying to remove chunk from entity %lld which does not have a chunk, ignoring.", entity->entityId);
+		shovelerLogWarning("Trying to remove chunk from entity %lld which does not have a chunk, ignoring.", entity->id);
 		return false;
 	}
 
-	return shovelerViewEntityRemoveComponent(entity, shovelerViewChunkComponentName);
-}
-
-static void assignConfiguration(ShovelerViewChunkConfiguration *destination, const ShovelerViewChunkConfiguration *source)
-{
-	clearConfiguration(destination);
-
-	destination->positionMappingX = source->positionMappingX;
-	destination->positionMappingY = source->positionMappingY;
-	destination->size = source->size;
-	destination->collider = source->collider;
-	destination->numLayers = source->numLayers;
-	destination->layers = malloc(destination->numLayers * sizeof(ShovelerViewChunkLayerConfiguration));
-	memcpy(destination->layers, source->layers, destination->numLayers * sizeof(ShovelerViewChunkLayerConfiguration));
-}
-
-static void clearConfiguration(ShovelerViewChunkConfiguration *configuration)
-{
-	configuration->positionMappingX = SHOVELER_COORDINATE_MAPPING_POSITIVE_X;
-	configuration->positionMappingY = SHOVELER_COORDINATE_MAPPING_POSITIVE_Y;
-	configuration->size = shovelerVector2(0.0f, 0.0f);
-	configuration->collider = false;
-
-	if(configuration->numLayers > 0) {
-		free(configuration->layers);
-		configuration->layers = NULL;
-	}
-	configuration->numLayers = 0;
-}
-
-static bool activateComponent(ShovelerViewComponent *component, void *componentDataPointer)
-{
-	assert(shovelerViewHasColliders(component->entity->view));
-	ComponentData *componentData = componentDataPointer;
-
-	ShovelerViewPosition *position = shovelerViewEntityGetPosition(component->entity);
-	assert(position != NULL);
-	ShovelerVector3 positionCoordinates = shovelerVector3((float) position->x, (float) position->y, (float) position->z);
-	ShovelerVector2 chunkPosition = shovelerVector2(
-		shovelerCoordinateMap(positionCoordinates, componentData->configuration.positionMappingX),
-		shovelerCoordinateMap(positionCoordinates, componentData->configuration.positionMappingY));
-
-	componentData->chunk = shovelerChunkCreate(chunkPosition, componentData->configuration.size);
-
-	for(int i = 0; i < componentData->configuration.numLayers; i++) {
-		const ShovelerViewChunkLayerConfiguration *layerConfiguration = &componentData->configuration.layers[i];
-		ShovelerViewEntity *layerEntity = shovelerViewGetEntity(component->entity->view, layerConfiguration->valueEntityId);
-		assert(layerEntity != NULL);
-
-		switch(layerConfiguration->type) {
-			case SHOVELER_CHUNK_LAYER_TYPE_CANVAS: {
-				ShovelerCanvas *canvas = shovelerViewEntityGetCanvas(layerEntity);
-				assert(canvas != NULL);
-
-				shovelerChunkAddCanvasLayer(componentData->chunk, canvas);
-			} break;
-			case SHOVELER_CHUNK_LAYER_TYPE_TILEMAP: {
-				ShovelerTilemap *tilemap = shovelerViewEntityGetTilemap(layerEntity);
-				assert(tilemap != NULL);
-
-				shovelerChunkAddTilemapLayer(componentData->chunk, tilemap);
-			} break;
-			default:
-				shovelerLogError("Unknown chunk layer type: %d", layerConfiguration->type);
-				shovelerChunkFree(componentData->chunk);
-				componentData->chunk = NULL;
-				return false;
-		}
-	}
-
-	if(componentData->configuration.collider) {
-		ShovelerColliders *colliders = shovelerViewGetColliders(component->entity->view);
-
-		componentData->collider = shovelerColliderChunkCreate(componentData->chunk);
-		shovelerCollidersAddCollider2(colliders, componentData->collider);
-	}
-
-	return true;
-}
-
-static void deactivateComponent(ShovelerViewComponent *component, void *componentDataPointer)
-{
-	assert(shovelerViewHasColliders(component->entity->view));
-	ComponentData *componentData = componentDataPointer;
-
-	if(componentData->configuration.collider) {
-		ShovelerColliders *colliders = shovelerViewGetColliders(component->entity->view);
-		shovelerCollidersRemoveCollider2(colliders, componentData->collider);
-
-		shovelerCollider2Free(componentData->collider);
-		componentData->collider = NULL;
-	}
-
-	shovelerChunkFree(componentData->chunk);
-	componentData->chunk = NULL;
-}
-
-static void freeComponent(ShovelerViewComponent *component, void *componentDataPointer)
-{
-	ComponentData *componentData = componentDataPointer;
-
-	clearConfiguration(&componentData->configuration);
-
-	shovelerChunkFree(componentData->chunk);
-	shovelerCollider2Free(componentData->collider);
-
-	free(componentData);
-}
-
-static const char *layerTypeToComponentName(ShovelerChunkLayerType type)
-{
-	switch(type) {
-		case SHOVELER_CHUNK_LAYER_TYPE_CANVAS:
-			return shovelerViewCanvasComponentName;
-		case SHOVELER_CHUNK_LAYER_TYPE_TILEMAP:
-			return shovelerViewTilemapComponentName;
-		default:
-			shovelerLogError("Unknown chunk layer type: %d", type);
-			return NULL;
-	}
+	return shovelerViewEntityRemoveComponent(entity, shovelerComponentTypeIdChunk);
 }

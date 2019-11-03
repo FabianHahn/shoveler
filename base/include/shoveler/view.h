@@ -1,119 +1,86 @@
-#ifndef SHOVELER_VIEW__H
-#define SHOVELER_VIEW__H
+#ifndef SHOVELER_VIEW_H
+#define SHOVELER_VIEW_H
 
 #include <stdbool.h> // bool
 
 #include <glib.h>
 
-struct ShovelerViewComponentStruct; // forward declaration
+typedef struct ShovelerComponentStruct ShovelerComponent; // forward declaration: component.h
+typedef struct ShovelerComponentTypeStruct ShovelerComponentType; // forward declaration: component.h
+typedef struct ShovelerComponentViewAdapterStruct ShovelerComponentViewAdapter; // forward declaration: component.h
 
-typedef struct {
+typedef struct ShovelerViewStruct {
+	/** map from string component type name to (ShovelerComponentType *) */
+	/* private */ GHashTable *componentTypes;
 	/** map from entity id (long long int) to entities (ShovelerViewEntity *) */
 	/* private */ GHashTable *entities;
 	/** map from string target name to target type */
 	/* private */ GHashTable *targets;
+	/** map from source (ShovelerViewQualifiedComponent *) to list of (ShovelerViewQualifiedComponent *) */
+	/* private */ GHashTable *dependencies;
 	/** map from target (ShovelerViewQualifiedComponent *) to list of (ShovelerViewQualifiedComponent *) */
 	/* private */ GHashTable *reverseDependencies;
-	/** list of (ShovelerViewDependencyCallback *) */
-	/* private */ GQueue *dependencyCallbacks;
-	unsigned int numEntities;
-	unsigned int numComponents;
-	unsigned int numComponentDependencies;
-	unsigned int numActiveComponents;
-	unsigned int numDelegatedComponents;
+	ShovelerComponentViewAdapter *adapter;
+	int numEntities;
+	int numComponents;
+	int numComponentDependencies;
+	int numActiveComponents;
+	int numDelegatedComponents;
 } ShovelerView;
 
-typedef enum {
-	SHOVELER_VIEW_COMPONENT_CALLBACK_ADD,
-	SHOVELER_VIEW_COMPONENT_CALLBACK_REMOVE,
-	SHOVELER_VIEW_COMPONENT_CALLBACK_UPDATE,
-	SHOVELER_VIEW_COMPONENT_CALLBACK_DELEGATE,
-	SHOVELER_VIEW_COMPONENT_CALLBACK_UNDELEGATE,
-	SHOVELER_VIEW_COMPONENT_CALLBACK_USER,
-} ShovelerViewComponentCallbackType;
-
-typedef void (ShovelerViewComponentCallbackFunction)(struct ShovelerViewComponentStruct *component, ShovelerViewComponentCallbackType callbackType, void *userData);
-
-typedef struct {
-	ShovelerViewComponentCallbackFunction *function;
-	void *userData;
-} ShovelerViewComponentCallback;
-
-typedef struct {
+typedef struct ShovelerViewEntityStruct {
 	ShovelerView *view;
-	long long int entityId;
+	long long int id;
 	char *type;
-	/** map from string component name to (ShovelerViewComponent *) */
+	/** map from string component type name to (ShovelerComponent *) */
 	/* private */ GHashTable *components;
-	/** map from string component name to (GQueue *) of (ShovelerViewComponentCallback *) */
-	/* private */ GHashTable *callbacks;
+	/** set of component type names */
+	/* private */ GHashTable *authoritativeComponents;
 } ShovelerViewEntity;
 
-typedef bool (ShovelerViewComponentActivateFunction)(struct ShovelerViewComponentStruct *, void *data);
-typedef void (ShovelerViewComponentDeactivateFunction)(struct ShovelerViewComponentStruct *, void *data);
-typedef void (ShovelerViewComponentFreeFunction)(struct ShovelerViewComponentStruct *, void *data);
-
-typedef struct ShovelerViewComponentStruct {
-	ShovelerViewEntity *entity;
-	char *name;
-	bool active;
-	bool authoritative;
-	/* private */ void *data;
-	/** list of (ShovelerViewQualifiedComponent *) */
-	/* private */ GQueue *dependencies;
-	/* private */ ShovelerViewComponentActivateFunction *activate;
-	/* private */ ShovelerViewComponentDeactivateFunction *deactivate;
-	/* private */ ShovelerViewComponentFreeFunction *free;
-} ShovelerViewComponent;
-
-typedef struct {
+typedef struct ShovelerViewQualifiedComponentStruct {
 	long long int entityId;
-	char *componentName;
+	const char *componentTypeId;
 } ShovelerViewQualifiedComponent;
 
-typedef void (ShovelerViewDependencyCallbackFunction)(ShovelerView *view, const ShovelerViewQualifiedComponent *dependencySource, const ShovelerViewQualifiedComponent *dependencyTarget, bool added, void *userData);
-
-typedef struct {
-	ShovelerViewDependencyCallbackFunction *function;
-	void *userData;
-} ShovelerViewDependencyCallback;
-
 ShovelerView *shovelerViewCreate();
+/** Adds a component type to the view, with the view taking ownership over it. */
+bool shovelerViewAddComponentType(ShovelerView *view, ShovelerComponentType *componentType);
+ShovelerComponentType *shovelerViewGetComponentType(ShovelerView *view, const char *componentTypeId);
+/** Adds a new dependency for a component, potentially deactivating it if the dependency isn't active. */
+void shovelerViewAddDependency(ShovelerView *view, long long int sourceEntityId, const char *sourceComponentTypeId, long long int targetEntityId, const char *targetComponentTypeId);
+/** Removes an existing dependency from a component, but doesn't automatically activate it even if this was the only unsatisfied one. */
+bool shovelerViewRemoveDependency(ShovelerView *view, long long int sourceEntityId, const char *sourceComponentTypeId, long long int targetEntityId, const char *targetComponentTypeId);
 ShovelerViewEntity *shovelerViewAddEntity(ShovelerView *view, long long int entityId);
 bool shovelerViewRemoveEntity(ShovelerView *view, long long int entityId);
+void shovelerViewEntityDelegate(ShovelerViewEntity *entity, const char *componentTypeId);
+bool shovelerViewEntityIsAuthoritative(ShovelerViewEntity *entity, const char *componentTypeId);
+void shovelerViewEntityUndelegate(ShovelerViewEntity *entity, const char *componentTypeId);
 /** Sets an entity's type, which is an arbitrary string without semantic meaning. */
 void shovelerViewEntitySetType(ShovelerViewEntity *entity, const char *type);
-ShovelerViewComponent *shovelerViewEntityAddComponent(ShovelerViewEntity *entity, const char *componentName, void *data, ShovelerViewComponentActivateFunction *activate, ShovelerViewComponentDeactivateFunction *deactivate, ShovelerViewComponentFreeFunction *freeFunction);
-void shovelerViewComponentUpdate(ShovelerViewComponent *component);
-void shovelerViewComponentDelegate(ShovelerViewComponent *component);
-void shovelerViewComponentUndelegate(ShovelerViewComponent *component);
-/** Adds a new dependency for a component, potentially deactivating it if the dependency isn't active. */
-void shovelerViewComponentAddDependency(ShovelerViewComponent *component, long long int dependencyEntityId, const char *dependencyComponentName);
-/** Removes an existing dependency from a component, but doesn't automatically activate it even if this was the only unsatisfied one. */
-bool shovelerViewComponentRemoveDependency(ShovelerViewComponent *component, long long int dependencyEntityId, const char *dependencyComponentName);
-bool shovelerViewComponentActivate(ShovelerViewComponent *component);
-void shovelerViewComponentDeactivate(ShovelerViewComponent *component);
-bool shovelerViewEntityRemoveComponent(ShovelerViewEntity *entity, const char *componentName);
-ShovelerViewComponentCallback *shovelerViewEntityAddCallback(ShovelerViewEntity *entity, const char *componentName, ShovelerViewComponentCallbackFunction *function, void *userData);
-bool shovelerViewEntityRemoveCallback(ShovelerViewEntity *entity, const char *componentName, ShovelerViewComponentCallback *callback);
+ShovelerComponent *shovelerViewEntityAddComponent(ShovelerViewEntity *entity, const char *componentTypeId);
+bool shovelerViewEntityRemoveComponent(ShovelerViewEntity *entity, const char *componentTypeId);
 /** Sets a target that is expected to be freed by the caller. */
 bool shovelerViewSetTarget(ShovelerView *view, const char *targetName, void *target);
 /** Creates the view's dependency graph to as a graphviz dot digraph string. */
 GString *shovelerViewCreateDependencyGraph(ShovelerView *view);
 /** Writes the view's dependency graph to a graphviz dot file. */
 bool shovelerViewWriteDependencyGraph(ShovelerView *view, const char *filename);
-ShovelerViewDependencyCallback *shovelerViewAddDependencyCallback(ShovelerView *view, ShovelerViewDependencyCallbackFunction *function, void *userData);
-bool shovelerViewRemoveDependencyCallback(ShovelerView *view, ShovelerViewDependencyCallback *callback);
 void shovelerViewFree(ShovelerView *view);
+
+static inline bool shovelerViewHasComponentType(ShovelerView *view, const char *componentTypeId)
+{
+	return shovelerViewGetComponentType(view, componentTypeId) != NULL;
+}
 
 static inline ShovelerViewEntity *shovelerViewGetEntity(ShovelerView *view, long long int entityId)
 {
 	return (ShovelerViewEntity *) g_hash_table_lookup(view->entities, &entityId);
 }
 
-static inline ShovelerViewComponent *shovelerViewEntityGetComponent(ShovelerViewEntity *entity, const char *component)
+static inline ShovelerComponent *shovelerViewEntityGetComponent(ShovelerViewEntity *entity, const char *componentTypeId)
 {
-	return (ShovelerViewComponent *) g_hash_table_lookup(entity->components, component);
+	return (ShovelerComponent *) g_hash_table_lookup(entity->components, componentTypeId);
 }
 
 static inline void *shovelerViewGetTarget(ShovelerView *view, const char *targetName)

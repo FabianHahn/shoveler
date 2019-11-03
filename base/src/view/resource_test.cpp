@@ -4,7 +4,10 @@
 #include <gtest/gtest.h>
 
 extern "C" {
+#include "shoveler/view/resource.h"
 #include "shoveler/view/resources.h"
+#include "shoveler/component.h"
+#include "shoveler/resources.h"
 }
 
 static void *loadResource(ShovelerResourcesTypeLoader *typeLoader, const unsigned char *buffer, int bufferSize);
@@ -69,7 +72,7 @@ TEST_F(ShovelerViewResourcesTest, addResource)
 
 	nextLoadResourceData = (void *) testResourceData;
 	const ShovelerViewResourceConfiguration configuration{testTypeId, &testResourceBuffer, testResourceBytes};
-	bool resourceComponentAdded = shovelerViewEntityAddResource(testEntity, configuration);
+	bool resourceComponentAdded = shovelerViewEntityAddResource(testEntity, &configuration);
 	ASSERT_TRUE(resourceComponentAdded);
 	ASSERT_EQ(lastLoadBufferSize, testResourceBytes) << "load should be called with correct bytes";
 	ASSERT_EQ(memcmp(&testResourceBuffer, lastLoadBuffer, testResourceBytes), 0) << "load should be called with correct buffer";
@@ -96,12 +99,13 @@ TEST_F(ShovelerViewResourcesTest, updateResource)
 
 	nextLoadResourceData = (void *) testResourceData;
 	const ShovelerViewResourceConfiguration configuration{testTypeId, &testResourceBuffer, testResourceBytes};
-	bool resourceComponentAdded = shovelerViewEntityAddResource(testEntity, configuration);
-	ASSERT_TRUE(resourceComponentAdded);
+	ShovelerComponent *testComponent = shovelerViewEntityAddResource(testEntity, &configuration);
+	ASSERT_TRUE(testComponent != NULL);
 
 	ShovelerResource *resource = shovelerResourcesGet(resources, testTypeId, testResourceId);
 	nextLoadResourceData = (void *) otherTestResourceData;
-	bool resourceComponentUpdated = shovelerViewEntityUpdateResource(testEntity, configuration);
+
+	bool resourceComponentUpdated = shovelerComponentUpdateCanonicalConfigurationOptionString(testComponent, SHOVELER_COMPONENT_RESOURCE_OPTION_ID_TYPE_ID, testTypeId);
 	ASSERT_TRUE(resourceComponentUpdated);
 	ASSERT_TRUE(resource->data == otherTestResourceData) << "resource data should have changed after component update";
 }
@@ -120,7 +124,7 @@ TEST_F(ShovelerViewResourcesTest, removeResource)
 	ASSERT_TRUE(testEntity != NULL);
 
 	const ShovelerViewResourceConfiguration configuration{testTypeId, &testResourceBuffer, testResourceBytes};
-	bool resourceComponentAdded = shovelerViewEntityAddResource(testEntity, configuration);
+	bool resourceComponentAdded = shovelerViewEntityAddResource(testEntity, &configuration);
 	ASSERT_TRUE(resourceComponentAdded);
 	bool resourceComponentRemoved = shovelerViewEntityRemoveResource(testEntity);
 	ASSERT_TRUE(resourceComponentRemoved);

@@ -3,14 +3,14 @@
 
 #include <stdbool.h> // bool
 
-#include <glib.h>
-
+#include <shoveler/component/model.h>
 #include <shoveler/model.h>
 #include <shoveler/scene.h>
 #include <shoveler/types.h>
 #include <shoveler/view.h>
 
 typedef struct {
+	long long int positionEntityId;
 	long long int drawableEntityId;
 	long long int materialEntityId;
 	ShovelerVector3 rotation;
@@ -21,18 +21,16 @@ typedef struct {
 	GLuint polygonMode;
 } ShovelerViewModelConfiguration;
 
-static const char *shovelerViewModelComponentName = "model";
-
-bool shovelerViewEntityAddModel(ShovelerViewEntity *entity, ShovelerViewModelConfiguration configuration);
+/** Adds a model component to an entity, copying the supplied configuration. */
+bool shovelerViewEntityAddModel(ShovelerViewEntity *entity, const ShovelerViewModelConfiguration *configuration);
 ShovelerModel *shovelerViewEntityGetModel(ShovelerViewEntity *entity);
-const ShovelerViewModelConfiguration *shovelerViewEntityGetModelConfiguration(ShovelerViewEntity *entity);
-bool shovelerViewEntityUpdateModelDrawableEntityId(ShovelerViewEntity *entity, long long int drawableEntityId);
-bool shovelerViewEntityUpdateModelMaterialEntityId(ShovelerViewEntity *entity, long long int materialEntityId);
-bool shovelerViewEntityUpdateModelRotation(ShovelerViewEntity *entity, ShovelerVector3 rotation);
-bool shovelerViewEntityUpdateModelScale(ShovelerViewEntity *entity, ShovelerVector3 scale);
-bool shovelerViewEntityUpdateModelVisible(ShovelerViewEntity *entity, bool visible);
-bool shovelerViewEntityUpdateModelEmitter(ShovelerViewEntity *entity, bool emitter);
-bool shovelerViewEntityUpdateModelPolygonMode(ShovelerViewEntity *entity, GLuint polygonMode);
+/** Returns the current model configuration, retaining ownership over returned fields. */
+bool shovelerViewEntityGetModelConfiguration(ShovelerViewEntity *entity, ShovelerViewModelConfiguration *outputConfiguration);
 bool shovelerViewEntityRemoveModel(ShovelerViewEntity *entity);
+
+static inline ShovelerComponent *shovelerViewEntityGetModelComponent(ShovelerViewEntity *entity)
+{
+	return shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdModel);
+}
 
 #endif

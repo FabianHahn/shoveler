@@ -5,34 +5,33 @@
 
 #include <glib.h>
 
-#include <shoveler/material/chunk.h>
+#include <shoveler/component/chunk.h>
 #include <shoveler/chunk.h>
 #include <shoveler/tileset.h>
 #include <shoveler/view.h>
 #include <shoveler/types.h>
 
 typedef struct {
-	ShovelerChunkLayerType type;
-	long long int valueEntityId;
-} ShovelerViewChunkLayerConfiguration;
-
-typedef struct {
+	long long int positionEntityId;
 	ShovelerCoordinateMapping positionMappingX;
 	ShovelerCoordinateMapping positionMappingY;
 	ShovelerVector2 size;
-	bool collider;
 	int numLayers;
-	ShovelerViewChunkLayerConfiguration *layers;
+	const long long int *layerEntityIds;
 } ShovelerViewChunkConfiguration;
 
-static const char *shovelerViewChunkComponentName = "chunk";
-
 /** Adds a chunk component to an entity, copying the supplied configuration. */
-bool shovelerViewEntityAddChunk(ShovelerViewEntity *entity, const ShovelerViewChunkConfiguration *configuration);
+ShovelerComponent *shovelerViewEntityAddChunk(ShovelerViewEntity *entity, const ShovelerViewChunkConfiguration *configuration);
 ShovelerChunk *shovelerViewEntityGetChunk(ShovelerViewEntity *entity);
-const ShovelerViewChunkConfiguration *shovelerViewEntityGetChunkConfiguration(ShovelerViewEntity *entity);
+/** Returns the current chunk configuration, retaining ownership over returned fields. */
+bool shovelerViewEntityGetChunkConfiguration(ShovelerViewEntity *entity, ShovelerViewChunkConfiguration *outputConfiguration);
 /** Updates a chunk component of an entity, copying the supplied configuration. */
-bool shovelerViewEntityUpdateChunk(ShovelerViewEntity *entity, ShovelerViewChunkConfiguration configuration);
+bool shovelerViewEntityUpdateChunk(ShovelerViewEntity *entity, const ShovelerViewChunkConfiguration *configuration);
 bool shovelerViewEntityRemoveChunk(ShovelerViewEntity *entity);
+
+static inline ShovelerComponent *shovelerViewEntityGetChunkComponent(ShovelerViewEntity *entity)
+{
+	return shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdChunk);
+}
 
 #endif

@@ -6,6 +6,8 @@
 #include "shoveler/drawable/quad.h"
 #include "shoveler/material/canvas.h"
 #include "shoveler/view/colliders.h"
+#include "shoveler/view/controller.h"
+#include "shoveler/view/scene.h"
 #include "shoveler/view/shader_cache.h"
 #include "shoveler/canvas.h"
 #include "shoveler/colliders.h"
@@ -132,8 +134,8 @@ ShovelerGame *shovelerGameCreate(ShovelerGameUpdateCallback *update, const Shove
 	shovelerCameraPerspectiveAttachController(game->camera, game->controller);
 
 	shovelerViewSetColliders(game->view, game->colliders);
-	shovelerViewSetTarget(game->view, "controller", game->controller);
-	shovelerViewSetTarget(game->view, "scene", game->scene);
+	shovelerViewSetController(game->view, game->controller);
+	shovelerViewSetScene(game->view, game->scene);
 	shovelerViewSetShaderCache(game->view, game->shaderCache);
 
 	ShovelerGlobalContext *global = shovelerGlobalGetContext();

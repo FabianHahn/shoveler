@@ -4,10 +4,8 @@
 #include <shoveler/scene.h>
 #include <shoveler/view.h>
 
-static inline ShovelerScene *shovelerViewGetScene(ShovelerView *view)
-{
-	return (ShovelerScene *) shovelerViewGetTarget(view, "scene");
-}
+bool shovelerViewSetScene(ShovelerView *view, ShovelerScene *scene);
+ShovelerScene *shovelerViewGetScene(ShovelerView *view);
 
 static inline bool shovelerViewHasScene(ShovelerView *view)
 {

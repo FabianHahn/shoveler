@@ -3,26 +3,17 @@
 
 #include <stdbool.h> // bool
 
-#include <glib.h>
-
+#include <shoveler/component/position.h>
+#include <shoveler/types.h>
 #include <shoveler/view.h>
 
-typedef void (ShovelerViewPositionRequestUpdateFunction)(ShovelerViewComponent *component, double x, double y, double z, void *userData);
-
-static const char *shovelerViewPositionComponentName = "position";
-
-typedef struct {
-	double x;
-	double y;
-	double z;
-} ShovelerViewPosition;
-
-bool shovelerViewEntityAddPosition(ShovelerViewEntity *entity, double x, double y, double z);
-ShovelerViewPosition *shovelerViewEntityGetPosition(ShovelerViewEntity *entity);
-bool shovelerViewEntityUpdatePosition(ShovelerViewEntity *entity, double x, double y, double z);
-bool shovelerViewEntityDelegatePosition(ShovelerViewEntity *entity, ShovelerViewPositionRequestUpdateFunction *requestUpdateFunction, void *userData);
-bool shovelerViewEntityUndelegatePosition(ShovelerViewEntity *entity);
-bool shovelerViewEntityRequestPositionUpdate(ShovelerViewEntity *entity, double x, double y, double z);
+ShovelerComponent *shovelerViewEntityAddPosition(ShovelerViewEntity *entity, ShovelerVector3 coordinates);
+const ShovelerVector3 *shovelerViewEntityGetPositionCoordinates(ShovelerViewEntity *entity);
 bool shovelerViewEntityRemovePosition(ShovelerViewEntity *entity);
+
+static inline ShovelerComponent *shovelerViewEntityGetPositionComponent(ShovelerViewEntity *entity)
+{
+	return shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdPosition);
+}
 
 #endif

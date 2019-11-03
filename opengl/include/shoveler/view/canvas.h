@@ -3,26 +3,26 @@
 
 #include <stdbool.h> // bool
 
-#include <glib.h>
-
-#include <shoveler/material/canvas.h>
-#include <shoveler/canvas.h>
-#include <shoveler/tileset.h>
+#include <shoveler/component/canvas.h>
 #include <shoveler/view.h>
 
 typedef struct {
-	int numTileSprites;
-	long long int *tileSpriteEntityIds;
+	size_t numTileSprites;
+	const long long int *tileSpriteEntityIds;
 } ShovelerViewCanvasConfiguration;
 
-static const char *shovelerViewCanvasComponentName = "canvas";
-
 /** Adds a canvas component to an entity, copying the supplied configuration. */
-bool shovelerViewEntityAddCanvas(ShovelerViewEntity *entity, const ShovelerViewCanvasConfiguration *configuration);
+ShovelerComponent *shovelerViewEntityAddCanvas(ShovelerViewEntity *entity, const ShovelerViewCanvasConfiguration *configuration);
 ShovelerCanvas *shovelerViewEntityGetCanvas(ShovelerViewEntity *entity);
-const ShovelerViewCanvasConfiguration *shovelerViewEntityGetCanvasConfiguration(ShovelerViewEntity *entity);
+/** Returns the current canvas configuration, retaining ownership over returned fields. */
+bool shovelerViewEntityGetCanvasConfiguration(ShovelerViewEntity *entity, ShovelerViewCanvasConfiguration *outputConfiguration);
 /** Updates a canvas component of an entity, copying the supplied configuration. */
-bool shovelerViewEntityUpdateCanvas(ShovelerViewEntity *entity, ShovelerViewCanvasConfiguration configuration);
+bool shovelerViewEntityUpdateCanvas(ShovelerViewEntity *entity, const ShovelerViewCanvasConfiguration *configuration);
 bool shovelerViewEntityRemoveCanvas(ShovelerViewEntity *entity);
+
+static inline ShovelerComponent *shovelerViewEntityGetCanvasComponent(ShovelerViewEntity *entity)
+{
+	return shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdCanvas);
+}
 
 #endif

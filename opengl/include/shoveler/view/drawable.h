@@ -5,33 +5,29 @@
 
 #include <glib.h>
 
+#include <shoveler/component/drawable.h>
 #include <shoveler/drawable.h>
 #include <shoveler/types.h>
 #include <shoveler/view.h>
 
-typedef enum {
-	SHOVELER_VIEW_DRAWABLE_TYPE_CUBE,
-	SHOVELER_VIEW_DRAWABLE_TYPE_QUAD,
-	SHOVELER_VIEW_DRAWABLE_TYPE_POINT,
-	SHOVELER_VIEW_DRAWABLE_TYPE_TILES,
-} ShovelerViewDrawableType;
-
 typedef struct {
-	unsigned char width;
-	unsigned char height;
-} ShovelerViewDrawableTilesSize;
-
-typedef struct {
-	ShovelerViewDrawableType type;
-	ShovelerViewDrawableTilesSize tilesSize;
+	ShovelerComponentDrawableType type;
+	unsigned int tilesWidth;
+	unsigned int tilesHeight;
 } ShovelerViewDrawableConfiguration;
 
-static const char *shovelerViewDrawableComponentName = "drawable";
-
-bool shovelerViewEntityAddDrawable(ShovelerViewEntity *entity, ShovelerViewDrawableConfiguration configuration);
+/** Adds a drawable component to an entity, copying the supplied configuration. */
+ShovelerComponent *shovelerViewEntityAddDrawable(ShovelerViewEntity *entity, const ShovelerViewDrawableConfiguration *configuration);
 ShovelerDrawable *shovelerViewEntityGetDrawable(ShovelerViewEntity *entity);
-const ShovelerViewDrawableConfiguration *shovelerViewEntityGetDrawableConfiguration(ShovelerViewEntity *entity);
-bool shovelerViewEntityUpdateDrawable(ShovelerViewEntity *entity, ShovelerViewDrawableConfiguration configuration);
+/** Returns the current drawable configuration, retaining ownership over returned fields. */
+bool shovelerViewEntityGetDrawableConfiguration(ShovelerViewEntity *entity, ShovelerViewDrawableConfiguration *outputConfiguration);
+/** Updates a drawable component of an entity, copying the supplied configuration. */
+bool shovelerViewEntityUpdateDrawable(ShovelerViewEntity *entity, const ShovelerViewDrawableConfiguration *configuration);
 bool shovelerViewEntityRemoveDrawable(ShovelerViewEntity *entity);
+
+static inline ShovelerComponent *shovelerViewEntityGetDrawableComponent(ShovelerViewEntity *entity)
+{
+	return shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdDrawable);
+}
 
 #endif
