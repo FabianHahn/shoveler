@@ -1,4 +1,5 @@
 set(SHOVELER_BASE_SRC
+	src/component/position.c
 	src/image/png.c
 	src/image/ppm.c
 	src/resources/image_png.c
@@ -19,6 +20,7 @@ set(SHOVELER_BASE_SRC
 	src/resources.c
 	src/view.c
 	include/shoveler/collider/box.h
+	include/shoveler/component/position.h
 	include/shoveler/image/png.h
 	include/shoveler/image/ppm.h
 	include/shoveler/resources/image_png.h
