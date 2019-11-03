@@ -1,0 +1,21 @@
+#ifndef SHOVELER_COMPONENT_TILE_SPRITE_ANIMATION_H
+#define SHOVELER_COMPONENT_TILE_SPRITE_ANIMATION_H
+
+typedef struct ShovelerTileSpriteAnimationStruct ShovelerTileSpriteAnimation; // forward declaration: tile_sprite_animation.h
+typedef struct ShovelerComponentTypeStruct ShovelerComponentType; // forward declaration: component.h
+typedef struct ShovelerComponentStruct ShovelerComponent; // forward declaration: component.h
+
+extern const char *const shovelerComponentTypeIdTileSpriteAnimation;
+
+typedef enum {
+	SHOVELER_COMPONENT_TILE_SPRITE_ANIMATION_OPTION_POSITION,
+	SHOVELER_COMPONENT_TILE_SPRITE_ANIMATION_OPTION_TILE_SPRITE,
+	SHOVELER_COMPONENT_TILE_SPRITE_ANIMATION_OPTION_POSITION_MAPPING_X,
+	SHOVELER_COMPONENT_TILE_SPRITE_ANIMATION_OPTION_POSITION_MAPPING_Y,
+	SHOVELER_COMPONENT_TILE_SPRITE_ANIMATION_OPTION_MOVE_AMOUNT_THRESHOLD,
+} ShovelerComponentTileSpriteAnimationOptionId;
+
+ShovelerComponentType *shovelerComponentCreateTileSpriteAnimationType();
+ShovelerTileSpriteAnimation *shovelerComponentGetTileSpriteAnimation(ShovelerComponent *component);
+
+#endif
