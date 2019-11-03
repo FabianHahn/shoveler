@@ -14,14 +14,12 @@ typedef struct {
 } ShovelerViewResourceConfiguration;
 
 static const char *shovelerViewResourceComponentName = "resource";
-static const char *shovelerViewResourceTypeIdOptionKey = "type_id";
-static const char *shovelerViewResourceBufferOptionKey = "buffer";
 static const char *shovelerViewResourcesTargetName = "resources";
 
 bool shovelerViewEntityAddResource(ShovelerViewEntity *entity, ShovelerViewResourceConfiguration configuration);
 void *shovelerViewEntityGetResource(ShovelerViewEntity *entity);
-bool shovelerViewEntityGetResourceConfiguration(ShovelerViewEntity *entity, ShovelerViewResourceConfiguration *outputConfiguration);
-bool shovelerViewEntityUpdateResourceConfiguration(ShovelerViewEntity *entity, ShovelerViewResourceConfiguration configuration);
+const ShovelerViewResourceConfiguration *shovelerViewEntityGetResourceConfiguration(ShovelerViewEntity *entity);
+bool shovelerViewEntityUpdateResource(ShovelerViewEntity *entity, ShovelerViewResourceConfiguration configuration);
 bool shovelerViewEntityRemoveResource(ShovelerViewEntity *entity);
 
 static inline bool shovelerViewSetResources(ShovelerView *view, ShovelerResources *resources)
