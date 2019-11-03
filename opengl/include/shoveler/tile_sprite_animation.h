@@ -14,6 +14,7 @@ typedef enum {
 
 typedef struct ShovelerTileSpriteAnimationStruct {
 	ShovelerCanvasTileSprite *tileSprite;
+	ShovelerVector2 currentPosition;
 	float moveAmountThreshold;
 	int numZeroUpdatesForStopping;
 	float eps;
@@ -24,8 +25,8 @@ typedef struct ShovelerTileSpriteAnimationStruct {
 	bool logDirectionChanges;
 } ShovelerTileSpriteAnimation;
 
-ShovelerTileSpriteAnimation *shovelerTileSpriteAnimationCreate(ShovelerCanvasTileSprite *tileSprite, float moveAmountThreshold);
-void shovelerTileSpriteAnimationUpdate(ShovelerTileSpriteAnimation *animation, ShovelerVector2 moveAmount);
+ShovelerTileSpriteAnimation *shovelerTileSpriteAnimationCreate(ShovelerCanvasTileSprite *tileSprite, ShovelerVector2 initialPosition, float moveAmountThreshold);
+void shovelerTileSpriteAnimationUpdate(ShovelerTileSpriteAnimation *animation, ShovelerVector2 newPosition);
 void shovelerTileSpriteAnimationFree(ShovelerTileSpriteAnimation *animation);
 
 #endif
