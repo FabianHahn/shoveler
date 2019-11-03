@@ -5,6 +5,7 @@ set(SHOVELER_OPENGL_SRC
 	src/component/controller.c
 	src/component/scene.c
 	src/component/shader_cache.c
+	src/component/texture.c
 	src/drawable/cube.c
 	src/drawable/quad.c
 	src/drawable/point.c
@@ -71,6 +72,7 @@ set(SHOVELER_OPENGL_SRC
 	include/shoveler/component/controller.h
 	include/shoveler/component/scene.h
 	include/shoveler/component/shader_cache.h
+	include/shoveler/component/texture.h
 	include/shoveler/drawable/cube.h
 	include/shoveler/drawable/point.h
 	include/shoveler/drawable/quad.h
