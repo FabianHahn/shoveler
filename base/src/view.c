@@ -2,7 +2,6 @@
 #include <stdlib.h> // malloc free
 #include <string.h> // strdup, memcmp, memcpy
 
-#include "shoveler/component.h"
 #include "shoveler/file.h"
 #include "shoveler/hash.h"
 #include "shoveler/log.h"
@@ -13,10 +12,6 @@ gboolean qualifiedComponentEqual(gconstpointer firstQualifiedComponentPointer, g
 static void triggerComponentCallback(ShovelerViewComponent *component, ShovelerViewComponentCallbackType callbackType);
 static ShovelerViewQualifiedComponent *copyQualifiedComponent(ShovelerViewQualifiedComponent *qualifiedComponent);
 static bool removeDependency(GQueue *dependencies, long long int dependencyEntityId, const char *dependencyComponentName);
-static bool activateTypedComponent(ShovelerViewComponent *viewComponent, void *componentPointer);
-static void deactivateTypedComponent(ShovelerViewComponent *viewComponent, void *componentPointer);
-static void freeTypedComponent(ShovelerViewComponent *viewComponent, void *componentPointer);
-static void freeComponentType(void *componentTypePointer);
 static void freeEntity(void *entityPointer);
 static void freeComponent(void *componentPointer);
 static void freeCallbacks(void *callbacksPointer);
@@ -26,7 +21,6 @@ static void freeQualifiedComponent(void *qualifiedComponentPointer);
 ShovelerView *shovelerViewCreate()
 {
 	ShovelerView *view = malloc(sizeof(ShovelerView));
-	view->componentTypes = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, freeComponentType);
 	view->entities = g_hash_table_new_full(g_int64_hash, g_int64_equal, NULL, freeEntity);
 	view->targets = g_hash_table_new_full(&g_str_hash, &g_str_equal, &free, NULL);
 	view->reverseDependencies = g_hash_table_new_full(qualifiedComponentHash, qualifiedComponentEqual, freeQualifiedComponent, freeQualifiedComponents);
@@ -38,16 +32,6 @@ ShovelerView *shovelerViewCreate()
 	view->numDelegatedComponents = 0;
 
 	return view;
-}
-
-bool shovelerViewAddComponentType(ShovelerView *view, ShovelerComponentType *componentType)
-{
-	return g_hash_table_insert(view->componentTypes, componentType->name, componentType);
-}
-
-bool shovelerViewHasComponentType(ShovelerView *view, const char *componentTypeName)
-{
-	return g_hash_table_lookup(view->componentTypes, componentTypeName) != NULL;
 }
 
 ShovelerViewEntity *shovelerViewAddEntity(ShovelerView *view, long long int entityId)
@@ -128,34 +112,6 @@ ShovelerViewComponent *shovelerViewEntityAddComponent(ShovelerViewEntity *entity
 	entity->view->numComponents++;
 	shovelerLogTrace("Added component '%s' to entity %lld.", componentName, entity->entityId);
 	return component;
-}
-
-ShovelerViewComponent *shovelerViewEntityAddTypedComponent(ShovelerViewEntity *entity, const char *componentTypeName)
-{
-	ShovelerComponentType *componentType = g_hash_table_lookup(entity->view->componentTypes, componentTypeName);
-	if(componentType == NULL) {
-		return NULL;
-	}
-
-	ShovelerComponent *component = shovelerComponentCreate(componentType, /* callbackUserData */ NULL);
-	ShovelerViewComponent *viewComponent = shovelerViewEntityAddComponent(entity, componentType->name, component, activateTypedComponent, deactivateTypedComponent, freeTypedComponent);
-	if(viewComponent == NULL) {
-		shovelerComponentFree(component);
-		return NULL;
-	}
-
-	component->callbackUserData = viewComponent;
-	return viewComponent;
-}
-
-ShovelerComponent *shovelerViewEntityGetTypedComponent(ShovelerViewEntity *entity, const char *componentTypeName)
-{
-	ShovelerViewComponent *viewComponent = shovelerViewEntityGetComponent(entity, componentTypeName);
-	if(viewComponent == NULL) {
-		return NULL;
-	}
-
-	return viewComponent->data;
 }
 
 void shovelerViewComponentUpdate(ShovelerViewComponent *component)
@@ -514,7 +470,6 @@ void shovelerViewFree(ShovelerView *view)
 	g_hash_table_destroy(view->entities);
 	g_hash_table_destroy(view->targets);
 	g_hash_table_destroy(view->reverseDependencies);
-	g_hash_table_destroy(view->componentTypes);
 	free(view);
 }
 
@@ -568,30 +523,6 @@ static bool removeDependency(GQueue *dependencies, long long int dependencyEntit
 	}
 
 	return false;
-}
-
-static bool activateTypedComponent(ShovelerViewComponent *viewComponent, void *componentPointer)
-{
-	ShovelerComponent *component = componentPointer;
-	return shovelerComponentActivate(component);
-}
-
-static void deactivateTypedComponent(ShovelerViewComponent *viewComponent, void *componentPointer)
-{
-	ShovelerComponent *component = componentPointer;
-	shovelerComponentDeactivate(component);
-}
-
-static void freeTypedComponent(ShovelerViewComponent *viewComponent, void *componentPointer)
-{
-	ShovelerComponent *component = componentPointer;
-	shovelerComponentFree(component);
-}
-
-static void freeComponentType(void *componentTypePointer)
-{
-	ShovelerComponentType *componentType = componentTypePointer;
-	shovelerComponentTypeFree(componentType);
 }
 
 static void freeEntity(void *entityPointer)
