@@ -1,0 +1,34 @@
+#ifndef SHOVELER_COMPONENT_MATERIAL_H
+#define SHOVELER_COMPONENT_MATERIAL_H
+
+typedef struct ShovelerMaterialStruct ShovelerMaterial; // forward declaration: material.h
+typedef struct ShovelerComponentTypeStruct ShovelerComponentType; // forward declaration: component.h
+typedef struct ShovelerComponentStruct ShovelerComponent; // forward declaration: component.h
+
+extern const char *const shovelerComponentTypeIdMaterial;
+
+typedef enum {
+	SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TYPE,
+	SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TEXTURE,
+	SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TEXTURE_SAMPLER,
+	SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TILEMAP,
+	SHOVELER_COMPONENT_MATERIAL_OPTION_ID_CANVAS,
+	SHOVELER_COMPONENT_MATERIAL_OPTION_ID_CHUNK,
+	SHOVELER_COMPONENT_MATERIAL_OPTION_ID_COLOR,
+	SHOVELER_COMPONENT_MATERIAL_OPTION_ID_CANVAS_REGION_POSITION,
+	SHOVELER_COMPONENT_MATERIAL_OPTION_ID_CANVAS_REGION_SIZE,
+} ShovelerComponentMaterialOptionId;
+
+typedef enum {
+	SHOVELER_COMPONENT_MATERIAL_TYPE_COLOR,
+	SHOVELER_COMPONENT_MATERIAL_TYPE_TEXTURE,
+	SHOVELER_COMPONENT_MATERIAL_TYPE_PARTICLE,
+	SHOVELER_COMPONENT_MATERIAL_TYPE_TILEMAP,
+	SHOVELER_COMPONENT_MATERIAL_TYPE_CANVAS,
+	SHOVELER_COMPONENT_MATERIAL_TYPE_CHUNK,
+} ShovelerComponentMaterialType;
+
+ShovelerComponentType *shovelerComponentCreateMaterialType();
+ShovelerMaterial *shovelerComponentGetMaterial(ShovelerComponent *component);
+
+#endif

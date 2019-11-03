@@ -7,6 +7,7 @@ set(SHOVELER_OPENGL_SRC
 	src/component/chunk_layer.c
 	src/component/controller.c
 	src/component/drawable.c
+	src/component/material.c
 	src/component/sampler.c
 	src/component/scene.c
 	src/component/shader_cache.c
@@ -85,6 +86,7 @@ set(SHOVELER_OPENGL_SRC
 	include/shoveler/component/chunk_layer.h
 	include/shoveler/component/controller.h
 	include/shoveler/component/drawable.h
+	include/shoveler/component/material.h
 	include/shoveler/component/sampler.h
 	include/shoveler/component/scene.h
 	include/shoveler/component/shader_cache.h
