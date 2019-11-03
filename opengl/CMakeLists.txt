@@ -3,6 +3,7 @@ set(SHOVELER_OPENGL_SRC
 	src/camera/perspective.c
 	src/collider/chunk.c
 	src/component/controller.c
+	src/component/sampler.c
 	src/component/scene.c
 	src/component/shader_cache.c
 	src/component/texture.c
@@ -73,6 +74,7 @@ set(SHOVELER_OPENGL_SRC
 	include/shoveler/camera/perspective.h
 	include/shoveler/collider/chunk.h
 	include/shoveler/component/controller.h
+	include/shoveler/component/sampler.h
 	include/shoveler/component/scene.h
 	include/shoveler/component/shader_cache.h
 	include/shoveler/component/texture.h
