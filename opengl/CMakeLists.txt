@@ -8,6 +8,7 @@ set(SHOVELER_OPENGL_SRC
 	src/component/scene.c
 	src/component/shader_cache.c
 	src/component/texture.c
+	src/component/tile_sprite.c
 	src/component/tilemap.c
 	src/component/tilemap_colliders.c
 	src/component/tilemap_tiles.c
@@ -81,6 +82,7 @@ set(SHOVELER_OPENGL_SRC
 	include/shoveler/component/scene.h
 	include/shoveler/component/shader_cache.h
 	include/shoveler/component/texture.h
+	include/shoveler/component/tile_sprite.h
 	include/shoveler/component/tilemap.h
 	include/shoveler/component/tilemap_colliders.h
 	include/shoveler/component/tilemap_tiles.h
