@@ -5,6 +5,7 @@ set(SHOVELER_OPENGL_SRC
 	src/component/canvas.c
 	src/component/chunk.c
 	src/component/chunk_layer.c
+	src/component/client.c
 	src/component/controller.c
 	src/component/drawable.c
 	src/component/light.c
@@ -86,6 +87,7 @@ set(SHOVELER_OPENGL_SRC
 	include/shoveler/component/canvas.h
 	include/shoveler/component/chunk.h
 	include/shoveler/component/chunk_layer.h
+	include/shoveler/component/client.h
 	include/shoveler/component/controller.h
 	include/shoveler/component/drawable.h
 	include/shoveler/component/light.h
