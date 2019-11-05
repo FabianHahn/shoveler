@@ -6,10 +6,17 @@
 #include <glib.h>
 
 typedef struct ShovelerComponentStruct ShovelerComponent; // forward declaration: component.h
+typedef struct ShovelerComponentConfigurationValueStruct ShovelerComponentConfigurationValue; // forward declaration: component.h
+typedef struct ShovelerComponentTypeConfigurationOptionStruct ShovelerComponentTypeConfigurationOption; // forward declaration: component.h
 typedef struct ShovelerComponentTypeStruct ShovelerComponentType; // forward declaration: component.h
 typedef struct ShovelerComponentViewAdapterStruct ShovelerComponentViewAdapter; // forward declaration: component.h
+typedef struct ShovelerViewStruct ShovelerView; // forward declaration: below
+
+typedef void (ShovelerViewUpdateAuthoritativeComponentFunction)(ShovelerView *view, ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *value, void *userData);
 
 typedef struct ShovelerViewStruct {
+	ShovelerViewUpdateAuthoritativeComponentFunction *updateAuthoritativeComponent;
+	void *updateAuthoritativeComponentUserData;
 	/** map from string component type name to (ShovelerComponentType *) */
 	/* private */ GHashTable *componentTypes;
 	/** map from entity id (long long int) to entities (ShovelerViewEntity *) */
@@ -43,7 +50,7 @@ typedef struct ShovelerViewQualifiedComponentStruct {
 	const char *componentTypeId;
 } ShovelerViewQualifiedComponent;
 
-ShovelerView *shovelerViewCreate();
+ShovelerView *shovelerViewCreate(ShovelerViewUpdateAuthoritativeComponentFunction *updateAuthoritativeComponent, void *updateAuthoritativeComponentUserData);
 /** Adds a component type to the view, with the view taking ownership over it. */
 bool shovelerViewAddComponentType(ShovelerView *view, ShovelerComponentType *componentType);
 ShovelerComponentType *shovelerViewGetComponentType(ShovelerView *view, const char *componentTypeId);

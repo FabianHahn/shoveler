@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
 	controllerSettings.boundingBoxSize2 = 0.2f;
 	controllerSettings.boundingBoxSize3 = 0.0f;
 
-	ShovelerGame *game = shovelerGameCreate(shovelerSampleUpdate, &windowSettings, &cameraSettings, &controllerSettings);
+	ShovelerGame *game = shovelerGameCreate(shovelerSampleUpdate, /* updateAuthoritativeViewComponent */ NULL, &windowSettings, &cameraSettings, &controllerSettings);
 	if(game == NULL) {
 		return EXIT_FAILURE;
 	}

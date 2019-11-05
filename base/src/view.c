@@ -12,6 +12,7 @@ guint qualifiedComponentHash(gconstpointer qualifiedComponentPointer);
 gboolean qualifiedComponentEqual(gconstpointer firstQualifiedComponentPointer, gconstpointer secondQualifiedComponentPointer);
 static ShovelerViewQualifiedComponent *copyQualifiedComponent(ShovelerViewQualifiedComponent *qualifiedComponent);
 static ShovelerComponent *getComponent(ShovelerComponent *component, long long int entityId, const char *componentTypeId, void *viewPointer);
+static void updateAuthoritativeComponentAdapter(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *value, void *viewPointer);
 static void *getTarget(ShovelerComponent *component, const char *targetName, void *viewPointer);
 static void addComponentDependency(ShovelerComponent *component, long long int targetEntityId, const char *targetComponentTypeId, void *viewPointer);
 static bool removeComponentDependency(ShovelerComponent *component, long long int targetEntityId, const char *targetComponentTypeId, void *viewPointer);
@@ -23,9 +24,11 @@ static void freeEntity(void *entityPointer);
 static void freeComponent(void *componentPointer);
 static void freeQualifiedComponents(void *qualifiedComponentsPointer);
 
-ShovelerView *shovelerViewCreate()
+ShovelerView *shovelerViewCreate(ShovelerViewUpdateAuthoritativeComponentFunction *updateAuthoritativeComponent, void *updateAuthoritativeComponentUserData)
 {
 	ShovelerView *view = malloc(sizeof(ShovelerView));
+	view->updateAuthoritativeComponent = updateAuthoritativeComponent;
+	view->updateAuthoritativeComponentUserData = updateAuthoritativeComponentUserData;
 	view->componentTypes = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, freeComponentType);
 	view->entities = g_hash_table_new_full(g_int64_hash, g_int64_equal, NULL, freeEntity);
 	view->targets = g_hash_table_new(g_direct_hash, g_direct_equal);
@@ -33,6 +36,7 @@ ShovelerView *shovelerViewCreate()
 	view->reverseDependencies = g_hash_table_new_full(qualifiedComponentHash, qualifiedComponentEqual, free, freeQualifiedComponents);
 	view->adapter = malloc(sizeof(ShovelerComponentViewAdapter));
 	view->adapter->getComponent = getComponent;
+	view->adapter->updateAuthoritativeComponent = updateAuthoritativeComponentAdapter;
 	view->adapter->getTarget = getTarget;
 	view->adapter->addDependency = addComponentDependency;
 	view->adapter->removeDependency = removeComponentDependency;
@@ -349,6 +353,13 @@ static ShovelerComponent *getComponent(ShovelerComponent *component, long long i
 	}
 
 	return g_hash_table_lookup(entity->components, componentTypeId);
+}
+
+static void updateAuthoritativeComponentAdapter(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *value, void *viewPointer)
+{
+	ShovelerView *view = (ShovelerView *) viewPointer;
+
+	view->updateAuthoritativeComponent(view, component, configurationOption, value, view->updateAuthoritativeComponentUserData);
 }
 
 static void *getTarget(ShovelerComponent *component, const char *targetName, void *viewPointer)

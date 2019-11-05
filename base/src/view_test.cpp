@@ -27,7 +27,7 @@ class ShovelerViewTest : public ::testing::Test {
 public:
 	virtual void SetUp()
 	{
-		view = shovelerViewCreate();
+		view = shovelerViewCreate(NULL, NULL);
 		shovelerViewSetTarget(view, testTargetName, this);
 
 		configurationOptions[COMPONENT_CONFIGURATION_OPTION] = shovelerComponentTypeConfigurationOption(configurationOptionName, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);

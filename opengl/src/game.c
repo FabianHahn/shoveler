@@ -23,9 +23,10 @@ static void updateScreenspaceCanvasRegion(ShovelerGame *game);
 static void keyHandler(ShovelerInput *input, int key, int scancode, int action, int mods, void *unused);
 static gint64 elapsedNs(double dt);
 static void printFps(void *gamePointer);
+static void updateAuthoritativeComponent(ShovelerView *view, ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *value, void *gamePointer);
 static void updateViewCounters(ShovelerGame *game);
 
-ShovelerGame *shovelerGameCreate(ShovelerGameUpdateCallback *update, const ShovelerGameWindowSettings *windowSettings, const ShovelerGameCameraSettings *cameraSettings, const ShovelerGameControllerSettings *controllerSettings)
+ShovelerGame *shovelerGameCreate(ShovelerGameUpdateCallback *update, ShovelerGameUpdateAuthoritativeViewComponentFunction *updateAuthoritativeViewComponent, const ShovelerGameWindowSettings *windowSettings, const ShovelerGameCameraSettings *cameraSettings, const ShovelerGameControllerSettings *controllerSettings)
 {
 	ShovelerGame *game = malloc(sizeof(ShovelerGame));
 	game->windowedWidth = windowSettings->windowedWidth;
@@ -109,7 +110,7 @@ ShovelerGame *shovelerGameCreate(ShovelerGameUpdateCallback *update, const Shove
 	game->camera = shovelerCameraPerspectiveCreate(game->shaderCache, &cameraSettings->frame, &cameraSettings->projection);
 	game->colliders = shovelerCollidersCreate();
 	game->controller = shovelerControllerCreate(game->window, game->input, game->colliders, &controllerSettings->frame, controllerSettings->moveFactor, controllerSettings->tiltFactor, controllerSettings->boundingBoxSize2, controllerSettings->boundingBoxSize3);
-	game->view = shovelerViewCreate();
+	game->view = shovelerViewCreate(updateAuthoritativeComponent, game);
 
 	game->screenspaceCanvas = shovelerCanvasCreate();
 	game->screenspaceCanvasQuad = shovelerDrawableQuadCreate();
@@ -120,6 +121,7 @@ ShovelerGame *shovelerGameCreate(ShovelerGameUpdateCallback *update, const Shove
 	shovelerSceneAddModel(game->scene, game->screenspaceCanvasModel);
 
 	game->update = update;
+	game->updateAuthoritativeViewComponent = updateAuthoritativeViewComponent;
 	game->lastFrameTime = glfwGetTime();
 	game->lastFpsPrintTime = game->lastFrameTime;
 	game->framesSinceLastFpsPrint = 0;
@@ -272,6 +274,15 @@ static void printFps(void *gamePointer)
 
 	game->lastFpsPrintTime = now;
 	game->framesSinceLastFpsPrint = 0;
+}
+
+static void updateAuthoritativeComponent(ShovelerView *view, ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *value, void *gamePointer)
+{
+	ShovelerGame *game = (ShovelerGame *) gamePointer;
+
+	if(game->updateAuthoritativeViewComponent != NULL) {
+		game->updateAuthoritativeViewComponent(game, component, configurationOption, value);
+	}
 }
 
 static void updateViewCounters(ShovelerGame *game)

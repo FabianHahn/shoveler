@@ -80,6 +80,7 @@ typedef struct ShovelerComponentTypeStruct {
 typedef void (ShovelerComponentAdapterViewForEachReverseDependencyCallbackFunction)(ShovelerComponent *sourceComponent, ShovelerComponent *targetComponent, void *userData);
 
 typedef ShovelerComponent *(ShovelerComponentViewAdapterGetComponentFunction)(ShovelerComponent *component, long long int entityId, const char *componentTypeId, void *userData);
+typedef void (ShovelerComponentViewAdapterUpdateAuthoritativeComponentFunction)(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *value, void *userData);
 typedef void *(ShovelerComponentViewAdapterGetTargetFunction)(ShovelerComponent *component, const char *targetName, void *userData);
 typedef void (ShovelerComponentViewAdapterAddDependencyFunction)(ShovelerComponent *component, long long int targetEntityId, const char *targetComponentTypeId, void *userData);
 typedef bool (ShovelerComponentViewAdapterRemoveDependencyFunction)(ShovelerComponent *component, long long int targetEntityId, const char *targetComponentTypeId, void *userData);
@@ -89,6 +90,7 @@ typedef void (ShovelerComponentViewAdapterReportActivationFunction)(ShovelerComp
 // Adapter struct to make a component integrate with a view.
 typedef struct ShovelerComponentViewAdapterStruct {
 	ShovelerComponentViewAdapterGetComponentFunction *getComponent;
+	ShovelerComponentViewAdapterUpdateAuthoritativeComponentFunction *updateAuthoritativeComponent;
 	ShovelerComponentViewAdapterGetTargetFunction *getTarget;
 	ShovelerComponentViewAdapterAddDependencyFunction *addDependency;
 	ShovelerComponentViewAdapterRemoveDependencyFunction *removeDependency;

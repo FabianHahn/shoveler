@@ -133,7 +133,7 @@ bool shovelerComponentUpdateConfigurationOption(ShovelerComponent *component, in
 			return false;
 		}
 
-		// TODO: invoke authoritative update listener
+		component->viewAdapter->updateAuthoritativeComponent(component, configurationOption, value, component->viewAdapter->userData);
 	}
 
 	bool wasActive = component->data != NULL;

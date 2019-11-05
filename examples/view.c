@@ -44,6 +44,7 @@ static double time = 0.0;
 
 static GString *getImageData(ShovelerImage *image);
 static void updateGame(ShovelerGame *game, double dt);
+static void updateAuthoritativeViewComponent(ShovelerGame *game, ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *value);
 
 int main(int argc, char *argv[])
 {
@@ -74,7 +75,7 @@ int main(int argc, char *argv[])
 	shovelerLogInit("shoveler/", SHOVELER_LOG_LEVEL_INFO_UP, stdout);
 	shovelerGlobalInit();
 
-	ShovelerGame *game = shovelerGameCreate(updateGame, &windowSettings, &cameraSettings, &controllerSettings);
+	ShovelerGame *game = shovelerGameCreate(updateGame, updateAuthoritativeViewComponent, &windowSettings, &cameraSettings, &controllerSettings);
 	if(game == NULL) {
 		return EXIT_FAILURE;
 	}
@@ -415,6 +416,7 @@ int main(int argc, char *argv[])
 	shovelerViewEntityAddClient(clientEntity, &clientConfiguration);
 	shovelerViewEntityDelegate(clientEntity, shovelerComponentTypeIdPosition);
 	shovelerViewEntityDelegate(clientEntity, shovelerComponentTypeIdClient);
+	shovelerComponentActivate(shovelerViewEntityGetClientComponent(clientEntity));
 
 	shovelerOpenGLCheckSuccess();
 
@@ -469,4 +471,13 @@ static void updateGame(ShovelerGame *game, double dt)
 	updatedTilesetColumns[0] = (unsigned char) ((int) time % 2);
 
 	shovelerComponentUpdateCanonicalConfigurationOptionBytes(tilemapComponent, SHOVELER_COMPONENT_TILEMAP_TILES_OPTION_TILESET_COLUMNS, updatedTilesetColumns, 4);
+}
+
+static void updateAuthoritativeViewComponent(ShovelerGame *game, ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *value)
+{
+	GString *printedValue = shovelerComponentConfigurationValuePrint(value);
+
+	shovelerLogInfo("Updating configuration option '%s' of component '%s' on entity %lld: %s", configurationOption->name, component->type->id, component->entityId, printedValue->str);
+
+	g_string_free(printedValue, true);
 }

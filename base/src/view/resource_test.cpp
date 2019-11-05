@@ -30,7 +30,7 @@ public:
 		bool typeLoaderRegistered = shovelerResourcesRegisterTypeLoader(resources, testTypeLoader);
 		ASSERT_TRUE(typeLoaderRegistered) << "test type loader should register correctly";
 
-		view = shovelerViewCreate();
+		view = shovelerViewCreate(NULL, NULL);
 		bool resourcesTargetAdded = shovelerViewSetResources(view, resources);
 		ASSERT_TRUE(resourcesTargetAdded);
 

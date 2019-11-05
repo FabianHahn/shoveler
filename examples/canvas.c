@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
 	shovelerLogInit("shoveler/", SHOVELER_LOG_LEVEL_INFO_UP, stdout);
 	shovelerGlobalInit();
 
-	ShovelerGame *game = shovelerGameCreate(shovelerSampleUpdate, &windowSettings, &cameraSettings, &controllerSettings);
+	ShovelerGame *game = shovelerGameCreate(shovelerSampleUpdate, /* updateAuthoritativeViewComponent */ NULL, &windowSettings, &cameraSettings, &controllerSettings);
 	if(game == NULL) {
 		return EXIT_FAILURE;
 	}
