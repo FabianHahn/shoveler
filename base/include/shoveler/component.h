@@ -173,6 +173,8 @@ ShovelerComponent *shovelerComponentGetDependency(ShovelerComponent *component, 
 ShovelerComponent *shovelerComponentGetArrayDependency(ShovelerComponent *component, int id, int index);
 void shovelerComponentFree(ShovelerComponent *component);
 
+GString *shovelerComponentConfigurationValuePrint(const ShovelerComponentConfigurationValue *configurationValue);
+
 /**
  * A ShovelerComponentTypeConfigurationOptionLiveUpdateFunction that does nothing and can be
  * passed to shovelerComponentTypeAddConfigurationOption.

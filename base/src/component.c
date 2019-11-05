@@ -345,6 +345,54 @@ void shovelerComponentFree(ShovelerComponent *component)
 	free(component);
 }
 
+GString *shovelerComponentConfigurationValuePrint(const ShovelerComponentConfigurationValue *configurationValue)
+{
+	GString *printed = g_string_new("");
+
+	switch(configurationValue->type) {
+		case SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_ENTITY_ID:
+			g_string_append_printf(printed, "%lld", configurationValue->entityIdValue);
+			break;
+		case SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_ENTITY_ID_ARRAY:
+			g_string_append(printed, "[");
+			for(int i = 0; i < configurationValue->entityIdArrayValue.size; i++) {
+				if(i > 0) {
+					g_string_append(printed, ", ");
+				}
+
+				g_string_append_printf(printed, "%lld", configurationValue->entityIdValue);
+			}
+			g_string_append(printed, "]");
+			break;
+		case SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_FLOAT:
+			g_string_append_printf(printed, "%.3f", configurationValue->floatValue);
+			break;
+		case SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BOOL:
+			g_string_append(printed, configurationValue->boolValue ? "true" : "false");
+			break;
+		case SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT:
+			g_string_append_printf(printed, "%d", configurationValue->intValue);
+			break;
+		case SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_STRING:
+			g_string_append(printed, configurationValue->stringValue);
+			break;
+		case SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_VECTOR2:
+			g_string_append_printf(printed, "(%.3f, %.3f)", configurationValue->vector2Value.values[0], configurationValue->vector2Value.values[1]);
+			break;
+		case SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_VECTOR3:
+			g_string_append_printf(printed, "(%.3f, %.3f, %.3f)", configurationValue->vector3Value.values[0], configurationValue->vector3Value.values[1], configurationValue->vector3Value.values[2]);
+			break;
+		case SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_VECTOR4:
+			g_string_append_printf(printed, "(%.3f, %.3f, %.3f, %.3f)", configurationValue->vector4Value.values[0], configurationValue->vector4Value.values[1], configurationValue->vector4Value.values[2], configurationValue->vector4Value.values[3]);
+			break;
+		case SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BYTES:
+			g_string_append_printf(printed, "%d bytes", configurationValue->bytesValue.size);
+			break;
+	}
+
+	return printed;
+}
+
 static ShovelerComponentConfigurationValue *createConfigurationValue(ShovelerComponentConfigurationOptionType type)
 {
 	ShovelerComponentConfigurationValue *configurationValue = malloc(sizeof(ShovelerComponentConfigurationValue));
