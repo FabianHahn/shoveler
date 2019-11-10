@@ -292,7 +292,7 @@ ShovelerComponent *shovelerComponentGetDependency(ShovelerComponent *component, 
 		return NULL;
 	}
 
-	return component->viewAdapter->getComponent(component, configurationValue->entityIdValue, configurationOption->dependencyComponentTypeId, component->viewAdapter->userData);
+	return component->viewAdapter->getComponent(component, toDependencyTargetEntityId(component, configurationValue->entityIdValue), configurationOption->dependencyComponentTypeId, component->viewAdapter->userData);
 }
 
 ShovelerComponent *shovelerComponentGetArrayDependency(ShovelerComponent *component, int id, int index)
@@ -315,7 +315,7 @@ ShovelerComponent *shovelerComponentGetArrayDependency(ShovelerComponent *compon
 		return NULL;
 	}
 
-	return component->viewAdapter->getComponent(component, configurationValue->entityIdArrayValue.entityIds[index], configurationOption->dependencyComponentTypeId, component->viewAdapter->userData);
+	return component->viewAdapter->getComponent(component, toDependencyTargetEntityId(component, configurationValue->entityIdArrayValue.entityIds[index]), configurationOption->dependencyComponentTypeId, component->viewAdapter->userData);
 }
 
 void shovelerComponentFree(ShovelerComponent *component)
@@ -546,7 +546,7 @@ static void updateReverseDependency(ShovelerComponent *sourceComponent, Shoveler
 		}
 
 		if(configurationOption->type == SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_ENTITY_ID) {
-			if(configurationValue->entityIdValue != targetComponent->entityId) {
+			if(toDependencyTargetEntityId(sourceComponent, configurationValue->entityIdValue) != targetComponent->entityId) {
 				continue;
 			}
 		} else {
@@ -554,7 +554,7 @@ static void updateReverseDependency(ShovelerComponent *sourceComponent, Shoveler
 
 			bool requiresUpdate = false;
 			for(int i = 0; i < configurationValue->entityIdArrayValue.size; i++) {
-				if(configurationValue->entityIdArrayValue.entityIds[i] == targetComponent->entityId) {
+				if(toDependencyTargetEntityId(sourceComponent, configurationValue->entityIdArrayValue.entityIds[i]) == targetComponent->entityId) {
 					requiresUpdate = true;
 					break;
 				}
