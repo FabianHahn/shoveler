@@ -22,6 +22,7 @@ static void *activateComponent(ShovelerComponent *component);
 static void deactivateComponent(ShovelerComponent *component);
 static void liveUpdateComponent(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *value);
 static void updateDependencyComponent(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent);
+static void dependencyCallbackFunction(ShovelerView *view, const ShovelerViewQualifiedComponent *dependencySource, const ShovelerViewQualifiedComponent *dependencyTarget, bool added, void *testPointer);
 
 class ShovelerViewTest : public ::testing::Test {
 public:
@@ -234,6 +235,37 @@ TEST_F(ShovelerViewTest, updateConfigurationLiveNotifiesReverseDependency) {
 	ASSERT_EQ(lastUpdateDependencyComponent, testDependencyComponent);
 }
 
+TEST_F(ShovelerViewTest, dependencyCallbacks)
+{
+	long long int testEntityId = 1337;
+	long long int testDependencyEntityId = 42;
+
+	shovelerViewAddDependencyCallback(view, dependencyCallbackFunction, this);
+
+	ShovelerViewEntity *testEntity = shovelerViewAddEntity(view, testEntityId);
+	ASSERT_TRUE(testEntity != NULL);
+
+	ShovelerComponent *testComponent = shovelerViewEntityAddComponent(testEntity, componentTypeId);
+	ASSERT_TRUE(testComponent != NULL);
+
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(testComponent, COMPONENT_CONFIGURATION_OPTION_DEPENDENCY, testDependencyEntityId);
+
+	ASSERT_EQ(lastDependencySource.entityId, testEntityId);
+	ASSERT_STREQ(lastDependencySource.componentTypeId, componentTypeId);
+	ASSERT_EQ(lastDependencyTarget.entityId, testDependencyEntityId);
+	ASSERT_STREQ(lastDependencyTarget.componentTypeId, otherComponentTypeId);
+	ASSERT_TRUE(lastDependencyAdded);
+
+	clearDependencyCallback();
+	shovelerComponentClearConfigurationOption(testComponent, COMPONENT_CONFIGURATION_OPTION_DEPENDENCY, /* isCanonical */ true);
+
+	ASSERT_EQ(lastDependencySource.entityId, testEntityId);
+	ASSERT_STREQ(lastDependencySource.componentTypeId, componentTypeId);
+	ASSERT_EQ(lastDependencyTarget.entityId, testDependencyEntityId);
+	ASSERT_STREQ(lastDependencyTarget.componentTypeId, otherComponentTypeId);
+	ASSERT_FALSE(lastDependencyAdded);
+}
+
 static void *activateComponent(ShovelerComponent *component)
 {
 	ShovelerViewTest *test = (ShovelerViewTest *) shovelerComponentGetViewTarget(component, testTargetName);
@@ -261,4 +293,12 @@ static void updateDependencyComponent(ShovelerComponent *component, const Shovel
 	test->updateDependencyCalled = true;
 	test->lastUpdateDependencyConfigurationOption = configurationOption;
 	test->lastUpdateDependencyComponent = dependencyComponent;
+}
+
+static void dependencyCallbackFunction(ShovelerView *view, const ShovelerViewQualifiedComponent *dependencySource, const ShovelerViewQualifiedComponent *dependencyTarget, bool added, void *testPointer)
+{
+	ShovelerViewTest *test = (ShovelerViewTest *) testPointer;
+	test->lastDependencySource = *dependencySource;
+	test->lastDependencyTarget = *dependencyTarget;
+	test->lastDependencyAdded = added;
 }
