@@ -10,7 +10,6 @@ static inline ShovelerCollider2 shovelerColliderBox2(ShovelerBoundingBox2 boundi
 	collider.boundingBox = boundingBox;
 	collider.data = NULL;
 	collider.intersect = NULL;
-	collider.freeData = NULL;
 
 	return collider;
 }
@@ -21,7 +20,6 @@ static inline ShovelerCollider3 shovelerColliderBox3(ShovelerBoundingBox3 boundi
 	collider.boundingBox = boundingBox;
 	collider.data = NULL;
 	collider.intersect = NULL;
-	collider.freeData = NULL;
 
 	return collider;
 }
