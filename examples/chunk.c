@@ -5,7 +5,6 @@
 #include <GLFW/glfw3.h>
 
 #include <shoveler/camera/perspective.h>
-#include <shoveler/collider/chunk.h>
 #include <shoveler/drawable/quad.h>
 #include <shoveler/material/chunk.h>
 #include <shoveler/canvas.h>
@@ -72,8 +71,7 @@ int main(int argc, char *argv[])
 	game->controller->lockTiltY = true;
 
 	ShovelerChunk *chunk = shovelerChunkCreate(shovelerVector2(0.0f, 0.0f), shovelerVector2(10.0f, 10.0f));
-	ShovelerCollider2 *chunkCollider = shovelerColliderChunkCreate(chunk);
-	shovelerCollidersAddCollider2(game->colliders, chunkCollider);
+	// shovelerCollidersAddCollider2(game->colliders, chunkCollider);
 
 	ShovelerImage *tilesImage = shovelerImageCreate(2, 2, 3);
 	shovelerImageClear(tilesImage);
@@ -172,7 +170,6 @@ int main(int argc, char *argv[])
 	shovelerDrawableFree(quad);
 	shovelerMaterialFree(chunkMaterial);
 	shovelerChunkFree(chunk);
-	shovelerCollider2Free(chunkCollider);
 	shovelerCanvasFree(canvas);
 	shovelerTilemapFree(tilemap);
 	shovelerTextureFree(tilesTexture);

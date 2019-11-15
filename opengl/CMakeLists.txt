@@ -4,7 +4,6 @@ set(SHOVELER_OPENGL_SRC
 	src/camera.c
 	src/canvas.c
 	src/chunk.c
-	src/collider/chunk.c
 	src/component/canvas.c
 	src/component/chunk.c
 	src/component/chunk_layer.c
@@ -92,7 +91,6 @@ set(SHOVELER_OPENGL_SRC
 	include/shoveler/camera.h
 	include/shoveler/canvas.h
 	include/shoveler/chunk.h
-	include/shoveler/collider/chunk.h
 	include/shoveler/component/canvas.h
 	include/shoveler/component/chunk.h
 	include/shoveler/component/chunk_layer.h
