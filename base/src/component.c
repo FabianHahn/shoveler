@@ -463,6 +463,12 @@ static void assignConfigurationValue(ShovelerComponentConfigurationValue *target
 	assert(target != NULL);
 	assert(target->type == source->type);
 
+	// no self assignment
+	assert(source != target);
+	assert(source->type != SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_ENTITY_ID_ARRAY || (source->entityIdArrayValue.entityIds != target->entityIdArrayValue.entityIds));
+	assert(source->type != SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_STRING || (source->stringValue != target->stringValue));
+	assert(source->type != SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BYTES || (source->bytesValue.data != target->bytesValue.data));
+
 	clearConfigurationValue(target);
 
 	target->isSet = source->isSet;
@@ -514,14 +520,6 @@ static void assignConfigurationValue(ShovelerComponentConfigurationValue *target
 			}
 		} break;
 	}
-}
-
-static void freeConfigurationValue(void *configurationValuePointer)
-{
-	ShovelerComponentConfigurationValue *configurationValue = configurationValuePointer;
-
-	clearConfigurationValue(configurationValue);
-	free(configurationValue);
 }
 
 static void updateReverseDependency(ShovelerComponent *sourceComponent, ShovelerComponent *targetComponent, void *unused)
