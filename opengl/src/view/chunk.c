@@ -18,7 +18,7 @@ ShovelerComponent *shovelerViewEntityAddChunk(ShovelerViewEntity *entity, const 
 	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerComponentTypeIdChunk);
 	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, SHOVELER_COMPONENT_CHUNK_OPTION_ID_POSITION, configuration->positionEntityId);
 	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, SHOVELER_COMPONENT_CHUNK_OPTION_ID_POSITION_MAPPING_X, configuration->positionMappingX);
-	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, SHOVELER_COMPONENT_CHUNK_OPTION_ID_POSITION_MAPPING_X, configuration->positionMappingY);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, SHOVELER_COMPONENT_CHUNK_OPTION_ID_POSITION_MAPPING_Y, configuration->positionMappingY);
 	shovelerComponentUpdateCanonicalConfigurationOptionVector2(component, SHOVELER_COMPONENT_CHUNK_OPTION_ID_SIZE, configuration->size);
 	shovelerComponentUpdateCanonicalConfigurationOptionEntityIdArray(component, SHOVELER_COMPONENT_CHUNK_OPTION_ID_LAYERS, configuration->layerEntityIds, configuration->numLayers);
 
@@ -64,9 +64,10 @@ bool shovelerViewEntityUpdateChunk(ShovelerViewEntity *entity, const ShovelerVie
 		return false;
 	}
 
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, SHOVELER_COMPONENT_CHUNK_OPTION_ID_POSITION, configuration->positionEntityId);
 	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, SHOVELER_COMPONENT_CHUNK_OPTION_ID_POSITION_MAPPING_X, configuration->positionMappingX);
-	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, SHOVELER_COMPONENT_CHUNK_OPTION_ID_POSITION_MAPPING_X, configuration->positionMappingY);
-	shovelerComponentUpdateCanonicalConfigurationOptionVector2(component, SHOVELER_COMPONENT_CHUNK_OPTION_ID_POSITION_MAPPING_X, configuration->size);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, SHOVELER_COMPONENT_CHUNK_OPTION_ID_POSITION_MAPPING_Y, configuration->positionMappingY);
+	shovelerComponentUpdateCanonicalConfigurationOptionVector2(component, SHOVELER_COMPONENT_CHUNK_OPTION_ID_SIZE, configuration->size);
 	shovelerComponentUpdateCanonicalConfigurationOptionEntityIdArray(component, SHOVELER_COMPONENT_CHUNK_OPTION_ID_LAYERS, configuration->layerEntityIds, configuration->numLayers);
 	return true;
 }
