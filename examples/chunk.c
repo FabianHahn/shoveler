@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
 	game->controller->lockTiltY = true;
 
 	ShovelerChunk *chunk = shovelerChunkCreate(shovelerVector2(0.0f, 0.0f), shovelerVector2(10.0f, 10.0f));
-	// shovelerCollidersAddCollider2(game->colliders, chunkCollider);
+	shovelerCollidersAddCollider2(game->colliders, chunk->collider);
 
 	ShovelerImage *tilesImage = shovelerImageCreate(2, 2, 3);
 	shovelerImageClear(tilesImage);

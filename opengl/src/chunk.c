@@ -10,17 +10,30 @@
 #include "shoveler/light.h"
 #include "shoveler/log.h"
 
+static ShovelerCollider2 *intersectCollider(ShovelerCollider2 *collider, const ShovelerBoundingBox2 *object);
+
 ShovelerChunk *shovelerChunkCreate(ShovelerVector2 position, ShovelerVector2 size)
 {
 	ShovelerChunk *chunk = malloc(sizeof(ShovelerChunk));
 	chunk->position = position;
 	chunk->size = size;
-	chunk->boundingBox = shovelerBoundingBox2(
+	chunk->collider = malloc(sizeof(ShovelerCollider2));
+	chunk->collider->boundingBox = shovelerBoundingBox2(
 		shovelerVector2LinearCombination(1.0f, chunk->position, -0.5f, chunk->size),
 		shovelerVector2LinearCombination(1.0f, chunk->position, 0.5f, chunk->size));
+	chunk->collider->intersect = intersectCollider;
+	chunk->collider->data = chunk;
 	chunk->layers = g_queue_new();
 
 	return chunk;
+}
+
+void shovelerChunkUpdatePosition(ShovelerChunk *chunk, ShovelerVector2 position)
+{
+	chunk->position = position;
+	chunk->collider->boundingBox = shovelerBoundingBox2(
+		shovelerVector2LinearCombination(1.0f, chunk->position, -0.5f, chunk->size),
+		shovelerVector2LinearCombination(1.0f, chunk->position, 0.5f, chunk->size));
 }
 
 int shovelerChunkAddCanvasLayer(ShovelerChunk *chunk, ShovelerCanvas *canvas)
@@ -53,7 +66,7 @@ bool shovelerChunkIntersect(ShovelerChunk *chunk, const ShovelerBoundingBox2 *ob
 				// no collision representation
 				continue;
 			case SHOVELER_CHUNK_LAYER_TYPE_TILEMAP:
-				if(shovelerTilemapIntersect(layer->value.tilemap, &chunk->boundingBox, object)) {
+				if(shovelerTilemapIntersect(layer->value.tilemap, &chunk->collider->boundingBox, object)) {
 					return true;
 				}
 				break;
@@ -105,5 +118,17 @@ void shovelerChunkFree(ShovelerChunk *chunk)
 	}
 
 	g_queue_free_full(chunk->layers, free);
+	free(chunk->collider);
 	free(chunk);
+}
+
+static ShovelerCollider2 *intersectCollider(ShovelerCollider2 *collider, const ShovelerBoundingBox2 *object)
+{
+	ShovelerChunk *chunk = collider->data;
+
+	if(shovelerChunkIntersect(chunk, object)) {
+		return collider;
+	}
+
+	return NULL;
 }
