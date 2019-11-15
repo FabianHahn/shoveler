@@ -2,9 +2,11 @@
 
 #include "shoveler/component/canvas.h"
 #include "shoveler/component/chunk_layer.h"
+#include "shoveler/component/colliders.h"
 #include "shoveler/component/position.h"
 #include "shoveler/component/tilemap.h"
 #include "shoveler/chunk.h"
+#include "shoveler/colliders.h"
 #include "shoveler/component.h"
 #include "shoveler/log.h"
 
@@ -36,6 +38,8 @@ ShovelerChunk *shovelerComponentGetChunk(ShovelerComponent *component)
 
 static void *activateChunkComponent(ShovelerComponent *component)
 {
+	assert(shovelerComponentHasViewColliders(component));
+
 	ShovelerVector2 chunkPosition = getChunkPosition(component);
 	ShovelerVector2 size = shovelerComponentGetConfigurationValueVector2(component, SHOVELER_COMPONENT_CHUNK_OPTION_ID_SIZE);
 	ShovelerChunk *chunk = shovelerChunkCreate(chunkPosition, size);
@@ -72,11 +76,19 @@ static void *activateChunkComponent(ShovelerComponent *component)
 		}
 	}
 
+	ShovelerColliders *colliders = shovelerComponentGetViewColliders(component);
+	shovelerCollidersAddCollider2(colliders, chunk->collider);
+
 	return chunk;
 }
 
 static void deactivateChunkComponent(ShovelerComponent *component)
 {
+	ShovelerChunk *chunk = (ShovelerChunk *) component->data;
+
+	ShovelerColliders *colliders = shovelerComponentGetViewColliders(component);
+	shovelerCollidersRemoveCollider2(colliders, chunk->collider);
+
 	shovelerChunkFree(component->data);
 }
 
@@ -85,7 +97,7 @@ static void updateChunkPositionDependency(ShovelerComponent *component, const Sh
 	ShovelerChunk *chunk = (ShovelerChunk *) component->data;
 	assert(chunk != NULL);
 
-	chunk->position = getChunkPosition(component);
+	shovelerChunkUpdatePosition(chunk, getChunkPosition(component));
 }
 
 static ShovelerVector2 getChunkPosition(ShovelerComponent *component)
