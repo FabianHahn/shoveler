@@ -14,7 +14,7 @@ typedef enum {
 	SHOVELER_COMPONENT_TILEMAP_COLLIDERS_OPTION_COLLIDERS,
 } ShovelerComponentTilemapCollidersOptionId;
 
-ShovelerComponentType *shovelerComponentCreateTilemapColliders();
+ShovelerComponentType *shovelerComponentCreateTilemapCollidersType();
 const bool *shovelerComponentGetTilemapColliders(ShovelerComponent *component);
 
 #endif

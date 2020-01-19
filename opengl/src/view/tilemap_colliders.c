@@ -11,7 +11,7 @@
 ShovelerComponent *shovelerViewEntityAddTilemapColliders(ShovelerViewEntity *entity, const ShovelerViewTilemapCollidersConfiguration *configuration)
 {
 	if(!shovelerViewHasComponentType(entity->view, shovelerComponentTypeIdTilemapColliders)) {
-		shovelerViewAddComponentType(entity->view, shovelerComponentCreateTilemapColliders());
+		shovelerViewAddComponentType(entity->view, shovelerComponentCreateTilemapCollidersType());
 	}
 
 	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerComponentTypeIdTilemapColliders);

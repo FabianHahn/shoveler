@@ -11,7 +11,7 @@ static void deactivateTilemapCollidersComponent(ShovelerComponent *component);
 static void liveUpdateCollidersOption(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *value);
 static void updateColliders(ShovelerComponent *component, bool *colliders);
 
-ShovelerComponentType *shovelerComponentCreateTilemapColliders()
+ShovelerComponentType *shovelerComponentCreateTilemapCollidersType()
 {
 	ShovelerComponentTypeConfigurationOption configurationOptions[3];
 	configurationOptions[SHOVELER_COMPONENT_TILEMAP_COLLIDERS_OPTION_NUM_COLUMNS] = shovelerComponentTypeConfigurationOption("num_columns", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ true, /* liveUpdate */ NULL);
