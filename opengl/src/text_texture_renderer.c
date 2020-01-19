@@ -10,6 +10,7 @@
 #include "shoveler/model.h"
 #include "shoveler/scene.h"
 #include "shoveler/shader_cache.h"
+#include "shoveler/sprite/text.h"
 #include "shoveler/text_texture_renderer.h"
 #include "shoveler/texture.h"
 
@@ -27,12 +28,8 @@ ShovelerTextTextureRenderer *shovelerTextTextureRendererCreate(ShovelerFontAtlas
 	shovelerSceneAddModel(renderer->textScene, renderer->textModel);
 
 	renderer->textCanvas = shovelerCanvasCreate();
-	renderer->textSprite.fontAtlasTexture = fontAtlasTexture;
-	renderer->textSprite.text = NULL;
-	renderer->textSprite.corner = shovelerVector2(0.0f, 0.0f);
-	renderer->textSprite.size = fontAtlasTexture->fontAtlas->fontSize;
-	renderer->textSprite.color = shovelerVector4(1.0f, 1.0f, 1.0f, 1.0f);
-	shovelerCanvasAddTextSprite(renderer->textCanvas, &renderer->textSprite);
+	renderer->textSprite = shovelerSpriteTextCreate(/* TODO */ NULL, fontAtlasTexture, fontAtlasTexture->fontAtlas->fontSize, /* color */ shovelerVector4(1.0f, 1.0f, 1.0f, 1.0f));
+	shovelerCanvasAddSprite(renderer->textCanvas, renderer->textSprite);
 	shovelerMaterialCanvasSetActive(renderer->canvasMaterial, renderer->textCanvas);
 
 	renderer->textures = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, freeTextTexture);
@@ -110,8 +107,8 @@ static ShovelerTexture *render(ShovelerTextTextureRenderer *renderer, const char
 	unsigned int height = (unsigned int) ceilf(currentHeightBottom + currentHeightTop);
 
 	shovelerFontAtlasTextureUpdate(renderer->fontAtlasTexture);
-	renderer->textSprite.text = text;
-	renderer->textSprite.corner = shovelerVector2(0.0f, currentHeightBottom);
+	shovelerSpriteTextSetContent(renderer->textSprite, text, false);
+	renderer->textSprite->translation = shovelerVector2(0.0f, currentHeightBottom);
 
 	shovelerMaterialCanvasSetActiveRegion(renderer->canvasMaterial, shovelerVector2(0.5f * width, 0.5f * height), shovelerVector2(width, height));
 

@@ -11,23 +11,24 @@ typedef struct ShovelerRenderStateStruct ShovelerRenderState; // forward declara
 typedef struct ShovelerSceneStruct ShovelerScene; // forward declaration: scene.h
 typedef struct ShovelerSpriteStruct ShovelerSprite; // forward declaration: below
 
-typedef bool (ShovelerSpriteRenderFunction)(ShovelerSprite *sprite, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerMaterial *material, ShovelerRenderState *renderState);
+typedef bool (ShovelerSpriteRenderFunction)(ShovelerSprite *sprite, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerRenderState *renderState);
 typedef void (ShovelerSpriteFreeFunction)(ShovelerSprite *sprite);
 
 typedef struct ShovelerSpriteStruct {
 	ShovelerVector2 translation;
 	ShovelerVector2 rotation;
 	ShovelerVector2 scale;
+	ShovelerMaterial *material;
 	ShovelerSpriteRenderFunction *render;
 	ShovelerSpriteFreeFunction *free;
 	void *data;
 } ShovelerSprite;
 
-void shovelerSpriteInit(ShovelerSprite *sprite);
+void shovelerSpriteInit(ShovelerSprite *sprite, ShovelerMaterial *material, ShovelerSpriteRenderFunction *render, ShovelerSpriteFreeFunction *free, void *data);
 
-static inline bool shovelerSpriteRender(ShovelerSprite *sprite, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerMaterial *material, ShovelerRenderState *renderState)
+static inline bool shovelerSpriteRender(ShovelerSprite *sprite, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerRenderState *renderState)
 {
-	return sprite->render(sprite, scene, camera, light, model, material, renderState);
+	return sprite->render(sprite, scene, camera, light, model, renderState);
 }
 
 static inline void shovelerSpriteFree(ShovelerSprite *sprite)

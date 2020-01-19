@@ -14,7 +14,7 @@ typedef struct ShovelerSpriteTextStruct {
 	ShovelerVector4 color;
 } ShovelerSpriteText;
 
-ShovelerSprite *shovelerSpriteTextCreate(ShovelerFontAtlasTexture *fontAtlasTexture, float fontSize, ShovelerVector4 color);
+ShovelerSprite *shovelerSpriteTextCreate(ShovelerMaterial *material, ShovelerFontAtlasTexture *fontAtlasTexture, float fontSize, ShovelerVector4 color);
 void shovelerSpriteTextSetContent(ShovelerSprite *sprite, const char *content, bool copyContent);
 
 #endif

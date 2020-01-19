@@ -8,6 +8,8 @@
 #include <shoveler/drawable/quad.h>
 #include <shoveler/image/png.h>
 #include <shoveler/material/canvas.h>
+#include <shoveler/material/text.h>
+#include <shoveler/material/tile_sprite.h>
 #include <shoveler/canvas.h>
 #include <shoveler/constants.h>
 #include <shoveler/controller.h>
@@ -23,6 +25,8 @@
 #include <shoveler/opengl.h>
 #include <shoveler/scene.h>
 #include <shoveler/shader_program.h>
+#include <shoveler/sprite/text.h>
+#include <shoveler/sprite/tile.h>
 #include <shoveler/text_texture_renderer.h>
 #include <shoveler/texture.h>
 #include <shoveler/tileset.h>
@@ -31,7 +35,8 @@ static double frameTimeSinceLastUpdate = 0.0;
 static unsigned int framesSinceLastUpdate = 0;
 static double exponentialAverageFps = 0.0;
 static GString *fpsString;
-static ShovelerCanvasTextSprite screenspaceTextSprite;
+static ShovelerSprite *screenspaceTextSprite;
+static ShovelerFontAtlasTexture *fontAtlasTexture;
 
 static void shovelerSampleUpdate(ShovelerGame *game, double dt);
 
@@ -91,26 +96,21 @@ int main(int argc, char *argv[])
 	ShovelerCanvas *canvas = shovelerCanvasCreate();
 
 	ShovelerFontAtlas *fontAtlas = shovelerFontAtlasCreate(font, /* fontSize */ 48, /* padding */ 1);
-	ShovelerFontAtlasTexture *fontAtlasTexture = shovelerFontAtlasTextureCreate(fontAtlas);
+	fontAtlasTexture = shovelerFontAtlasTextureCreate(fontAtlas);
 
 	ShovelerTextTextureRenderer *textTextureRenderer = shovelerTextTextureRendererCreate(fontAtlasTexture, game->shaderCache);
 	ShovelerTexture *shovelerTextTexture = shovelerTextTextureRendererRender(textTextureRenderer, "shoveler", &game->renderState);
 	ShovelerTileset *textTileset = shovelerTilesetCreateFromTexture(shovelerTextTexture, /* columns */ 1, /* rows */ 1, /* padding */ 0);
 
-	ShovelerCanvasTileSprite textSprite;
-	textSprite.tileset = textTileset;
-	textSprite.tilesetColumn = 0;
-	textSprite.tilesetRow = 0;
-	textSprite.position = shovelerVector2(0.5f, 0.5f);
-	textSprite.size = shovelerVector2(1.0f, (float) shovelerTextTexture->height / shovelerTextTexture->width);
-	shovelerCanvasAddTileSprite(canvas, &textSprite);
+	ShovelerMaterial *tileSpriteMaterial = shovelerMaterialTileSpriteCreate(game->shaderCache, /* screenspace */ false);
+	ShovelerSprite *textSprite = shovelerSpriteTileCreate(tileSpriteMaterial, textTileset, /* tilesetRow */ 0, /* tilesetColumn */ 0);
+	textSprite->translation = shovelerVector2(0.5f, 0.5f);
+	textSprite->scale = shovelerVector2(1.0f, (float) shovelerTextTexture->height / shovelerTextTexture->width);
+	shovelerCanvasAddSprite(canvas, textSprite);
 
-	screenspaceTextSprite.fontAtlasTexture = fontAtlasTexture;
-	screenspaceTextSprite.text = "";
-	screenspaceTextSprite.corner = shovelerVector2(0.0f, 0.0f);
-	screenspaceTextSprite.size = 48.0f;
-	screenspaceTextSprite.color = shovelerVector4(0.0f, 1.0f, 0.0f, 0.5f);
-	shovelerCanvasAddTextSprite(game->screenspaceCanvas, &screenspaceTextSprite);
+	ShovelerMaterial *textMaterial = shovelerMaterialTextCreate(game->shaderCache, /* screenspace */ true);
+	screenspaceTextSprite = shovelerSpriteTextCreate(textMaterial, fontAtlasTexture, /* fontSize */ 48.0f, /* color */ shovelerVector4(0.0f, 1.0f, 0.0f, 0.5f));
+	shovelerCanvasAddSprite(game->screenspaceCanvas, screenspaceTextSprite);
 
 	shovelerImagePngWriteFile(fontAtlas->image, "atlas.png");
 
@@ -134,7 +134,11 @@ int main(int argc, char *argv[])
 	g_string_free(fpsString, true);
 	shovelerDrawableFree(quad);
 	shovelerMaterialFree(canvasMaterial);
+	shovelerMaterialFree(textMaterial);
+	shovelerMaterialFree(tileSpriteMaterial);
 	shovelerCanvasFree(canvas);
+	shovelerSpriteFree(screenspaceTextSprite);
+	shovelerSpriteFree(textSprite);
 	shovelerTilesetFree(textTileset);
 	shovelerTextTextureRendererFree(textTextureRenderer);
 	shovelerFontAtlasTextureFree(fontAtlasTexture);
@@ -161,14 +165,14 @@ static void shovelerSampleUpdate(ShovelerGame *game, double dt)
 		exponentialAverageFps = 0.5 * fps + 0.5 * exponentialAverageFps;
 		g_string_set_size(fpsString, 0);
 		g_string_append_printf(fpsString, "FPS: %.1f", exponentialAverageFps);
-		screenspaceTextSprite.text = fpsString->str;
-		screenspaceTextSprite.corner = shovelerVector2(10.0f, game->framebuffer->height - screenspaceTextSprite.size - 10.0f);
+		shovelerSpriteTextSetContent(screenspaceTextSprite, fpsString->str, /* copyContent */ false);
+		screenspaceTextSprite->translation = shovelerVector2(10.0f, game->framebuffer->height - 48.0f - 10.0f);
 
-		for(const char *c = screenspaceTextSprite.text; *c != '\0'; c++) {
+		for(const char *c = fpsString->str; *c != '\0'; c++) {
 			unsigned char character = *((unsigned char *) c);
-			shovelerFontAtlasGetGlyph(screenspaceTextSprite.fontAtlasTexture->fontAtlas, character);
+			shovelerFontAtlasGetGlyph(fontAtlasTexture->fontAtlas, character);
 		}
-		shovelerFontAtlasTextureUpdate(screenspaceTextSprite.fontAtlasTexture);
+		shovelerFontAtlasTextureUpdate(fontAtlasTexture);
 
 		frameTimeSinceLastUpdate = 0.0;
 		framesSinceLastUpdate = 0;

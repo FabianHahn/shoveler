@@ -1,10 +1,12 @@
 #include <stdlib.h> // malloc, free
 
 #include "shoveler/material/tile_sprite.h"
+#include "shoveler/material.h"
 #include "shoveler/shader_program/model_vertex.h"
 #include "shoveler/shader_cache.h"
 #include "shoveler/shader_program.h"
 #include "shoveler/sprite/tile.h"
+#include "shoveler/tileset.h"
 #include "shoveler/types.h"
 #include "shoveler/uniform.h"
 #include "shoveler/uniform_map.h"
@@ -120,20 +122,6 @@ ShovelerMaterial *shovelerMaterialTileSpriteCreate(ShovelerShaderCache *shaderCa
 	shovelerUniformMapInsert(materialData->material->uniforms, "tileset", shovelerUniformCreateTexturePointer(&materialData->activeTilesetTexture, &materialData->activeTilesetSampler));
 
 	return materialData->material;
-}
-
-void shovelerMaterialTileSpriteSetActiveLegacy(ShovelerMaterial *material, const ShovelerCanvasTileSprite *tileSprite)
-{
-	MaterialData *materialData = material->data;
-	materialData->activeSpriteTilesetColumn = tileSprite->tilesetColumn;
-	materialData->activeSpriteTilesetRow = tileSprite->tilesetRow;
-	materialData->activeSpritePosition = tileSprite->position;
-	materialData->activeSpriteSize = tileSprite->size;
-	materialData->activeTilesetRows = tileSprite->tileset->rows;
-	materialData->activeTilesetColumns = tileSprite->tileset->columns;
-	materialData->activeTilesetPadding = tileSprite->tileset->padding;
-	materialData->activeTilesetTexture = tileSprite->tileset->texture;
-	materialData->activeTilesetSampler = tileSprite->tileset->sampler;
 }
 
 void shovelerMaterialTileSpriteSetActive(ShovelerMaterial *material, const ShovelerSpriteTile *spriteTile)

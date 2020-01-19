@@ -5,13 +5,13 @@
 #include "shoveler/sprite/text.h"
 #include "shoveler/material.h"
 
-static bool renderSpriteTile(ShovelerSprite *sprite, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerMaterial *material, ShovelerRenderState *renderState);
-static void freeSpriteTile(ShovelerSprite *sprite);
+static bool renderSpriteText(ShovelerSprite *sprite, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerRenderState *renderState);
+static void freeSpriteText(ShovelerSprite *sprite);
 
-ShovelerSprite *shovelerSpriteTextCreate(ShovelerFontAtlasTexture *fontAtlasTexture, float fontSize, ShovelerVector4 color)
+ShovelerSprite *shovelerSpriteTextCreate(ShovelerMaterial *material, ShovelerFontAtlasTexture *fontAtlasTexture, float fontSize, ShovelerVector4 color)
 {
 	ShovelerSpriteText *spriteText = malloc(sizeof(ShovelerSpriteText));
-	shovelerSpriteInit(&spriteText->sprite);
+	shovelerSpriteInit(&spriteText->sprite, material, renderSpriteText, freeSpriteText, spriteText);
 	spriteText->fontAtlasTexture = fontAtlasTexture;
 	spriteText->content = "";
 	spriteText->isContentManaged = false;
@@ -36,18 +36,18 @@ void shovelerSpriteTextSetContent(ShovelerSprite *sprite, const char *content, b
 	}
 }
 
-static bool renderSpriteTile(ShovelerSprite *sprite, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerMaterial *material, ShovelerRenderState *renderState)
+static bool renderSpriteText(ShovelerSprite *sprite, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerRenderState *renderState)
 {
 	ShovelerSpriteText *spriteText = (ShovelerSpriteText *) sprite->data;
 
-	shovelerMaterialTextSetActiveText(material, spriteText->content, sprite->translation, spriteText->fontSize);
-	shovelerMaterialTextSetActiveColor(material, spriteText->color);
-	shovelerMaterialTextSetActiveFontAtlasTexture(material, spriteText->fontAtlasTexture);
+	shovelerMaterialTextSetActiveText(sprite->material, spriteText->content, sprite->translation, spriteText->fontSize);
+	shovelerMaterialTextSetActiveColor(sprite->material, spriteText->color);
+	shovelerMaterialTextSetActiveFontAtlasTexture(sprite->material, spriteText->fontAtlasTexture);
 
-	return shovelerMaterialRender(material, scene, camera, light, model, renderState);
+	return shovelerMaterialRender(sprite->material, scene, camera, light, model, renderState);
 }
 
-static void freeSpriteTile(ShovelerSprite *sprite)
+static void freeSpriteText(ShovelerSprite *sprite)
 {
 	free(sprite);
 }

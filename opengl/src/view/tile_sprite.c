@@ -26,7 +26,7 @@ ShovelerComponent *shovelerViewEntityAddTileSprite(ShovelerViewEntity *entity, c
 	return component;
 }
 
-ShovelerCanvasTileSprite *shovelerViewEntityGetTileSprite(ShovelerViewEntity *entity)
+ShovelerSprite *shovelerViewEntityGetTileSprite(ShovelerViewEntity *entity)
 {
 	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdTileSprite);
 	if(component == NULL) {

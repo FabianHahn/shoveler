@@ -4,8 +4,8 @@
 
 #include "shoveler/component/position.h"
 #include "shoveler/component/tileset.h"
-#include "shoveler/canvas.h"
 #include "shoveler/component.h"
+#include "shoveler/sprite/tile.h"
 
 const char *const shovelerComponentTypeIdTileSprite = "tile_sprite";
 
@@ -28,7 +28,7 @@ ShovelerComponentType *shovelerComponentCreateTileSpriteType()
 	return shovelerComponentTypeCreate(shovelerComponentTypeIdTileSprite, activateTileSpriteComponent, deactivateTileSpriteComponent, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
 }
 
-ShovelerCanvasTileSprite *shovelerComponentGetTileSprite(ShovelerComponent *component)
+ShovelerSprite *shovelerComponentGetTileSprite(ShovelerComponent *component)
 {
 	assert(component->type->id == shovelerComponentTypeIdTileSprite);
 
@@ -47,29 +47,28 @@ static void *activateTileSpriteComponent(ShovelerComponent *component)
 	ShovelerVector2 position = getTileSpritePosition(component);
 	ShovelerVector2 size = shovelerComponentGetConfigurationValueVector2(component, SHOVELER_COMPONENT_TILE_SPRITE_OPTION_SIZE);
 
-	ShovelerCanvasTileSprite *tileSprite = malloc(sizeof(ShovelerCanvasTileSprite));
-	tileSprite->tileset = tileset;
-	tileSprite->tilesetColumn = tilesetColumn;
-	tileSprite->tilesetRow = tilesetRow;
-	tileSprite->position = position;
-	tileSprite->size = size;
+	ShovelerSprite *tileSprite = shovelerSpriteTileCreate(/* TODO */ NULL, tileset, tilesetColumn, tilesetRow);
+	tileSprite->translation = position;
+	tileSprite->scale = size;
+	// TODO: rotation
+
 	return tileSprite;
 }
 
 static void deactivateTileSpriteComponent(ShovelerComponent *component)
 {
-	ShovelerCanvasTileSprite *tileSprite = (ShovelerCanvasTileSprite *) component->data;
+	ShovelerSprite *tileSprite = (ShovelerSprite *) component->data;
 	assert(tileSprite != NULL);
 
-	free(tileSprite);
+	shovelerSpriteFree(tileSprite);
 }
 
 static void updateTileSpritePositionDependency(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent)
 {
-	ShovelerCanvasTileSprite *tileSprite = (ShovelerCanvasTileSprite *) component->data;
+	ShovelerSprite *tileSprite = (ShovelerSprite *) component->data;
 	assert(tileSprite != NULL);
 
-	tileSprite->position = getTileSpritePosition(component);
+	tileSprite->translation = getTileSpritePosition(component);
 }
 
 static ShovelerVector2 getTileSpritePosition(ShovelerComponent *component)

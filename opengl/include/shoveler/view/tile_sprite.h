@@ -20,7 +20,7 @@ typedef struct {
 
 /** Adds a tile sprite component to an entity, copying the supplied configuration. */
 ShovelerComponent *shovelerViewEntityAddTileSprite(ShovelerViewEntity *entity, const ShovelerViewTileSpriteConfiguration *configuration);
-ShovelerCanvasTileSprite *shovelerViewEntityGetTileSprite(ShovelerViewEntity *entity);
+ShovelerSprite *shovelerViewEntityGetTileSprite(ShovelerViewEntity *entity);
 /** Returns the current tile sprite configuration, retaining ownership over returned fields. */
 bool shovelerViewEntityGetTileSpriteConfiguration(ShovelerViewEntity *entity, ShovelerViewTileSpriteConfiguration *outputConfiguration);
 /** Updates a tile sprite component on an entity, copying the supplied configuration. */
