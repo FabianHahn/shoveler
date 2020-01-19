@@ -4,6 +4,7 @@
 #include "shoveler/shader_program/model_vertex.h"
 #include "shoveler/shader_cache.h"
 #include "shoveler/shader_program.h"
+#include "shoveler/sprite/tile.h"
 #include "shoveler/types.h"
 #include "shoveler/uniform.h"
 #include "shoveler/uniform_map.h"
@@ -121,7 +122,7 @@ ShovelerMaterial *shovelerMaterialTileSpriteCreate(ShovelerShaderCache *shaderCa
 	return materialData->material;
 }
 
-void shovelerMaterialTileSpriteSetActive(ShovelerMaterial *material, const ShovelerCanvasTileSprite *tileSprite)
+void shovelerMaterialTileSpriteSetActiveLegacy(ShovelerMaterial *material, const ShovelerCanvasTileSprite *tileSprite)
 {
 	MaterialData *materialData = material->data;
 	materialData->activeSpriteTilesetColumn = tileSprite->tilesetColumn;
@@ -133,6 +134,21 @@ void shovelerMaterialTileSpriteSetActive(ShovelerMaterial *material, const Shove
 	materialData->activeTilesetPadding = tileSprite->tileset->padding;
 	materialData->activeTilesetTexture = tileSprite->tileset->texture;
 	materialData->activeTilesetSampler = tileSprite->tileset->sampler;
+}
+
+void shovelerMaterialTileSpriteSetActive(ShovelerMaterial *material, const ShovelerSpriteTile *spriteTile)
+{
+	MaterialData *materialData = material->data;
+	materialData->activeSpriteTilesetColumn = spriteTile->tilesetColumn;
+	materialData->activeSpriteTilesetRow = spriteTile->tilesetRow;
+	materialData->activeSpritePosition = spriteTile->sprite.translation;
+	materialData->activeSpriteSize = spriteTile->sprite.scale;
+	// TODO: rotation
+	materialData->activeTilesetRows = spriteTile->tileset->rows;
+	materialData->activeTilesetColumns = spriteTile->tileset->columns;
+	materialData->activeTilesetPadding = spriteTile->tileset->padding;
+	materialData->activeTilesetTexture = spriteTile->tileset->texture;
+	materialData->activeTilesetSampler = spriteTile->tileset->sampler;
 }
 
 static void freeMaterialData(ShovelerMaterial *material)

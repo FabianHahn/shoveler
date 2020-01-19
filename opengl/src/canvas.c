@@ -62,7 +62,7 @@ bool shovelerCanvasRender(ShovelerCanvas *canvas, ShovelerMaterial *textMaterial
 			case SHOVELER_CANVAS_SPRITE_TYPE_TILE: {
 				const ShovelerCanvasTileSprite *tileSprite = sprite->value.tile;
 
-				shovelerMaterialTileSpriteSetActive(tileSpriteMaterial, tileSprite);
+				shovelerMaterialTileSpriteSetActiveLegacy(tileSpriteMaterial, tileSprite);
 
 				if(!shovelerShaderUse(tileShader)) {
 					shovelerLogWarning("Failed to use shader for tile sprite %p of canvas %p with tile sprite material %p, scene %p, camera %p, light %p and model %p.", tileSprite, canvas, tileSpriteMaterial, scene, camera, light, model);
