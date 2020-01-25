@@ -8,25 +8,25 @@
 
 #include <shoveler/uniform.h>
 
-struct ShovelerCameraStruct; // forward declaration: camera.h
-struct ShovelerLightStruct; // forward declaration: light.h
-struct ShovelerMaterialStruct; // forward declaration: material.h
-struct ShovelerModelStruct; // forward declaration: model.h
-struct ShovelerSceneStruct; // forward declaration: scene.h
-struct ShovelerShaderStruct; // forward declaration: shader.h
+typedef struct ShovelerCameraStruct ShovelerCamera; // forward declaration: camera.h
+typedef struct ShovelerLightStruct ShovelerLight; // forward declaration: light.h
+typedef struct ShovelerMaterialStruct ShovelerMaterial; // forward declaration: material.h
+typedef struct ShovelerModelStruct ShovelerModel; // forward declaration: model.h
+typedef struct ShovelerSceneStruct ShovelerScene; // forward declaration: scene.h
+typedef struct ShovelerShaderStruct ShovelerShader; // forward declaration: shader.h
 
 typedef struct ShovelerShaderKeyStruct {
-	struct ShovelerSceneStruct *scene;
-	struct ShovelerCameraStruct *camera;
-	struct ShovelerLightStruct *light;
-	struct ShovelerModelStruct *model;
-	struct ShovelerMaterialStruct *material;
+	ShovelerScene *scene;
+	ShovelerCamera *camera;
+	ShovelerLight *light;
+	ShovelerModel *model;
+	ShovelerMaterial *material;
 	void *userData;
 } ShovelerShaderKey;
 
 typedef struct ShovelerShaderStruct {
 	ShovelerShaderKey key;
-	struct ShovelerMaterialStruct *material;
+	ShovelerMaterial *material;
 	/** map from (char *) to (ShovelerUniformAttachment *) */
 	GHashTable *attachments;
 } ShovelerShader;
@@ -36,7 +36,7 @@ guint shovelerShaderKeyHash(gconstpointer shaderKeyPointer);
 /** Checks whether two shader keys are equal to be used for a hash table. */
 gboolean shovelerShaderKeyEqual(gconstpointer firstShaderKeyPointer, gconstpointer secondShaderKeyPointer);
 /** Creates a shader for a material with a previously created shader key. */
-ShovelerShader *shovelerShaderCreate(ShovelerShaderKey shaderKey, struct ShovelerMaterialStruct *material);
+ShovelerShader *shovelerShaderCreate(ShovelerShaderKey shaderKey, ShovelerMaterial *material);
 bool shovelerShaderAttachUniform(ShovelerShader *shader, const char *name, ShovelerUniform *uniform);
 bool shovelerShaderUse(ShovelerShader *shader);
 void shovelerShaderFree(ShovelerShader *shader);

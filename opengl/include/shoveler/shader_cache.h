@@ -5,13 +5,13 @@
 
 #include <glib.h>
 
-struct ShovelerCameraStruct; // forward declaration: camera.h
-struct ShovelerLightStruct; // forward declaration: light.h
-struct ShovelerMaterialStruct; // forward declaration: material.h
-struct ShovelerModelStruct; // forward declaration: model.h
-struct ShovelerSceneStruct; // forward declaration: scene.h
-struct ShovelerShaderStruct; // forward declaration: shader.h
-struct ShovelerShaderKeyStruct; // forward declaration: shader.h
+typedef struct ShovelerCameraStruct ShovelerCamera; // forward declaration: camera.h
+typedef struct ShovelerLightStruct ShovelerLight; // forward declaration: light.h
+typedef struct ShovelerMaterialStruct ShovelerMaterial; // forward declaration: material.h
+typedef struct ShovelerModelStruct ShovelerModel; // forward declaration: model.h
+typedef struct ShovelerSceneStruct ShovelerScene; // forward declaration: scene.h
+typedef struct ShovelerShaderStruct ShovelerShader; // forward declaration: shader.h
+typedef struct ShovelerShaderKeyStruct ShovelerShaderKey; // forward declaration: shader.h
 
 typedef struct ShovelerShaderCacheStruct {
 	/** map from (ShovelerShaderKey *) to (ShovelerShader *) */
@@ -35,14 +35,14 @@ typedef void (ShovelerShaderCacheFreeShaderFunction)(void *shaderPointer);
 ShovelerShaderCache *shovelerShaderCacheCreate();
 ShovelerShaderCache *shovelerShaderCacheCreateWithCustomFree(ShovelerShaderCacheFreeShaderFunction *freeShader);
 /** Insert a shader into the cache, transferring ownership over it to the cache. */
-void shovelerShaderCacheInsert(ShovelerShaderCache *cache, struct ShovelerShaderStruct *shader);
-bool shovelerShaderCacheRemove(ShovelerShaderCache *cache, const struct ShovelerShaderKeyStruct *shaderKey);
-struct ShovelerShaderStruct *shovelerShaderCacheLookup(ShovelerShaderCache *cache, const struct ShovelerShaderKeyStruct *shaderKey);
-void shovelerShaderCacheInvalidateScene(ShovelerShaderCache *cache, struct ShovelerSceneStruct *scene);
-void shovelerShaderCacheInvalidateCamera(ShovelerShaderCache *cache, struct ShovelerCameraStruct *camera);
-void shovelerShaderCacheInvalidateLight(ShovelerShaderCache *cache, struct ShovelerLightStruct *light);
-void shovelerShaderCacheInvalidateModel(ShovelerShaderCache *cache, struct ShovelerModelStruct *model);
-void shovelerShaderCacheInvalidateMaterial(ShovelerShaderCache *cache, struct ShovelerMaterialStruct *material);
+void shovelerShaderCacheInsert(ShovelerShaderCache *cache, ShovelerShader *shader);
+bool shovelerShaderCacheRemove(ShovelerShaderCache *cache, const ShovelerShaderKey *shaderKey);
+struct ShovelerShaderStruct *shovelerShaderCacheLookup(ShovelerShaderCache *cache, const ShovelerShaderKey *shaderKey);
+void shovelerShaderCacheInvalidateScene(ShovelerShaderCache *cache, ShovelerScene *scene);
+void shovelerShaderCacheInvalidateCamera(ShovelerShaderCache *cache, ShovelerCamera *camera);
+void shovelerShaderCacheInvalidateLight(ShovelerShaderCache *cache, ShovelerLight *light);
+void shovelerShaderCacheInvalidateModel(ShovelerShaderCache *cache, ShovelerModel *model);
+void shovelerShaderCacheInvalidateMaterial(ShovelerShaderCache *cache, ShovelerMaterial *material);
 void shovelerShaderCacheInvalidateUserData(ShovelerShaderCache *cache, void *userData);
 void shovelerShaderCacheFree(ShovelerShaderCache *cache);
 
