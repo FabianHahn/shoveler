@@ -3,12 +3,14 @@
 #include <stdlib.h> // malloc, free
 
 #include "shoveler/log.h"
+#include "shoveler/sprite/tile.h"
 #include "shoveler/tile_sprite_animation.h"
 
-ShovelerTileSpriteAnimation *shovelerTileSpriteAnimationCreate(ShovelerCanvasTileSprite *tileSprite, ShovelerVector2 initialPosition, float moveAmountThreshold)
+ShovelerTileSpriteAnimation *shovelerTileSpriteAnimationCreate(ShovelerSprite *tileSprite, ShovelerVector2 initialPosition, float moveAmountThreshold)
 {
-	assert(tileSprite->tileset->columns >= 4);
-	assert(tileSprite->tileset->rows >= 3);
+	ShovelerTileset *tileset = shovelerSpriteTileGetTileset(tileSprite);
+	assert(tileset->columns >= 4);
+	assert(tileset->rows >= 3);
 
 	ShovelerTileSpriteAnimation *animation = malloc(sizeof(ShovelerTileSpriteAnimation));
 	animation->tileSprite = tileSprite;
@@ -114,8 +116,7 @@ void shovelerTileSpriteAnimationUpdate(ShovelerTileSpriteAnimation *animation, S
 		}
 	}
 
-	animation->tileSprite->tilesetColumn = animation->direction;
-	animation->tileSprite->tilesetRow = animation->frame;
+	shovelerSpriteTileSetIndices(animation->tileSprite, animation->frame, animation->direction);
 }
 
 void shovelerTileSpriteAnimationFree(ShovelerTileSpriteAnimation *animation)

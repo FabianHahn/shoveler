@@ -15,6 +15,7 @@ typedef struct ShovelerModelStruct ShovelerModel; // forward declaration: model.
 typedef struct ShovelerRenderStateStruct ShovelerRenderState; // forward declaration: render_state.h
 typedef struct ShovelerSceneStruct ShovelerScene; // forward declaration: scene.h
 typedef struct ShovelerShaderCacheStruct ShovelerShaderCache; // forward declaration: shader_cache.h
+typedef struct ShovelerSpriteStruct ShovelerSprite; // forward declaration: sprite.h
 typedef struct ShovelerTextureStruct ShovelerTexture; // forward declaration: texture.h
 
 typedef struct ShovelerTextTextureStruct {
@@ -26,10 +27,11 @@ typedef struct ShovelerTextTextureRendererStruct {
 	ShovelerFontAtlasTexture *fontAtlasTexture;
 	ShovelerScene *textScene;
 	ShovelerMaterial *canvasMaterial;
+	ShovelerMaterial *textMaterial;
 	ShovelerDrawable *textQuad;
 	ShovelerModel *textModel;
 	ShovelerCanvas *textCanvas;
-	ShovelerCanvasTextSprite textSprite;
+	ShovelerSprite *textSprite;
 	/* map from texture text to (ShovelerTextTexture *) */
 	GHashTable *textures;
 } ShovelerTextTextureRenderer;

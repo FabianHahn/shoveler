@@ -10,7 +10,9 @@
 #include "shoveler/material/chunk.h"
 #include "shoveler/material/color.h"
 #include "shoveler/material/particle.h"
+#include "shoveler/material/text.h"
 #include "shoveler/material/texture.h"
+#include "shoveler/material/tile_sprite.h"
 #include "shoveler/material/tilemap.h"
 #include "shoveler/component.h"
 #include "shoveler/log.h"
@@ -103,6 +105,12 @@ static void *activateMaterialComponent(ShovelerComponent *component)
 
 			material = shovelerMaterialChunkCreate(shaderCache, /* screenspace */ false);
 			shovelerMaterialChunkSetActive(material, chunk);
+		} break;
+		case SHOVELER_COMPONENT_MATERIAL_TYPE_TILE_SPRITE: {
+			material = shovelerMaterialTileSpriteCreate(shaderCache, /* screenspace */ false);
+		} break;
+		case SHOVELER_COMPONENT_MATERIAL_TYPE_TEXT: {
+			material = shovelerMaterialTextCreate(shaderCache, /* screenspace */ false);
 		} break;
 		default:
 			shovelerLogWarning("Trying to activate material with unknown material type %d, ignoring.", type);

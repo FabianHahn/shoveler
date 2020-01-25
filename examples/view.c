@@ -296,6 +296,7 @@ int main(int argc, char *argv[])
 
 	ShovelerViewTileSpriteConfiguration tileSpriteConfiguration;
 	tileSpriteConfiguration.positionEntityId = 14;
+	tileSpriteConfiguration.materialEntityId = 14;
 	tileSpriteConfiguration.tilesetEntityId = 11;
 	tileSpriteConfiguration.tilesetColumn = 0;
 	tileSpriteConfiguration.tilesetRow = 0;
@@ -308,9 +309,12 @@ int main(int argc, char *argv[])
 	tileSpriteAnimationConfiguration.positionMappingX = SHOVELER_COORDINATE_MAPPING_POSITIVE_X;
 	tileSpriteAnimationConfiguration.positionMappingY = SHOVELER_COORDINATE_MAPPING_POSITIVE_Y;
 	tileSpriteAnimationConfiguration.moveAmountThreshold = 1.0f;
+	ShovelerViewMaterialConfiguration tileSpriteMaterialConfiguration;
+	tileSpriteMaterialConfiguration.type = SHOVELER_COMPONENT_MATERIAL_TYPE_TILE_SPRITE;
 	ShovelerViewEntity *tileSpriteEntity = shovelerViewAddEntity(game->view, 14);
 	shovelerViewEntityAddTileSprite(tileSpriteEntity, &tileSpriteConfiguration);
 	shovelerViewEntityAddTileSpriteAnimation(tileSpriteEntity, &tileSpriteAnimationConfiguration);
+	shovelerViewEntityAddMaterial(tileSpriteEntity, &tileSpriteMaterialConfiguration);
 	shovelerViewEntityAddPosition(tileSpriteEntity, shovelerVector3(3.0, 4.0, 0.0));
 
 	ShovelerViewCanvasConfiguration canvasConfiguration;

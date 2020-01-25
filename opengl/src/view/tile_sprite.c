@@ -15,6 +15,7 @@ ShovelerComponent *shovelerViewEntityAddTileSprite(ShovelerViewEntity *entity, c
 
 	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerComponentTypeIdTileSprite);
 	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, SHOVELER_COMPONENT_TILE_SPRITE_OPTION_POSITION, configuration->positionEntityId);
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, SHOVELER_COMPONENT_TILE_SPRITE_OPTION_MATERIAL, configuration->materialEntityId);
 	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, SHOVELER_COMPONENT_TILE_SPRITE_OPTION_TILESET, configuration->tilesetEntityId);
 	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, SHOVELER_COMPONENT_TILE_SPRITE_OPTION_TILESET_COLUMN, configuration->tilesetColumn);
 	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, SHOVELER_COMPONENT_TILE_SPRITE_OPTION_TILESET_ROW, configuration->tilesetRow);
@@ -26,7 +27,7 @@ ShovelerComponent *shovelerViewEntityAddTileSprite(ShovelerViewEntity *entity, c
 	return component;
 }
 
-ShovelerCanvasTileSprite *shovelerViewEntityGetTileSprite(ShovelerViewEntity *entity)
+ShovelerSprite *shovelerViewEntityGetTileSprite(ShovelerViewEntity *entity)
 {
 	ShovelerComponent *component = shovelerViewEntityGetComponent(entity, shovelerComponentTypeIdTileSprite);
 	if(component == NULL) {
@@ -44,6 +45,7 @@ bool shovelerViewEntityGetTileSpriteConfiguration(ShovelerViewEntity *entity, Sh
 	}
 
 	outputConfiguration->positionEntityId = shovelerComponentGetConfigurationValueEntityId(component, SHOVELER_COMPONENT_TILE_SPRITE_OPTION_POSITION);
+	outputConfiguration->materialEntityId = shovelerComponentGetConfigurationValueEntityId(component, SHOVELER_COMPONENT_TILE_SPRITE_OPTION_MATERIAL);
 	outputConfiguration->tilesetEntityId = shovelerComponentGetConfigurationValueEntityId(component, SHOVELER_COMPONENT_TILE_SPRITE_OPTION_TILESET);
 	outputConfiguration->tilesetColumn = shovelerComponentGetConfigurationValueInt(component, SHOVELER_COMPONENT_TILE_SPRITE_OPTION_TILESET_COLUMN);
 	outputConfiguration->tilesetRow = shovelerComponentGetConfigurationValueInt(component, SHOVELER_COMPONENT_TILE_SPRITE_OPTION_TILESET_ROW);
@@ -62,6 +64,7 @@ bool shovelerViewEntityUpdateTileSprite(ShovelerViewEntity *entity, const Shovel
 	}
 
 	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, SHOVELER_COMPONENT_TILE_SPRITE_OPTION_POSITION, configuration->positionEntityId);
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, SHOVELER_COMPONENT_TILE_SPRITE_OPTION_MATERIAL, configuration->materialEntityId);
 	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, SHOVELER_COMPONENT_TILE_SPRITE_OPTION_TILESET, configuration->tilesetEntityId);
 	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, SHOVELER_COMPONENT_TILE_SPRITE_OPTION_TILESET_COLUMN, configuration->tilesetColumn);
 	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, SHOVELER_COMPONENT_TILE_SPRITE_OPTION_TILESET_ROW, configuration->tilesetRow);

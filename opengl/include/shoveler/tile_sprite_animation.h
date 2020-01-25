@@ -1,9 +1,10 @@
 #ifndef SHOVELER_TILE_SPRITE_ANIMATION_H
 #define SHOVELER_TILE_SPRITE_ANIMATION_H
 
-#include <shoveler/canvas.h>
 #include <shoveler/tileset.h>
 #include <shoveler/types.h>
+
+typedef struct ShovelerSpriteStruct ShovelerSprite; // forward declaration: sprite.h
 
 typedef enum {
 	SHOVELER_TILE_SPRITE_ANIMATION_STATE_DOWN = 0,
@@ -13,7 +14,7 @@ typedef enum {
 } ShovelerTileSpriteAnimationDirection;
 
 typedef struct ShovelerTileSpriteAnimationStruct {
-	ShovelerCanvasTileSprite *tileSprite;
+	ShovelerSprite *tileSprite;
 	ShovelerVector2 currentPosition;
 	float moveAmountThreshold;
 	int numZeroUpdatesForStopping;
@@ -25,7 +26,7 @@ typedef struct ShovelerTileSpriteAnimationStruct {
 	bool logDirectionChanges;
 } ShovelerTileSpriteAnimation;
 
-ShovelerTileSpriteAnimation *shovelerTileSpriteAnimationCreate(ShovelerCanvasTileSprite *tileSprite, ShovelerVector2 initialPosition, float moveAmountThreshold);
+ShovelerTileSpriteAnimation *shovelerTileSpriteAnimationCreate(ShovelerSprite *tileSprite, ShovelerVector2 initialPosition, float moveAmountThreshold);
 void shovelerTileSpriteAnimationUpdate(ShovelerTileSpriteAnimation *animation, ShovelerVector2 newPosition);
 void shovelerTileSpriteAnimationFree(ShovelerTileSpriteAnimation *animation);
 

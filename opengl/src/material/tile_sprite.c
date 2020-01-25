@@ -1,10 +1,12 @@
 #include <stdlib.h> // malloc, free
 
 #include "shoveler/material/tile_sprite.h"
+#include "shoveler/material.h"
 #include "shoveler/shader_program/model_vertex.h"
 #include "shoveler/shader_cache.h"
 #include "shoveler/shader_program.h"
 #include "shoveler/sprite/tile.h"
+#include "shoveler/tileset.h"
 #include "shoveler/types.h"
 #include "shoveler/uniform.h"
 #include "shoveler/uniform_map.h"
@@ -75,6 +77,8 @@ static const char *fragmentShaderSource =
 
 typedef struct {
 	ShovelerMaterial *material;
+	ShovelerVector2 activeRegionPosition;
+	ShovelerVector2 activeRegionSize;
 	int activeSpriteTilesetColumn;
 	int activeSpriteTilesetRow;
 	ShovelerVector2 activeSpritePosition;
@@ -98,6 +102,8 @@ ShovelerMaterial *shovelerMaterialTileSpriteCreate(ShovelerShaderCache *shaderCa
 	materialData->material = shovelerMaterialCreate(shaderCache, screenspace, program);
 	materialData->material->data = materialData;
 	materialData->material->freeData = freeMaterialData;
+	materialData->activeRegionPosition = shovelerVector2(0.0f, 0.0f);
+	materialData->activeRegionSize = shovelerVector2(1.0f, 1.0f);
 	materialData->activeSpriteTilesetColumn = 0;
 	materialData->activeSpriteTilesetRow = 0;
 	materialData->activeSpritePosition = shovelerVector2(0.0f, 0.0f);
@@ -107,6 +113,9 @@ ShovelerMaterial *shovelerMaterialTileSpriteCreate(ShovelerShaderCache *shaderCa
 	materialData->activeTilesetPadding = 0;
 	materialData->activeTilesetTexture = NULL;
 	materialData->activeTilesetSampler = NULL;
+
+	shovelerUniformMapInsert(materialData->material->uniforms, "regionPosition", shovelerUniformCreateVector2Pointer(&materialData->activeRegionPosition));
+	shovelerUniformMapInsert(materialData->material->uniforms, "regionSize", shovelerUniformCreateVector2Pointer(&materialData->activeRegionSize));
 
 	shovelerUniformMapInsert(materialData->material->uniforms, "tilesetColumn", shovelerUniformCreateIntPointer(&materialData->activeSpriteTilesetColumn));
 	shovelerUniformMapInsert(materialData->material->uniforms, "tilesetRow", shovelerUniformCreateIntPointer(&materialData->activeSpriteTilesetRow));
@@ -122,18 +131,11 @@ ShovelerMaterial *shovelerMaterialTileSpriteCreate(ShovelerShaderCache *shaderCa
 	return materialData->material;
 }
 
-void shovelerMaterialTileSpriteSetActiveLegacy(ShovelerMaterial *material, const ShovelerCanvasTileSprite *tileSprite)
+void shovelerMaterialTileSpriteSetActiveRegion(ShovelerMaterial *material, ShovelerVector2 regionPosition, ShovelerVector2 regionSize)
 {
 	MaterialData *materialData = material->data;
-	materialData->activeSpriteTilesetColumn = tileSprite->tilesetColumn;
-	materialData->activeSpriteTilesetRow = tileSprite->tilesetRow;
-	materialData->activeSpritePosition = tileSprite->position;
-	materialData->activeSpriteSize = tileSprite->size;
-	materialData->activeTilesetRows = tileSprite->tileset->rows;
-	materialData->activeTilesetColumns = tileSprite->tileset->columns;
-	materialData->activeTilesetPadding = tileSprite->tileset->padding;
-	materialData->activeTilesetTexture = tileSprite->tileset->texture;
-	materialData->activeTilesetSampler = tileSprite->tileset->sampler;
+	materialData->activeRegionPosition = regionPosition;
+	materialData->activeRegionSize = regionSize;
 }
 
 void shovelerMaterialTileSpriteSetActive(ShovelerMaterial *material, const ShovelerSpriteTile *spriteTile)
@@ -141,9 +143,8 @@ void shovelerMaterialTileSpriteSetActive(ShovelerMaterial *material, const Shove
 	MaterialData *materialData = material->data;
 	materialData->activeSpriteTilesetColumn = spriteTile->tilesetColumn;
 	materialData->activeSpriteTilesetRow = spriteTile->tilesetRow;
-	materialData->activeSpritePosition = spriteTile->sprite.translation;
-	materialData->activeSpriteSize = spriteTile->sprite.scale;
-	// TODO: rotation
+	materialData->activeSpritePosition = spriteTile->sprite.position;
+	materialData->activeSpriteSize = spriteTile->sprite.size;
 	materialData->activeTilesetRows = spriteTile->tileset->rows;
 	materialData->activeTilesetColumns = spriteTile->tileset->columns;
 	materialData->activeTilesetPadding = spriteTile->tileset->padding;

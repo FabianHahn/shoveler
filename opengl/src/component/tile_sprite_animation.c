@@ -4,7 +4,9 @@
 #include "shoveler/component/tile_sprite.h"
 #include "shoveler/component.h"
 #include "shoveler/log.h"
+#include "shoveler/sprite/tile.h"
 #include "shoveler/tile_sprite_animation.h"
+#include "shoveler/tileset.h"
 
 const char *const shovelerComponentTypeIdTileSpriteAnimation = "tile_sprite_animation";
 
@@ -36,10 +38,12 @@ static void *activateTileSpriteAnimationComponent(ShovelerComponent *component)
 {
 	ShovelerComponent *tileSpriteComponent = shovelerComponentGetDependency(component, SHOVELER_COMPONENT_TILE_SPRITE_ANIMATION_OPTION_TILE_SPRITE);
 	assert(tileSpriteComponent != NULL);
-	ShovelerCanvasTileSprite *tileSprite = shovelerComponentGetTileSprite(tileSpriteComponent);
+	ShovelerSprite *tileSprite = shovelerComponentGetTileSprite(tileSpriteComponent);
 	assert(tileSprite != NULL);
+	ShovelerTileset *tileset = shovelerSpriteTileGetTileset(tileSprite);
+	assert(tileset != NULL);
 
-	if(tileSprite->tileset->columns < 4 || tileSprite->tileset->rows < 3) {
+	if(tileset->columns < 4 || tileset->rows < 3) {
 		shovelerLogWarning("Failed to activate tile sprite animation of entity %lld because the tileset of dependency tile sprite on entity %lld doesn't have enough columns and rows.", component->entityId, tileSpriteComponent->entityId);
 		return false;
 	}

@@ -8,6 +8,7 @@
 #include <shoveler/collider/box.h>
 #include <shoveler/drawable/quad.h>
 #include <shoveler/material/canvas.h>
+#include <shoveler/material/tile_sprite.h>
 #include <shoveler/canvas.h>
 #include <shoveler/collider.h>
 #include <shoveler/colliders.h>
@@ -22,6 +23,7 @@
 #include <shoveler/opengl.h>
 #include <shoveler/scene.h>
 #include <shoveler/shader_program.h>
+#include <shoveler/sprite/tile.h>
 #include <shoveler/texture.h>
 #include <shoveler/tile_sprite_animation.h>
 #include <shoveler/tileset.h>
@@ -29,7 +31,7 @@
 static void shovelerSampleTerminate();
 static void shovelerSampleUpdate(ShovelerGame *game, double dt);
 
-static ShovelerCanvasTileSprite characterSprite;
+static ShovelerSprite *characterSprite;
 static ShovelerTileSpriteAnimation *animation;
 
 int main(int argc, char *argv[])
@@ -91,27 +93,23 @@ int main(int argc, char *argv[])
 	shovelerImageFree(tilesetImage);
 	shovelerImageFree(animationTilesetImage);
 
-	ShovelerCanvasTileSprite tileSprite;
-	tileSprite.tileset = tileset;
-	tileSprite.tilesetColumn = 1;
-	tileSprite.tilesetRow = 1;
-	tileSprite.position = shovelerVector2(-0.3f, -0.2f);
-	tileSprite.size = shovelerVector2(0.25f, 0.4f);
-	shovelerCanvasAddTileSprite(canvas, &tileSprite);
+	ShovelerMaterial *tileSpriteMaterial = shovelerMaterialTileSpriteCreate(game->shaderCache, /* screenspace */ false);
+	ShovelerSprite *tileSprite = shovelerSpriteTileCreate(tileSpriteMaterial, tileset, /* tilesetRow */ 1, /* tilesetColumn */ 1);
+	tileSprite->position = shovelerVector2(-0.3f, -0.2f);
+	tileSprite->size = shovelerVector2(0.25f, 0.4f);
+	shovelerCanvasAddSprite(canvas, tileSprite);
 
 	ShovelerCollider2 tileBoxCollider = shovelerColliderBox2(shovelerBoundingBox2(
-		shovelerVector2LinearCombination(1.0f, tileSprite.position, -0.5f, tileSprite.size),
-		shovelerVector2LinearCombination(1.0f, tileSprite.position, 0.5f, tileSprite.size)));
+		shovelerVector2LinearCombination(1.0f, tileSprite->position, -0.5f, tileSprite->size),
+		shovelerVector2LinearCombination(1.0f, tileSprite->position, 0.5f, tileSprite->size)));
 	shovelerCollidersAddCollider2(game->colliders, &tileBoxCollider);
 
-	characterSprite.tileset = animationTileset;
-	characterSprite.tilesetColumn = 0;
-	characterSprite.tilesetRow = 0;
-	characterSprite.position = shovelerVector2(0.0f, 0.0f);
-	characterSprite.size = shovelerVector2(0.2f, 0.2f);
-	shovelerCanvasAddTileSprite(canvas, &characterSprite);
+	characterSprite = shovelerSpriteTileCreate(tileSpriteMaterial, animationTileset, /* tilesetRow */ 0, /* tilesetColumn */ 0);
+	characterSprite->position = shovelerVector2(0.0f, 0.0f);
+	characterSprite->size = shovelerVector2(0.2f, 0.2f);
+	shovelerCanvasAddSprite(canvas, characterSprite);
 
-	animation = shovelerTileSpriteAnimationCreate(&characterSprite, shovelerVector2(0.0f, 0.0f), 0.1f);
+	animation = shovelerTileSpriteAnimationCreate(characterSprite, shovelerVector2(0.0f, 0.0f), 0.1f);
 	animation->moveAmountThreshold = 0.25f;
 
 	ShovelerMaterial *canvasMaterial = shovelerMaterialCanvasCreate(game->shaderCache, /* screenspace */ false);
@@ -136,7 +134,10 @@ int main(int argc, char *argv[])
 	shovelerTilesetFree(animationTileset);
 	shovelerDrawableFree(quad);
 	shovelerMaterialFree(canvasMaterial);
+	shovelerMaterialFree(tileSpriteMaterial);
 	shovelerCanvasFree(canvas);
+	shovelerSpriteFree(tileSprite);
+	shovelerSpriteFree(characterSprite);
 	shovelerGameFree(game);
 	shovelerGlobalUninit();
 	shovelerLogTerminate();
@@ -150,10 +151,10 @@ static void shovelerSampleUpdate(ShovelerGame *game, double dt)
 
 	shovelerCameraUpdateView(game->camera);
 
-	float moveAmountX = controller->frame.position.values[0] - characterSprite.position.values[0];
-	float moveAmountY = controller->frame.position.values[1] - characterSprite.position.values[1];
+	float moveAmountX = controller->frame.position.values[0] - characterSprite->position.values[0];
+	float moveAmountY = controller->frame.position.values[1] - characterSprite->position.values[1];
 	shovelerTileSpriteAnimationUpdate(animation, shovelerVector2(moveAmountX, moveAmountY));
 
-	characterSprite.position.values[0] = controller->frame.position.values[0];
-	characterSprite.position.values[1] = controller->frame.position.values[1];
+	characterSprite->position.values[0] = controller->frame.position.values[0];
+	characterSprite->position.values[1] = controller->frame.position.values[1];
 }

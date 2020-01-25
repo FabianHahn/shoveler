@@ -113,6 +113,8 @@ static const char *fragmentShaderSource =
 typedef struct {
 	ShovelerMaterial *material;
 	ShovelerSampler *sampler;
+	ShovelerVector2 activeRegionPosition;
+	ShovelerVector2 activeRegionSize;
 	ShovelerFontAtlasTexture *activeFontAtlasTexture;
 	ShovelerTexture *activeTexture;
 	unsigned int activeFontSize;
@@ -160,6 +162,9 @@ ShovelerMaterial *shovelerMaterialTextCreate(ShovelerShaderCache *shaderCache, b
 	materialData->activeGlyphBearingY = 0;
 	materialData->activeGlyphIsRotated = false;
 
+	shovelerUniformMapInsert(materialData->material->uniforms, "regionPosition", shovelerUniformCreateVector2Pointer(&materialData->activeRegionPosition));
+	shovelerUniformMapInsert(materialData->material->uniforms, "regionSize", shovelerUniformCreateVector2Pointer(&materialData->activeRegionSize));
+
 	shovelerUniformMapInsert(materialData->material->uniforms, "fontAtlas", shovelerUniformCreateTexturePointer(&materialData->activeTexture, &materialData->sampler));
 	shovelerUniformMapInsert(materialData->material->uniforms, "fontSize", shovelerUniformCreateUnsignedIntPointer(&materialData->activeFontSize));
 
@@ -179,6 +184,13 @@ ShovelerMaterial *shovelerMaterialTextCreate(ShovelerShaderCache *shaderCache, b
 	shovelerUniformMapInsert(materialData->material->uniforms, "glyphIsRotated", shovelerUniformCreateBoolPointer(&materialData->activeGlyphIsRotated));
 
 	return materialData->material;
+}
+
+void shovelerMaterialTextSetActiveRegion(ShovelerMaterial *material, ShovelerVector2 regionPosition, ShovelerVector2 regionSize)
+{
+	MaterialData *materialData = material->data;
+	materialData->activeRegionPosition = regionPosition;
+	materialData->activeRegionSize = regionSize;
 }
 
 void shovelerMaterialTextSetActiveFontAtlasTexture(ShovelerMaterial *material, ShovelerFontAtlasTexture *fontAtlasTexture)

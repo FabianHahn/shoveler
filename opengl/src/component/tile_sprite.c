@@ -2,10 +2,11 @@
 
 #include <stdlib.h> // malloc free
 
+#include "shoveler/component/material.h"
 #include "shoveler/component/position.h"
 #include "shoveler/component/tileset.h"
-#include "shoveler/canvas.h"
 #include "shoveler/component.h"
+#include "shoveler/sprite/tile.h"
 
 const char *const shovelerComponentTypeIdTileSprite = "tile_sprite";
 
@@ -16,8 +17,9 @@ static ShovelerVector2 getTileSpritePosition(ShovelerComponent *component);
 
 ShovelerComponentType *shovelerComponentCreateTileSpriteType()
 {
-	ShovelerComponentTypeConfigurationOption configurationOptions[7];
+	ShovelerComponentTypeConfigurationOption configurationOptions[8];
 	configurationOptions[SHOVELER_COMPONENT_TILE_SPRITE_OPTION_POSITION] = shovelerComponentTypeConfigurationOptionDependency("position", shovelerComponentTypeIdPosition, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, updateTileSpritePositionDependency);
+	configurationOptions[SHOVELER_COMPONENT_TILE_SPRITE_OPTION_MATERIAL] = shovelerComponentTypeConfigurationOptionDependency("material", shovelerComponentTypeIdMaterial, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_TILE_SPRITE_OPTION_TILESET] = shovelerComponentTypeConfigurationOptionDependency("tileset", shovelerComponentTypeIdTileset, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_TILE_SPRITE_OPTION_TILESET_COLUMN] = shovelerComponentTypeConfigurationOption("tileset_column", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_TILE_SPRITE_OPTION_TILESET_ROW] = shovelerComponentTypeConfigurationOption("tileset_row", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
@@ -28,7 +30,7 @@ ShovelerComponentType *shovelerComponentCreateTileSpriteType()
 	return shovelerComponentTypeCreate(shovelerComponentTypeIdTileSprite, activateTileSpriteComponent, deactivateTileSpriteComponent, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
 }
 
-ShovelerCanvasTileSprite *shovelerComponentGetTileSprite(ShovelerComponent *component)
+ShovelerSprite *shovelerComponentGetTileSprite(ShovelerComponent *component)
 {
 	assert(component->type->id == shovelerComponentTypeIdTileSprite);
 
@@ -37,6 +39,11 @@ ShovelerCanvasTileSprite *shovelerComponentGetTileSprite(ShovelerComponent *comp
 
 static void *activateTileSpriteComponent(ShovelerComponent *component)
 {
+	ShovelerComponent *materialComponent = shovelerComponentGetDependency(component, SHOVELER_COMPONENT_TILE_SPRITE_OPTION_MATERIAL);
+	assert(materialComponent != NULL);
+	ShovelerMaterial *material = shovelerComponentGetMaterial(materialComponent);
+	assert(material != NULL);
+
 	ShovelerComponent *tilesetComponent = shovelerComponentGetDependency(component, SHOVELER_COMPONENT_TILE_SPRITE_OPTION_TILESET);
 	assert(tilesetComponent != NULL);
 	ShovelerTileset *tileset = shovelerComponentGetTileset(tilesetComponent);
@@ -47,26 +54,24 @@ static void *activateTileSpriteComponent(ShovelerComponent *component)
 	ShovelerVector2 position = getTileSpritePosition(component);
 	ShovelerVector2 size = shovelerComponentGetConfigurationValueVector2(component, SHOVELER_COMPONENT_TILE_SPRITE_OPTION_SIZE);
 
-	ShovelerCanvasTileSprite *tileSprite = malloc(sizeof(ShovelerCanvasTileSprite));
-	tileSprite->tileset = tileset;
-	tileSprite->tilesetColumn = tilesetColumn;
-	tileSprite->tilesetRow = tilesetRow;
+	ShovelerSprite *tileSprite = shovelerSpriteTileCreate(material, tileset, tilesetColumn, tilesetRow);
 	tileSprite->position = position;
 	tileSprite->size = size;
+
 	return tileSprite;
 }
 
 static void deactivateTileSpriteComponent(ShovelerComponent *component)
 {
-	ShovelerCanvasTileSprite *tileSprite = (ShovelerCanvasTileSprite *) component->data;
+	ShovelerSprite *tileSprite = (ShovelerSprite *) component->data;
 	assert(tileSprite != NULL);
 
-	free(tileSprite);
+	shovelerSpriteFree(tileSprite);
 }
 
 static void updateTileSpritePositionDependency(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent)
 {
-	ShovelerCanvasTileSprite *tileSprite = (ShovelerCanvasTileSprite *) component->data;
+	ShovelerSprite *tileSprite = (ShovelerSprite *) component->data;
 	assert(tileSprite != NULL);
 
 	tileSprite->position = getTileSpritePosition(component);

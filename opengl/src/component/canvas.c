@@ -34,10 +34,10 @@ static void *activateCanvasComponent(ShovelerComponent *component)
 	for(int i = 0; i < tileSpritesValue->entityIdArrayValue.size; i++) {
 		ShovelerComponent *tileSpriteComponent = shovelerComponentGetArrayDependency(component, SHOVELER_COMPONENT_CANVAS_OPTION_ID_TILE_SPRITE, i);
 		assert(tileSpriteComponent != NULL);
-		ShovelerCanvasTileSprite *tileSprite = shovelerComponentGetTileSprite(tileSpriteComponent);
+		ShovelerSprite *tileSprite = shovelerComponentGetTileSprite(tileSpriteComponent);
 		assert(tileSprite != NULL);
 
-		shovelerCanvasAddTileSprite(canvas, tileSprite);
+		shovelerCanvasAddSprite(canvas, tileSprite);
 	}
 
 	return canvas;

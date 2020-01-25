@@ -81,17 +81,12 @@ bool shovelerChunkIntersect(ShovelerChunk *chunk, const ShovelerBoundingBox2 *ob
 
 bool shovelerChunkRender(ShovelerChunk *chunk, ShovelerMaterial *canvasMaterial, ShovelerMaterial *tilemapMaterial, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerRenderState *renderState)
 {
-	ShovelerMaterial *textMaterial = shovelerMaterialCanvasGetTextMaterial(canvasMaterial);
-	ShovelerMaterial *tileSpriteMaterial = shovelerMaterialCanvasGetTileSpriteMaterial(canvasMaterial);
-
-	shovelerMaterialCanvasSetActiveRegion(canvasMaterial, chunk->position, chunk->size);
-
 	for(GList *iter = chunk->layers->head; iter != NULL; iter = iter->next) {
 		ShovelerChunkLayer *layer = iter->data;
 
 		switch(layer->type) {
 			case SHOVELER_CHUNK_LAYER_TYPE_CANVAS:
-				if(!shovelerCanvasRender(layer->value.canvas, textMaterial, tileSpriteMaterial, scene, camera, light, model, renderState)) {
+				if(!shovelerCanvasRender(layer->value.canvas, chunk->position, chunk->size, scene, camera, light, model, renderState)) {
 					shovelerLogWarning("Failed to render canvas %p layer of chunk %p.", layer->value.canvas, chunk);
 					return false;
 				}

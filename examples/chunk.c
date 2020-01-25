@@ -7,6 +7,7 @@
 #include <shoveler/camera/perspective.h>
 #include <shoveler/drawable/quad.h>
 #include <shoveler/material/chunk.h>
+#include <shoveler/material/tile_sprite.h>
 #include <shoveler/canvas.h>
 #include <shoveler/chunk.h>
 #include <shoveler/colliders.h>
@@ -21,6 +22,7 @@
 #include <shoveler/opengl.h>
 #include <shoveler/scene.h>
 #include <shoveler/shader_program.h>
+#include <shoveler/sprite/tile.h>
 #include <shoveler/texture.h>
 #include <shoveler/tilemap.h>
 #include <shoveler/tile_sprite_animation.h>
@@ -30,7 +32,7 @@
 static void shovelerSampleTerminate();
 static void shovelerSampleUpdate(ShovelerGame *game, double dt);
 
-static ShovelerCanvasTileSprite characterSprite;
+static ShovelerSprite *characterSprite;
 static ShovelerTileSpriteAnimation *animation;
 
 int main(int argc, char *argv[])
@@ -133,22 +135,18 @@ int main(int argc, char *argv[])
 	shovelerImageFree(borderTilesetImage);
 	shovelerTilemapAddTileset(borderTilemap, borderTileset);
 
-	ShovelerCanvasTileSprite tileSprite;
-	tileSprite.tileset = tileset;
-	tileSprite.tilesetColumn = 1;
-	tileSprite.tilesetRow = 0;
-	tileSprite.position = shovelerVector2(-1.5f, -1.5f);
-	tileSprite.size = shovelerVector2(5.0f, 5.0f);
-	shovelerCanvasAddTileSprite(canvas, &tileSprite);
+	ShovelerMaterial *tileSpriteMaterial = shovelerMaterialTileSpriteCreate(game->shaderCache, /* screenspace */ false);
+	ShovelerSprite *tileSprite = shovelerSpriteTileCreate(tileSpriteMaterial, tileset, /* tilesetRow */ 0, /* tilesetColumn */ 1);
+	tileSprite->position = shovelerVector2(-1.5f, -1.5f);
+	tileSprite->size = shovelerVector2(5.0f, 5.0f);
+	shovelerCanvasAddSprite(canvas, tileSprite);
 
-	characterSprite.tileset = animationTileset;
-	characterSprite.tilesetColumn = 0;
-	characterSprite.tilesetRow = 0;
-	characterSprite.position = shovelerVector2(0.0f, 0.0f);
-	characterSprite.size = shovelerVector2(1.0f, 1.0f);
-	shovelerCanvasAddTileSprite(canvas, &characterSprite);
+	characterSprite = shovelerSpriteTileCreate(tileSpriteMaterial, animationTileset, /* tilesetRow */ 0, /* tilesetColumn */ 0);
+	characterSprite->position = shovelerVector2(0.0f, 0.0f);
+	characterSprite->size = shovelerVector2(1.0f, 1.0f);
+	shovelerCanvasAddSprite(canvas, characterSprite);
 
-	animation = shovelerTileSpriteAnimationCreate(&characterSprite, shovelerVector2(0.0f, 0.0f), 0.1f);
+	animation = shovelerTileSpriteAnimationCreate(characterSprite, shovelerVector2(0.0f, 0.0f), 0.1f);
 	animation->moveAmountThreshold = 0.25f;
 
 	ShovelerMaterial *chunkMaterial = shovelerMaterialChunkCreate(game->shaderCache, /* screenspace */ false);
@@ -169,12 +167,16 @@ int main(int argc, char *argv[])
 
 	shovelerDrawableFree(quad);
 	shovelerMaterialFree(chunkMaterial);
+	shovelerMaterialFree(tileSpriteMaterial);
 	shovelerChunkFree(chunk);
 	shovelerCanvasFree(canvas);
+	shovelerSpriteFree(characterSprite);
+	shovelerSpriteFree(tileSprite);
 	shovelerTilemapFree(tilemap);
 	shovelerTextureFree(tilesTexture);
 	shovelerTilemapFree(borderTilemap);
 	shovelerTextureFree(borderTilesTexture);
+	shovelerTilesetFree(animationTileset);
 	shovelerTilesetFree(tileset);
 	shovelerTilesetFree(tileset2);
 	shovelerTilesetFree(borderTileset);
@@ -191,13 +193,13 @@ static void shovelerSampleUpdate(ShovelerGame *game, double dt)
 
 	shovelerCameraUpdateView(game->camera);
 
-	float characterWorldX = characterSprite.position.values[0];
-	float characterWorldY = characterSprite.position.values[1];
+	float characterWorldX = characterSprite->position.values[0];
+	float characterWorldY = characterSprite->position.values[1];
 
 	float moveAmountX = controller->frame.position.values[0] - characterWorldX;
 	float moveAmountY = controller->frame.position.values[1] - characterWorldY;
 	shovelerTileSpriteAnimationUpdate(animation, shovelerVector2(moveAmountX, moveAmountY));
 
-	characterSprite.position.values[0] = controller->frame.position.values[0];
-	characterSprite.position.values[1] = controller->frame.position.values[1];
+	characterSprite->position.values[0] = controller->frame.position.values[0];
+	characterSprite->position.values[1] = controller->frame.position.values[1];
 }
