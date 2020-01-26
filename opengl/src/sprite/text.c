@@ -11,7 +11,7 @@ static void freeSpriteText(ShovelerSprite *sprite);
 ShovelerSprite *shovelerSpriteTextCreate(ShovelerMaterial *material, ShovelerFontAtlasTexture *fontAtlasTexture, float fontSize, ShovelerVector4 color)
 {
 	ShovelerSpriteText *spriteText = malloc(sizeof(ShovelerSpriteText));
-	shovelerSpriteInit(&spriteText->sprite, material, renderSpriteText, freeSpriteText, spriteText);
+	shovelerSpriteInit(&spriteText->sprite, material, /* intersect */ NULL, renderSpriteText, freeSpriteText, spriteText);
 	spriteText->fontAtlasTexture = fontAtlasTexture;
 	spriteText->content = "";
 	spriteText->isContentManaged = false;

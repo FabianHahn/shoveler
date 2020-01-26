@@ -11,7 +11,7 @@ static void freeSpriteTile(ShovelerSprite *sprite);
 ShovelerSprite *shovelerSpriteTileCreate(ShovelerMaterial *material, ShovelerTileset *tileset, int tilesetRow, int tilesetColumn)
 {
 	ShovelerSpriteTile *spriteTile = malloc(sizeof(ShovelerSpriteTile));
-	shovelerSpriteInit(&spriteTile->sprite, material, renderSpriteTile, freeSpriteTile, spriteTile);
+	shovelerSpriteInit(&spriteTile->sprite, material, /* intersect */ NULL, renderSpriteTile, freeSpriteTile, spriteTile);
 	spriteTile->tileset = tileset;
 	spriteTile->tilesetRow = tilesetRow;
 	spriteTile->tilesetColumn = tilesetColumn;

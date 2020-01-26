@@ -73,7 +73,6 @@ int main(int argc, char *argv[])
 	game->controller->lockTiltY = true;
 
 	ShovelerCanvas *canvas = shovelerCanvasCreate(/* numLayers */ 3);
-	// TODO: collider support for canvas similar to chunk
 
 	ShovelerMaterial *tilemapMaterial = shovelerMaterialTilemapCreate(game->shaderCache, /* screenspace */ false);
 
@@ -98,6 +97,7 @@ int main(int argc, char *argv[])
 	ShovelerSprite *tilemapSprite = shovelerSpriteTilemapCreate(tilemapMaterial, tilemap);
 	tilemapSprite->size = shovelerVector2(10.0f, 10.0f);
 	shovelerCanvasAddSprite(canvas, /* layerId */ 0, tilemapSprite);
+	shovelerCollidersAddCollider2(game->colliders, &tilemapSprite->collider);
 
 	ShovelerImage *borderTilesImage = shovelerImageCreate(1, 1, 3);
 	shovelerImageClear(borderTilesImage);
@@ -110,6 +110,7 @@ int main(int argc, char *argv[])
 	ShovelerSprite *borderTilemapSprite = shovelerSpriteTilemapCreate(tilemapMaterial, borderTilemap);
 	borderTilemapSprite->size = shovelerVector2(10.0f, 10.0f);
 	shovelerCanvasAddSprite(canvas, /* layerId */ 2, borderTilemapSprite);
+	shovelerCollidersAddCollider2(game->colliders, &borderTilemapSprite->collider);
 
 	ShovelerImage *tilesetImage = shovelerImageCreate(2, 2, 3);
 	shovelerImageClear(tilesetImage);
