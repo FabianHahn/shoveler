@@ -2,6 +2,10 @@ set(SHOVELER_EXAMPLE_CANVAS_SRC
 	canvas.c
 )
 
+set(SHOVELER_EXAMPLE_CANVAS_LAYERS_SRC
+	canvas_layers.c
+)
+
 set(SHOVELER_EXAMPLE_CHUNK_SRC
 	chunk.c
 )
@@ -22,6 +26,10 @@ if(SHOVELER_BUILD_EXAMPLES)
 	add_executable(shoveler_example_canvas ${SHOVELER_EXAMPLE_CANVAS_SRC})
 	set_property(TARGET shoveler_example_canvas PROPERTY C_STANDARD 99)
 	target_link_libraries(shoveler_example_canvas shoveler::shoveler_opengl)
+
+	add_executable(shoveler_example_canvas_layers ${SHOVELER_EXAMPLE_CANVAS_LAYERS_SRC})
+	set_property(TARGET shoveler_example_canvas_layers PROPERTY C_STANDARD 99)
+	target_link_libraries(shoveler_example_canvas_layers shoveler::shoveler_opengl)
 
 	add_executable(shoveler_example_chunk ${SHOVELER_EXAMPLE_CHUNK_SRC})
 	set_property(TARGET shoveler_example_chunk PROPERTY C_STANDARD 99)
