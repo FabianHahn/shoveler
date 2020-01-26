@@ -66,13 +66,14 @@ bool shovelerTilemapIntersect(ShovelerTilemap *tilemap, const ShovelerBoundingBo
 	return false;
 }
 
-bool shovelerTilemapRender(ShovelerTilemap *tilemap, ShovelerMaterial *material, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerRenderState *renderState)
+bool shovelerTilemapRender(ShovelerTilemap *tilemap, ShovelerVector2 regionPosition, ShovelerVector2 regionSize, ShovelerMaterial *material, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerRenderState *renderState)
 {
 	// since we are only changing uniform pointer values per per tileset, we can reuse the same shader for all of them
 	ShovelerShader *shader = shovelerSceneGenerateShader(scene, camera, light, model, material, NULL);
 
 	shovelerRenderStateEnableBlend(renderState, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+	shovelerMaterialTilemapSetActiveRegion(material, regionPosition, regionSize);
 	shovelerMaterialTilemapSetActiveTiles(material, tilemap->tiles);
 
 	int tilesetId = 1; // start with one since zero is blank

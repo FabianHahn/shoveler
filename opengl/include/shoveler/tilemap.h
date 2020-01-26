@@ -5,17 +5,17 @@
 
 #include <shoveler/types.h>
 
-struct ShovelerCameraStruct; // forward declaration: camera.h
-struct ShovelerLightStruct; // forward declaration: light.h
-struct ShovelerMaterialStruct; // forward declaration: material.h
-struct ShovelerModelStruct; // forward declaration: model.h
-struct ShovelerRenderStateStruct; // forward declaration: render_state.h
-struct ShovelerSceneStruct; // forward declaration: scene.h
-struct ShovelerTextureStruct; // forward declaration: texture.h
-struct ShovelerTilesetStruct; // forward declaration: tileset.h
+typedef struct ShovelerCameraStruct ShovelerCamera; // forward declaration: camera.h
+typedef struct ShovelerLightStruct ShovelerLight; // forward declaration: light.h
+typedef struct ShovelerMaterialStruct ShovelerMaterial; // forward declaration: material.h
+typedef struct ShovelerModelStruct ShovelerModel; // forward declaration: model.h
+typedef struct ShovelerRenderStateStruct ShovelerRenderState; // forward declaration: render_state.h
+typedef struct ShovelerSceneStruct ShovelerScene; // forward declaration: scene.h
+typedef struct ShovelerTextureStruct ShovelerTexture; // forward declaration: texture.h
+typedef struct ShovelerTilesetStruct ShovelerTileset; // forward declaration: tileset.h
 
 typedef struct ShovelerTilemapStruct {
-	struct ShovelerTextureStruct *tiles;
+	ShovelerTexture *tiles;
 	/** list of (ShovelerTileset *) */
 	GQueue *tilesets;
 	/**
@@ -25,11 +25,11 @@ typedef struct ShovelerTilemapStruct {
 } ShovelerTilemap;
 
 /** Creates a tilemap from a texture and an array of colliding tiles, with the caller retaining ownership over both. */
-ShovelerTilemap *shovelerTilemapCreate(struct ShovelerTextureStruct *tiles, const bool *collidingTiles);
+ShovelerTilemap *shovelerTilemapCreate(ShovelerTexture *tiles, const bool *collidingTiles);
 /** Adds a tileset to the tilemap, returning its index. */
-int shovelerTilemapAddTileset(ShovelerTilemap *tilemap, struct ShovelerTilesetStruct *tileset);
+int shovelerTilemapAddTileset(ShovelerTilemap *tilemap, ShovelerTileset *tileset);
 bool shovelerTilemapIntersect(ShovelerTilemap *tilemap, const ShovelerBoundingBox2 *boundingBox, const ShovelerBoundingBox2 *object);
-bool shovelerTilemapRender(ShovelerTilemap *tilemap, struct ShovelerMaterialStruct *material, struct ShovelerSceneStruct *scene, struct ShovelerCameraStruct *camera, struct ShovelerLightStruct *light, struct ShovelerModelStruct *model, struct ShovelerRenderStateStruct *renderState);
+bool shovelerTilemapRender(ShovelerTilemap *tilemap, ShovelerVector2 regionPosition, ShovelerVector2 regionSize, ShovelerMaterial *material, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerRenderState *renderState);
 void shovelerTilemapFree(ShovelerTilemap *tilemap);
 
 #endif

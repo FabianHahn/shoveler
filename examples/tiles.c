@@ -14,11 +14,14 @@
 #include <shoveler/global.h>
 #include <shoveler/image.h>
 #include <shoveler/input.h>
+#include <shoveler/material.h>
 #include <shoveler/model.h>
 #include <shoveler/opengl.h>
 #include <shoveler/scene.h>
 #include <shoveler/shader_program.h>
 #include <shoveler/texture.h>
+#include <shoveler/tilemap.h>
+#include <shoveler/tileset.h>
 
 static void shovelerSampleTerminate();
 static void shovelerSampleUpdate(ShovelerGame *game, double dt);
@@ -94,6 +97,7 @@ int main(int argc, char *argv[])
 	shovelerImageFree(tilesetImage);
 
 	ShovelerMaterial *tilemapMaterial = shovelerMaterialTilemapCreate(game->shaderCache, /* screenspace */ false);
+	shovelerMaterialTilemapSetActiveRegion(tilemapMaterial, /* regionPosition */ shovelerVector2(0.0f, 0.0f), /* regionSize */ shovelerVector2(1.0f, 1.0f));
 	shovelerMaterialTilemapSetActive(tilemapMaterial, tilemap);
 
 	ShovelerDrawable *quad = shovelerDrawableQuadCreate();

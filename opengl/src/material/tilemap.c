@@ -15,6 +15,9 @@
 #include "shoveler/shader.h"
 #include "shoveler/shader_cache.h"
 #include "shoveler/shader_program.h"
+#include "shoveler/sprite/tilemap.h"
+#include "shoveler/tilemap.h"
+#include "shoveler/tileset.h"
 
 static const char *vertexShaderSource =
 	"#version 400\n"
@@ -52,6 +55,10 @@ static const char *fragmentShaderSource =
 	"#version 400\n"
 	"\n"
 	"uniform bool sceneDebugMode;\n"
+	"uniform vec2 regionPosition;\n"
+	"uniform vec2 regionSize;\n"
+	"uniform vec2 spritePosition;\n"
+	"uniform vec2 spriteSize;\n"
 	"uniform int tilesWidth;\n"
 	"uniform int tilesHeight;\n"
 	"uniform int tilesetId;\n"
@@ -70,59 +77,86 @@ static const char *fragmentShaderSource =
 	"in vec4 lightFrustumPosition4;\n"
 	"\n"
 	"out vec4 fragmentColor;\n"
-	"\n"
+	""
+	"vec2 getSpriteUv()\n"
+	"{\n"
+	"	vec2 regionCorner = regionPosition - 0.5 * regionSize;\n"
+	"	vec2 spriteCorner = spritePosition - 0.5 * spriteSize;\n"
+	"	vec2 spriteOffset = spriteCorner - regionCorner;\n"
+	"	vec2 spriteOffsetUv = spriteOffset / regionSize;\n"
+	"	vec2 spriteTileOffsetUv = worldUv - spriteOffsetUv;\n"
+	""
+	"	vec2 spriteUvScale = regionSize / spriteSize;\n"
+	"	return spriteTileOffsetUv * spriteUvScale;\n"
+	"}\n"
+	""
 	"void main()\n"
 	"{\n"
-	"	vec3 tile = round(255 * texture2D(tiles, worldUv).xyz);\n"
+	"	vec2 spriteUv = getSpriteUv();\n"
+	""
+	"	if (spriteUv.x < 0.0 ||\n"
+	"		spriteUv.x > 1.0 ||\n"
+	"		spriteUv.y < 0.0 ||\n"
+	"		spriteUv.y > 1.0) {\n"
+	"		fragmentColor = vec4(0.0f);\n"
+	"		return;\n"
+	"	}\n"
+	""
+	"	vec3 tile = round(255 * texture2D(tiles, spriteUv).xyz);\n"
 	"	int tileTilesetId = int(tile.z);\n"
 	""
-	"	if (tileTilesetId == tilesetId) {\n"
-	"		vec2 tilesSize = textureSize(tiles, 0);\n"
-	"		vec2 tilesInverseSize = 1.0 / tilesSize;\n"
+	"	if (tileTilesetId != tilesetId) {\n"
+	"		fragmentColor = vec4(0.0f);\n"
+	"		return;\n"
+	"	}\n"
 	""
-	"		vec2 tilemapScaledUv = worldUv * tilesSize;\n"
-	"		vec2 tileUv = tilemapScaledUv;\n"
+	"	vec2 tilesSize = textureSize(tiles, 0);\n"
+	"	vec2 tilesInverseSize = 1.0 / tilesSize;\n"
 	""
-	"		// To avoid singularities around 0 and 1, make sure we don't break continuity of the uv function\n"
-	"		// because of flooring.\n"
-	"		if (worldUv.x > 0.5 * tilesInverseSize.x) {\n"
-	"			if (worldUv.x < (1.0 - 0.5 * tilesInverseSize.x)) {\n"
-	"				tileUv.x -= floor(tilemapScaledUv.x);\n"
-	"			} else {\n"
-	"				tileUv.x -= floor((1.0 - 0.5 * tilesInverseSize.x) * tilesSize.x);\n"
-	"			}\n"
-	"		}\n"
-	"		if (worldUv.y > 0.5 * tilesInverseSize.y) {\n"
-	"			if (worldUv.y < (1.0 - 0.5 * tilesInverseSize.y)) {\n"
-	"				tileUv.y -= floor(tilemapScaledUv.y);\n"
-	"			} else {\n"
-	"				tileUv.y -= floor((1.0 - 0.5 * tilesInverseSize.y) * tilesSize.y);\n"
-	"			}\n"
-	"		}\n"
+	"	vec2 tilemapScaledUv = spriteUv * tilesSize;\n"
+	"	vec2 tileUv = tilemapScaledUv;\n"
 	""
-	"		vec2 tilesetSize = textureSize(tileset, 0);\n"
-	"		vec2 tilesetInverseDimensions = 1.0 / vec2(tilesetColumns, tilesetRows);\n"
-	"		vec2 paddedTileSize = tilesetSize * tilesetInverseDimensions;\n"
-	"		vec2 paddedTilePaddingFraction = vec2(tilesetPadding) / paddedTileSize;\n"
-	"		vec2 tilePaddingScaleFactor = vec2(1.0) - 2.0 * paddedTilePaddingFraction;"
-	""
-	"		vec2 tilePaddedUv = paddedTilePaddingFraction + tilePaddingScaleFactor * tileUv;\n"
-	"		vec2 tilesetUv = (tile.xy + tilePaddedUv) * tilesetInverseDimensions;\n"
-	""
-	"		vec4 color = texture2D(tileset, tilesetUv).rgba;\n"
-	"		if (sceneDebugMode) {\n"
-	"			fragmentColor = vec4(tilesetUv.xy, tilesetUv.y, 1.0);\n"
+	"	// To avoid singularities around 0 and 1, make sure we don't break continuity of the uv function\n"
+	"	// because of flooring.\n"
+	"	if (spriteUv.x > 0.5 * tilesInverseSize.x) {\n"
+	"		if (spriteUv.x < (1.0 - 0.5 * tilesInverseSize.x)) {\n"
+	"			tileUv.x -= floor(tilemapScaledUv.x);\n"
 	"		} else {\n"
-	"			fragmentColor = color;\n"
+	"			tileUv.x -= floor((1.0 - 0.5 * tilesInverseSize.x) * tilesSize.x);\n"
 	"		}\n"
+	"	}\n"
+	"	if (spriteUv.y > 0.5 * tilesInverseSize.y) {\n"
+	"		if (spriteUv.y < (1.0 - 0.5 * tilesInverseSize.y)) {\n"
+	"			tileUv.y -= floor(tilemapScaledUv.y);\n"
+	"		} else {\n"
+	"			tileUv.y -= floor((1.0 - 0.5 * tilesInverseSize.y) * tilesSize.y);\n"
+	"		}\n"
+	"	}\n"
+	""
+	"	vec2 tilesetSize = textureSize(tileset, 0);\n"
+	"	vec2 tilesetInverseDimensions = 1.0 / vec2(tilesetColumns, tilesetRows);\n"
+	"	vec2 paddedTileSize = tilesetSize * tilesetInverseDimensions;\n"
+	"	vec2 paddedTilePaddingFraction = vec2(tilesetPadding) / paddedTileSize;\n"
+	"	vec2 tilePaddingScaleFactor = vec2(1.0) - 2.0 * paddedTilePaddingFraction;"
+	""
+	"	vec2 tilePaddedUv = paddedTilePaddingFraction + tilePaddingScaleFactor * tileUv;\n"
+	"	vec2 tilesetUv = (tile.xy + tilePaddedUv) * tilesetInverseDimensions;\n"
+	""
+	"	vec4 color = texture2D(tileset, tilesetUv).rgba;\n"
+	"	if (sceneDebugMode) {\n"
+	"	fragmentColor = vec4(tilesetUv.xy, tilesetUv.y, 1.0);\n"
 	"	} else {\n"
-	"		fragmentColor = vec4(0.0);\n"
+	"		fragmentColor = color;\n"
 	"	}\n"
 	"}\n";
 
 typedef struct {
 	ShovelerMaterial *material;
 	ShovelerSampler *tilesSampler;
+	ShovelerVector2 activeRegionPosition;
+	ShovelerVector2 activeRegionSize;
+	ShovelerVector2 activeSpritePosition;
+	ShovelerVector2 activeSpriteSize;
 	ShovelerTilemap *activeTilemap;
 	int activeLayerWidth;
 	int activeLayerHeight;
@@ -150,6 +184,10 @@ ShovelerMaterial *shovelerMaterialTilemapCreate(ShovelerShaderCache *shaderCache
 	materialData->material->render = render;
 	materialData->material->freeData = freeTilemap;
 	materialData->tilesSampler = shovelerSamplerCreate(false, false, true);
+	materialData->activeRegionPosition = shovelerVector2(0.0f, 0.0f);
+	materialData->activeRegionSize = shovelerVector2(1.0f, 1.0f);
+	materialData->activeSpritePosition = shovelerVector2(0.0f, 0.0f);
+	materialData->activeSpriteSize = shovelerVector2(1.0f, 1.0f);
 	materialData->activeLayerWidth = 0;
 	materialData->activeLayerHeight = 0;
 	materialData->activeLayerTexture = NULL;
@@ -159,6 +197,11 @@ ShovelerMaterial *shovelerMaterialTilemapCreate(ShovelerShaderCache *shaderCache
 	materialData->activeTilesetPadding = 0;
 	materialData->activeTilesetTexture = NULL;
 	materialData->activeTilesetSampler = NULL;
+
+	shovelerUniformMapInsert(materialData->material->uniforms, "regionPosition", shovelerUniformCreateVector2Pointer(&materialData->activeRegionPosition));
+	shovelerUniformMapInsert(materialData->material->uniforms, "regionSize", shovelerUniformCreateVector2Pointer(&materialData->activeRegionSize));
+	shovelerUniformMapInsert(materialData->material->uniforms, "spritePosition", shovelerUniformCreateVector2Pointer(&materialData->activeSpritePosition));
+	shovelerUniformMapInsert(materialData->material->uniforms, "spriteSize", shovelerUniformCreateVector2Pointer(&materialData->activeSpriteSize));
 
 	shovelerUniformMapInsert(materialData->material->uniforms, "tilesWidth", shovelerUniformCreateIntPointer(&materialData->activeLayerWidth));
 	shovelerUniformMapInsert(materialData->material->uniforms, "tilesHeight", shovelerUniformCreateIntPointer(&materialData->activeLayerHeight));
@@ -173,6 +216,23 @@ ShovelerMaterial *shovelerMaterialTilemapCreate(ShovelerShaderCache *shaderCache
 	shovelerUniformMapInsert(materialData->material->uniforms, "tileset", shovelerUniformCreateTexturePointer(&materialData->activeTilesetTexture, &materialData->activeTilesetSampler));
 
 	return materialData->material;
+}
+
+void shovelerMaterialTilemapSetActiveRegion(ShovelerMaterial *material, ShovelerVector2 regionPosition, ShovelerVector2 regionSize)
+{
+	MaterialData *materialData = material->data;
+
+	materialData->activeRegionPosition = regionPosition;
+	materialData->activeRegionSize = regionSize;
+}
+
+void shovelerMaterialTilemapSetActiveSprite(ShovelerMaterial *material, ShovelerSpriteTilemap *sprite)
+{
+	MaterialData *materialData = material->data;
+
+	materialData->activeSpritePosition = sprite->sprite.position;
+	materialData->activeSpriteSize = sprite->sprite.size;
+	materialData->activeTilemap = sprite->tilemap;
 }
 
 void shovelerMaterialTilemapSetActive(ShovelerMaterial *tilemapMaterial, ShovelerTilemap *tilemap)
@@ -212,7 +272,7 @@ static bool render(ShovelerMaterial *material, ShovelerScene *scene, ShovelerCam
 		return false;
 	}
 
-	return shovelerTilemapRender(materialData->activeTilemap, material, scene, camera, light, model, renderState);
+	return shovelerTilemapRender(materialData->activeTilemap, materialData->activeRegionPosition, materialData->activeRegionSize, material, scene, camera, light, model, renderState);
 }
 
 static void freeTilemap(ShovelerMaterial *material)

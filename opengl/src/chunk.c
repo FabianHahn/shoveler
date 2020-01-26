@@ -92,7 +92,7 @@ bool shovelerChunkRender(ShovelerChunk *chunk, ShovelerMaterial *canvasMaterial,
 				}
 				break;
 			case SHOVELER_CHUNK_LAYER_TYPE_TILEMAP:
-				if(!shovelerTilemapRender(layer->value.tilemap, tilemapMaterial, scene, camera, light, model, renderState)) {
+				if(!shovelerTilemapRender(layer->value.tilemap, /* regionPosition */ shovelerVector2(0.0f, 0.0f), /* regionSize */ shovelerVector2(1.0f, 1.0f), tilemapMaterial, scene, camera, light, model, renderState)) {
 					shovelerLogWarning("Failed to render tilemap %p layer of chunk %p.", layer->value.tilemap, chunk);
 					return false;
 				}
