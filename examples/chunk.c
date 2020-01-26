@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
 	ShovelerTilemap *tilemap = shovelerTilemapCreate(tilesTexture, collidingTiles);
 	shovelerChunkAddTilemapLayer(chunk, tilemap);
 
-	ShovelerCanvas *canvas = shovelerCanvasCreate();
+	ShovelerCanvas *canvas = shovelerCanvasCreate(/* numLayers */ 1);
 	shovelerChunkAddCanvasLayer(chunk, canvas);
 
 	ShovelerImage *borderTilesImage = shovelerImageCreate(1, 1, 3);
@@ -139,12 +139,12 @@ int main(int argc, char *argv[])
 	ShovelerSprite *tileSprite = shovelerSpriteTileCreate(tileSpriteMaterial, tileset, /* tilesetRow */ 0, /* tilesetColumn */ 1);
 	tileSprite->position = shovelerVector2(-1.5f, -1.5f);
 	tileSprite->size = shovelerVector2(5.0f, 5.0f);
-	shovelerCanvasAddSprite(canvas, tileSprite);
+	shovelerCanvasAddSprite(canvas, /* layerId */ 0, tileSprite);
 
 	characterSprite = shovelerSpriteTileCreate(tileSpriteMaterial, animationTileset, /* tilesetRow */ 0, /* tilesetColumn */ 0);
 	characterSprite->position = shovelerVector2(0.0f, 0.0f);
 	characterSprite->size = shovelerVector2(1.0f, 1.0f);
-	shovelerCanvasAddSprite(canvas, characterSprite);
+	shovelerCanvasAddSprite(canvas, /* layerId */ 0, characterSprite);
 
 	animation = shovelerTileSpriteAnimationCreate(characterSprite, shovelerVector2(0.0f, 0.0f), 0.1f);
 	animation->moveAmountThreshold = 0.25f;

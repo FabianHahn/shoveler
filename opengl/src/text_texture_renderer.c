@@ -29,9 +29,9 @@ ShovelerTextTextureRenderer *shovelerTextTextureRendererCreate(ShovelerFontAtlas
 	renderer->textModel = shovelerModelCreate(renderer->textQuad, renderer->canvasMaterial);
 	shovelerSceneAddModel(renderer->textScene, renderer->textModel);
 
-	renderer->textCanvas = shovelerCanvasCreate();
+	renderer->textCanvas = shovelerCanvasCreate(/* numLayers */ 1);
 	renderer->textSprite = shovelerSpriteTextCreate(renderer->textMaterial, fontAtlasTexture, fontAtlasTexture->fontAtlas->fontSize, /* color */ shovelerVector4(1.0f, 1.0f, 1.0f, 1.0f));
-	shovelerCanvasAddSprite(renderer->textCanvas, renderer->textSprite);
+	shovelerCanvasAddSprite(renderer->textCanvas, /* layerId */ 0, renderer->textSprite);
 	shovelerMaterialCanvasSetActive(renderer->canvasMaterial, renderer->textCanvas);
 
 	renderer->textures = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, freeTextTexture);

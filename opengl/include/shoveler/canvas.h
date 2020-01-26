@@ -18,13 +18,14 @@ typedef struct ShovelerModelStruct ShovelerModel; // forward declaration: model.
 typedef struct ShovelerSpriteStruct ShovelerSprite; // forward declaration: sprite.h
 
 typedef struct ShovelerCanvasStruct {
-	/** list of (ShovelerSprite *) */
-	GQueue *sprites;
+	int numLayers;
+	/** array of size numLayers, wher each element is a list of (ShovelerSprite *) */
+	GQueue **layers;
 } ShovelerCanvas;
 
-ShovelerCanvas *shovelerCanvasCreate();
+ShovelerCanvas *shovelerCanvasCreate(int numLayers);
 /** Adds a sprite to the canvas, with the caller retaining ownership over it and changes to it being reflected live. Returns the id of the added sprite. */
-int shovelerCanvasAddSprite(ShovelerCanvas *canvas, ShovelerSprite *sprite);
+int shovelerCanvasAddSprite(ShovelerCanvas *canvas, int layerId, ShovelerSprite *sprite);
 bool shovelerCanvasRender(ShovelerCanvas *canvas, ShovelerVector2 regionPosition, ShovelerVector2 regionSize, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerRenderState *renderState);
 void shovelerCanvasFree(ShovelerCanvas *canvas);
 

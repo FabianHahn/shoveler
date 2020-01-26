@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
 
 	fpsString = g_string_new("");
 
-	ShovelerCanvas *canvas = shovelerCanvasCreate();
+	ShovelerCanvas *canvas = shovelerCanvasCreate(/* numLayers */ 1);
 
 	ShovelerFontAtlas *fontAtlas = shovelerFontAtlasCreate(font, /* fontSize */ 48, /* padding */ 1);
 	fontAtlasTexture = shovelerFontAtlasTextureCreate(fontAtlas);
@@ -106,11 +106,11 @@ int main(int argc, char *argv[])
 	ShovelerSprite *textSprite = shovelerSpriteTileCreate(tileSpriteMaterial, textTileset, /* tilesetRow */ 0, /* tilesetColumn */ 0);
 	textSprite->position = shovelerVector2(0.5f, 0.5f);
 	textSprite->size = shovelerVector2(1.0f, (float) shovelerTextTexture->height / shovelerTextTexture->width);
-	shovelerCanvasAddSprite(canvas, textSprite);
+	shovelerCanvasAddSprite(canvas, /* layerId */ 0, textSprite);
 
 	ShovelerMaterial *textMaterial = shovelerMaterialTextCreate(game->shaderCache, /* screenspace */ true);
 	screenspaceTextSprite = shovelerSpriteTextCreate(textMaterial, fontAtlasTexture, /* fontSize */ 48.0f, /* color */ shovelerVector4(0.0f, 1.0f, 0.0f, 0.5f));
-	shovelerCanvasAddSprite(game->screenspaceCanvas, screenspaceTextSprite);
+	shovelerCanvasAddSprite(game->screenspaceCanvas, /* layerId */ 0, screenspaceTextSprite);
 
 	shovelerImagePngWriteFile(fontAtlas->image, "atlas.png");
 

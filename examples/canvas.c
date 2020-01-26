@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
 	game->controller->lockTiltX = true;
 	game->controller->lockTiltY = true;
 
-	ShovelerCanvas *canvas = shovelerCanvasCreate();
+	ShovelerCanvas *canvas = shovelerCanvasCreate(/* numLayers */ 1);
 
 	ShovelerImage *tilesetImage = shovelerImageCreate(2, 2, 4);
 	shovelerImageClear(tilesetImage);
@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
 	ShovelerSprite *tileSprite = shovelerSpriteTileCreate(tileSpriteMaterial, tileset, /* tilesetRow */ 1, /* tilesetColumn */ 1);
 	tileSprite->position = shovelerVector2(-0.3f, -0.2f);
 	tileSprite->size = shovelerVector2(0.25f, 0.4f);
-	shovelerCanvasAddSprite(canvas, tileSprite);
+	shovelerCanvasAddSprite(canvas, /* layerId */ 0, tileSprite);
 
 	ShovelerCollider2 tileBoxCollider = shovelerColliderBox2(shovelerBoundingBox2(
 		shovelerVector2LinearCombination(1.0f, tileSprite->position, -0.5f, tileSprite->size),
@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
 	characterSprite = shovelerSpriteTileCreate(tileSpriteMaterial, animationTileset, /* tilesetRow */ 0, /* tilesetColumn */ 0);
 	characterSprite->position = shovelerVector2(0.0f, 0.0f);
 	characterSprite->size = shovelerVector2(0.2f, 0.2f);
-	shovelerCanvasAddSprite(canvas, characterSprite);
+	shovelerCanvasAddSprite(canvas, /* layerId */ 0, characterSprite);
 
 	animation = shovelerTileSpriteAnimationCreate(characterSprite, shovelerVector2(0.0f, 0.0f), 0.1f);
 	animation->moveAmountThreshold = 0.25f;

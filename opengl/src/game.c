@@ -112,7 +112,7 @@ ShovelerGame *shovelerGameCreate(ShovelerGameUpdateCallback *update, ShovelerGam
 	game->controller = shovelerControllerCreate(game->window, game->input, game->colliders, &controllerSettings->frame, controllerSettings->moveFactor, controllerSettings->tiltFactor, controllerSettings->boundingBoxSize2, controllerSettings->boundingBoxSize3);
 	game->view = shovelerViewCreate(updateAuthoritativeComponent, game);
 
-	game->screenspaceCanvas = shovelerCanvasCreate();
+	game->screenspaceCanvas = shovelerCanvasCreate(/* numLayers */ 1);
 	game->screenspaceCanvasQuad = shovelerDrawableQuadCreate();
 	game->screenspaceCanvasMaterial = shovelerMaterialCanvasCreate(game->shaderCache, /* screenspace */ true);
 	shovelerMaterialCanvasSetActive(game->screenspaceCanvasMaterial, game->screenspaceCanvas);
