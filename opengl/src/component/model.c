@@ -15,6 +15,7 @@ const char *const shovelerComponentTypeIdModel = "model";
 static void *activateModelComponent(ShovelerComponent *component);
 static void deactivateModelComponent(ShovelerComponent *component);
 static void updateModelPositionDependency(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent);
+static GLuint convertPolygonMode(ShovelerComponentModelPolygonMode polygonMode);
 
 ShovelerComponentType *shovelerComponentCreateModelType()
 {
@@ -65,7 +66,7 @@ static void *activateModelComponent(ShovelerComponent *component)
 	model->visible = shovelerComponentGetConfigurationValueBool(component, SHOVELER_COMPONENT_MODEL_OPTION_ID_VISIBLE);
 	model->emitter = shovelerComponentGetConfigurationValueBool(component, SHOVELER_COMPONENT_MODEL_OPTION_ID_EMITTER);
 	model->castsShadow = shovelerComponentGetConfigurationValueBool(component, SHOVELER_COMPONENT_MODEL_OPTION_ID_CASTS_SHADOW);
-	model->polygonMode = shovelerComponentGetConfigurationValueInt(component, SHOVELER_COMPONENT_MODEL_OPTION_ID_POLYGON_MODE);
+	model->polygonMode = convertPolygonMode(shovelerComponentGetConfigurationValueInt(component, SHOVELER_COMPONENT_MODEL_OPTION_ID_POLYGON_MODE));
 	shovelerModelUpdateTransformation(model);
 
 	ShovelerScene *scene = shovelerComponentGetViewScene(component);
@@ -99,4 +100,17 @@ static void updateModelPositionDependency(ShovelerComponent *component, const Sh
 
 	model->translation = *positionCoordinates;
 	shovelerModelUpdateTransformation(model);
+}
+
+static GLuint convertPolygonMode(ShovelerComponentModelPolygonMode polygonMode)
+{
+	switch(polygonMode) {
+		case SHOVELER_COMPONENT_MODEL_POLYGON_MODE_POINT:
+			return GL_POINT;
+		case SHOVELER_COMPONENT_MODEL_POLYGON_MODE_LINE:
+			return GL_LINE;
+		case SHOVELER_COMPONENT_MODEL_POLYGON_MODE_FILL:
+		default:
+			return GL_FILL;
+	}
 }

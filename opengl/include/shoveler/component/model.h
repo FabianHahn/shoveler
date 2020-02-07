@@ -19,6 +19,12 @@ typedef enum {
 	SHOVELER_COMPONENT_MODEL_OPTION_ID_POLYGON_MODE,
 } ShovelerComponentModelOptionId;
 
+typedef enum {
+	SHOVELER_COMPONENT_MODEL_POLYGON_MODE_POINT,
+	SHOVELER_COMPONENT_MODEL_POLYGON_MODE_LINE,
+	SHOVELER_COMPONENT_MODEL_POLYGON_MODE_FILL,
+} ShovelerComponentModelPolygonMode;
+
 ShovelerComponentType *shovelerComponentCreateModelType();
 ShovelerModel *shovelerComponentGetModel(ShovelerComponent *component);
 

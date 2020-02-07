@@ -18,7 +18,7 @@ typedef struct {
 	bool visible;
 	bool emitter;
 	bool castsShadow;
-	GLuint polygonMode;
+	ShovelerComponentModelPolygonMode polygonMode;
 } ShovelerViewModelConfiguration;
 
 /** Adds a model component to an entity, copying the supplied configuration. */
