@@ -1,6 +1,5 @@
 #include "shoveler/view/canvas.h"
 
-#include "shoveler/view/tile_sprite.h"
 #include "shoveler/component.h"
 #include "shoveler/log.h"
 
@@ -11,7 +10,7 @@ ShovelerComponent *shovelerViewEntityAddCanvas(ShovelerViewEntity *entity, const
 	}
 
 	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerComponentTypeIdCanvas);
-	shovelerComponentUpdateCanonicalConfigurationOptionEntityIdArray(component, SHOVELER_COMPONENT_CANVAS_OPTION_ID_TILE_SPRITE, configuration->tileSpriteEntityIds, configuration->numTileSprites);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, SHOVELER_COMPONENT_CANVAS_OPTION_ID_NUM_LAYERS, configuration->numLayers);
 
 	shovelerComponentActivate(component);
 	return component;
@@ -34,11 +33,7 @@ bool shovelerViewEntityGetCanvasConfiguration(ShovelerViewEntity *entity, Shovel
 		return false;
 	}
 
-	const ShovelerComponentConfigurationValue *tileSpritesValue = shovelerComponentGetConfigurationValue(component, SHOVELER_COMPONENT_CANVAS_OPTION_ID_TILE_SPRITE);
-	assert(tileSpritesValue != NULL);
-
-	outputConfiguration->tileSpriteEntityIds = tileSpritesValue->entityIdArrayValue.entityIds;
-	outputConfiguration->numTileSprites = tileSpritesValue->entityIdArrayValue.size;
+	outputConfiguration->numLayers = shovelerComponentGetConfigurationValueInt(component, SHOVELER_COMPONENT_CANVAS_OPTION_ID_NUM_LAYERS);
 	return true;
 }
 
@@ -50,7 +45,7 @@ bool shovelerViewEntityUpdateCanvas(ShovelerViewEntity *entity, const ShovelerVi
 		return false;
 	}
 
-	shovelerComponentUpdateCanonicalConfigurationOptionEntityIdArray(component, SHOVELER_COMPONENT_CANVAS_OPTION_ID_TILE_SPRITE, configuration->tileSpriteEntityIds, configuration->numTileSprites);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, SHOVELER_COMPONENT_CANVAS_OPTION_ID_NUM_LAYERS, configuration->numLayers);
 	return true;
 }
 

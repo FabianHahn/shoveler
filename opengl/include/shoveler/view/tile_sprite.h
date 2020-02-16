@@ -9,14 +9,10 @@
 #include <shoveler/types.h>
 
 typedef struct {
-	long long int positionEntityId;
 	long long int materialEntityId;
 	long long int tilesetEntityId;
 	int tilesetColumn;
 	int tilesetRow;
-	ShovelerCoordinateMapping positionMappingX;
-	ShovelerCoordinateMapping positionMappingY;
-	ShovelerVector2 size;
 } ShovelerViewTileSpriteConfiguration;
 
 /** Adds a tile sprite component to an entity, copying the supplied configuration. */

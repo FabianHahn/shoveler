@@ -7,8 +7,7 @@
 #include <shoveler/view.h>
 
 typedef struct {
-	size_t numTileSprites;
-	const long long int *tileSpriteEntityIds;
+	int numLayers;
 } ShovelerViewCanvasConfiguration;
 
 /** Adds a canvas component to an entity, copying the supplied configuration. */

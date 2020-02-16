@@ -21,6 +21,7 @@
 #include <shoveler/view/resource.h>
 #include <shoveler/view/resources.h>
 #include <shoveler/view/sampler.h>
+#include <shoveler/view/sprite.h>
 #include <shoveler/view/texture.h>
 #include <shoveler/view/tile_sprite.h>
 #include <shoveler/view/tile_sprite_animation.h>
@@ -294,15 +295,19 @@ int main(int argc, char *argv[])
 	ShovelerViewEntity *tilemapForegroundEntity = shovelerViewAddEntity(game->view, 13);
 	shovelerViewEntityAddTilemap(tilemapForegroundEntity, &tilemapForegroundConfiguration);
 
+	ShovelerViewSpriteConfiguration spriteConfiguration;
+	spriteConfiguration.positionEntityId = 14;
+	spriteConfiguration.positionMappingX = SHOVELER_COORDINATE_MAPPING_POSITIVE_X;
+	spriteConfiguration.positionMappingY = SHOVELER_COORDINATE_MAPPING_POSITIVE_Y;
+	spriteConfiguration.canvasEntityId = 15;
+	spriteConfiguration.layer = 0;
+	spriteConfiguration.size = shovelerVector2(2.5, 2.5);
+	spriteConfiguration.tileSpriteEntityId = 14;
 	ShovelerViewTileSpriteConfiguration tileSpriteConfiguration;
-	tileSpriteConfiguration.positionEntityId = 14;
 	tileSpriteConfiguration.materialEntityId = 14;
 	tileSpriteConfiguration.tilesetEntityId = 11;
 	tileSpriteConfiguration.tilesetColumn = 0;
 	tileSpriteConfiguration.tilesetRow = 0;
-	tileSpriteConfiguration.positionMappingX = SHOVELER_COORDINATE_MAPPING_POSITIVE_X;
-	tileSpriteConfiguration.positionMappingY = SHOVELER_COORDINATE_MAPPING_POSITIVE_Y;
-	tileSpriteConfiguration.size = shovelerVector2(2.5, 2.5);
 	ShovelerViewTileSpriteAnimationConfiguration tileSpriteAnimationConfiguration;
 	tileSpriteAnimationConfiguration.positionEntityId = 14;
 	tileSpriteAnimationConfiguration.tileSpriteEntityId = 14;
@@ -312,14 +317,14 @@ int main(int argc, char *argv[])
 	ShovelerViewMaterialConfiguration tileSpriteMaterialConfiguration;
 	tileSpriteMaterialConfiguration.type = SHOVELER_COMPONENT_MATERIAL_TYPE_TILE_SPRITE;
 	ShovelerViewEntity *tileSpriteEntity = shovelerViewAddEntity(game->view, 14);
+	shovelerViewEntityAddSprite(tileSpriteEntity, &spriteConfiguration);
 	shovelerViewEntityAddTileSprite(tileSpriteEntity, &tileSpriteConfiguration);
 	shovelerViewEntityAddTileSpriteAnimation(tileSpriteEntity, &tileSpriteAnimationConfiguration);
 	shovelerViewEntityAddMaterial(tileSpriteEntity, &tileSpriteMaterialConfiguration);
 	shovelerViewEntityAddPosition(tileSpriteEntity, shovelerVector3(3.0, 4.0, 0.0));
 
 	ShovelerViewCanvasConfiguration canvasConfiguration;
-	canvasConfiguration.numTileSprites = 1;
-	canvasConfiguration.tileSpriteEntityIds = (long long int[]){14};
+	canvasConfiguration.numLayers = 1;
 	ShovelerViewEntity *canvasEntity = shovelerViewAddEntity(game->view, 15);
 	shovelerViewEntityAddCanvas(canvasEntity, &canvasConfiguration);
 

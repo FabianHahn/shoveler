@@ -1,8 +1,8 @@
 #include "shoveler/component/canvas.h"
 
-#include "shoveler/component/tile_sprite.h"
 #include "shoveler/canvas.h"
 #include "shoveler/component.h"
+#include "shoveler/log.h"
 
 const char *const shovelerComponentTypeIdCanvas = "canvas";
 
@@ -12,7 +12,7 @@ static void deactivateCanvasComponent(ShovelerComponent *component);
 ShovelerComponentType *shovelerComponentCreateCanvasType()
 {
 	ShovelerComponentTypeConfigurationOption configurationOptions[1];
-	configurationOptions[SHOVELER_COMPONENT_CANVAS_OPTION_ID_TILE_SPRITE] = shovelerComponentTypeConfigurationOptionDependency("tile_sprite", shovelerComponentTypeIdTileSprite, /* isArray */ true, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+	configurationOptions[SHOVELER_COMPONENT_CANVAS_OPTION_ID_NUM_LAYERS] = shovelerComponentTypeConfigurationOption("num_layers", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
 
 	return shovelerComponentTypeCreate(shovelerComponentTypeIdCanvas, activateCanvasComponent, deactivateCanvasComponent, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
 }
@@ -26,20 +26,13 @@ ShovelerCanvas *shovelerComponentGetCanvas(ShovelerComponent *component)
 
 static void *activateCanvasComponent(ShovelerComponent *component)
 {
-	ShovelerCanvas *canvas = shovelerCanvasCreate(/* numLayers */ 1);
-
-	const ShovelerComponentConfigurationValue *tileSpritesValue = shovelerComponentGetConfigurationValue(component, SHOVELER_COMPONENT_CANVAS_OPTION_ID_TILE_SPRITE);
-	assert(tileSpritesValue != NULL);
-
-	for(int i = 0; i < tileSpritesValue->entityIdArrayValue.size; i++) {
-		ShovelerComponent *tileSpriteComponent = shovelerComponentGetArrayDependency(component, SHOVELER_COMPONENT_CANVAS_OPTION_ID_TILE_SPRITE, i);
-		assert(tileSpriteComponent != NULL);
-		ShovelerSprite *tileSprite = shovelerComponentGetTileSprite(tileSpriteComponent);
-		assert(tileSprite != NULL);
-
-		shovelerCanvasAddSprite(canvas, /* layerId */ 0, tileSprite);
+	int numLayers = shovelerComponentGetConfigurationValueInt(component, SHOVELER_COMPONENT_CANVAS_OPTION_ID_NUM_LAYERS);
+	if(numLayers < 1) {
+		shovelerLogWarning("Failed to activate canvas component on entity %lld: num_layers option must be positive, but got %d.", component->entityId, numLayers);
+		return NULL;
 	}
 
+	ShovelerCanvas *canvas = shovelerCanvasCreate(numLayers);
 	return canvas;
 }
 
