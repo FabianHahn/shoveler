@@ -25,7 +25,7 @@ ShovelerCanvas *shovelerCanvasCreate(int numLayers)
 	return canvas;
 }
 
-int shovelerCanvasAddSprite(ShovelerCanvas *canvas, int layerId, ShovelerSprite *sprite)
+void shovelerCanvasAddSprite(ShovelerCanvas *canvas, int layerId, ShovelerSprite *sprite)
 {
 	assert(layerId >= 0);
 	assert(layerId < canvas->numLayers);
@@ -33,7 +33,16 @@ int shovelerCanvasAddSprite(ShovelerCanvas *canvas, int layerId, ShovelerSprite 
 	GQueue *layer = canvas->layers[layerId];
 
 	g_queue_push_tail(layer, (gpointer) sprite);
-	return g_queue_get_length(layer) - 1;
+}
+
+bool shovelerCanvasRemoveSprite(ShovelerCanvas *canvas, int layerId, ShovelerSprite *sprite)
+{
+	assert(layerId >= 0);
+	assert(layerId < canvas->numLayers);
+
+	GQueue *layer = canvas->layers[layerId];
+
+	return g_queue_remove(layer, sprite);
 }
 
 bool shovelerCanvasRender(ShovelerCanvas *canvas, ShovelerVector2 regionPosition, ShovelerVector2 regionSize, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerRenderState *renderState)

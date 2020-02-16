@@ -16,7 +16,7 @@
 const char *const shovelerComponentTypeIdSprite = "sprite";
 
 static void *activateSpriteComponent(ShovelerComponent *component);
-static void *deactivateSpriteComponent(ShovelerComponent *component);
+static void deactivateSpriteComponent(ShovelerComponent *component);
 static void updateSpritePositionDependency(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent);
 static ShovelerVector2 getSpritePosition(ShovelerComponent *component);
 
@@ -33,7 +33,7 @@ ShovelerComponentType *shovelerComponentCreateSpriteType()
 	configurationOptions[SHOVELER_COMPONENT_SPRITE_OPTION_ID_TILE_SPRITE] = shovelerComponentTypeConfigurationOptionDependency("tile_sprite", shovelerComponentTypeIdTileSprite, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* updateDependency */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_SPRITE_OPTION_ID_TILEMAP_SPRITE] = shovelerComponentTypeConfigurationOptionDependency("tilemap_sprite", shovelerComponentTypeIdTilemapSprite, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* updateDependency */ NULL);
 
-	return shovelerComponentTypeCreate(shovelerComponentTypeIdSprite, activateSpriteComponent, /* deactivate */ NULL, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
+	return shovelerComponentTypeCreate(shovelerComponentTypeIdSprite, activateSpriteComponent, deactivateSpriteComponent, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
 }
 
 ShovelerSprite *shovelerComponentGetSprite(ShovelerComponent *component)
@@ -89,7 +89,7 @@ static void *activateSpriteComponent(ShovelerComponent *component)
 	return sprite;
 }
 
-static void *deactivateSpriteComponent(ShovelerComponent *component)
+static void deactivateSpriteComponent(ShovelerComponent *component)
 {
 	ShovelerSprite *sprite = (ShovelerSprite *) component->data;
 	assert(sprite != NULL);
@@ -97,7 +97,9 @@ static void *deactivateSpriteComponent(ShovelerComponent *component)
 	ShovelerComponent *canvasComponent = shovelerComponentGetDependency(component, SHOVELER_COMPONENT_SPRITE_OPTION_ID_CANVAS);
 	assert(canvasComponent != NULL);
 	ShovelerCanvas *canvas = shovelerComponentGetCanvas(canvasComponent);
-	// TODO remove sprite from canvas
+
+	int layerId = shovelerComponentGetConfigurationValueInt(component, SHOVELER_COMPONENT_SPRITE_OPTION_ID_LAYER);
+	shovelerCanvasRemoveSprite(canvas, layerId, sprite);
 }
 
 static void updateSpritePositionDependency(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent)

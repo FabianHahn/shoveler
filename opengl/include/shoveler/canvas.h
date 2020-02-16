@@ -25,7 +25,9 @@ typedef struct ShovelerCanvasStruct {
 
 ShovelerCanvas *shovelerCanvasCreate(int numLayers);
 /** Adds a sprite to the canvas, with the caller retaining ownership over it and changes to it being reflected live. Returns the id of the added sprite. */
-int shovelerCanvasAddSprite(ShovelerCanvas *canvas, int layerId, ShovelerSprite *sprite);
+void shovelerCanvasAddSprite(ShovelerCanvas *canvas, int layerId, ShovelerSprite *sprite);
+/** Removes a sprite from a given layer of the canvas. */
+bool shovelerCanvasRemoveSprite(ShovelerCanvas *canvas, int layerId, ShovelerSprite *sprite);
 bool shovelerCanvasRender(ShovelerCanvas *canvas, ShovelerVector2 regionPosition, ShovelerVector2 regionSize, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerRenderState *renderState);
 void shovelerCanvasFree(ShovelerCanvas *canvas);
 
