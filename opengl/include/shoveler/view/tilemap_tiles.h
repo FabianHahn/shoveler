@@ -15,7 +15,7 @@ typedef struct {
 	 * Otherwise, uses inline tiles definition below.
 	 */
 	bool isImageResourceEntityDefinition;
-	long long int imageResourceEntityId;
+	long long int imageEntityId;
 	int numColumns;
 	int numRows;
 	/** Array of tileset column bytes, where tile (column, row) is at position [row * numColumns + column] */

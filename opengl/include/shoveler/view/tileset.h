@@ -7,7 +7,7 @@
 #include <shoveler/view.h>
 
 typedef struct {
-	long long int imageResourceEntityId;
+	long long int imageEntityId;
 	int numColumns;
 	int numRows;
 	int padding;

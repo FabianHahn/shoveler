@@ -2,6 +2,8 @@
 
 #include "shoveler/component.h"
 
+const char *const shovelerComponentTypeIdPosition = "position";
+
 ShovelerComponentType *shovelerComponentCreatePositionType()
 {
 	ShovelerComponentTypeConfigurationOption configurationOptions[1];

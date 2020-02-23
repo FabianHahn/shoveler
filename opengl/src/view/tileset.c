@@ -1,6 +1,5 @@
 #include "shoveler/view/tileset.h"
 
-#include "shoveler/view/resources.h"
 #include "shoveler/component.h"
 #include "shoveler/log.h"
 #include "shoveler/view.h"
@@ -12,7 +11,7 @@ ShovelerComponent *shovelerViewEntityAddTileset(ShovelerViewEntity *entity, cons
 	}
 
 	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerComponentTypeIdTileset);
-	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, SHOVELER_COMPONENT_TILESET_OPTION_ID_IMAGE_RESOURCE, configuration->imageResourceEntityId);
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, SHOVELER_COMPONENT_TILESET_OPTION_ID_IMAGE, configuration->imageEntityId);
 	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, SHOVELER_COMPONENT_TILESET_OPTION_ID_NUM_COLUMNS, configuration->numColumns);
 	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, SHOVELER_COMPONENT_TILESET_OPTION_ID_NUM_ROWS, configuration->numRows);
 	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, SHOVELER_COMPONENT_TILESET_OPTION_ID_PADDING, configuration->padding);
@@ -38,7 +37,7 @@ bool shovelerViewEntityGetTilesetConfiguration(ShovelerViewEntity *entity, Shove
 		return NULL;
 	}
 
-	outputConfiguration->imageResourceEntityId = shovelerComponentGetConfigurationValueEntityId(component, SHOVELER_COMPONENT_TILESET_OPTION_ID_IMAGE_RESOURCE);
+	outputConfiguration->imageEntityId = shovelerComponentGetConfigurationValueEntityId(component, SHOVELER_COMPONENT_TILESET_OPTION_ID_IMAGE);
 	outputConfiguration->numColumns = shovelerComponentGetConfigurationValueInt(component, SHOVELER_COMPONENT_TILESET_OPTION_ID_NUM_COLUMNS);
 	outputConfiguration->numRows = shovelerComponentGetConfigurationValueInt(component, SHOVELER_COMPONENT_TILESET_OPTION_ID_NUM_ROWS);
 	outputConfiguration->padding = shovelerComponentGetConfigurationValueInt(component, SHOVELER_COMPONENT_TILESET_OPTION_ID_PADDING);
@@ -53,7 +52,7 @@ bool shovelerViewEntityUpdateTileset(ShovelerViewEntity *entity, const ShovelerV
 		return false;
 	}
 
-	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, SHOVELER_COMPONENT_TILESET_OPTION_ID_IMAGE_RESOURCE, configuration->imageResourceEntityId);
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, SHOVELER_COMPONENT_TILESET_OPTION_ID_IMAGE, configuration->imageEntityId);
 	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, SHOVELER_COMPONENT_TILESET_OPTION_ID_NUM_COLUMNS, configuration->numColumns);
 	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, SHOVELER_COMPONENT_TILESET_OPTION_ID_NUM_ROWS, configuration->numRows);
 	shovelerComponentUpdateCanonicalConfigurationOptionInt(component, SHOVELER_COMPONENT_TILESET_OPTION_ID_PADDING, configuration->padding);

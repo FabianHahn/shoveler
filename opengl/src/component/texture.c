@@ -1,6 +1,6 @@
 #include "shoveler/component/texture.h"
 
-#include "shoveler/component/resource.h"
+#include "shoveler/component/image.h"
 #include "shoveler/component.h"
 #include "shoveler/texture.h"
 
@@ -12,7 +12,7 @@ static void deactivateTextureComponent(ShovelerComponent *component);
 ShovelerComponentType *shovelerComponentCreateTextureType()
 {
 	ShovelerComponentTypeConfigurationOption configurationOptions[1];
-	configurationOptions[SHOVELER_COMPONENT_TEXTURE_OPTION_ID_IMAGE_RESOURCE] = shovelerComponentTypeConfigurationOptionDependency("image_resource", shovelerComponentTypeIdResource, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+	configurationOptions[SHOVELER_COMPONENT_TEXTURE_OPTION_ID_IMAGE] = shovelerComponentTypeConfigurationOptionDependency("image", shovelerComponentTypeIdImage, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
 
 	return shovelerComponentTypeCreate(shovelerComponentTypeIdTexture, activateTextureComponent, deactivateTextureComponent, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
 }
@@ -26,9 +26,9 @@ ShovelerTexture *shovelerComponentGetTexture(ShovelerComponent *component)
 
 static void *activateTextureComponent(ShovelerComponent *component)
 {
-	ShovelerComponent *imageResourceComponent = shovelerComponentGetDependency(component, SHOVELER_COMPONENT_TEXTURE_OPTION_ID_IMAGE_RESOURCE);
-	assert(imageResourceComponent != NULL);
-	ShovelerImage *image = shovelerComponentGetResource(imageResourceComponent);
+	ShovelerComponent *imageComponent = shovelerComponentGetDependency(component, SHOVELER_COMPONENT_TEXTURE_OPTION_ID_IMAGE);
+	assert(imageComponent != NULL);
+	ShovelerImage *image = shovelerComponentGetImage(imageComponent);
 	assert(image != NULL);
 
 	ShovelerTexture *texture = shovelerTextureCreate2d(image, false);

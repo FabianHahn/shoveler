@@ -6,8 +6,6 @@
 #include "shoveler/component.h"
 #include "shoveler/log.h"
 
-const char *const shovelerComponentTypeIdPosition = "position";
-
 ShovelerComponent *shovelerViewEntityAddPosition(ShovelerViewEntity *entity, ShovelerVector3 coordinates)
 {
 	if(!shovelerViewHasComponentType(entity->view, shovelerComponentTypeIdPosition)) {

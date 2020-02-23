@@ -1,8 +1,5 @@
-#include <assert.h> // assert
-#include <stdlib.h> // malloc free
-
-#include "shoveler/view/resources.h"
 #include "shoveler/view/texture.h"
+
 #include "shoveler/component.h"
 #include "shoveler/log.h"
 #include "shoveler/view.h"
@@ -14,7 +11,7 @@ bool shovelerViewEntityAddTexture(ShovelerViewEntity *entity, const ShovelerView
 	}
 
 	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerComponentTypeIdTexture);
-	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, SHOVELER_COMPONENT_TEXTURE_OPTION_ID_IMAGE_RESOURCE, configuration->imageResourceEntityId);
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, SHOVELER_COMPONENT_TEXTURE_OPTION_ID_IMAGE, configuration->imageEntityId);
 
 	shovelerComponentActivate(component);
 	return component;
@@ -37,7 +34,7 @@ bool shovelerViewEntityGetTextureConfiguration(ShovelerViewEntity *entity, Shove
 		return false;
 	}
 
-	outputConfiguration->imageResourceEntityId = shovelerComponentGetConfigurationValueEntityId(component, SHOVELER_COMPONENT_TEXTURE_OPTION_ID_IMAGE_RESOURCE);
+	outputConfiguration->imageEntityId = shovelerComponentGetConfigurationValueEntityId(component, SHOVELER_COMPONENT_TEXTURE_OPTION_ID_IMAGE);
 	return true;
 }
 
@@ -49,7 +46,7 @@ bool shovelerViewEntityUpdateTexture(ShovelerViewEntity *entity, const ShovelerV
 		return false;
 	}
 
-	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, SHOVELER_COMPONENT_TEXTURE_OPTION_ID_IMAGE_RESOURCE, configuration->imageResourceEntityId);
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, SHOVELER_COMPONENT_TEXTURE_OPTION_ID_IMAGE, configuration->imageEntityId);
 	return true;
 }
 

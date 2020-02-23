@@ -10,7 +10,7 @@
 #include <shoveler/view.h>
 
 typedef struct {
-	long long int imageResourceEntityId;
+	long long int imageEntityId;
 } ShovelerViewTextureConfiguration;
 
 /** Adds a texture component to an entity, copying the supplied configuration. */

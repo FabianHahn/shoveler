@@ -8,7 +8,7 @@ typedef struct ShovelerComponentStruct ShovelerComponent; // forward declaration
 extern const char *const shovelerComponentTypeIdTexture;
 
 typedef enum {
-	SHOVELER_COMPONENT_TEXTURE_OPTION_ID_IMAGE_RESOURCE,
+	SHOVELER_COMPONENT_TEXTURE_OPTION_ID_IMAGE,
 } ShovelerComponentTextureOptionId;
 
 ShovelerComponentType *shovelerComponentCreateTextureType();

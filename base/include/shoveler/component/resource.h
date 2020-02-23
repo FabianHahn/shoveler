@@ -7,11 +7,10 @@ typedef struct ShovelerComponentStruct ShovelerComponent; // forward declaration
 extern const char *const shovelerComponentTypeIdResource;
 
 typedef enum {
-	SHOVELER_COMPONENT_RESOURCE_OPTION_ID_TYPE_ID,
 	SHOVELER_COMPONENT_RESOURCE_OPTION_ID_BUFFER,
 } ShovelerComponentResourceOptionId;
 
 ShovelerComponentType *shovelerComponentCreateResourceType();
-void *shovelerComponentGetResource(ShovelerComponent *component);
+void shovelerComponentGetResource(ShovelerComponent *component, const unsigned char **outputData, int *outputSize);
 
 #endif

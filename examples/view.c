@@ -14,6 +14,7 @@
 #include <shoveler/view/client.h>
 #include <shoveler/view/controller.h>
 #include <shoveler/view/drawable.h>
+#include <shoveler/view/image.h>
 #include <shoveler/view/light.h>
 #include <shoveler/view/material.h>
 #include <shoveler/view/model.h>
@@ -172,17 +173,20 @@ int main(int argc, char *argv[])
 	shovelerImageGet(image, 1, 1, 3) = 255;
 	GString *imageData = getImageData(image);
 	ShovelerViewResourceConfiguration imageResourceConfiguration;
-	imageResourceConfiguration.typeId = "image/png";
 	imageResourceConfiguration.buffer = (unsigned char *) imageData->str;
 	imageResourceConfiguration.bufferSize = imageData->len;
+	ShovelerViewImageConfiguration imageConfiguration;
+	imageConfiguration.format = SHOVELER_COMPONENT_IMAGE_FORMAT_PNG;
+	imageConfiguration.resourceEntityId = 6;
 	ShovelerViewTextureConfiguration textureConfiguration;
-	textureConfiguration.imageResourceEntityId = 6;
+	textureConfiguration.imageEntityId = 6;
 	ShovelerViewSamplerConfiguration samplerConfiguration;
 	samplerConfiguration.interpolate = true;
 	samplerConfiguration.useMipmaps = true;
 	samplerConfiguration.clamp = true;
 	ShovelerViewEntity *resourceEntity = shovelerViewAddEntity(game->view, 6);
 	shovelerViewEntityAddResource(resourceEntity, &imageResourceConfiguration);
+	shovelerViewEntityAddImage(resourceEntity, &imageConfiguration);
 	shovelerViewEntityAddTexture(resourceEntity, &textureConfiguration);
 	shovelerViewEntityAddSampler(resourceEntity, &samplerConfiguration);
 	g_string_free(imageData, true);
@@ -211,7 +215,7 @@ int main(int argc, char *argv[])
 	tilesetIds[3] = 2; // full tileset
 	ShovelerViewTilemapTilesConfiguration tilesConfiguration;
 	tilesConfiguration.isImageResourceEntityDefinition = false;
-	tilesConfiguration.imageResourceEntityId = 0;
+	tilesConfiguration.imageEntityId = 0;
 	tilesConfiguration.numColumns = 2;
 	tilesConfiguration.numRows = 2;
 	tilesConfiguration.tilesetColumns = tilesetColumns;
@@ -233,24 +237,27 @@ int main(int argc, char *argv[])
 	GString *layer2ImageData = getImageData(layer2Image);
 	shovelerImageFree(layer2Image);
 	ShovelerViewResourceConfiguration layer2ImageResourceConfiguration;
-	layer2ImageResourceConfiguration.typeId = "image/png";
 	layer2ImageResourceConfiguration.buffer = (unsigned char *) layer2ImageData->str;
 	layer2ImageResourceConfiguration.bufferSize = layer2ImageData->len;
+	ShovelerViewImageConfiguration layer2ImageConfiguration;
+	layer2ImageConfiguration.format = SHOVELER_COMPONENT_IMAGE_FORMAT_PNG;
+	layer2ImageConfiguration.resourceEntityId = 9;
 	ShovelerViewTilemapTilesConfiguration layer2Configuration;
 	layer2Configuration.isImageResourceEntityDefinition = true;
-	layer2Configuration.imageResourceEntityId = 9;
+	layer2Configuration.imageEntityId = 9;
 	ShovelerViewTilemapCollidersConfiguration colliders2Configuration;
 	colliders2Configuration.numColumns = 3;
 	colliders2Configuration.numRows = 3;
 	colliders2Configuration.colliders = (unsigned char[]){false, false, false, false, false, false, false, false, false};
 	ShovelerViewEntity *layer2ResourceEntity = shovelerViewAddEntity(game->view, 9);
 	shovelerViewEntityAddResource(layer2ResourceEntity, &layer2ImageResourceConfiguration);
+	shovelerViewEntityAddImage(layer2ResourceEntity, &layer2ImageConfiguration);
 	shovelerViewEntityAddTilemapTiles(layer2ResourceEntity, &layer2Configuration);
 	g_string_free(layer2ImageData, true);
 	shovelerViewEntityAddTilemapColliders(layer2ResourceEntity, &colliders2Configuration);
 
 	ShovelerViewTilesetConfiguration tilesetConfiguration;
-	tilesetConfiguration.imageResourceEntityId = 6;
+	tilesetConfiguration.imageEntityId = 6;
 	tilesetConfiguration.numColumns = 2;
 	tilesetConfiguration.numRows = 2;
 	tilesetConfiguration.padding = 1;
@@ -260,18 +267,21 @@ int main(int argc, char *argv[])
 	ShovelerImage *animationTilesetImage = shovelerImageCreateAnimationTileset(image, 1);
 	GString *animationTilesetImageData = getImageData(animationTilesetImage);
 	ShovelerViewResourceConfiguration animationTilesetImageResourceConfiguration;
-	animationTilesetImageResourceConfiguration.typeId = "image/png";
 	animationTilesetImageResourceConfiguration.buffer = (unsigned char *) animationTilesetImageData->str;
 	animationTilesetImageResourceConfiguration.bufferSize = animationTilesetImageData->len;
+	ShovelerViewImageConfiguration animationTilesetImageConfiguration;
+	animationTilesetImageConfiguration.format = SHOVELER_COMPONENT_IMAGE_FORMAT_PNG;
+	animationTilesetImageConfiguration.resourceEntityId = 11;
 	ShovelerViewTextureConfiguration animationTilesetTextureConfiguration;
-	animationTilesetTextureConfiguration.imageResourceEntityId = 11;
+	animationTilesetTextureConfiguration.imageEntityId = 11;
 	ShovelerViewTilesetConfiguration animationTilesetConfiguration;
-	animationTilesetConfiguration.imageResourceEntityId = 11;
+	animationTilesetConfiguration.imageEntityId = 11;
 	animationTilesetConfiguration.numColumns = 4;
 	animationTilesetConfiguration.numRows = 3;
 	animationTilesetConfiguration.padding = 1;
 	ShovelerViewEntity *animationTilesetEntity = shovelerViewAddEntity(game->view, 11);
 	shovelerViewEntityAddResource(animationTilesetEntity, &animationTilesetImageResourceConfiguration);
+	shovelerViewEntityAddImage(animationTilesetEntity, &animationTilesetImageConfiguration);
 	shovelerViewEntityAddTexture(animationTilesetEntity, &animationTilesetTextureConfiguration);
 	shovelerViewEntityAddTileset(animationTilesetEntity, &animationTilesetConfiguration);
 	g_string_free(animationTilesetImageData, true);

@@ -1,53 +1,24 @@
 #include "shoveler/component/resource.h"
 
-#include "shoveler/component/resources.h"
 #include "shoveler/component.h"
 #include "shoveler/resources.h"
+
+const char *const shovelerComponentTypeIdResource = "resource";
 
 static void *activateResourceComponent(ShovelerComponent *component);
 static void deactivateResourceComponent(ShovelerComponent *component);
 
 ShovelerComponentType *shovelerComponentCreateResourceType()
 {
-	ShovelerComponentTypeConfigurationOption configurationOptions[2];
-	configurationOptions[SHOVELER_COMPONENT_RESOURCE_OPTION_ID_TYPE_ID] = shovelerComponentTypeConfigurationOption("type_id", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_STRING, /* isOptional */ false, /* liveUpdate */ NULL);
+	ShovelerComponentTypeConfigurationOption configurationOptions[1];
 	configurationOptions[SHOVELER_COMPONENT_RESOURCE_OPTION_ID_BUFFER] = shovelerComponentTypeConfigurationOption("type_id", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BYTES, /* isOptional */ false, /* liveUpdate */ NULL);
 
-	return shovelerComponentTypeCreate(shovelerComponentTypeIdResource, activateResourceComponent, deactivateResourceComponent, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
+	return shovelerComponentTypeCreate(shovelerComponentTypeIdResource, /* activate */ NULL, /* deactivate */ NULL, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
 }
 
-void *shovelerComponentGetResource(ShovelerComponent *component)
+void shovelerComponentGetResource(ShovelerComponent *component, const unsigned char **outputData, int *outputSize)
 {
 	assert(component->type->id == shovelerComponentTypeIdResource);
 
-	return component->data;
-}
-
-static void *activateResourceComponent(ShovelerComponent *component)
-{
-	assert(shovelerComponentHasViewResources(component));
-
-	ShovelerResources *resources = shovelerComponentGetViewResources(component);
-
-	GString *resourceId = g_string_new("");
-	g_string_append_printf(resourceId, "%lld", component->entityId);
-
-	const char *typeId = shovelerComponentGetConfigurationValueString(component, SHOVELER_COMPONENT_RESOURCE_OPTION_ID_TYPE_ID);
-	const unsigned char *bufferData;
-	int bufferSize;
-	shovelerComponentGetConfigurationValueBytes(component, SHOVELER_COMPONENT_RESOURCE_OPTION_ID_BUFFER, &bufferData, &bufferSize);
-	if(!shovelerResourcesSet(resources, typeId, resourceId->str, bufferData, bufferSize)) {
-		g_string_free(resourceId, true);
-		return NULL;
-	}
-
-	ShovelerResource *resource = shovelerResourcesGet(resources, typeId, resourceId->str);
-	g_string_free(resourceId, true);
-
-	return resource->data;
-}
-
-static void deactivateResourceComponent(ShovelerComponent *component)
-{
-	// nothing to do here, resources are currently persisted
+	shovelerComponentGetConfigurationValueBytes(component, SHOVELER_COMPONENT_RESOURCE_OPTION_ID_BUFFER, outputData, outputSize);
 }

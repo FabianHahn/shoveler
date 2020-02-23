@@ -1,6 +1,6 @@
 #include "shoveler/component/tilemap_tiles.h"
 
-#include "shoveler/component/resource.h"
+#include "shoveler/component/image.h"
 #include "shoveler/component.h"
 #include "shoveler/image.h"
 #include "shoveler/log.h"
@@ -18,7 +18,7 @@ static bool isComponentConfigurationOptionDefinition(ShovelerComponent *componen
 ShovelerComponentType *shovelerComponentCreateTilemapTilesType()
 {
 	ShovelerComponentTypeConfigurationOption configurationOptions[6];
-	configurationOptions[SHOVELER_COMPONENT_TILEMAP_TILES_OPTION_IMAGE_RESOURCE] = shovelerComponentTypeConfigurationOptionDependency("image_resource", shovelerComponentTypeIdResource, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+	configurationOptions[SHOVELER_COMPONENT_TILEMAP_TILES_OPTION_IMAGE] = shovelerComponentTypeConfigurationOptionDependency("image", shovelerComponentTypeIdImage, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* updateDependency */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_TILEMAP_TILES_OPTION_NUM_COLUMNS] = shovelerComponentTypeConfigurationOption("num_columns", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ true, /* liveUpdate */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_TILEMAP_TILES_OPTION_NUM_ROWS] = shovelerComponentTypeConfigurationOption("num_rows", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ true, /* liveUpdate */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_TILEMAP_TILES_OPTION_TILESET_COLUMNS] = shovelerComponentTypeConfigurationOption("tileset_columns", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BYTES, /* isOptional */ true, liveUpdateTilesOption);
@@ -42,9 +42,9 @@ static void *activateTilemapTilesComponent(ShovelerComponent *component)
 
 	ShovelerTexture *texture;
 	if(isImageResourceEntityDefinition && !isConfigurationOptionDefinition) {
-		ShovelerComponent *imageResourceComponent = shovelerComponentGetDependency(component, SHOVELER_COMPONENT_TILEMAP_TILES_OPTION_IMAGE_RESOURCE);
-		assert(imageResourceComponent != NULL);
-		ShovelerImage *image = shovelerComponentGetResource(imageResourceComponent);
+		ShovelerComponent *imageComponent = shovelerComponentGetDependency(component, SHOVELER_COMPONENT_TILEMAP_TILES_OPTION_IMAGE);
+		assert(imageComponent != NULL);
+		ShovelerImage *image = shovelerComponentGetImage(imageComponent);
 		assert(image != NULL);
 
 		texture = shovelerTextureCreate2d(image, false);
@@ -113,7 +113,7 @@ static void updateTiles(ShovelerComponent *component, ShovelerTexture *texture)
 
 static bool isComponentImageResourceEntityDefinition(ShovelerComponent *component)
 {
-	return shovelerComponentHasConfigurationValue(component, SHOVELER_COMPONENT_TILEMAP_TILES_OPTION_IMAGE_RESOURCE);
+	return shovelerComponentHasConfigurationValue(component, SHOVELER_COMPONENT_TILEMAP_TILES_OPTION_IMAGE);
 }
 
 static bool isComponentConfigurationOptionDefinition(ShovelerComponent *component)

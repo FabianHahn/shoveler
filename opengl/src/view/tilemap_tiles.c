@@ -1,9 +1,5 @@
-﻿#include <assert.h> // assert
-#include <stdlib.h> // malloc free
-#include <string.h> // memmove
+﻿#include "shoveler/view/tilemap_tiles.h"
 
-#include "shoveler/view/resources.h"
-#include "shoveler/view/tilemap_tiles.h"
 #include "shoveler/component.h"
 #include "shoveler/image.h"
 #include "shoveler/log.h"
@@ -18,7 +14,7 @@ ShovelerComponent *shovelerViewEntityAddTilemapTiles(ShovelerViewEntity *entity,
 	ShovelerComponent *component = shovelerViewEntityAddComponent(entity, shovelerComponentTypeIdTilemapTiles);
 
 	if(configuration->isImageResourceEntityDefinition) {
-		shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, SHOVELER_COMPONENT_TILEMAP_TILES_OPTION_IMAGE_RESOURCE, configuration->imageResourceEntityId);
+		shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, SHOVELER_COMPONENT_TILEMAP_TILES_OPTION_IMAGE, configuration->imageEntityId);
 	} else {
 		shovelerComponentUpdateCanonicalConfigurationOptionInt(component, SHOVELER_COMPONENT_TILEMAP_TILES_OPTION_NUM_COLUMNS, configuration->numColumns);
 		shovelerComponentUpdateCanonicalConfigurationOptionInt(component, SHOVELER_COMPONENT_TILEMAP_TILES_OPTION_NUM_ROWS, configuration->numRows);
@@ -48,10 +44,10 @@ bool shovelerViewEntityGetTilemapTilesConfiguration(ShovelerViewEntity *entity, 
 		return false;
 	}
 
-	outputConfiguration->isImageResourceEntityDefinition = shovelerComponentHasConfigurationValue(component, SHOVELER_COMPONENT_TILEMAP_TILES_OPTION_IMAGE_RESOURCE);
+	outputConfiguration->isImageResourceEntityDefinition = shovelerComponentHasConfigurationValue(component, SHOVELER_COMPONENT_TILEMAP_TILES_OPTION_IMAGE);
 
 	if(outputConfiguration->isImageResourceEntityDefinition) {
-		outputConfiguration->imageResourceEntityId = shovelerComponentGetConfigurationValueEntityId(component, SHOVELER_COMPONENT_TILEMAP_TILES_OPTION_IMAGE_RESOURCE);
+		outputConfiguration->imageEntityId = shovelerComponentGetConfigurationValueEntityId(component, SHOVELER_COMPONENT_TILEMAP_TILES_OPTION_IMAGE);
 	} else {
 		outputConfiguration->numColumns = shovelerComponentGetConfigurationValueInt(component, SHOVELER_COMPONENT_TILEMAP_TILES_OPTION_NUM_COLUMNS);
 		outputConfiguration->numRows = shovelerComponentGetConfigurationValueInt(component, SHOVELER_COMPONENT_TILEMAP_TILES_OPTION_NUM_ROWS);
@@ -72,14 +68,14 @@ bool shovelerViewEntityUpdateTilemapTiles(ShovelerViewEntity *entity, const Shov
 	}
 
 	if(configuration->isImageResourceEntityDefinition) {
-		shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, SHOVELER_COMPONENT_TILEMAP_TILES_OPTION_IMAGE_RESOURCE, configuration->imageResourceEntityId);
+		shovelerComponentUpdateCanonicalConfigurationOptionEntityId(component, SHOVELER_COMPONENT_TILEMAP_TILES_OPTION_IMAGE, configuration->imageEntityId);
 		shovelerComponentClearConfigurationOption(component, SHOVELER_COMPONENT_TILEMAP_TILES_OPTION_NUM_COLUMNS, /* isCanonical */ true);
 		shovelerComponentClearConfigurationOption(component, SHOVELER_COMPONENT_TILEMAP_TILES_OPTION_NUM_ROWS, /* isCanonical */ true);
 		shovelerComponentClearConfigurationOption(component, SHOVELER_COMPONENT_TILEMAP_TILES_OPTION_TILESET_COLUMNS, /* isCanonical */ true);
 		shovelerComponentClearConfigurationOption(component, SHOVELER_COMPONENT_TILEMAP_TILES_OPTION_TILESET_ROWS, /* isCanonical */ true);
 		shovelerComponentClearConfigurationOption(component, SHOVELER_COMPONENT_TILEMAP_TILES_OPTION_TILESET_IDS, /* isCanonical */ true);
 	} else {
-		shovelerComponentClearConfigurationOption(component, SHOVELER_COMPONENT_TILEMAP_TILES_OPTION_IMAGE_RESOURCE, /* isCanonical */ true);
+		shovelerComponentClearConfigurationOption(component, SHOVELER_COMPONENT_TILEMAP_TILES_OPTION_IMAGE, /* isCanonical */ true);
 		shovelerComponentUpdateCanonicalConfigurationOptionInt(component, SHOVELER_COMPONENT_TILEMAP_TILES_OPTION_NUM_COLUMNS, configuration->numColumns);
 		shovelerComponentUpdateCanonicalConfigurationOptionInt(component, SHOVELER_COMPONENT_TILEMAP_TILES_OPTION_NUM_ROWS, configuration->numRows);
 		shovelerComponentUpdateCanonicalConfigurationOptionBytes(component, SHOVELER_COMPONENT_TILEMAP_TILES_OPTION_TILESET_COLUMNS, configuration->tilesetColumns, configuration->numColumns * configuration->numRows);
