@@ -20,6 +20,7 @@ set(SHOVELER_BASE_SRC
 	src/font_atlas.c
 	src/frustum.c
 	src/image.c
+	src/input_stream.c
 	src/log.c
 	src/projection.c
 	src/resources.c
@@ -49,6 +50,7 @@ set(SHOVELER_BASE_SRC
 	include/shoveler/frustum.h
 	include/shoveler/hash.h
 	include/shoveler/image.h
+	include/shoveler/input_stream.h
 	include/shoveler/log.h
 	include/shoveler/projection.h
 	include/shoveler/resources.h
