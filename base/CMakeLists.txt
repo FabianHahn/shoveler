@@ -60,6 +60,7 @@ set(SHOVELER_BASE_SRC
 
 set(SHOVELER_BASE_TEST_SRC
 	src/image/png_test.cpp
+	src/image/ppm_test.cpp
 	src/resources/image_png_test.cpp
 	src/view/resource_test.cpp
 	src/colliders_test.cpp

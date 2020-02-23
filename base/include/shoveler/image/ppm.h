@@ -5,7 +5,8 @@
 
 #include <shoveler/image.h>
 
-ShovelerImage *shovelerImagePpmRead(const char *filename);
-bool shovelerImagePpmWrite(ShovelerImage *image, const char *filename);
+ShovelerImage *shovelerImagePpmReadFile(const char *filename);
+ShovelerImage *shovelerImagePpmReadBuffer(const unsigned char *buffer, int bufferSize);
+bool shovelerImagePpmWriteFile(ShovelerImage *image, const char *filename);
 
 #endif

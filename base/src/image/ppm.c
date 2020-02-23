@@ -4,77 +4,44 @@
 #include <string.h> // strncmp
 
 #include "shoveler/image/ppm.h"
+#include "shoveler/input_stream.h"
 #include "shoveler/log.h"
 
-ShovelerImage *shovelerImagePpmRead(const char *filename)
+#define PPM_HEADER_BYTES 3
+
+static const char *ppmHeader = "P3\n";
+
+static ShovelerImage *readPpm(ShovelerInputStream *inputStream);
+
+ShovelerImage *shovelerImagePpmReadFile(const char *filename)
 {
-	FILE *file = fopen(filename, "r");
-	if(file == NULL) {
-		shovelerLogError("Failed to read PPM image from '%s': fopen failed.", filename);
+	ShovelerInputStream *inputStream = shovelerInputStreamCreateFile(filename);
+	if(inputStream == NULL) {
 		return NULL;
 	}
 
-	// read magic number
-	char magic[4];
-	fgets(magic, 3 + 1, file);
-	if(strncmp(magic, "P3\n", 3) != 0) {
-		shovelerLogError("Failed to read PPM image from '%s': invalid magic number.", filename);
-		fclose(file);
-		return NULL;
-	}
+	ShovelerImage *image = readPpm(inputStream);
 
-	// skip comments
-	int c = getc(file);
-	while(c == '#') {
-		// go to end of line
-		while(c != '\n') {
-			if(c == EOF) {
-				shovelerLogError("Failed to read PPM image from '%s': unexpected end of file when parsing header comment.", filename);
-				fclose(file);
-				return NULL;
-			}
-			c = getc(file);
-		}
-		c = getc(file);
-	}
-	ungetc(c, file);
+	shovelerInputStreamFree(inputStream);
 
-	// read header
-	unsigned int width = 0;
-	unsigned int height = 0;
-	unsigned int maxValue = 0;
-	fscanf(file, "%u %u %u", &width, &height, &maxValue);
-
-	ShovelerImage *image = shovelerImageCreate(width, height, 3);
-
-	for(unsigned int y = 0; y < height; y++) {
-		for(unsigned int x = 0; x < width; x++) {
-			unsigned int r = 0;
-			unsigned int g = 0;
-			unsigned int b = 0;
-			fscanf(file, "%u", &r);
-			fscanf(file, "%u", &g);
-			fscanf(file, "%u", &b);
-			if(r > maxValue || g > maxValue || b > maxValue) {
-				shovelerLogError("Failed to read PPM image from '%s': invalid pixel (%u, %u) value of (%u, %u, %u).", filename, x, y, r, g, b);
-				shovelerImageFree(image);
-				fclose(file);
-				return NULL;
-			}
-			shovelerImageGet(image, x, y, 0) = (unsigned char) ((double) UCHAR_MAX * r / maxValue);
-			shovelerImageGet(image, x, y, 1) = (unsigned char) ((double) UCHAR_MAX * g / maxValue);
-			shovelerImageGet(image, x, y, 2) = (unsigned char) ((double) UCHAR_MAX * b / maxValue);
-
-		}
-	}
-
-	fclose(file);
-
-	shovelerLogInfo("Successfully read PPM image of size (%d, %d) from '%s'.", width, height, filename);
 	return image;
 }
 
-bool shovelerImagePpmWrite(ShovelerImage *image, const char *filename)
+ShovelerImage *shovelerImagePpmReadBuffer(const unsigned char *buffer, int bufferSize)
+{
+	ShovelerInputStream *inputStream = shovelerInputStreamCreateMemory(buffer, bufferSize);
+	if(inputStream == NULL) {
+		return NULL;
+	}
+
+	ShovelerImage *image = readPpm(inputStream);
+
+	shovelerInputStreamFree(inputStream);
+
+	return image;
+}
+
+bool shovelerImagePpmWriteFile(ShovelerImage *image, const char *filename)
 {
 	if(image->channels < 3) {
 		shovelerLogError("Failed to write PPM image to '%s': can only write image with at least 3 channels.", filename);
@@ -102,4 +69,65 @@ bool shovelerImagePpmWrite(ShovelerImage *image, const char *filename)
 
 	shovelerLogInfo("Successfully wrote PPM image of size (%u, %u) to '%s'.", image->width, image->height, filename);
 	return true;
+}
+
+static ShovelerImage *readPpm(ShovelerInputStream *inputStream)
+{
+	// read magic number
+	unsigned char header[3];
+	if(shovelerInputStreamRead(inputStream, header, PPM_HEADER_BYTES) < PPM_HEADER_BYTES) {
+		shovelerLogError("Failed to read PPM image from %s: failed to read PPM header.", shovelerInputStreamGetDescription(inputStream));
+		return NULL;
+	}
+
+	if(strncmp((const char *) header, ppmHeader, PPM_HEADER_BYTES) != 0) {
+		shovelerLogError("Failed to read PPM image from %s: invalid magic number.", shovelerInputStreamGetDescription(inputStream));
+		return NULL;
+	}
+
+	// skip comments
+	int c = shovelerInputStreamGetc(inputStream);
+	while(c == '#') {
+		// go to end of line
+		while(c != '\n') {
+			if(c == EOF) {
+				shovelerLogError("Failed to read PPM image from %s: unexpected end of file when parsing header comment.", shovelerInputStreamGetDescription(inputStream));
+				return NULL;
+			}
+			c = shovelerInputStreamGetc(inputStream);
+		}
+		c = shovelerInputStreamGetc(inputStream);
+	}
+	shovelerInputStreamUngetc(inputStream, c);
+
+	// read header
+	int width = shovelerInputStreamReadInt(inputStream);
+	int height = shovelerInputStreamReadInt(inputStream);
+	int maxValue = shovelerInputStreamReadInt(inputStream);
+	if(width < 0 || height < 0 || maxValue <= 0) {
+		shovelerLogError("Failed to read PPM image from %s: invalid header defining image of size (%d, %d) and max value of %d.", shovelerInputStreamGetDescription(inputStream), width, height, maxValue);
+		return NULL;
+	}
+
+	ShovelerImage *image = shovelerImageCreate(width, height, 3);
+
+	for(unsigned int y = 0; y < height; y++) {
+		for(unsigned int x = 0; x < width; x++) {
+			int r = shovelerInputStreamReadInt(inputStream);
+			int g = shovelerInputStreamReadInt(inputStream);
+			int b = shovelerInputStreamReadInt(inputStream);
+			if(r < 0 || r > maxValue || g < 0 || g > maxValue || b < 0 || b > maxValue) {
+				shovelerLogError("Failed to read PPM image from %s: invalid pixel (%d, %d) value of (%d, %d, %d).", shovelerInputStreamGetDescription(inputStream), x, y, r, g, b);
+				shovelerImageFree(image);
+				return NULL;
+			}
+			shovelerImageGet(image, x, y, 0) = (unsigned char) ((double) UCHAR_MAX * r / maxValue);
+			shovelerImageGet(image, x, y, 1) = (unsigned char) ((double) UCHAR_MAX * g / maxValue);
+			shovelerImageGet(image, x, y, 2) = (unsigned char) ((double) UCHAR_MAX * b / maxValue);
+
+		}
+	}
+
+	shovelerLogInfo("Successfully read PPM image of size (%d, %d) from %s.", width, height, shovelerInputStreamGetDescription(inputStream));
+	return image;
 }
