@@ -9,33 +9,14 @@
 #include <string.h> // memcpy
 
 #include "shoveler/image/png.h"
+#include "shoveler/input_stream.h"
 #include "shoveler/log.h"
 
-typedef struct {
-	const unsigned char *buffer;
-	int size;
-	int index;
-} MemoryStream;
+#define PNG_HEADER_CHECK_BYTES 8
 
-typedef enum {
-	READ_INPUT_FILE,
-	READ_INPUT_MEMORY_STREAM,
-} ReadInputType;
-
-typedef union {
-	FILE *file;
-	MemoryStream memoryStream;
-} ReadInputValue;
-
-typedef struct {
-	ReadInputType type;
-	ReadInputValue value;
-	char *description;
-} ReadInput;
-
-static ShovelerImage *readPng(ReadInput input);
+static ShovelerImage *readPng(ShovelerInputStream *inputStream);
 static bool readPngData(png_structp png, png_infop info, png_infop endInfo, png_uint_32 *width, volatile png_uint_32 *height, png_uint_32 *channels, png_byte *bitDepth, png_bytep * volatile *rowPointers);
-static void readMemoryStream(png_structp png, png_bytep outBytes, png_size_t bytesToRead);
+static void readInputStream(png_structp png, png_bytep outBytes, png_size_t bytesToRead);
 static ShovelerImage *createImageFromRowPointers(png_uint_32 width, png_uint_32 height, png_uint_32 channels, png_bytep *rowPointers);
 static void handlePngReadError(png_structp png, png_const_charp error);
 static void handlePngReadWarning(png_structp png, png_const_charp warning);
@@ -43,35 +24,28 @@ static void freeRowPointers(png_uint_32 height, png_bytep *rowPointers);
 
 ShovelerImage *shovelerImagePngReadFile(const char *filename)
 {
-	FILE *file = fopen(filename, "rb");
-	if(file == NULL) {
-		shovelerLogError("Failed to read PNG image from file '%s': fopen failed.", filename);
+	ShovelerInputStream *inputStream = shovelerInputStreamCreateFile(filename);
+	if(inputStream == NULL) {
 		return NULL;
 	}
 
-	GString *descriptionString = g_string_new("");
-	g_string_append_printf(descriptionString, "file '%s'", filename);
+	ShovelerImage *image = readPng(inputStream);
 
-	ReadInput readInput = {READ_INPUT_FILE, {file}, descriptionString->str};
-	ShovelerImage *image = readPng(readInput);
-
-	g_string_free(descriptionString, true);
-	fclose(file);
+	shovelerInputStreamFree(inputStream);
 
 	return image;
 }
 
 ShovelerImage *shovelerImagePngReadBuffer(const unsigned char *buffer, int bufferSize)
 {
-	GString *descriptionString = g_string_new("");
-	g_string_append_printf(descriptionString, "buffer (%d bytes)", bufferSize);
+	ShovelerInputStream *inputStream = shovelerInputStreamCreateMemory(buffer, bufferSize);
+	if(inputStream == NULL) {
+		return NULL;
+	}
 
-	ReadInputValue readInputValue;
-	readInputValue.memoryStream = (MemoryStream){buffer, bufferSize, 0};
-	ReadInput readInput = {READ_INPUT_MEMORY_STREAM, readInputValue, descriptionString->str};
-	ShovelerImage *image = readPng(readInput);
+	ShovelerImage *image = readPng(inputStream);
 
-	g_string_free(descriptionString, true);
+	shovelerInputStreamFree(inputStream);
 
 	return image;
 }
@@ -181,44 +155,34 @@ bool shovelerImagePngWriteFile(ShovelerImage *image, const char *filename)
 	return true;
 }
 
-static ShovelerImage *readPng(ReadInput input)
+static ShovelerImage *readPng(ShovelerInputStream *inputStream)
 {
-	switch(input.type) {
-		case READ_INPUT_FILE: {
-			png_byte header[8];
-
-			if(fread(header, 1, 8, input.value.file) <= 0 || png_sig_cmp(header, 0, 8)) {
-				shovelerLogError("Failed to read PNG image from %s: libpng header signature mismatch.", input.description);
-				return NULL;
-			}
-		} break;
-		case READ_INPUT_MEMORY_STREAM:
-			if(png_sig_cmp(input.value.memoryStream.buffer, 0, 8)) {
-				shovelerLogError("Failed to read PNG image from %s: libpng header signature mismatch.", input.description);
-				return NULL;
-			}
-		break;
-		default:
-			shovelerLogError("Failed to read PNG image from %s: invalid input type %d.", input.description, input.type);
-		break;
+	png_byte header[PNG_HEADER_CHECK_BYTES];
+	if(shovelerInputStreamRead(inputStream, header, PNG_HEADER_CHECK_BYTES) < PNG_HEADER_CHECK_BYTES) {
+		shovelerLogError("Failed to read PNG image from %s: failed to read PNG header.", shovelerInputStreamGetDescription(inputStream));
+		return NULL;
 	}
 
+	if(png_sig_cmp(header, 0, 8)) {
+		shovelerLogError("Failed to read PNG image from %s: libpng header signature mismatch.", shovelerInputStreamGetDescription(inputStream));
+		return NULL;
+	}
 
 	png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 	if(png == NULL) {
-		shovelerLogError("Failed to read PNG image from %s: failed to create libpng read struct.", input.description);
+		shovelerLogError("Failed to read PNG image from %s: failed to create libpng read struct.", shovelerInputStreamGetDescription(inputStream));
 		return false;
 	}
 
 	png_infop info = png_create_info_struct(png);
 	if(info == NULL) {
-		shovelerLogError("Failed to read PNG image from %s: failed to create libpng info struct.", input.description);
+		shovelerLogError("Failed to read PNG image from %s: failed to create libpng info struct.", shovelerInputStreamGetDescription(inputStream));
 		return false;
 	}
 
 	png_infop endInfo = png_create_info_struct(png);
 	if(endInfo == NULL) {
-		shovelerLogError("Failed to read PNG image from %s: failed to create libpng end info struct.", input.description);
+		shovelerLogError("Failed to read PNG image from %s: failed to create libpng end info struct.", shovelerInputStreamGetDescription(inputStream));
 		return false;
 	}
 
@@ -236,20 +200,13 @@ static ShovelerImage *readPng(ReadInput input)
 		return NULL;
 	}
 
-	png_set_error_fn(png, &input, handlePngReadError, handlePngReadWarning);
+	png_set_error_fn(png, inputStream, handlePngReadError, handlePngReadWarning);
+	png_set_sig_bytes(png, 8);
 
-	switch(input.type) {
-		case READ_INPUT_FILE:
-			png_init_io(png, input.value.file);
-			png_set_sig_bytes(png, 8);
-		break;
-		case READ_INPUT_MEMORY_STREAM:
-			png_set_read_fn(png, &input.value.memoryStream, readMemoryStream);
-			png_set_sig_bytes(png, 0);
-		break;
-		default:
-			shovelerLogError("Failed to read PNG image from %s: invalid input type %d.", input.description, input.type);
-		break;
+	if(inputStream->type == SHOVELER_INPUT_STREAM_TYPE_FILE) {
+		png_init_io(png, inputStream->fileSource.file);
+	} else {
+		png_set_read_fn(png, inputStream, readInputStream);
 	}
 
 	bool read = readPngData(png, info, endInfo, &width, &height, &channels, &bitDepth, &rowPointers);
@@ -261,7 +218,7 @@ static ShovelerImage *readPng(ReadInput input)
 	ShovelerImage *image = createImageFromRowPointers(width, height, channels, rowPointers);
 	freeRowPointers(height, rowPointers);
 
-	shovelerLogInfo("Successfully read %d-bit PNG image of size (%d, %d) with %d channels from %s.", bitDepth, width, height, channels, input.description);
+	shovelerLogInfo("Successfully read %d-bit PNG image of size (%d, %d) with %d channels from %s.", bitDepth, width, height, channels, shovelerInputStreamGetDescription(inputStream));
 	return image;
 }
 
@@ -315,7 +272,7 @@ static bool readPngData(png_structp png, png_infop info, png_infop endInfo, png_
 	return true;
 }
 
-static void readMemoryStream(png_structp png, png_bytep outBytes, png_size_t bytesToReadSize)
+static void readInputStream(png_structp png, png_bytep outBytes, png_size_t bytesToReadSize)
 {
 	if(bytesToReadSize > INT_MAX) {
 		shovelerLogWarning("Integer overflow when trying to read %zu bytes from memory stream.", bytesToReadSize);
@@ -323,17 +280,8 @@ static void readMemoryStream(png_structp png, png_bytep outBytes, png_size_t byt
 	}
 	int bytesToRead = (int) bytesToReadSize;
 
-	MemoryStream *memoryStream = (MemoryStream *) png_get_io_ptr(png);
-
-	int bytesLeft = memoryStream->size - memoryStream->index;
-	assert(bytesLeft > 0);
-	if(bytesToRead > bytesLeft) {
-		shovelerLogWarning("Tryed to read %u bytes from memory stream but only %u bytes are left - returning those.", bytesToRead, bytesLeft);
-		bytesToRead = bytesLeft;
-	}
-
-	memcpy(outBytes, memoryStream->buffer + memoryStream->index, (unsigned long) bytesToRead);
-	memoryStream->index += bytesToRead;
+	ShovelerInputStream *inputStream = (ShovelerInputStream *) png_get_io_ptr(png);
+	shovelerInputStreamRead(inputStream, outBytes, bytesToRead);
 }
 
 static ShovelerImage *createImageFromRowPointers(png_uint_32 width, png_uint_32 height, png_uint_32 channels, png_bytep *rowPointers)
@@ -353,15 +301,15 @@ static ShovelerImage *createImageFromRowPointers(png_uint_32 width, png_uint_32 
 
 static void handlePngReadError(png_structp png, png_const_charp error)
 {
-	ReadInput *readInput = (ReadInput *) png_get_error_ptr(png);
-	shovelerLogError("Failed to read PNG image from %s due to libpng error: %s", readInput->description, error);
+	ShovelerInputStream *inputStream = (ShovelerInputStream *) png_get_error_ptr(png);
+	shovelerLogError("Failed to read PNG image from %s due to libpng error: %s", shovelerInputStreamGetDescription(inputStream), error);
 	png_longjmp(png, 1);
 }
 
 static void handlePngReadWarning(png_structp png, png_const_charp warning)
 {
-	ReadInput *readInput = (ReadInput *) png_get_error_ptr(png);
-	shovelerLogWarning("libpng warning while reading PNG image from %s: %s", readInput->description, warning);
+	ShovelerInputStream *inputStream = (ShovelerInputStream *) png_get_error_ptr(png);
+	shovelerLogWarning("libpng warning while reading PNG image from %s: %s", shovelerInputStreamGetDescription(inputStream), warning);
 }
 
 static void freeRowPointers(png_uint_32 height, png_bytep *rowPointers)
