@@ -46,7 +46,7 @@ static double time = 0.0;
 
 static GString *getImageData(ShovelerImage *image);
 static void updateGame(ShovelerGame *game, double dt);
-static void updateAuthoritativeViewComponent(ShovelerGame *game, ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *value);
+static void updateAuthoritativeViewComponent(ShovelerGame *game, ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *value, void *unused);
 
 int main(int argc, char *argv[])
 {
@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
 	shovelerLogInit("shoveler/", SHOVELER_LOG_LEVEL_INFO_UP, stdout);
 	shovelerGlobalInit();
 
-	ShovelerGame *game = shovelerGameCreate(updateGame, updateAuthoritativeViewComponent, &windowSettings, &cameraSettings, &controllerSettings);
+	ShovelerGame *game = shovelerGameCreate(updateGame, updateAuthoritativeViewComponent, /* updateAuthoritativeViewComponentUserData */ NULL, &windowSettings, &cameraSettings, &controllerSettings);
 	if(game == NULL) {
 		return EXIT_FAILURE;
 	}
@@ -492,7 +492,7 @@ static void updateGame(ShovelerGame *game, double dt)
 	shovelerComponentUpdateCanonicalConfigurationOptionBytes(tilemapComponent, SHOVELER_COMPONENT_TILEMAP_TILES_OPTION_TILESET_COLUMNS, updatedTilesetColumns, 4);
 }
 
-static void updateAuthoritativeViewComponent(ShovelerGame *game, ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *value)
+static void updateAuthoritativeViewComponent(ShovelerGame *game, ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *value, void *unused)
 {
 	GString *printedValue = shovelerComponentConfigurationValuePrint(value);
 

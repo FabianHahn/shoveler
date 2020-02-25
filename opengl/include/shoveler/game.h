@@ -23,7 +23,7 @@ typedef struct ShovelerGameStruct ShovelerGame; // forward declaration: below
 typedef struct ShovelerShaderCacheStruct ShovelerShaderCache; // forward declaration: shader_cache.h
 
 typedef void (ShovelerGameUpdateCallback)(ShovelerGame *game, double dt);
-typedef void (ShovelerGameUpdateAuthoritativeViewComponentFunction)(ShovelerGame *game, ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *value);
+typedef void (ShovelerGameUpdateAuthoritativeViewComponentFunction)(ShovelerGame *game, ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *value, void *userData);
 
 typedef struct {
 	const char *windowTitle;
@@ -69,6 +69,7 @@ typedef struct ShovelerGameStruct {
 	ShovelerModel *screenspaceCanvasModel;
 	ShovelerGameUpdateCallback *update;
 	ShovelerGameUpdateAuthoritativeViewComponentFunction *updateAuthoritativeViewComponent;
+	void *updateAuthoritativeViewComponentUserData;
 	double lastFrameTime;
 	double lastFpsPrintTime;
 	int framesSinceLastFpsPrint;
@@ -81,7 +82,7 @@ typedef struct ShovelerGameStruct {
 	} lastViewCounters;
 } ShovelerGame;
 
-ShovelerGame *shovelerGameCreate(ShovelerGameUpdateCallback *update, ShovelerGameUpdateAuthoritativeViewComponentFunction *updateAuthoritativeViewComponent, const ShovelerGameWindowSettings *windowSettings, const ShovelerGameCameraSettings *cameraSettings, const ShovelerGameControllerSettings *controllerSettings);
+ShovelerGame *shovelerGameCreate(ShovelerGameUpdateCallback *update, ShovelerGameUpdateAuthoritativeViewComponentFunction *updateAuthoritativeViewComponent, void *updateAuthoritativeViewComponentUserData, const ShovelerGameWindowSettings *windowSettings, const ShovelerGameCameraSettings *cameraSettings, const ShovelerGameControllerSettings *controllerSettings);
 ShovelerGame *shovelerGameGetForWindow(GLFWwindow *window);
 void shovelerGameToggleFullscreen(ShovelerGame *game);
 int shovelerGameRenderFrame(ShovelerGame *game);

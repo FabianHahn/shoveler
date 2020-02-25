@@ -26,7 +26,7 @@ static void printFps(void *gamePointer);
 static void updateAuthoritativeComponent(ShovelerView *view, ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *value, void *gamePointer);
 static void updateViewCounters(ShovelerGame *game);
 
-ShovelerGame *shovelerGameCreate(ShovelerGameUpdateCallback *update, ShovelerGameUpdateAuthoritativeViewComponentFunction *updateAuthoritativeViewComponent, const ShovelerGameWindowSettings *windowSettings, const ShovelerGameCameraSettings *cameraSettings, const ShovelerGameControllerSettings *controllerSettings)
+ShovelerGame *shovelerGameCreate(ShovelerGameUpdateCallback *update, ShovelerGameUpdateAuthoritativeViewComponentFunction *updateAuthoritativeViewComponent, void *updateAuthoritativeViewComponentUserData, const ShovelerGameWindowSettings *windowSettings, const ShovelerGameCameraSettings *cameraSettings, const ShovelerGameControllerSettings *controllerSettings)
 {
 	ShovelerGame *game = malloc(sizeof(ShovelerGame));
 	game->windowedWidth = windowSettings->windowedWidth;
@@ -122,6 +122,7 @@ ShovelerGame *shovelerGameCreate(ShovelerGameUpdateCallback *update, ShovelerGam
 
 	game->update = update;
 	game->updateAuthoritativeViewComponent = updateAuthoritativeViewComponent;
+	game->updateAuthoritativeViewComponentUserData = updateAuthoritativeViewComponentUserData;
 	game->lastFrameTime = glfwGetTime();
 	game->lastFpsPrintTime = game->lastFrameTime;
 	game->framesSinceLastFpsPrint = 0;
@@ -281,7 +282,7 @@ static void updateAuthoritativeComponent(ShovelerView *view, ShovelerComponent *
 	ShovelerGame *game = (ShovelerGame *) gamePointer;
 
 	if(game->updateAuthoritativeViewComponent != NULL) {
-		game->updateAuthoritativeViewComponent(game, component, configurationOption, value);
+		game->updateAuthoritativeViewComponent(game, component, configurationOption, value, game->updateAuthoritativeViewComponentUserData);
 	}
 }
 
