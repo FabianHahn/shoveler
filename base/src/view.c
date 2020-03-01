@@ -219,13 +219,17 @@ ShovelerComponent *shovelerViewEntityAddComponent(ShovelerViewEntity *entity, co
 {
 	ShovelerComponentType *componentType = g_hash_table_lookup(entity->view->componentTypes, componentTypeId);
 	if(componentType == NULL) {
+		shovelerLogWarning("Tried to add component with invalid type '%s' to entity %lld, ignoring.", componentTypeId, entity->id);
 		return NULL;
 	}
 
-	ShovelerComponent *component = shovelerComponentCreate(entity->view->adapter, entity->id, componentType);
-	if(component == NULL) {
+	ShovelerComponent *component = g_hash_table_lookup(entity->components, (gpointer) componentTypeId);
+	if(component != NULL) {
+		shovelerLogWarning("Tried to already existing component '%s' to entity %lld, ignoring.", componentTypeId, entity->id);
 		return NULL;
 	}
+
+	component = shovelerComponentCreate(entity->view->adapter, entity->id, componentType);
 
 	if(!g_hash_table_insert(entity->components, (gpointer) component->type->id, component)) {
 		shovelerComponentFree(component);
