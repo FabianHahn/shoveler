@@ -74,26 +74,6 @@ set(SHOVELER_OPENGL_SRC
 	src/uniform_attachment.c
 	src/uniform_map.c
 	src/uniform.c
-	src/view/canvas.c
-	src/view/chunk_layer.c
-	src/view/chunk.c
-	src/view/client.c
-	src/view/controller.c
-	src/view/drawable.c
-	src/view/light.c
-	src/view/material.c
-	src/view/model.c
-	src/view/sampler.c
-	src/view/scene.c
-	src/view/shader_cache.c
-	src/view/sprite.c
-	src/view/texture.c
-	src/view/tile_sprite_animation.c
-	src/view/tile_sprite.c
-	src/view/tilemap_colliders.c
-	src/view/tilemap_tiles.c
-	src/view/tilemap.c
-	src/view/tileset.c
 	include/shoveler/camera/identity.h
 	include/shoveler/camera/perspective.h
 	include/shoveler/camera.h
@@ -173,26 +153,6 @@ set(SHOVELER_OPENGL_SRC
 	include/shoveler/uniform_attachment.h
 	include/shoveler/uniform_map.h
 	include/shoveler/uniform.h
-	include/shoveler/view/canvas.h
-	include/shoveler/view/chunk_layer.h
-	include/shoveler/view/chunk.h
-	include/shoveler/view/client.h
-	include/shoveler/view/controller.h
-	include/shoveler/view/drawable.h
-	include/shoveler/view/light.h
-	include/shoveler/view/material.h
-	include/shoveler/view/model.h
-	include/shoveler/view/sampler.h
-	include/shoveler/view/scene.h
-	include/shoveler/view/shader_cache.h
-	include/shoveler/view/sprite.h
-	include/shoveler/view/texture.h
-	include/shoveler/view/tile_sprite_animation.h
-	include/shoveler/view/tile_sprite.h
-	include/shoveler/view/tilemap_colliders.h
-	include/shoveler/view/tilemap_tiles.h
-	include/shoveler/view/tilemap.h
-	include/shoveler/view/tileset.h
 )
 
 set(SHOVELER_OPENGL_TEST_SRC

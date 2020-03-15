@@ -5,10 +5,10 @@
 #include "shoveler/camera/perspective.h"
 #include "shoveler/drawable/quad.h"
 #include "shoveler/material/canvas.h"
-#include "shoveler/view/colliders.h"
-#include "shoveler/view/controller.h"
-#include "shoveler/view/scene.h"
-#include "shoveler/view/shader_cache.h"
+#include "shoveler/component/colliders.h"
+#include "shoveler/component/controller.h"
+#include "shoveler/component/scene.h"
+#include "shoveler/component/shader_cache.h"
 #include "shoveler/canvas.h"
 #include "shoveler/colliders.h"
 #include "shoveler/game.h"
@@ -136,10 +136,10 @@ ShovelerGame *shovelerGameCreate(ShovelerGameUpdateCallback *update, ShovelerGam
 
 	shovelerCameraPerspectiveAttachController(game->camera, game->controller);
 
-	shovelerViewSetColliders(game->view, game->colliders);
-	shovelerViewSetController(game->view, game->controller);
-	shovelerViewSetScene(game->view, game->scene);
-	shovelerViewSetShaderCache(game->view, game->shaderCache);
+	shovelerViewSetTarget(game->view, shovelerComponentViewTargetIdColliders, game->colliders);
+	shovelerViewSetTarget(game->view, shovelerComponentViewTargetIdController, game->controller);
+	shovelerViewSetTarget(game->view, shovelerComponentViewTargetIdScene, game->scene);
+	shovelerViewSetTarget(game->view, shovelerComponentViewTargetIdShaderCache, game->shaderCache);
 
 	ShovelerGlobalContext *global = shovelerGlobalGetContext();
 	g_hash_table_insert(global->games, game->window, game);

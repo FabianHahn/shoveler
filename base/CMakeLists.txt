@@ -7,11 +7,6 @@ set(SHOVELER_BASE_SRC
 	src/image/png.c
 	src/image/ppm.c
 	src/resources/image_png.c
-	src/view/colliders.c
-	src/view/image.c
-	src/view/position.c
-	src/view/resource.c
-	src/view/resources.c
 	src/colliders.c
 	src/color.c
 	src/component.c
@@ -36,11 +31,6 @@ set(SHOVELER_BASE_SRC
 	include/shoveler/image/png.h
 	include/shoveler/image/ppm.h
 	include/shoveler/resources/image_png.h
-	include/shoveler/view/colliders.h
-	include/shoveler/view/image.h
-	include/shoveler/view/position.h
-	include/shoveler/view/resource.h
-	include/shoveler/view/resources.h
 	include/shoveler/collider.h
 	include/shoveler/colliders.h
 	include/shoveler/color.h
