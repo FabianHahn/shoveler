@@ -47,6 +47,12 @@ bool shovelerCanvasRemoveSprite(ShovelerCanvas *canvas, int layerId, ShovelerSpr
 
 bool shovelerCanvasRender(ShovelerCanvas *canvas, ShovelerVector2 regionPosition, ShovelerVector2 regionSize, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerRenderState *renderState)
 {
+	// We're using a bounding box that's 1% larger than the region we render to make sure we also
+	// intersect with sprites outside the exact region for border interpolation.
+	ShovelerBoundingBox2 regionBoundingBox = shovelerBoundingBox2(
+		shovelerVector2LinearCombination(1.0f, regionPosition, 1.01f * -0.5f, regionSize),
+		shovelerVector2LinearCombination(1.0f, regionPosition, 1.01f * 0.5f, regionSize));
+
 	shovelerRenderStateEnableBlend(renderState, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	for(int layerId = 0; layerId < canvas->numLayers; layerId++) {
@@ -54,6 +60,13 @@ bool shovelerCanvasRender(ShovelerCanvas *canvas, ShovelerVector2 regionPosition
 
 		for(GList *iter = layer->head; iter != NULL; iter = iter->next) {
 			ShovelerSprite *sprite = iter->data;
+
+			// We're deliberately checking only against the sprite's bounding box instead of doing a
+			// full collider check, because we don't care about an actual collision. All we need to
+			// know is if a sprite is close enough to the canvas to be rendered.
+			if(!shovelerBoundingBox2Intersect(&regionBoundingBox, &sprite->collider.boundingBox)) {
+				continue;
+			}
 
 			if(!shovelerSpriteRender(sprite, regionPosition, regionSize, scene, camera, light, model, renderState)) {
 				shovelerLogWarning("Failed to render sprite %p of canvas %p to scene %p, camera %p, light %p and model %p.", sprite, canvas, scene, camera, light, model);
