@@ -77,13 +77,16 @@ static void *activateMaterialComponent(ShovelerComponent *component)
 			material = shovelerMaterialParticleCreate(shaderCache, color);
 		} break;
 		case SHOVELER_COMPONENT_MATERIAL_TYPE_TILEMAP: {
-			ShovelerComponent *tilemapComponent = shovelerComponentGetDependency(component, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TILEMAP);
-			assert(tilemapComponent != NULL);
-			ShovelerTilemap *tilemap = shovelerComponentGetTilemap(tilemapComponent);
-			assert(tilemap != NULL);
-
 			material = shovelerMaterialTilemapCreate(shaderCache, /* screenspace */ false);
-			shovelerMaterialTilemapSetActive(material, tilemap);
+
+			bool hasTilemap = shovelerComponentHasConfigurationValue(component, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TILEMAP);
+			if(hasTilemap) {
+				ShovelerComponent *tilemapComponent = shovelerComponentGetDependency(component, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TILEMAP);
+				assert(tilemapComponent != NULL);
+				ShovelerTilemap *tilemap = shovelerComponentGetTilemap(tilemapComponent);
+				assert(tilemap != NULL);
+				shovelerMaterialTilemapSetActive(material, tilemap);
+			}
 		} break;
 		case SHOVELER_COMPONENT_MATERIAL_TYPE_CANVAS: {
 			bool hasRegionPosition = shovelerComponentHasConfigurationValue(component, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_CANVAS_REGION_POSITION);
