@@ -1,4 +1,5 @@
 #include <assert.h> // assert
+#include <math.h> // INFINITY
 #include <stdlib.h> // malloc, free
 #include <string.h> // memcpy
 
@@ -10,11 +11,18 @@
 #include "shoveler/shader.h"
 #include "shoveler/sprite.h"
 
+static ShovelerCollider2 *intersectCanvas(ShovelerCollider2 *collider, const ShovelerBoundingBox2 *object);
+
 ShovelerCanvas *shovelerCanvasCreate(int numLayers)
 {
 	assert(numLayers > 0);
 
 	ShovelerCanvas *canvas = malloc(sizeof(ShovelerCanvas));
+	canvas->collider.boundingBox = shovelerBoundingBox2(
+		shovelerVector2(-INFINITY, -INFINITY),
+		shovelerVector2(INFINITY, INFINITY));
+	canvas->collider.intersect = intersectCanvas;
+	canvas->collider.data = canvas;
 	canvas->numLayers = numLayers;
 	canvas->layers = malloc((size_t) numLayers * sizeof(GQueue *));
 
@@ -94,4 +102,24 @@ void shovelerCanvasFree(ShovelerCanvas *canvas)
 
 	free(canvas->layers);
 	free(canvas);
+}
+
+static ShovelerCollider2 *intersectCanvas(ShovelerCollider2 *collider, const ShovelerBoundingBox2 *object)
+{
+	ShovelerCanvas *canvas = (ShovelerCanvas *) collider->data;
+
+	for(int layerId = 0; layerId < canvas->numLayers; layerId++) {
+		GQueue *layer = canvas->layers[layerId];
+
+		for(GList *iter = layer->head; iter != NULL; iter = iter->next) {
+			ShovelerSprite *sprite = iter->data;
+
+			ShovelerCollider2 *collidingSprite = shovelerCollider2Intersect(&sprite->collider, object);
+			if(collidingSprite != NULL) {
+				return collidingSprite;
+			}
+		}
+	}
+
+	return NULL;
 }

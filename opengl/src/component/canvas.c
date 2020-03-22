@@ -1,6 +1,8 @@
 #include "shoveler/component/canvas.h"
 
 #include "shoveler/canvas.h"
+#include "shoveler/colliders.h"
+#include "shoveler/component/colliders.h"
 #include "shoveler/component.h"
 #include "shoveler/log.h"
 
@@ -26,6 +28,8 @@ ShovelerCanvas *shovelerComponentGetCanvas(ShovelerComponent *component)
 
 static void *activateCanvasComponent(ShovelerComponent *component)
 {
+	assert(shovelerComponentHasViewColliders(component));
+
 	int numLayers = shovelerComponentGetConfigurationValueInt(component, SHOVELER_COMPONENT_CANVAS_OPTION_ID_NUM_LAYERS);
 	if(numLayers < 1) {
 		shovelerLogWarning("Failed to activate canvas component on entity %lld: num_layers option must be positive, but got %d.", component->entityId, numLayers);
@@ -33,10 +37,19 @@ static void *activateCanvasComponent(ShovelerComponent *component)
 	}
 
 	ShovelerCanvas *canvas = shovelerCanvasCreate(numLayers);
+
+	ShovelerColliders *colliders = shovelerComponentGetViewColliders(component);
+	shovelerCollidersAddCollider2(colliders, &canvas->collider);
+
 	return canvas;
 }
 
 static void deactivateCanvasComponent(ShovelerComponent *component)
 {
+	ShovelerCanvas *canvas = (ShovelerCanvas *) component->data;
+
+	ShovelerColliders *colliders = shovelerComponentGetViewColliders(component);
+	shovelerCollidersRemoveCollider2(colliders, &canvas->collider);
+
 	shovelerCanvasFree(component->data);
 }

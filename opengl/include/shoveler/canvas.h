@@ -5,9 +5,7 @@
 
 #include <glib.h>
 
-#include <shoveler/material.h>
-#include <shoveler/scene.h>
-#include <shoveler/tileset.h>
+#include <shoveler/collider.h>
 #include <shoveler/types.h>
 
 typedef struct ShovelerCameraStruct ShovelerCamera; // forward declaration: camera.h
@@ -15,9 +13,12 @@ typedef struct ShovelerFontAtlasTextureStruct ShovelerFontAtlasTexture; // forwa
 typedef struct ShovelerLightStruct ShovelerLight; // forward declaration: light.h
 typedef struct ShovelerMaterialStruct ShovelerMaterial; // forward declaration: material.h
 typedef struct ShovelerModelStruct ShovelerModel; // forward declaration: model.h
+typedef struct ShovelerRenderStateStruct ShovelerRenderState; // forward declaration: render_state.h
+typedef struct ShovelerSceneStruct ShovelerScene; // forward declaration: scene.h
 typedef struct ShovelerSpriteStruct ShovelerSprite; // forward declaration: sprite.h
 
 typedef struct ShovelerCanvasStruct {
+	ShovelerCollider2 collider;
 	int numLayers;
 	/** array of size numLayers, wher each element is a list of (ShovelerSprite *) */
 	GQueue **layers;

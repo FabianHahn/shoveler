@@ -18,6 +18,7 @@
 #include <shoveler/global.h>
 #include <shoveler/image.h>
 #include <shoveler/input.h>
+#include <shoveler/material.h>
 #include <shoveler/model.h>
 #include <shoveler/opengl.h>
 #include <shoveler/scene.h>
