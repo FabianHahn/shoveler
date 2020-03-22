@@ -10,8 +10,6 @@
 #include <shoveler/resources/image_png.h>
 #include <shoveler/chunk.h>
 #include <shoveler/component/canvas.h>
-#include <shoveler/component/chunk.h>
-#include <shoveler/component/chunk_layer.h>
 #include <shoveler/component/client.h>
 #include <shoveler/component/controller.h>
 #include <shoveler/component/drawable.h>
@@ -29,6 +27,7 @@
 #include <shoveler/component/tile_sprite_animation.h>
 #include <shoveler/component/tilemap.h>
 #include <shoveler/component/tilemap_colliders.h>
+#include <shoveler/component/tilemap_sprite.h>
 #include <shoveler/component/tilemap_tiles.h>
 #include <shoveler/component/tileset.h>
 #include <shoveler/component.h>
@@ -85,8 +84,6 @@ int main(int argc, char *argv[])
 	}
 
 	shovelerViewAddComponentType(game->view, shovelerComponentCreateCanvasType());
-	shovelerViewAddComponentType(game->view, shovelerComponentCreateChunkType());
-	shovelerViewAddComponentType(game->view, shovelerComponentCreateChunkLayerType());
 	shovelerViewAddComponentType(game->view, shovelerComponentCreateClientType());
 	shovelerViewAddComponentType(game->view, shovelerComponentCreateDrawableType());
 	shovelerViewAddComponentType(game->view, shovelerComponentCreateImageType());
@@ -102,6 +99,7 @@ int main(int argc, char *argv[])
 	shovelerViewAddComponentType(game->view, shovelerComponentCreateTileSpriteAnimationType());
 	shovelerViewAddComponentType(game->view, shovelerComponentCreateTilemapType());
 	shovelerViewAddComponentType(game->view, shovelerComponentCreateTilemapCollidersType());
+	shovelerViewAddComponentType(game->view, shovelerComponentCreateTilemapSpriteType());
 	shovelerViewAddComponentType(game->view, shovelerComponentCreateTilemapTilesType());
 	shovelerViewAddComponentType(game->view, shovelerComponentCreateTilesetType());
 
@@ -321,6 +319,25 @@ int main(int argc, char *argv[])
 	long long int tilesetEntityIds[] = {10, 11};
 	shovelerComponentUpdateCanonicalConfigurationOptionEntityIdArray(tilemapBackgroundComponent, SHOVELER_COMPONENT_TILEMAP_OPTION_ID_TILESETS, tilesetEntityIds, 2);
 	shovelerComponentActivate(tilemapBackgroundComponent);
+	ShovelerComponent *tilemapSpriteBackgroundComponent = shovelerViewEntityAddComponent(tilemapBackgroundEntity, shovelerComponentTypeIdTilemapSprite);
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(tilemapSpriteBackgroundComponent, SHOVELER_COMPONENT_TILEMAP_SPRITE_OPTION_ID_MATERIAL, 12);
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(tilemapSpriteBackgroundComponent, SHOVELER_COMPONENT_TILEMAP_SPRITE_OPTION_ID_TILEMAP, 12);
+	shovelerComponentActivate(tilemapSpriteBackgroundComponent);
+	ShovelerComponent *backgroundSpriteComponent = shovelerViewEntityAddComponent(tilemapBackgroundEntity, shovelerComponentTypeIdSprite);
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(backgroundSpriteComponent, SHOVELER_COMPONENT_SPRITE_OPTION_ID_POSITION, 12);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(backgroundSpriteComponent, SHOVELER_COMPONENT_SPRITE_OPTION_ID_POSITION_MAPPING_X, SHOVELER_COORDINATE_MAPPING_POSITIVE_X);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(backgroundSpriteComponent, SHOVELER_COMPONENT_SPRITE_OPTION_ID_POSITION_MAPPING_Y, SHOVELER_COORDINATE_MAPPING_POSITIVE_Y);
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(backgroundSpriteComponent, SHOVELER_COMPONENT_SPRITE_OPTION_ID_CANVAS, 16);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(backgroundSpriteComponent, SHOVELER_COMPONENT_SPRITE_OPTION_ID_LAYER, 0);
+	shovelerComponentUpdateCanonicalConfigurationOptionVector2(backgroundSpriteComponent, SHOVELER_COMPONENT_SPRITE_OPTION_ID_SIZE, shovelerVector2(10.0f, 10.0f));
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(backgroundSpriteComponent, SHOVELER_COMPONENT_SPRITE_OPTION_ID_TILEMAP_SPRITE, 12);
+	shovelerComponentActivate(backgroundSpriteComponent);
+	ShovelerComponent *backgrouindTilemapMaterialComponent = shovelerViewEntityAddComponent(tilemapBackgroundEntity, shovelerComponentTypeIdMaterial);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(backgrouindTilemapMaterialComponent, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TYPE, SHOVELER_COMPONENT_MATERIAL_TYPE_TILEMAP);
+	shovelerComponentActivate(backgrouindTilemapMaterialComponent);
+	ShovelerComponent *backgroundSpritePositionComponent = shovelerViewEntityAddComponent(tilemapBackgroundEntity, shovelerComponentTypeIdPosition);
+	shovelerComponentUpdateCanonicalConfigurationOptionVector3(backgroundSpritePositionComponent, SHOVELER_COMPONENT_POSITION_OPTION_ID_COORDINATES, shovelerVector3(5.0f, 5.0f, 0.0f));
+	shovelerComponentActivate(backgroundSpritePositionComponent);
 
 	ShovelerViewEntity *tilemapForegroundEntity = shovelerViewAddEntity(game->view, 13);
 	ShovelerComponent *tilemapForegroundComponent = shovelerViewEntityAddComponent(tilemapForegroundEntity, shovelerComponentTypeIdTilemap);
@@ -328,6 +345,22 @@ int main(int argc, char *argv[])
 	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(tilemapForegroundComponent, SHOVELER_COMPONENT_TILEMAP_OPTION_ID_COLLIDERS, 9);
 	shovelerComponentUpdateCanonicalConfigurationOptionEntityIdArray(tilemapForegroundComponent, SHOVELER_COMPONENT_TILEMAP_OPTION_ID_TILESETS, tilesetEntityIds, 2);
 	shovelerComponentActivate(tilemapForegroundComponent);
+	ShovelerComponent *tilemapSpriteForegroundComponent = shovelerViewEntityAddComponent(tilemapForegroundEntity, shovelerComponentTypeIdTilemapSprite);
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(tilemapSpriteForegroundComponent, SHOVELER_COMPONENT_TILEMAP_SPRITE_OPTION_ID_MATERIAL, 12);
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(tilemapSpriteForegroundComponent, SHOVELER_COMPONENT_TILEMAP_SPRITE_OPTION_ID_TILEMAP, 13);
+	shovelerComponentActivate(tilemapSpriteForegroundComponent);
+	ShovelerComponent *foregroundSpriteComponent = shovelerViewEntityAddComponent(tilemapForegroundEntity, shovelerComponentTypeIdSprite);
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(foregroundSpriteComponent, SHOVELER_COMPONENT_SPRITE_OPTION_ID_POSITION, 13);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(foregroundSpriteComponent, SHOVELER_COMPONENT_SPRITE_OPTION_ID_POSITION_MAPPING_X, SHOVELER_COORDINATE_MAPPING_POSITIVE_X);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(foregroundSpriteComponent, SHOVELER_COMPONENT_SPRITE_OPTION_ID_POSITION_MAPPING_Y, SHOVELER_COORDINATE_MAPPING_POSITIVE_Y);
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(foregroundSpriteComponent, SHOVELER_COMPONENT_SPRITE_OPTION_ID_CANVAS, 16);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(foregroundSpriteComponent, SHOVELER_COMPONENT_SPRITE_OPTION_ID_LAYER, 2);
+	shovelerComponentUpdateCanonicalConfigurationOptionVector2(foregroundSpriteComponent, SHOVELER_COMPONENT_SPRITE_OPTION_ID_SIZE, shovelerVector2(10.0f, 10.0f));
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(foregroundSpriteComponent, SHOVELER_COMPONENT_SPRITE_OPTION_ID_TILEMAP_SPRITE, 13);
+	shovelerComponentActivate(foregroundSpriteComponent);
+	ShovelerComponent *foregroundSpritePositionComponent = shovelerViewEntityAddComponent(tilemapForegroundEntity, shovelerComponentTypeIdPosition);
+	shovelerComponentUpdateCanonicalConfigurationOptionVector3(foregroundSpritePositionComponent, SHOVELER_COMPONENT_POSITION_OPTION_ID_COORDINATES, shovelerVector3(5.0f, 5.0f, 0.0f));
+	shovelerComponentActivate(foregroundSpritePositionComponent);
 
 	ShovelerViewEntity *tileSpriteEntity = shovelerViewAddEntity(game->view, 14);
 	ShovelerComponent *spriteComponent = shovelerViewEntityAddComponent(tileSpriteEntity, shovelerComponentTypeIdSprite);
@@ -364,36 +397,21 @@ int main(int argc, char *argv[])
 	shovelerComponentUpdateCanonicalConfigurationOptionInt(canvasComponent, SHOVELER_COMPONENT_CANVAS_OPTION_ID_NUM_LAYERS, 1);
 	shovelerComponentActivate(canvasComponent);
 
-	ShovelerViewEntity *chunkLayer1Entity = shovelerViewAddEntity(game->view, 16);
-	ShovelerComponent *chunkLayer1Component = shovelerViewEntityAddComponent(chunkLayer1Entity, shovelerComponentTypeIdChunkLayer);
-	shovelerComponentUpdateCanonicalConfigurationOptionInt(chunkLayer1Component, SHOVELER_COMPONENT_CHUNK_LAYER_OPTION_TYPE, SHOVELER_CHUNK_LAYER_TYPE_TILEMAP);
-	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(chunkLayer1Component, SHOVELER_COMPONENT_CHUNK_LAYER_OPTION_TILEMAP, 12);
-	shovelerComponentActivate(chunkLayer1Component);
+	ShovelerViewEntity *chunkEntity = shovelerViewAddEntity(game->view, 16);
+	ShovelerComponent *chunkCanvasComponent = shovelerViewEntityAddComponent(chunkEntity, shovelerComponentTypeIdCanvas);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(chunkCanvasComponent, SHOVELER_COMPONENT_CANVAS_OPTION_ID_NUM_LAYERS, 3);
+	shovelerComponentActivate(chunkCanvasComponent);
 
-	ShovelerViewEntity *chunkLayer2Entity = shovelerViewAddEntity(game->view, 17);
-	ShovelerComponent *chunkLayer2Component = shovelerViewEntityAddComponent(chunkLayer2Entity, shovelerComponentTypeIdChunkLayer);
-	shovelerComponentUpdateCanonicalConfigurationOptionInt(chunkLayer2Component, SHOVELER_COMPONENT_CHUNK_LAYER_OPTION_TYPE, SHOVELER_CHUNK_LAYER_TYPE_CANVAS);
-	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(chunkLayer2Component, SHOVELER_COMPONENT_CHUNK_LAYER_OPTION_CANVAS, 15);
-	shovelerComponentActivate(chunkLayer2Component);
-
-	ShovelerViewEntity *chunkLayer3Entity = shovelerViewAddEntity(game->view, 18);
-	ShovelerComponent *chunkLayer3Component = shovelerViewEntityAddComponent(chunkLayer3Entity, shovelerComponentTypeIdChunkLayer);
-	shovelerComponentUpdateCanonicalConfigurationOptionInt(chunkLayer3Component, SHOVELER_COMPONENT_CHUNK_LAYER_OPTION_TYPE, SHOVELER_CHUNK_LAYER_TYPE_TILEMAP);
-	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(chunkLayer3Component, SHOVELER_COMPONENT_CHUNK_LAYER_OPTION_TILEMAP, 13);
-	shovelerComponentActivate(chunkLayer3Component);
-
-	ShovelerViewEntity *chunkEntity = shovelerViewAddEntity(game->view, 19);
-	ShovelerComponent *chunkComponent = shovelerViewEntityAddComponent(chunkEntity, shovelerComponentTypeIdChunk);
-	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(chunkComponent, SHOVELER_COMPONENT_CHUNK_OPTION_ID_POSITION, 19);
-	shovelerComponentUpdateCanonicalConfigurationOptionInt(chunkComponent, SHOVELER_COMPONENT_CHUNK_OPTION_ID_POSITION_MAPPING_X, SHOVELER_COORDINATE_MAPPING_POSITIVE_X);
-	shovelerComponentUpdateCanonicalConfigurationOptionInt(chunkComponent, SHOVELER_COMPONENT_CHUNK_OPTION_ID_POSITION_MAPPING_Y, SHOVELER_COORDINATE_MAPPING_POSITIVE_Y);
-	shovelerComponentUpdateCanonicalConfigurationOptionVector2(chunkComponent, SHOVELER_COMPONENT_CHUNK_OPTION_ID_SIZE, shovelerVector2(10.0f, 10.0f));
-	long long int layerEntityIds[] = {16, 17, 18};
-	shovelerComponentUpdateCanonicalConfigurationOptionEntityIdArray(chunkComponent, SHOVELER_COMPONENT_CHUNK_OPTION_ID_LAYERS, layerEntityIds, 3);
-	shovelerComponentActivate(chunkComponent);
-	ShovelerComponent *chunkPositionComponent = shovelerViewEntityAddComponent(chunkEntity, shovelerComponentTypeIdPosition);
-	shovelerComponentUpdateCanonicalConfigurationOptionVector3(chunkPositionComponent, SHOVELER_COMPONENT_POSITION_OPTION_ID_COORDINATES, shovelerVector3(5.0f, 5.0f, 0.0f));
-	shovelerComponentActivate(chunkPositionComponent);
+	ShovelerViewEntity *chunkTileSpriteEntity = shovelerViewAddEntity(game->view, 17);
+	ShovelerComponent *chunkSpriteComponent = shovelerViewEntityAddComponent(chunkTileSpriteEntity, shovelerComponentTypeIdSprite);
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(chunkSpriteComponent, SHOVELER_COMPONENT_SPRITE_OPTION_ID_POSITION, 14);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(chunkSpriteComponent, SHOVELER_COMPONENT_SPRITE_OPTION_ID_POSITION_MAPPING_X, SHOVELER_COORDINATE_MAPPING_POSITIVE_X);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(chunkSpriteComponent, SHOVELER_COMPONENT_SPRITE_OPTION_ID_POSITION_MAPPING_Y, SHOVELER_COORDINATE_MAPPING_POSITIVE_Y);
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(chunkSpriteComponent, SHOVELER_COMPONENT_SPRITE_OPTION_ID_CANVAS, 16);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(chunkSpriteComponent, SHOVELER_COMPONENT_SPRITE_OPTION_ID_LAYER, 1);
+	shovelerComponentUpdateCanonicalConfigurationOptionVector2(chunkSpriteComponent, SHOVELER_COMPONENT_SPRITE_OPTION_ID_SIZE, shovelerVector2(2.5f, 2.5f));
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(chunkSpriteComponent, SHOVELER_COMPONENT_SPRITE_OPTION_ID_TILE_SPRITE, 14);
+	shovelerComponentActivate(chunkSpriteComponent);
 
 	ShovelerViewEntity *tilemapMaterialEntity = shovelerViewAddEntity(game->view, 20);
 	ShovelerComponent *tilemapMaterialModelComponent = shovelerViewEntityAddComponent(tilemapMaterialEntity, shovelerComponentTypeIdModel);
@@ -449,10 +467,12 @@ int main(int argc, char *argv[])
 	shovelerComponentUpdateCanonicalConfigurationOptionBool(chunkMaterialModelComponent, SHOVELER_COMPONENT_MODEL_OPTION_ID_CASTS_SHADOW, true);
 	shovelerComponentUpdateCanonicalConfigurationOptionInt(chunkMaterialModelComponent, SHOVELER_COMPONENT_MODEL_OPTION_ID_POLYGON_MODE, SHOVELER_COMPONENT_MODEL_POLYGON_MODE_FILL);
 	shovelerComponentActivate(chunkMaterialModelComponent);
-	ShovelerComponent *chunkMaterialComponent = shovelerViewEntityAddComponent(chunkMaterialEntity, shovelerComponentTypeIdMaterial);
-	shovelerComponentUpdateCanonicalConfigurationOptionInt(chunkMaterialComponent, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TYPE, SHOVELER_COMPONENT_MATERIAL_TYPE_CHUNK);
-	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(chunkMaterialComponent, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_CHUNK, 19);
-	shovelerComponentActivate(chunkMaterialComponent);
+	ShovelerComponent *chunkCanvasMaterialComponent = shovelerViewEntityAddComponent(chunkMaterialEntity, shovelerComponentTypeIdMaterial);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(chunkCanvasMaterialComponent, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TYPE, SHOVELER_COMPONENT_MATERIAL_TYPE_CANVAS);
+	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(chunkCanvasMaterialComponent, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_CANVAS, 16);
+	shovelerComponentUpdateCanonicalConfigurationOptionVector2(chunkCanvasMaterialComponent, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_CANVAS_REGION_POSITION, shovelerVector2(5.0f, 5.0f));
+	shovelerComponentUpdateCanonicalConfigurationOptionVector2(chunkCanvasMaterialComponent, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_CANVAS_REGION_SIZE, shovelerVector2(10.0f, 10.0f));
+	shovelerComponentActivate(chunkCanvasMaterialComponent);
 	ShovelerComponent *chunkMaterialPositionComponent = shovelerViewEntityAddComponent(chunkMaterialEntity, shovelerComponentTypeIdPosition);
 	shovelerComponentUpdateCanonicalConfigurationOptionVector3(chunkMaterialPositionComponent, SHOVELER_COMPONENT_POSITION_OPTION_ID_COORDINATES, shovelerVector3(-5.0f, 5.0f, 7.5f));
 	shovelerComponentActivate(chunkMaterialPositionComponent);
