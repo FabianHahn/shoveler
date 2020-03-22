@@ -86,6 +86,15 @@ static void *activateMaterialComponent(ShovelerComponent *component)
 			shovelerMaterialTilemapSetActive(material, tilemap);
 		} break;
 		case SHOVELER_COMPONENT_MATERIAL_TYPE_CANVAS: {
+			bool hasRegionPosition = shovelerComponentHasConfigurationValue(component, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_CANVAS_REGION_POSITION);
+			bool hasRegionSize = shovelerComponentHasConfigurationValue(component, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_CANVAS_REGION_SIZE);
+			bool hasCanvas = shovelerComponentHasConfigurationValue(component, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_CANVAS);
+
+			if(!hasRegionPosition || !hasRegionSize || !hasCanvas) {
+				shovelerLogWarning("Failed to activate material component of entity %lld: Type is set to canvas, but not all of canvas, region position, and region size options are provided.", component->entityId);
+				return NULL;
+			}
+
 			ShovelerVector2 canvasRegionPosition = shovelerComponentGetConfigurationValueVector2(component, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_CANVAS_REGION_POSITION);
 			ShovelerVector2 canvasRegionSize = shovelerComponentGetConfigurationValueVector2(component, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_CANVAS_REGION_SIZE);
 			ShovelerComponent *canvasComponent = shovelerComponentGetDependency(component, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_CANVAS);
@@ -114,7 +123,7 @@ static void *activateMaterialComponent(ShovelerComponent *component)
 		} break;
 		default:
 			shovelerLogWarning("Trying to activate material with unknown material type %d, ignoring.", type);
-			return false;
+			return NULL;
 	}
 
 	return material;
