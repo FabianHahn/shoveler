@@ -11,7 +11,7 @@
 #include "shoveler/shader.h"
 #include "shoveler/sprite.h"
 
-static ShovelerCollider2 *intersectCanvas(ShovelerCollider2 *collider, const ShovelerBoundingBox2 *object);
+static const ShovelerCollider2 *intersectCanvas(const ShovelerCollider2 *collider, const ShovelerBoundingBox2 *object, ShovelerCollider2FilterCandidateFunction *filterCandidate, void *filterCandidateUserData);
 
 ShovelerCanvas *shovelerCanvasCreate(int numLayers)
 {
@@ -104,7 +104,7 @@ void shovelerCanvasFree(ShovelerCanvas *canvas)
 	free(canvas);
 }
 
-static ShovelerCollider2 *intersectCanvas(ShovelerCollider2 *collider, const ShovelerBoundingBox2 *object)
+static const ShovelerCollider2 *intersectCanvas(const ShovelerCollider2 *collider, const ShovelerBoundingBox2 *object, ShovelerCollider2FilterCandidateFunction *filterCandidate, void *filterCandidateUserData)
 {
 	ShovelerCanvas *canvas = (ShovelerCanvas *) collider->data;
 
@@ -114,7 +114,7 @@ static ShovelerCollider2 *intersectCanvas(ShovelerCollider2 *collider, const Sho
 		for(GList *iter = layer->head; iter != NULL; iter = iter->next) {
 			ShovelerSprite *sprite = iter->data;
 
-			ShovelerCollider2 *collidingSprite = shovelerCollider2Intersect(&sprite->collider, object);
+			const ShovelerCollider2 *collidingSprite = shovelerCollider2IntersectFiltered(&sprite->collider, object, filterCandidate, filterCandidateUserData);
 			if(collidingSprite != NULL) {
 				return collidingSprite;
 			}

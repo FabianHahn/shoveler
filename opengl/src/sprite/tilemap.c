@@ -6,7 +6,7 @@
 #include "shoveler/sprite.h"
 #include "shoveler/tilemap.h"
 
-static ShovelerCollider2 *intersectTilemapSpriteCollider(ShovelerCollider2 *collider, const ShovelerBoundingBox2 *object);
+static const ShovelerCollider2 *intersectTilemapSpriteCollider(const ShovelerCollider2 *collider, const ShovelerBoundingBox2 *object, ShovelerCollider2FilterCandidateFunction *filterCandidate, void *filterCandidateUserData);
 static bool renderTilemapSprite(ShovelerSprite *sprite, ShovelerVector2 regionPosition, ShovelerVector2 regionSize, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerRenderState *renderState);
 static void freeTilemapSprite(ShovelerSprite *sprite);
 
@@ -19,7 +19,7 @@ ShovelerSprite *shovelerSpriteTilemapCreate(ShovelerMaterial *material, Shoveler
 	return &tilemapSprite->sprite;
 }
 
-static ShovelerCollider2 *intersectTilemapSpriteCollider(ShovelerCollider2 *collider, const ShovelerBoundingBox2 *object)
+static const ShovelerCollider2 *intersectTilemapSpriteCollider(const ShovelerCollider2 *collider, const ShovelerBoundingBox2 *object, ShovelerCollider2FilterCandidateFunction *filterCandidate, void *filterCandidateUserData)
 {
 	ShovelerSpriteTilemap *tilemapSprite = collider->data;
 

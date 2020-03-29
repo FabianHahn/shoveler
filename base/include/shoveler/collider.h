@@ -7,11 +7,14 @@
 
 #include <shoveler/types.h>
 
-struct ShovelerCollider2Struct; // forward declaration: below
-struct ShovelerCollider3Struct; // forward declaration: below
+typedef struct ShovelerCollider2Struct ShovelerCollider2; // forward declaration: below
+typedef struct ShovelerCollider3Struct ShovelerCollider3; // forward declaration: below
 
-typedef struct ShovelerCollider2Struct *(ShovelerCollider2IntersectFunction)(struct ShovelerCollider2Struct *collider, const ShovelerBoundingBox2 *object);
-typedef struct ShovelerCollider3Struct *(ShovelerCollider3IntersectFunction)(struct ShovelerCollider3Struct *collider, const ShovelerBoundingBox3 *object);
+typedef bool (ShovelerCollider2FilterCandidateFunction)(const ShovelerCollider2 *candidate, void *userData);
+typedef bool (ShovelerCollider3FilterCandidateFunction)(const ShovelerCollider3 *candidate, void *userData);
+
+typedef const ShovelerCollider2 *(ShovelerCollider2IntersectFunction)(const ShovelerCollider2 *collider, const ShovelerBoundingBox2 *object, ShovelerCollider2FilterCandidateFunction *filterCandidate, void *filterCandidateUserData);
+typedef const ShovelerCollider3 *(ShovelerCollider3IntersectFunction)(const ShovelerCollider3 *collider, const ShovelerBoundingBox3 *object, ShovelerCollider3FilterCandidateFunction *filterCandidate, void *filterCandidateUserData);
 
 typedef struct ShovelerCollider2Struct {
 	ShovelerBoundingBox2 boundingBox;
@@ -25,26 +28,17 @@ typedef struct ShovelerCollider3Struct {
 	void *data;
 } ShovelerCollider3;
 
-static inline ShovelerCollider2 *shovelerCollider2Intersect(ShovelerCollider2 *collider, const ShovelerBoundingBox2 *object)
+const ShovelerCollider2 *shovelerCollider2IntersectFiltered(const ShovelerCollider2 *collider, const ShovelerBoundingBox2 *object, ShovelerCollider2FilterCandidateFunction *filterCandidate, void *filterCandidateUserData);
+const ShovelerCollider3 *shovelerCollider3IntersectFiltered(const ShovelerCollider3 *collider, const ShovelerBoundingBox3 *object, ShovelerCollider3FilterCandidateFunction *filterCandidate, void *filterCandidateUserData);
+
+static inline const ShovelerCollider2 *shovelerCollider2Intersect(const ShovelerCollider2 *collider, const ShovelerBoundingBox2 *object)
 {
-	if(shovelerBoundingBox2Intersect(&collider->boundingBox, object)) {
-		if(collider->intersect != NULL) {
-			return collider->intersect(collider, object);
-		}
-		return collider;
-	}
-	return NULL;
+	return shovelerCollider2IntersectFiltered(collider, object, /* filterCandidate */ NULL, /* filterCandidateUserData */ NULL);
 }
 
-static inline ShovelerCollider3 *shovelerCollider3Intersect(ShovelerCollider3 *collider, const ShovelerBoundingBox3 *object)
+static inline const ShovelerCollider3 *shovelerCollider3Intersect(const ShovelerCollider3 *collider, const ShovelerBoundingBox3 *object)
 {
-	if(shovelerBoundingBox3Intersect(&collider->boundingBox, object)) {
-		if(collider->intersect != NULL) {
-			return collider->intersect(collider, object);
-		}
-		return collider;
-	}
-	return NULL;
+	return shovelerCollider3IntersectFiltered(collider, object, /* filterCandidate */ NULL, /* filterCandidateUserData */ NULL);
 }
 
 #endif

@@ -31,13 +31,13 @@ bool shovelerCollidersRemoveCollider3(ShovelerColliders *colliders, ShovelerColl
 	return g_hash_table_remove(colliders->colliders3, (gpointer) collider);
 }
 
-ShovelerCollider2 *shovelerCollidersIntersect2(ShovelerColliders *colliders, const ShovelerBoundingBox2 *boundingBox)
+const ShovelerCollider2 *shovelerCollidersIntersect2Filtered(ShovelerColliders *colliders, const ShovelerBoundingBox2 *boundingBox, ShovelerCollider2FilterCandidateFunction *filterCandidate, void *filterCandidateUserData)
 {
 	GHashTableIter iter;
 	g_hash_table_iter_init(&iter, colliders->colliders2);
 	ShovelerCollider2 *collider;
 	while(g_hash_table_iter_next(&iter, (gpointer *) &collider, NULL)) {
-		ShovelerCollider2 *intersectingCollider = shovelerCollider2Intersect(collider, boundingBox);
+		const ShovelerCollider2 *intersectingCollider = shovelerCollider2IntersectFiltered(collider, boundingBox, filterCandidate, filterCandidateUserData);
 		if(intersectingCollider != NULL) {
 			return intersectingCollider;
 		}
@@ -46,13 +46,13 @@ ShovelerCollider2 *shovelerCollidersIntersect2(ShovelerColliders *colliders, con
 	return NULL;
 }
 
-ShovelerCollider3 *shovelerCollidersIntersect3(ShovelerColliders *colliders, const ShovelerBoundingBox3 *boundingBox)
+const ShovelerCollider3 *shovelerCollidersIntersect3Filtered(ShovelerColliders *colliders, const ShovelerBoundingBox3 *boundingBox, ShovelerCollider3FilterCandidateFunction *filterCandidate, void *filterCandidateUserData)
 {
 	GHashTableIter iter;
 	g_hash_table_iter_init(&iter, colliders->colliders3);
 	ShovelerCollider3 *collider;
 	while(g_hash_table_iter_next(&iter, (gpointer *) &collider, NULL)) {
-		ShovelerCollider3 *intersectingCollider = shovelerCollider3Intersect(collider, boundingBox);
+		const ShovelerCollider3 *intersectingCollider = shovelerCollider3IntersectFiltered(collider, boundingBox, filterCandidate, filterCandidateUserData);
 		if(intersectingCollider != NULL) {
 			return intersectingCollider;
 		}

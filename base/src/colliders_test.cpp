@@ -36,25 +36,25 @@ TEST_F(ShovelerCollidersTest, intersect2)
 	ShovelerBoundingBox2 intersectingBox = shovelerBoundingBox2(
 			shovelerVector2(2.5f, 2.5f),
 			shovelerVector2(7.5f, 7.5f));
-	ShovelerCollider2 *intersectingCollider = shovelerCollidersIntersect2(colliders, &intersectingBox);
+	const ShovelerCollider2 *intersectingCollider = shovelerCollidersIntersect2(colliders, &intersectingBox);
 	ASSERT_EQ(intersectingCollider, &collider);
 
 	ShovelerBoundingBox2 intersectingBox2 = shovelerBoundingBox2(
 			shovelerVector2(-7.5f, -7.5f),
 			shovelerVector2(2.5f, 2.5f));
-	ShovelerCollider2 *intersectingCollider2 = shovelerCollidersIntersect2(colliders, &intersectingBox2);
+	const ShovelerCollider2 *intersectingCollider2 = shovelerCollidersIntersect2(colliders, &intersectingBox2);
 	ASSERT_EQ(intersectingCollider2, &collider2);
 
 	ShovelerBoundingBox2 eitherIntersectingBox = shovelerBoundingBox2(
 			shovelerVector2(-2.5f, -2.5f),
 			shovelerVector2(2.5f, 2.5f));
-	ShovelerCollider2 *eitherIntersectingCollider = shovelerCollidersIntersect2(colliders, &eitherIntersectingBox);
+	const ShovelerCollider2 *eitherIntersectingCollider = shovelerCollidersIntersect2(colliders, &eitherIntersectingBox);
 	ASSERT_TRUE(eitherIntersectingCollider == &collider || eitherIntersectingCollider == &collider2);
 
 	ShovelerBoundingBox2 notIntersectingBox = shovelerBoundingBox2(
 			shovelerVector2(-7.5f, 2.5f),
 			shovelerVector2(-2.5f, 7.5f));
-	ShovelerCollider2 *notIntersectingCollider = shovelerCollidersIntersect2(colliders, &notIntersectingBox);
+	const ShovelerCollider2 *notIntersectingCollider = shovelerCollidersIntersect2(colliders, &notIntersectingBox);
 	ASSERT_TRUE(notIntersectingCollider == NULL);
 }
 
@@ -72,24 +72,24 @@ TEST_F(ShovelerCollidersTest, intersect3)
 	ShovelerBoundingBox3 intersectingBox = shovelerBoundingBox3(
 			shovelerVector3(2.5f, 2.5f, 2.5f),
 			shovelerVector3(7.5f, 7.5f, 7.5f));
-	ShovelerCollider3 *intersectingCollider = shovelerCollidersIntersect3(colliders, &intersectingBox);
+	const ShovelerCollider3 *intersectingCollider = shovelerCollidersIntersect3(colliders, &intersectingBox);
 	ASSERT_EQ(intersectingCollider, &collider);
 
 	ShovelerBoundingBox3 intersectingBox2 = shovelerBoundingBox3(
 			shovelerVector3(-7.5f, -7.5f, -7.5f),
 			shovelerVector3(2.5f, 2.5f, 2.5f));
-	ShovelerCollider3 *intersectingCollider2 = shovelerCollidersIntersect3(colliders, &intersectingBox2);
+	const ShovelerCollider3 *intersectingCollider2 = shovelerCollidersIntersect3(colliders, &intersectingBox2);
 	ASSERT_EQ(intersectingCollider2, &collider2);
 
 	ShovelerBoundingBox3 eitherIntersectingBox = shovelerBoundingBox3(
 			shovelerVector3(-2.5f, -2.5f, -2.5f),
 			shovelerVector3(2.5f, 2.5f, 2.5f));
-	ShovelerCollider3 *eitherIntersectingCollider = shovelerCollidersIntersect3(colliders, &eitherIntersectingBox);
+	const ShovelerCollider3 *eitherIntersectingCollider = shovelerCollidersIntersect3(colliders, &eitherIntersectingBox);
 	ASSERT_TRUE(eitherIntersectingCollider == &collider || eitherIntersectingCollider == &collider2);
 
 	ShovelerBoundingBox3 notIntersectingBox = shovelerBoundingBox3(
 			shovelerVector3(-7.5f, 2.5f, 2.5f),
 			shovelerVector3(-2.5f, 7.5f, 7.5f));
-	ShovelerCollider3 *notIntersectingCollider = shovelerCollidersIntersect3(colliders, &notIntersectingBox);
+	const ShovelerCollider3 *notIntersectingCollider = shovelerCollidersIntersect3(colliders, &notIntersectingBox);
 	ASSERT_TRUE(notIntersectingCollider == NULL);
 }

@@ -7,6 +7,7 @@ set(SHOVELER_BASE_SRC
 	src/image/png.c
 	src/image/ppm.c
 	src/resources/image_png.c
+	src/collider.c
 	src/colliders.c
 	src/color.c
 	src/component.c

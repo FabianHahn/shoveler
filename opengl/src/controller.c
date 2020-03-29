@@ -282,7 +282,7 @@ static bool tryMoveDirection(ShovelerController *controller, ShovelerVector3 rig
 			shovelerVector2LinearCombination(1.0, targetPosition2, -0.5f * controller->boundingBoxSize2, shovelerVector2(1.0f, 1.0f)),
 			shovelerVector2LinearCombination(1.0, targetPosition2, 0.5f * controller->boundingBoxSize2, shovelerVector2(1.0f, 1.0f)));
 
-		ShovelerCollider2 *collider = shovelerCollidersIntersect2(controller->colliders, &targetBoundingBox2);
+		const ShovelerCollider2 *collider = shovelerCollidersIntersect2(controller->colliders, &targetBoundingBox2);
 		if(collider != NULL) {
 			shovelerLogTrace("Bumping into 2d collider %p with bounding box (%.2f, %.2f)-(%.2f, %.2f), aborting position shift to (%.2f, %.2f).",
 				collider,
@@ -302,7 +302,7 @@ static bool tryMoveDirection(ShovelerController *controller, ShovelerVector3 rig
 			shovelerVector3LinearCombination(1.0, targetPosition, -0.5f * controller->boundingBoxSize3, shovelerVector3(1.0f, 1.0f, 1.0f)),
 			shovelerVector3LinearCombination(1.0, targetPosition, 0.5f * controller->boundingBoxSize3, shovelerVector3(1.0f, 1.0f, 1.0f)));
 
-		ShovelerCollider3 *collider = shovelerCollidersIntersect3(controller->colliders, &targetBoundingBox3);
+		const ShovelerCollider3 *collider = shovelerCollidersIntersect3(controller->colliders, &targetBoundingBox3);
 		if(collider != NULL) {
 			shovelerLogTrace("Bumping into 3d collider %p with bounding box (%.2f, %.2f, %.2f)-(%.2f, %.2f, %.2f), aborting position shift to (%.2f, %.2f, %.2f).",
 				collider,

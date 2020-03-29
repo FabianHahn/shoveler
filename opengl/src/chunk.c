@@ -10,7 +10,7 @@
 #include "shoveler/light.h"
 #include "shoveler/log.h"
 
-static ShovelerCollider2 *intersectCollider(ShovelerCollider2 *collider, const ShovelerBoundingBox2 *object);
+static const ShovelerCollider2 *intersectCollider(const ShovelerCollider2 *collider, const ShovelerBoundingBox2 *object, ShovelerCollider2FilterCandidateFunction *filterCandidate, void *filterCandidateUserData);
 
 ShovelerChunk *shovelerChunkCreate(ShovelerVector2 position, ShovelerVector2 size)
 {
@@ -120,7 +120,7 @@ void shovelerChunkFree(ShovelerChunk *chunk)
 	free(chunk);
 }
 
-static ShovelerCollider2 *intersectCollider(ShovelerCollider2 *collider, const ShovelerBoundingBox2 *object)
+static const ShovelerCollider2 *intersectCollider(const ShovelerCollider2 *collider, const ShovelerBoundingBox2 *object, ShovelerCollider2FilterCandidateFunction *filterCandidate, void *filterCandidateUserData)
 {
 	ShovelerChunk *chunk = collider->data;
 
