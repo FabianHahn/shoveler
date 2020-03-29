@@ -78,8 +78,8 @@ static void *activateSpriteComponent(ShovelerComponent *component)
 	assert(sprite != NULL);
 
 	shovelerSpriteUpdatePosition(sprite, getSpritePosition(component));
-	sprite->enableCollider = shovelerComponentGetConfigurationValueBool(component, SHOVELER_COMPONENT_SPRITE_OPTION_ID_ENABLE_COLLIDER);
-	sprite->size = shovelerComponentGetConfigurationValueVector2(component, SHOVELER_COMPONENT_SPRITE_OPTION_ID_SIZE);
+	shovelerSpriteUpdateSize(sprite, shovelerComponentGetConfigurationValueVector2(component, SHOVELER_COMPONENT_SPRITE_OPTION_ID_SIZE));
+	shovelerSpriteSetEnableCollider(sprite, shovelerComponentGetConfigurationValueBool(component, SHOVELER_COMPONENT_SPRITE_OPTION_ID_ENABLE_COLLIDER));
 
 	ShovelerComponent *canvasComponent = shovelerComponentGetDependency(component, SHOVELER_COMPONENT_SPRITE_OPTION_ID_CANVAS);
 	assert(canvasComponent != NULL);

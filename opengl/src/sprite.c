@@ -23,3 +23,16 @@ void shovelerSpriteUpdatePosition(ShovelerSprite *sprite, ShovelerVector2 positi
 		shovelerVector2LinearCombination(1.0f, sprite->position, -0.5f, sprite->size),
 		shovelerVector2LinearCombination(1.0f, sprite->position, 0.5f, sprite->size));
 }
+
+void shovelerSpriteUpdateSize(ShovelerSprite *sprite, ShovelerVector2 size)
+{
+	sprite->size = size;
+	sprite->collider.boundingBox = shovelerBoundingBox2(
+		shovelerVector2LinearCombination(1.0f, sprite->position, -0.5f, sprite->size),
+		shovelerVector2LinearCombination(1.0f, sprite->position, 0.5f, sprite->size));
+}
+
+void shovelerSpriteSetEnableCollider(ShovelerSprite *sprite, bool enableCollider)
+{
+	sprite->enableCollider = enableCollider;
+}
