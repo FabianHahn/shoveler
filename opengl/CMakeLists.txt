@@ -3,10 +3,7 @@ set(SHOVELER_OPENGL_SRC
 	src/camera/perspective.c
 	src/camera.c
 	src/canvas.c
-	src/chunk.c
 	src/component/canvas.c
-	src/component/chunk.c
-	src/component/chunk_layer.c
 	src/component/client.c
 	src/component/controller.c
 	src/component/drawable.c
@@ -40,7 +37,6 @@ set(SHOVELER_OPENGL_SRC
 	src/light/point.c
 	src/light/spot.c
 	src/material/canvas.c
-	src/material/chunk.c
 	src/material/color.c
 	src/material/depth_texture_gaussian_filter.c
 	src/material/depth.c
@@ -78,10 +74,7 @@ set(SHOVELER_OPENGL_SRC
 	include/shoveler/camera/perspective.h
 	include/shoveler/camera.h
 	include/shoveler/canvas.h
-	include/shoveler/chunk.h
 	include/shoveler/component/canvas.h
-	include/shoveler/component/chunk.h
-	include/shoveler/component/chunk_layer.h
 	include/shoveler/component/client.h
 	include/shoveler/component/controller.h
 	include/shoveler/component/drawable.h
@@ -118,7 +111,6 @@ set(SHOVELER_OPENGL_SRC
 	include/shoveler/light/spot.h
 	include/shoveler/light.h
 	include/shoveler/material/canvas.h
-	include/shoveler/material/chunk.h
 	include/shoveler/material/color.h
 	include/shoveler/material/depth_texture_gaussian_filter.h
 	include/shoveler/material/depth.h
@@ -156,7 +148,6 @@ set(SHOVELER_OPENGL_SRC
 )
 
 set(SHOVELER_OPENGL_TEST_SRC
-	src/chunk_test.cpp
 	src/shader_cache_test.cpp
 	src/tilemap_test.cpp
 	src/test.cpp

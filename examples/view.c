@@ -8,7 +8,6 @@
 #include <shoveler/camera/perspective.h>
 #include <shoveler/image/png.h>
 #include <shoveler/resources/image_png.h>
-#include <shoveler/chunk.h>
 #include <shoveler/component/canvas.h>
 #include <shoveler/component/client.h>
 #include <shoveler/component/controller.h>
