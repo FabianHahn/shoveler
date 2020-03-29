@@ -158,6 +158,7 @@ set(SHOVELER_OPENGL_SRC
 set(SHOVELER_OPENGL_TEST_SRC
 	src/chunk_test.cpp
 	src/shader_cache_test.cpp
+	src/tilemap_test.cpp
 	src/test.cpp
 )
 
