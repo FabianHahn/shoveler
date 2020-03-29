@@ -22,10 +22,11 @@ static ShovelerVector2 getSpritePosition(ShovelerComponent *component);
 
 ShovelerComponentType *shovelerComponentCreateSpriteType()
 {
-	ShovelerComponentTypeConfigurationOption configurationOptions[9];
+	ShovelerComponentTypeConfigurationOption configurationOptions[10];
 	configurationOptions[SHOVELER_COMPONENT_SPRITE_OPTION_ID_POSITION] = shovelerComponentTypeConfigurationOptionDependency("position", shovelerComponentTypeIdPosition, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, updateSpritePositionDependency);
 	configurationOptions[SHOVELER_COMPONENT_SPRITE_OPTION_ID_POSITION_MAPPING_X] = shovelerComponentTypeConfigurationOption("position_mapping_x", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_SPRITE_OPTION_ID_POSITION_MAPPING_Y] = shovelerComponentTypeConfigurationOption("position_mapping_y", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
+	configurationOptions[SHOVELER_COMPONENT_SPRITE_OPTION_ID_ENABLE_COLLIDER] = shovelerComponentTypeConfigurationOption("enable_collider", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BOOL, /* isOptional */ false, /* liveUpdate */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_SPRITE_OPTION_ID_SIZE] = shovelerComponentTypeConfigurationOption("size", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_VECTOR2, /* isOptional */ false, /* liveUpdate */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_SPRITE_OPTION_ID_CANVAS] = shovelerComponentTypeConfigurationOptionDependency("canvas", shovelerComponentTypeIdCanvas, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_SPRITE_OPTION_ID_LAYER] = shovelerComponentTypeConfigurationOption("layer", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
@@ -77,6 +78,7 @@ static void *activateSpriteComponent(ShovelerComponent *component)
 	assert(sprite != NULL);
 
 	shovelerSpriteUpdatePosition(sprite, getSpritePosition(component));
+	sprite->enableCollider = shovelerComponentGetConfigurationValueBool(component, SHOVELER_COMPONENT_SPRITE_OPTION_ID_ENABLE_COLLIDER);
 	sprite->size = shovelerComponentGetConfigurationValueVector2(component, SHOVELER_COMPONENT_SPRITE_OPTION_ID_SIZE);
 
 	ShovelerComponent *canvasComponent = shovelerComponentGetDependency(component, SHOVELER_COMPONENT_SPRITE_OPTION_ID_CANVAS);

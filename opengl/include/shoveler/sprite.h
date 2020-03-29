@@ -19,6 +19,7 @@ typedef struct ShovelerSpriteStruct {
 	ShovelerVector2 position;
 	ShovelerVector2 size;
 	ShovelerCollider2 collider;
+	bool enableCollider;
 	ShovelerMaterial *material;
 	ShovelerSpriteRenderFunction *render;
 	ShovelerSpriteFreeFunction *free;

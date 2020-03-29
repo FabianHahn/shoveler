@@ -114,6 +114,10 @@ static const ShovelerCollider2 *intersectCanvas(const ShovelerCollider2 *collide
 		for(GList *iter = layer->head; iter != NULL; iter = iter->next) {
 			ShovelerSprite *sprite = iter->data;
 
+			if(!sprite->enableCollider) {
+				continue;
+			}
+
 			const ShovelerCollider2 *collidingSprite = shovelerCollider2IntersectFiltered(&sprite->collider, object, filterCandidate, filterCandidateUserData);
 			if(collidingSprite != NULL) {
 				return collidingSprite;
