@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
 	const char *filename = argv[1];
 
 	ShovelerFonts *fonts = shovelerFontsCreate();
-	ShovelerFont *font = shovelerFontsLoadFont(fonts, "test font", filename);
+	ShovelerFont *font = shovelerFontsLoadFontFile(fonts, "test font", filename);
 	if(font == NULL) {
 		shovelerFontsFree(fonts);
 		return EXIT_FAILURE;

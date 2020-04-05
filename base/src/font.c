@@ -22,7 +22,7 @@ ShovelerFonts *shovelerFontsCreate()
 	return fonts;
 }
 
-ShovelerFont *shovelerFontsLoadFont(ShovelerFonts *fonts, const char *name, const char *filename)
+ShovelerFont *shovelerFontsLoadFontFile(ShovelerFonts *fonts, const char *name, const char *filename)
 {
 	ShovelerFont *font = g_hash_table_lookup(fonts->fonts, name);
 	if(font != NULL) {
@@ -33,6 +33,29 @@ ShovelerFont *shovelerFontsLoadFont(ShovelerFonts *fonts, const char *name, cons
 	FT_Error error = FT_New_Face(fonts->library, filename, 0, &face);
 	if(error != FT_Err_Ok) {
 		shovelerLogError("Failed to load font '%s' from '%s': %s", name, filename, FT_Error_String(error));
+		return NULL;
+	}
+
+	font = malloc(sizeof(ShovelerFont));
+	font->fonts = fonts;
+	font->name = strdup(name);
+	font->face = face;
+	g_hash_table_insert(fonts->fonts, font->name, font);
+
+	return font;
+}
+
+ShovelerFont *shovelerFontsLoadFontBuffer(ShovelerFonts *fonts, const char *name, const unsigned char *buffer, int bufferSize)
+{
+	ShovelerFont *font = g_hash_table_lookup(fonts->fonts, name);
+	if(font != NULL) {
+		return font;
+	}
+
+	FT_Face face;
+	FT_Error error = FT_New_Memory_Face(fonts->library, buffer, bufferSize, 0, &face);
+	if(error != FT_Err_Ok) {
+		shovelerLogError("Failed to load font '%s' from buffer of size %d: %s", name, bufferSize, FT_Error_String(error));
 		return NULL;
 	}
 

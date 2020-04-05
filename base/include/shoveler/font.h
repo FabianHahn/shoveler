@@ -21,7 +21,8 @@ typedef struct ShovelerFontStruct {
 } ShovelerFont;
 
 ShovelerFonts *shovelerFontsCreate();
-ShovelerFont *shovelerFontsLoadFont(ShovelerFonts *fonts, const char *name, const char *filename);
+ShovelerFont *shovelerFontsLoadFontFile(ShovelerFonts *fonts, const char *name, const char *filename);
+ShovelerFont *shovelerFontsLoadFontBuffer(ShovelerFonts *fonts, const char *name, const unsigned char *buffer, int bufferSize);
 bool shovelerFontsUnloadFont(ShovelerFonts *fonts, const char *name);
 void shovelerFontsFree(ShovelerFonts *fonts);
 
