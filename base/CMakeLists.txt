@@ -1,6 +1,7 @@
 set(SHOVELER_BASE_SRC
 	src/component/colliders.c
 	src/component/font.c
+	src/component/font_atlas.c
 	src/component/fonts.c
 	src/component/image.c
 	src/component/position.c
@@ -28,6 +29,7 @@ set(SHOVELER_BASE_SRC
 	include/shoveler/collider/box.h
 	include/shoveler/component/colliders.h
 	include/shoveler/component/font.h
+	include/shoveler/component/font_atlas.h
 	include/shoveler/component/fonts.h
 	include/shoveler/component/image.h
 	include/shoveler/component/position.h
