@@ -1,5 +1,5 @@
 #include <assert.h> // assert
-#include <limits.h> // UINT_MAX
+#include <limits.h> // UINT_MAX INT_MAX
 #include <stdlib.h> // malloc free
 
 #include "shoveler/font.h"
@@ -7,14 +7,17 @@
 #include "shoveler/log.h"
 #include "shoveler/image.h"
 
-static void insertGlyph(ShovelerFontAtlas *fontAtlas, FT_Bitmap glyph, unsigned int *outputPositionX, unsigned int *outputPositionY, bool *outputIsRotated);
+static void insertGlyph(ShovelerFontAtlas *fontAtlas, FT_Bitmap glyph, int *outputPositionX, int *outputPositionY, bool *outputIsRotated);
 static void growImage(ShovelerFontAtlas *fontAtlas);
-static void addBitmapToImage(ShovelerImage *image, FT_Bitmap bitmap, unsigned bottomLeftX, unsigned bottomLeftY, bool isRotated);
-static ShovelerFontAtlasSkylineEdge *allocateSkylineEdge(unsigned int minX, unsigned int width, unsigned int height);
+static void addBitmapToImage(ShovelerImage *image, FT_Bitmap bitmap, int bottomLeftX, int bottomLeftY, bool isRotated);
+static ShovelerFontAtlasSkylineEdge *allocateSkylineEdge(int minX, int width, int height);
 
-ShovelerFontAtlas *shovelerFontAtlasCreate(ShovelerFont *font, unsigned int fontSize, unsigned int padding)
+ShovelerFontAtlas *shovelerFontAtlasCreate(ShovelerFont *font, int fontSize, int padding)
 {
-	FT_Error error = FT_Set_Pixel_Sizes(font->face, 0, fontSize);
+	assert(fontSize >= 0);
+	assert(padding >= 0);
+
+	FT_Error error = FT_Set_Pixel_Sizes(font->face, 0, (unsigned int) fontSize);
 	if(error != FT_Err_Ok) {
 		shovelerLogError("Failed to set pixel size to %u for font '%s': %s", fontSize, font->name, FT_Error_String(error));
 		return NULL;
@@ -50,13 +53,32 @@ ShovelerFontAtlasGlyph *shovelerFontAtlasGetGlyph(ShovelerFontAtlas *fontAtlas, 
 		return NULL;
 	}
 
+	unsigned int bitmapWidth = fontAtlas->font->face->glyph->bitmap.width;
+	if(bitmapWidth > INT_MAX) {
+		shovelerLogError("Font face glyph bitmap width for code point %u out of bounds: %u", (unsigned int) codePoint, bitmapWidth);
+		return NULL;
+	}
+
+	unsigned int bitmapHeight = fontAtlas->font->face->glyph->bitmap.rows;
+	if(bitmapHeight > INT_MAX) {
+		shovelerLogError("Font face glyph bitmap rows for code point %u out of bounds: %u", (unsigned int) codePoint, bitmapHeight);
+		return NULL;
+	}
+
+	long advanceX = fontAtlas->font->face->glyph->advance.x;
+	if(advanceX > INT_MAX) {
+		shovelerLogError("Font face glyph bitmap advance X for code point %u out of bounds: %lu", (unsigned int) codePoint, advanceX);
+		return NULL;
+	}
+
+
 	glyph = malloc(sizeof(ShovelerFontAtlasGlyph));
 	glyph->index = glyphIndex;
-	glyph->width = fontAtlas->font->face->glyph->bitmap.width;
-	glyph->height = fontAtlas->font->face->glyph->bitmap.rows;
+	glyph->width = (int) bitmapWidth;
+	glyph->height = (int) bitmapHeight;
 	glyph->bearingX = fontAtlas->font->face->glyph->bitmap_left;
 	glyph->bearingY = fontAtlas->font->face->glyph->bitmap_top;
-	glyph->advance = fontAtlas->font->face->glyph->advance.x;
+	glyph->advance = (int) advanceX;
 	insertGlyph(fontAtlas, fontAtlas->font->face->glyph->bitmap, &glyph->minX, &glyph->minY, &glyph->isRotated);
 
 	g_hash_table_insert(fontAtlas->glyphs, &glyph->index, glyph);
@@ -66,7 +88,7 @@ ShovelerFontAtlasGlyph *shovelerFontAtlasGetGlyph(ShovelerFontAtlas *fontAtlas, 
 
 void shovelerFontAtlasValidateState(ShovelerFontAtlas *fontAtlas)
 {
-	unsigned int totalWidth = 0;
+	int totalWidth = 0;
 	for(GList *iter = fontAtlas->skylineEdges->head; iter != NULL; iter = iter->next) {
 		ShovelerFontAtlasSkylineEdge *skylineEdge = iter->data;
 
@@ -86,14 +108,14 @@ void shovelerFontAtlasValidateState(ShovelerFontAtlas *fontAtlas)
 	g_hash_table_iter_init(&iter, fontAtlas->glyphs);
 	ShovelerFontAtlasGlyph *glyph;
 	while(g_hash_table_iter_next(&iter, NULL, (gpointer *) &glyph)) {
-		unsigned int placedGlyphWidth = glyph->isRotated ? glyph->height : glyph->width;
-		unsigned int placedGlyphHeight = glyph->isRotated ? glyph->width : glyph->height;
+		int placedGlyphWidth = glyph->isRotated ? glyph->height : glyph->width;
+		int placedGlyphHeight = glyph->isRotated ? glyph->width : glyph->height;
 		assert(glyph->minX + placedGlyphWidth <= fontAtlas->image->width);
 		assert(glyph->minY + placedGlyphHeight <= fontAtlas->image->height);
 
-		for(unsigned int x = 0; x < glyph->width; x++) {
-			for(unsigned int y = 0; y < glyph->height; y++) {
-				unsigned int bitmapX, bitmapY;
+		for(int x = 0; x < glyph->width; x++) {
+			for(int y = 0; y < glyph->height; y++) {
+				int bitmapX, bitmapY;
 				if(glyph->isRotated) {
 					bitmapX = glyph->minX + y;
 					bitmapY = glyph->minY + x;
@@ -124,8 +146,11 @@ void shovelerFontAtlasFree(ShovelerFontAtlas *fontAtlas)
 	free(fontAtlas);
 }
 
-static void insertGlyph(ShovelerFontAtlas *fontAtlas, FT_Bitmap glyph, unsigned int *outputPositionX, unsigned int *outputPositionY, bool *outputIsRotated)
+static void insertGlyph(ShovelerFontAtlas *fontAtlas, FT_Bitmap glyph, int *outputPositionX, int *outputPositionY, bool *outputIsRotated)
 {
+	assert(glyph.width <= INT_MAX);
+	assert(glyph.rows <= INT_MAX);
+
 	// Using the "skyline bottom left" algorithm, we try to place the glyph in a position such
 	// that its height is as low as possible while also having it touch the existing ones on its
 	// left. To do this, the only information we need to keep track of is the current skyline of
@@ -142,12 +167,12 @@ static void insertGlyph(ShovelerFontAtlas *fontAtlas, FT_Bitmap glyph, unsigned 
 	// track of the created holes, but it is much more complicated to implement:
 	// "The Bottom-Left Bin-Packing Heuristic" by Chazelle et al.
 
-	unsigned int placedGlyphWidth = 2 * fontAtlas->padding + glyph.width;
-	unsigned int placedGlyphHeight = 2 * fontAtlas->padding + glyph.rows;
+	int placedGlyphWidth = 2 * fontAtlas->padding + (int) glyph.width;
+	int placedGlyphHeight = 2 * fontAtlas->padding + (int) glyph.rows;
 
 	GList *bestStartSkylineEdgeIter = NULL;
 	GList *bestEndSkylineEdgeIter = NULL;
-	unsigned int bestHeight = UINT_MAX;
+	int bestHeight = INT_MAX;
 	bool isRotated = false;
 	for(GList *iter = fontAtlas->skylineEdges->head; iter != NULL; iter = iter->next) {
 		ShovelerFontAtlasSkylineEdge *skylineEdge = iter->data;
@@ -155,11 +180,11 @@ static void insertGlyph(ShovelerFontAtlas *fontAtlas, FT_Bitmap glyph, unsigned 
 		// Try to put the glyph rotated on top of this skyline edge. We try rotated first because
 		// we expect glyphs to have a larger height than width.
 		{
-			unsigned int maxEdgeHeight = skylineEdge->height;
+			int maxEdgeHeight = skylineEdge->height;
 			// The glyph could be wider than this skyline edge, so we might have to extend across
 			// a few more as long as their height is lower.
 			GList *endIter = iter;
-			unsigned int currentEdgeWidth = skylineEdge->width;
+			int currentEdgeWidth = skylineEdge->width;
 			while(currentEdgeWidth < placedGlyphHeight && endIter->next != NULL) {
 				endIter = endIter->next;
 				ShovelerFontAtlasSkylineEdge *additionalSkylineEdge = endIter->data;
@@ -173,7 +198,7 @@ static void insertGlyph(ShovelerFontAtlas *fontAtlas, FT_Bitmap glyph, unsigned 
 				currentEdgeWidth += additionalSkylineEdge->width;
 			}
 
-			unsigned int candidateHeight = maxEdgeHeight + placedGlyphWidth;
+			int candidateHeight = maxEdgeHeight + placedGlyphWidth;
 			if(candidateHeight < bestHeight && candidateHeight <= fontAtlas->image->height && currentEdgeWidth >= placedGlyphHeight) {
 				// We could put the glyph here, and this is the best we've found so far.
 				bestStartSkylineEdgeIter = iter;
@@ -185,11 +210,11 @@ static void insertGlyph(ShovelerFontAtlas *fontAtlas, FT_Bitmap glyph, unsigned 
 
 		// Try to put the glyph on top of this skyline edge.
 		{
-			unsigned int maxEdgeHeight = skylineEdge->height;
+			int maxEdgeHeight = skylineEdge->height;
 			// The glyph could be wider than this skyline edge, so we might have to extend across
 			// a few more as long as their height is lower.
 			GList *endIter = iter;
-			unsigned int currentEdgeWidth = skylineEdge->width;
+			int currentEdgeWidth = skylineEdge->width;
 			while(currentEdgeWidth < placedGlyphWidth && endIter->next != NULL) {
 				endIter = endIter->next;
 				ShovelerFontAtlasSkylineEdge *additionalSkylineEdge = endIter->data;
@@ -203,7 +228,7 @@ static void insertGlyph(ShovelerFontAtlas *fontAtlas, FT_Bitmap glyph, unsigned 
 				currentEdgeWidth += additionalSkylineEdge->width;
 			}
 
-			unsigned int candidateHeight = maxEdgeHeight + placedGlyphHeight;
+			int candidateHeight = maxEdgeHeight + placedGlyphHeight;
 			if(candidateHeight < bestHeight && candidateHeight <= fontAtlas->image->height && currentEdgeWidth >= placedGlyphWidth) {
 				// We could put the glyph here, and this is the best we've found so far.
 				bestStartSkylineEdgeIter = iter;
@@ -222,7 +247,7 @@ static void insertGlyph(ShovelerFontAtlas *fontAtlas, FT_Bitmap glyph, unsigned 
 	}
 
 	if(isRotated) {
-		unsigned int temp = placedGlyphHeight;
+		int temp = placedGlyphHeight;
 		placedGlyphHeight = placedGlyphWidth;
 		placedGlyphWidth = temp;
 	}
@@ -237,7 +262,7 @@ static void insertGlyph(ShovelerFontAtlas *fontAtlas, FT_Bitmap glyph, unsigned 
 
 	// Accumulate the width of all the skyline edges that we're going to combine by placing the
 	// glyph on top.
-	unsigned int accumulatedWidth = 0;
+	int accumulatedWidth = 0;
 	for(GList *iter = bestStartSkylineEdgeIter; iter != bestEndSkylineEdgeIter;) {
 		ShovelerFontAtlasSkylineEdge *currentSkylineEdge = iter->data;
 
@@ -256,7 +281,7 @@ static void insertGlyph(ShovelerFontAtlas *fontAtlas, FT_Bitmap glyph, unsigned 
 
 	assert(accumulatedWidth >= placedGlyphWidth);
 
-	unsigned int remainingWidth = accumulatedWidth - placedGlyphWidth;
+	int remainingWidth = accumulatedWidth - placedGlyphWidth;
 	if(remainingWidth > 0) {
 		// If we don't fill the full edge, split off the remainder
 		ShovelerFontAtlasSkylineEdge *splitEndSkylineEdge = allocateSkylineEdge(
@@ -283,17 +308,19 @@ static void growImage(ShovelerFontAtlas *fontAtlas)
 	shovelerImageFree(oldImage);
 }
 
-static void addBitmapToImage(ShovelerImage *image, FT_Bitmap bitmap, unsigned bottomLeftX, unsigned bottomLeftY, bool isRotated)
+static void addBitmapToImage(ShovelerImage *image, FT_Bitmap bitmap, int bottomLeftX, int bottomLeftY, bool isRotated)
 {
+	assert(bitmap.width <= INT_MAX);
+	assert(bitmap.rows <= INT_MAX);
 	assert(bottomLeftX < image->width);
 	assert(bottomLeftY < image->height);
-	unsigned int rotatedBitmapWidth = isRotated ? bitmap.rows : bitmap.width;
-	unsigned int rotatedBitmapHeight = isRotated ? bitmap.width : bitmap.rows;
-	assert(UINT_MAX - rotatedBitmapWidth >= image->width); // rotatedBitmapWidth + image->width won't overflow
-	assert(UINT_MAX - rotatedBitmapHeight >= image->height); // rotatedBitmapHeight + image->height won't overflow
+	int rotatedBitmapWidth = isRotated ? (int) bitmap.rows : (int) bitmap.width;
+	int rotatedBitmapHeight = isRotated ? (int) bitmap.width : (int) bitmap.rows;
+	assert(INT_MAX - rotatedBitmapWidth >= image->width); // rotatedBitmapWidth + image->width won't overflow
+	assert(INT_MAX - rotatedBitmapHeight >= image->height); // rotatedBitmapHeight + image->height won't overflow
 
-	for(unsigned int bitmapX = 0; bitmapX < bitmap.width; bitmapX++) {
-		for(unsigned int bitmapY = 0; bitmapY < bitmap.rows; bitmapY++) {
+	for(int bitmapX = 0; bitmapX < (int) bitmap.width; bitmapX++) {
+		for(int bitmapY = 0; bitmapY < (int) bitmap.rows; bitmapY++) {
 			if(isRotated) {
 				shovelerImageGet(image, bottomLeftX + bitmapY, bottomLeftY + bitmapX, 0) = bitmap.buffer[bitmapY * bitmap.pitch + bitmapX];
 			} else {
@@ -303,7 +330,7 @@ static void addBitmapToImage(ShovelerImage *image, FT_Bitmap bitmap, unsigned bo
 	}
 }
 
-static ShovelerFontAtlasSkylineEdge *allocateSkylineEdge(unsigned int minX, unsigned int width, unsigned int height)
+static ShovelerFontAtlasSkylineEdge *allocateSkylineEdge(int minX, int width, int height)
 {
 	ShovelerFontAtlasSkylineEdge *skylineEdge = malloc(sizeof(ShovelerFontAtlasSkylineEdge));
 	skylineEdge->minX = minX;

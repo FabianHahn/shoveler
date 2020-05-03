@@ -9,27 +9,27 @@ typedef struct ShovelerFontStruct ShovelerFont; // forward declaration: font.h
 typedef struct ShovelerImageStruct ShovelerImage; // forward declaration: image.h
 
 typedef struct ShovelerFontAtlasSkylineEdgeStruct {
-	unsigned int minX;
-	unsigned int width;
-	unsigned int height;
+	int minX;
+	int width;
+	int height;
 } ShovelerFontAtlasSkylineEdge;
 
 typedef struct ShovelerFontAtlasGlyphStruct {
 	unsigned int index;
-	unsigned int minX;
-	unsigned int minY;
-	unsigned int width;
-	unsigned int height;
-	unsigned int bearingX;
-	unsigned int bearingY;
-	unsigned int advance;
+	int minX;
+	int minY;
+	int width;
+	int height;
+	int bearingX;
+	int bearingY;
+	int advance;
 	bool isRotated;
 } ShovelerFontAtlasGlyph;
 
 typedef struct ShovelerFontAtlasStruct {
 	ShovelerFont *font;
-	unsigned int fontSize;
-	unsigned int padding;
+	int fontSize;
+	int padding;
 	ShovelerImage *image;
 	/** list of (ShovelerFontAtlasRectangle *) representing rectangles above the skyline */
 	GQueue *skylineEdges;
@@ -37,7 +37,7 @@ typedef struct ShovelerFontAtlasStruct {
 	GHashTable *glyphs;
 } ShovelerFontAtlas;
 
-ShovelerFontAtlas *shovelerFontAtlasCreate(ShovelerFont *font, unsigned int fontSize, unsigned int padding);
+ShovelerFontAtlas *shovelerFontAtlasCreate(ShovelerFont *font, int fontSize, int padding);
 ShovelerFontAtlasGlyph *shovelerFontAtlasGetGlyph(ShovelerFontAtlas *fontAtlas, uint32_t codePoint);
 void shovelerFontAtlasValidateState(ShovelerFontAtlas *fontAtlas);
 void shovelerFontAtlasFree(ShovelerFontAtlas *fontAtlas);
