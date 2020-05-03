@@ -14,8 +14,8 @@ static void deactivateFontComponent(ShovelerComponent *component);
 ShovelerComponentType *shovelerComponentCreateFontType()
 {
 	ShovelerComponentTypeConfigurationOption configurationOptions[2];
-	configurationOptions[SHOVELER_COMPONENT_IMAGE_OPTION_ID_NAME] = shovelerComponentTypeConfigurationOption("name", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_STRING, /* isOptional */ false, /* liveUpdate */ NULL);
-	configurationOptions[SHOVELER_COMPONENT_IMAGE_OPTION_ID_RESOURCE] = shovelerComponentTypeConfigurationOptionDependency("resource", shovelerComponentTypeIdResource, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+	configurationOptions[SHOVELER_COMPONENT_FONT_OPTION_ID_NAME] = shovelerComponentTypeConfigurationOption("name", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_STRING, /* isOptional */ false, /* liveUpdate */ NULL);
+	configurationOptions[SHOVELER_COMPONENT_FONT_OPTION_ID_RESOURCE] = shovelerComponentTypeConfigurationOptionDependency("resource", shovelerComponentTypeIdResource, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
 
 	return shovelerComponentTypeCreate(shovelerComponentTypeIdFont, activateFontComponent, deactivateFontComponent, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
 }
@@ -31,10 +31,10 @@ static void *activateFontComponent(ShovelerComponent *component)
 {
 	assert(shovelerComponentHasViewFonts(component));
 
-	ShovelerComponent *resourceComponent = shovelerComponentGetDependency(component, SHOVELER_COMPONENT_IMAGE_OPTION_ID_RESOURCE);
+	ShovelerComponent *resourceComponent = shovelerComponentGetDependency(component, SHOVELER_COMPONENT_FONT_OPTION_ID_RESOURCE);
 	assert(resourceComponent != NULL);
 
-	const char *name = shovelerComponentGetConfigurationValueString(component, SHOVELER_COMPONENT_IMAGE_OPTION_ID_NAME);
+	const char *name = shovelerComponentGetConfigurationValueString(component, SHOVELER_COMPONENT_FONT_OPTION_ID_NAME);
 
 	const unsigned char *bufferData;
 	int bufferSize;

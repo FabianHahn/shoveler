@@ -8,8 +8,8 @@ typedef struct ShovelerFontStruct ShovelerFont; // forward declaration: font.h
 extern const char *const shovelerComponentTypeIdFont;
 
 typedef enum {
-	SHOVELER_COMPONENT_IMAGE_OPTION_ID_NAME,
-	SHOVELER_COMPONENT_IMAGE_OPTION_ID_RESOURCE,
+	SHOVELER_COMPONENT_FONT_OPTION_ID_NAME,
+	SHOVELER_COMPONENT_FONT_OPTION_ID_RESOURCE,
 } ShovelerComponentFontOptionId;
 
 ShovelerComponentType *shovelerComponentCreateFontType();
