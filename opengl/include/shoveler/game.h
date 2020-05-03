@@ -19,6 +19,7 @@
 typedef struct ShovelerCanvasStruct ShovelerCanvas; // forward declaration: canvas.h
 typedef struct ShovelerCollidersStruct ShovelerColliders; // forward declaration: colliders.h
 typedef struct ShovelerDrawableStruct ShovelerDrawable; // forward declaration: drawable.h
+typedef struct ShovelerFontsStruct ShovelerFonts; // forward declaration: font.h
 typedef struct ShovelerGameStruct ShovelerGame; // forward declaration: below
 typedef struct ShovelerShaderCacheStruct ShovelerShaderCache; // forward declaration: shader_cache.h
 
@@ -62,6 +63,7 @@ typedef struct ShovelerGameStruct {
 	ShovelerCamera *camera;
 	ShovelerColliders *colliders;
 	ShovelerController *controller;
+	ShovelerFonts *fonts;
 	ShovelerView *view;
 	ShovelerCanvas *screenspaceCanvas;
 	ShovelerDrawable *screenspaceCanvasQuad;

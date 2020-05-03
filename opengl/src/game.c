@@ -7,10 +7,12 @@
 #include "shoveler/material/canvas.h"
 #include "shoveler/component/colliders.h"
 #include "shoveler/component/controller.h"
+#include "shoveler/component/fonts.h"
 #include "shoveler/component/scene.h"
 #include "shoveler/component/shader_cache.h"
 #include "shoveler/canvas.h"
 #include "shoveler/colliders.h"
+#include "shoveler/font.h"
 #include "shoveler/game.h"
 #include "shoveler/global.h"
 #include "shoveler/input.h"
@@ -111,6 +113,7 @@ ShovelerGame *shovelerGameCreate(ShovelerGameUpdateCallback *update, ShovelerGam
 	game->camera = shovelerCameraPerspectiveCreate(game->shaderCache, &cameraSettings->frame, &cameraSettings->projection);
 	game->colliders = shovelerCollidersCreate();
 	game->controller = shovelerControllerCreate(game->window, game->input, game->colliders, &controllerSettings->frame, controllerSettings->moveFactor, controllerSettings->tiltFactor, controllerSettings->boundingBoxSize2, controllerSettings->boundingBoxSize3);
+	game->fonts = shovelerFontsCreate();
 	game->view = shovelerViewCreate(updateAuthoritativeComponent, game);
 
 	game->screenspaceCanvas = shovelerCanvasCreate(/* numLayers */ 1);
@@ -139,6 +142,7 @@ ShovelerGame *shovelerGameCreate(ShovelerGameUpdateCallback *update, ShovelerGam
 
 	shovelerViewSetTarget(game->view, shovelerComponentViewTargetIdColliders, game->colliders);
 	shovelerViewSetTarget(game->view, shovelerComponentViewTargetIdController, game->controller);
+	shovelerViewSetTarget(game->view, shovelerComponentViewTargetIdFonts, game->fonts);
 	shovelerViewSetTarget(game->view, shovelerComponentViewTargetIdScene, game->scene);
 	shovelerViewSetTarget(game->view, shovelerComponentViewTargetIdShaderCache, game->shaderCache);
 
@@ -216,6 +220,7 @@ void shovelerGameFree(ShovelerGame *game)
 	shovelerCanvasFree(game->screenspaceCanvas);
 
 	shovelerViewFree(game->view);
+	shovelerFontsFree(game->fonts);
 	shovelerControllerFree(game->controller);
 	shovelerCollidersFree(game->colliders);
 	shovelerInputFree(game->input);
