@@ -132,6 +132,29 @@ ShovelerComponentTypeConfigurationOption shovelerComponentTypeConfigurationOptio
  */
 ShovelerComponentTypeConfigurationOption shovelerComponentTypeConfigurationOptionDependency(const char *name, const char *dependencyComponentTypeId, bool isArray, bool isOptional, ShovelerComponentTypeConfigurationOptionLiveUpdateFunction *liveUpdate, ShovelerComponentTypeConfigurationOptionUpdateDependencyFunction *updateDependency);
 
+/**
+ * Creates a new component type.
+ *
+ * The specified ID should be a statically defined string with external linkage that will be used
+ * as unique identifier for the component type. It is a string so it can be easily printed as part
+ * of log messages.
+ *
+ * If an activation function is specified and not NULL, it will be called whenever a component
+ * instance of this type tries to activate. It must return a non-NULL data value if its activation
+ * succeeds.
+ *
+ * If a deactivation function is specified, it will be called when a component instance of this
+ * type deactivates. It is intended to free any memory or registrations performed by the activation
+ * function and should leave the component instance in a state where it can be reactivated again at
+ * any later point in time.
+ *
+ * If requiresAuthority is true, the component will only attempt to activate if it is currently
+ * delegated authority.
+ *
+ * A component type can be created with any number of configuration options that will be
+ * instantiated on each component instance of this type. The caller retains ownership of the passed
+ * configuration options.
+ */
 ShovelerComponentType *shovelerComponentTypeCreate(const char *id, ShovelerComponentTypeActivationFunction *activate, ShovelerComponentTypeDeactivationFunction *deactivate, bool requiresAuthority, int numConfigurationOptions, const ShovelerComponentTypeConfigurationOption *configurationOptions);
 void shovelerComponentTypeFree(ShovelerComponentType *componentType);
 
