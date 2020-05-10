@@ -155,7 +155,7 @@ set(SHOVELER_OPENGL_TEST_SRC
 
 add_library(shoveler_opengl ${SHOVELER_OPENGL_SRC})
 add_library(shoveler::shoveler_opengl ALIAS shoveler_opengl)
-set_property(TARGET shoveler_opengl PROPERTY C_STANDARD 99)
+set_property(TARGET shoveler_opengl PROPERTY C_STANDARD 11)
 
 target_include_directories(shoveler_opengl
 	PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
