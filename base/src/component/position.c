@@ -9,7 +9,7 @@ ShovelerComponentType *shovelerComponentCreatePositionType()
 	ShovelerComponentTypeConfigurationOption configurationOptions[1];
 	configurationOptions[SHOVELER_COMPONENT_POSITION_OPTION_ID_COORDINATES] = shovelerComponentTypeConfigurationOption("coordinates", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_VECTOR3, /* isOptional */ false, shovelerComponentLiveUpdateNoop);
 
-	return shovelerComponentTypeCreate(shovelerComponentTypeIdPosition, /* activate */ NULL, /* deactivate */ NULL, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
+	return shovelerComponentTypeCreate(shovelerComponentTypeIdPosition, /* activate */ NULL, /* update */ NULL, /* deactivate */ NULL, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
 }
 
 const ShovelerVector3 *shovelerComponentGetPositionCoordinates(ShovelerComponent *component)

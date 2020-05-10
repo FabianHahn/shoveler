@@ -54,18 +54,19 @@ typedef struct ShovelerComponentConfigurationValueStruct {
 } ShovelerComponentConfigurationValue;
 
 typedef void (ShovelerComponentTypeConfigurationOptionLiveUpdateFunction)(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *value);
-typedef void (ShovelerComponentTypeConfigurationOptionUpdateDependencyFunction)(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent);
+typedef void (ShovelerComponentTypeConfigurationOptionLiveUpdateDependencyFunction)(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent);
 
 typedef struct ShovelerComponentTypeConfigurationOptionStruct {
 	const char *name;
 	ShovelerComponentConfigurationOptionType type;
 	bool isOptional;
 	ShovelerComponentTypeConfigurationOptionLiveUpdateFunction *liveUpdate;
-	ShovelerComponentTypeConfigurationOptionUpdateDependencyFunction *updateDependency;
+	ShovelerComponentTypeConfigurationOptionLiveUpdateDependencyFunction *liveUpdateDependency;
 	const char *dependencyComponentTypeId;
 } ShovelerComponentTypeConfigurationOption;
 
 typedef void *(ShovelerComponentTypeActivationFunction)(ShovelerComponent *component);
+typedef bool (ShovelerComponentTypeUpdateFunction)(ShovelerComponent *component, double dt);
 typedef void (ShovelerComponentTypeDeactivationFunction)(ShovelerComponent *component);
 
 typedef struct ShovelerComponentTypeStruct {
@@ -73,6 +74,7 @@ typedef struct ShovelerComponentTypeStruct {
 	int numConfigurationOptions;
 	ShovelerComponentTypeConfigurationOption *configurationOptions;
 	ShovelerComponentTypeActivationFunction *activate;
+	ShovelerComponentTypeUpdateFunction *update;
 	ShovelerComponentTypeDeactivationFunction *deactivate;
 	bool requiresAuthority;
 } ShovelerComponentType;
@@ -126,11 +128,11 @@ ShovelerComponentTypeConfigurationOption shovelerComponentTypeConfigurationOptio
  * If the passed live update function is not NULL, this indicates that the configuration option can
  * be updated by calling that function instead of deactivating and reactivating the component.
  *
- * If the component is active and the passed update dependency function is not NULL, it will be
- * called whenever the dependency this component value points to is live updated. This includes
- * updates to the dependency's transitive dependencies.
+ * If the component is active and the passed live update dependency function is not NULL, it will
+ * be called whenever the dependency this component value points to is updated instead of
+ * reactivating this component.
  */
-ShovelerComponentTypeConfigurationOption shovelerComponentTypeConfigurationOptionDependency(const char *name, const char *dependencyComponentTypeId, bool isArray, bool isOptional, ShovelerComponentTypeConfigurationOptionLiveUpdateFunction *liveUpdate, ShovelerComponentTypeConfigurationOptionUpdateDependencyFunction *updateDependency);
+ShovelerComponentTypeConfigurationOption shovelerComponentTypeConfigurationOptionDependency(const char *name, const char *dependencyComponentTypeId, bool isArray, bool isOptional, ShovelerComponentTypeConfigurationOptionLiveUpdateFunction *liveUpdate, ShovelerComponentTypeConfigurationOptionLiveUpdateDependencyFunction *liveUpdateDependency);
 
 /**
  * Creates a new component type.
@@ -142,6 +144,11 @@ ShovelerComponentTypeConfigurationOption shovelerComponentTypeConfigurationOptio
  * If an activation function is specified and not NULL, it will be called whenever a component
  * instance of this type tries to activate. It must return a non-NULL data value if its activation
  * succeeds.
+ *
+ * If an update function is specified and not NULL, it will be called whenever a component instance
+ * of this type is updated by the view. It must return true if an update was actually performed,
+ * which will then propogate down to its reverse dependencies. If it returns false, no other
+ * component depending on it will be notified or reactivated based on the update.
  *
  * If a deactivation function is specified, it will be called when a component instance of this
  * type deactivates. It is intended to free any memory or registrations performed by the activation
@@ -155,7 +162,7 @@ ShovelerComponentTypeConfigurationOption shovelerComponentTypeConfigurationOptio
  * instantiated on each component instance of this type. The caller retains ownership of the passed
  * configuration options.
  */
-ShovelerComponentType *shovelerComponentTypeCreate(const char *id, ShovelerComponentTypeActivationFunction *activate, ShovelerComponentTypeDeactivationFunction *deactivate, bool requiresAuthority, int numConfigurationOptions, const ShovelerComponentTypeConfigurationOption *configurationOptions);
+ShovelerComponentType *shovelerComponentTypeCreate(const char *id, ShovelerComponentTypeActivationFunction *activate, ShovelerComponentTypeUpdateFunction *update, ShovelerComponentTypeDeactivationFunction *deactivate, bool requiresAuthority, int numConfigurationOptions, const ShovelerComponentTypeConfigurationOption *configurationOptions);
 void shovelerComponentTypeFree(ShovelerComponentType *componentType);
 
 ShovelerComponent *shovelerComponentCreate(ShovelerComponentViewAdapter *viewAdapter, long long int entityId, ShovelerComponentType *componentType);
@@ -182,6 +189,18 @@ const ShovelerComponentConfigurationValue *shovelerComponentGetConfigurationValu
  */
 bool shovelerComponentActivate(ShovelerComponent *component);
 bool shovelerComponentIsActive(ShovelerComponent *component);
+/**
+ * Updates a component if it is active.
+ *
+ * If the component type specifies an update function, it is invoked with the specified amount of
+ * time dt in seconds that has passed since the last update.
+ *
+ * In case the component is updated, this update is then propagated recursively to other
+ * components depending on it.
+ *
+ * Returns true if the specified component has been updated.
+ */
+bool shovelerComponentUpdate(ShovelerComponent *component, double dt);
 /**
  * Deactivates this component if it is active.
  *

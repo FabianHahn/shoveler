@@ -16,9 +16,9 @@ ShovelerComponentType *shovelerComponentCreateImageType()
 {
 	ShovelerComponentTypeConfigurationOption configurationOptions[2];
 	configurationOptions[SHOVELER_COMPONENT_IMAGE_OPTION_ID_FORMAT] = shovelerComponentTypeConfigurationOption("format", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
-	configurationOptions[SHOVELER_COMPONENT_IMAGE_OPTION_ID_RESOURCE] = shovelerComponentTypeConfigurationOptionDependency("resource", shovelerComponentTypeIdResource, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+	configurationOptions[SHOVELER_COMPONENT_IMAGE_OPTION_ID_RESOURCE] = shovelerComponentTypeConfigurationOptionDependency("resource", shovelerComponentTypeIdResource, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* liveUpdateDependency */ NULL);
 
-	return shovelerComponentTypeCreate(shovelerComponentTypeIdImage, activateImageComponent, deactivateImageComponent, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
+	return shovelerComponentTypeCreate(shovelerComponentTypeIdImage, activateImageComponent, /* update */ NULL, deactivateImageComponent, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
 }
 
 ShovelerImage *shovelerComponentGetImage(ShovelerComponent *component)

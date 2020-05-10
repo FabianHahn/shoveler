@@ -25,15 +25,15 @@ ShovelerComponentType *shovelerComponentCreateMaterialType()
 {
 	ShovelerComponentTypeConfigurationOption configurationOptions[8];
 	configurationOptions[SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TYPE] = shovelerComponentTypeConfigurationOption("type", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
-	configurationOptions[SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TEXTURE] = shovelerComponentTypeConfigurationOptionDependency("texture", shovelerComponentTypeIdTexture, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* updateDependency */ NULL);
-	configurationOptions[SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TEXTURE_SAMPLER] = shovelerComponentTypeConfigurationOptionDependency("texture_sampler", shovelerComponentTypeIdSampler, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* updateDependency */ NULL);
-	configurationOptions[SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TILEMAP] = shovelerComponentTypeConfigurationOptionDependency("tilemap", shovelerComponentTypeIdTilemap, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* updateDependency */ NULL);
-	configurationOptions[SHOVELER_COMPONENT_MATERIAL_OPTION_ID_CANVAS] = shovelerComponentTypeConfigurationOptionDependency("canvas", shovelerComponentTypeIdCanvas, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+	configurationOptions[SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TEXTURE] = shovelerComponentTypeConfigurationOptionDependency("texture", shovelerComponentTypeIdTexture, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* liveUpdateDependency */ NULL);
+	configurationOptions[SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TEXTURE_SAMPLER] = shovelerComponentTypeConfigurationOptionDependency("texture_sampler", shovelerComponentTypeIdSampler, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* liveUpdateDependency */ NULL);
+	configurationOptions[SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TILEMAP] = shovelerComponentTypeConfigurationOptionDependency("tilemap", shovelerComponentTypeIdTilemap, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* liveUpdateDependency */ NULL);
+	configurationOptions[SHOVELER_COMPONENT_MATERIAL_OPTION_ID_CANVAS] = shovelerComponentTypeConfigurationOptionDependency("canvas", shovelerComponentTypeIdCanvas, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* liveUpdateDependency */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_MATERIAL_OPTION_ID_COLOR] = shovelerComponentTypeConfigurationOption("color", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_VECTOR3, /* isOptional */ true, /* liveUpdate */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_MATERIAL_OPTION_ID_CANVAS_REGION_POSITION] = shovelerComponentTypeConfigurationOption("canvas_region_position", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_VECTOR2, /* isOptional */ true, /* liveUpdate */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_MATERIAL_OPTION_ID_CANVAS_REGION_SIZE] = shovelerComponentTypeConfigurationOption("canvas_region_size", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_VECTOR2, /* isOptional */ true, /* liveUpdate */ NULL);
 
-	return shovelerComponentTypeCreate(shovelerComponentTypeIdMaterial, activateMaterialComponent, deactivateMaterialComponent, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
+	return shovelerComponentTypeCreate(shovelerComponentTypeIdMaterial, activateMaterialComponent, /* update */ NULL, deactivateMaterialComponent, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
 }
 
 ShovelerMaterial *shovelerComponentGetMaterial(ShovelerComponent *component)

@@ -13,11 +13,11 @@ static void deactivateFontAtlasComponent(ShovelerComponent *component);
 ShovelerComponentType *shovelerComponentCreateFontAtlasType()
 {
 	ShovelerComponentTypeConfigurationOption configurationOptions[3];
-	configurationOptions[SHOVELER_COMPONENT_FONT_ATLAS_OPTION_ID_FONT] = shovelerComponentTypeConfigurationOptionDependency("font", shovelerComponentTypeIdFont, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+	configurationOptions[SHOVELER_COMPONENT_FONT_ATLAS_OPTION_ID_FONT] = shovelerComponentTypeConfigurationOptionDependency("font", shovelerComponentTypeIdFont, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* liveUpdateDependency */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_FONT_ATLAS_OPTION_ID_FONT_SIZE] = shovelerComponentTypeConfigurationOption("font_size", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_FONT_ATLAS_OPTION_ID_PADDING] = shovelerComponentTypeConfigurationOption("name", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
 
-	return shovelerComponentTypeCreate(shovelerComponentTypeIdFontAtlas, activateFontAtlasComponent, deactivateFontAtlasComponent, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
+	return shovelerComponentTypeCreate(shovelerComponentTypeIdFontAtlas, activateFontAtlasComponent, /* update */ NULL, deactivateFontAtlasComponent, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
 }
 
 ShovelerFontAtlas *shovelerComponentGetFontAtlas(ShovelerComponent *component)

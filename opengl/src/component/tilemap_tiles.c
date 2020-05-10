@@ -18,14 +18,14 @@ static bool isComponentConfigurationOptionDefinition(ShovelerComponent *componen
 ShovelerComponentType *shovelerComponentCreateTilemapTilesType()
 {
 	ShovelerComponentTypeConfigurationOption configurationOptions[6];
-	configurationOptions[SHOVELER_COMPONENT_TILEMAP_TILES_OPTION_IMAGE] = shovelerComponentTypeConfigurationOptionDependency("image", shovelerComponentTypeIdImage, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+	configurationOptions[SHOVELER_COMPONENT_TILEMAP_TILES_OPTION_IMAGE] = shovelerComponentTypeConfigurationOptionDependency("image", shovelerComponentTypeIdImage, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* liveUpdateDependency */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_TILEMAP_TILES_OPTION_NUM_COLUMNS] = shovelerComponentTypeConfigurationOption("num_columns", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ true, /* liveUpdate */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_TILEMAP_TILES_OPTION_NUM_ROWS] = shovelerComponentTypeConfigurationOption("num_rows", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ true, /* liveUpdate */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_TILEMAP_TILES_OPTION_TILESET_COLUMNS] = shovelerComponentTypeConfigurationOption("tileset_columns", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BYTES, /* isOptional */ true, liveUpdateTilesOption);
 	configurationOptions[SHOVELER_COMPONENT_TILEMAP_TILES_OPTION_TILESET_ROWS] = shovelerComponentTypeConfigurationOption("tileset_rows", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BYTES, /* isOptional */ true, liveUpdateTilesOption);
 	configurationOptions[SHOVELER_COMPONENT_TILEMAP_TILES_OPTION_TILESET_IDS] = shovelerComponentTypeConfigurationOption("tileset_ids", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BYTES, /* isOptional */ true, liveUpdateTilesOption);
 
-	return shovelerComponentTypeCreate(shovelerComponentTypeIdTilemapTiles, activateTilemapTilesComponent, deactivateTilemapTilesComponent, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
+	return shovelerComponentTypeCreate(shovelerComponentTypeIdTilemapTiles, activateTilemapTilesComponent, /* update */ NULL, deactivateTilemapTilesComponent, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
 }
 
 ShovelerTexture *shovelerComponentGetTilemapTiles(ShovelerComponent *component)

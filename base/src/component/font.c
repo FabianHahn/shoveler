@@ -15,9 +15,9 @@ ShovelerComponentType *shovelerComponentCreateFontType()
 {
 	ShovelerComponentTypeConfigurationOption configurationOptions[2];
 	configurationOptions[SHOVELER_COMPONENT_FONT_OPTION_ID_NAME] = shovelerComponentTypeConfigurationOption("name", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_STRING, /* isOptional */ false, /* liveUpdate */ NULL);
-	configurationOptions[SHOVELER_COMPONENT_FONT_OPTION_ID_RESOURCE] = shovelerComponentTypeConfigurationOptionDependency("resource", shovelerComponentTypeIdResource, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+	configurationOptions[SHOVELER_COMPONENT_FONT_OPTION_ID_RESOURCE] = shovelerComponentTypeConfigurationOptionDependency("resource", shovelerComponentTypeIdResource, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* liveUpdateDependency */ NULL);
 
-	return shovelerComponentTypeCreate(shovelerComponentTypeIdFont, activateFontComponent, deactivateFontComponent, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
+	return shovelerComponentTypeCreate(shovelerComponentTypeIdFont, activateFontComponent, /* update */ NULL, deactivateFontComponent, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
 }
 
 ShovelerFont *shovelerComponentGetFont(ShovelerComponent *component)

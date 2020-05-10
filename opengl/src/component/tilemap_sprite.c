@@ -13,10 +13,10 @@ static void deactivateTilemapSpriteComponent(ShovelerComponent *component);
 ShovelerComponentType *shovelerComponentCreateTilemapSpriteType()
 {
 	ShovelerComponentTypeConfigurationOption configurationOptions[2];
-	configurationOptions[SHOVELER_COMPONENT_TILEMAP_SPRITE_OPTION_ID_MATERIAL] = shovelerComponentTypeConfigurationOptionDependency("material", shovelerComponentTypeIdMaterial, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
-	configurationOptions[SHOVELER_COMPONENT_TILEMAP_SPRITE_OPTION_ID_TILEMAP] = shovelerComponentTypeConfigurationOptionDependency("tilemap", shovelerComponentTypeIdTilemap, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+	configurationOptions[SHOVELER_COMPONENT_TILEMAP_SPRITE_OPTION_ID_MATERIAL] = shovelerComponentTypeConfigurationOptionDependency("material", shovelerComponentTypeIdMaterial, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* liveUpdateDependency */ NULL);
+	configurationOptions[SHOVELER_COMPONENT_TILEMAP_SPRITE_OPTION_ID_TILEMAP] = shovelerComponentTypeConfigurationOptionDependency("tilemap", shovelerComponentTypeIdTilemap, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* liveUpdateDependency */ NULL);
 
-	return shovelerComponentTypeCreate(shovelerComponentTypeIdTilemapSprite, activateTilemapSpriteComponent, deactivateTilemapSpriteComponent, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
+	return shovelerComponentTypeCreate(shovelerComponentTypeIdTilemapSprite, activateTilemapSpriteComponent, /* update */ NULL, deactivateTilemapSpriteComponent, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
 }
 
 ShovelerSprite *shovelerComponentGetTilemapSprite(ShovelerComponent *component)

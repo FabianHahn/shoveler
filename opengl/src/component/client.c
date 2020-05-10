@@ -18,10 +18,10 @@ static void moveController(ShovelerController *controller, ShovelerVector3 posit
 ShovelerComponentType *shovelerComponentCreateClientType()
 {
 	ShovelerComponentTypeConfigurationOption configurationOptions[2];
-	configurationOptions[SHOVELER_COMPONENT_CLIENT_OPTION_ID_POSITION] = shovelerComponentTypeConfigurationOptionDependency("position", shovelerComponentTypeIdPosition, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
-	configurationOptions[SHOVELER_COMPONENT_CLIENT_OPTION_ID_MODEL] = shovelerComponentTypeConfigurationOptionDependency("model", shovelerComponentTypeIdModel, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+	configurationOptions[SHOVELER_COMPONENT_CLIENT_OPTION_ID_POSITION] = shovelerComponentTypeConfigurationOptionDependency("position", shovelerComponentTypeIdPosition, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* liveUpdateDependency */ NULL);
+	configurationOptions[SHOVELER_COMPONENT_CLIENT_OPTION_ID_MODEL] = shovelerComponentTypeConfigurationOptionDependency("model", shovelerComponentTypeIdModel, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* liveUpdateDependency */ NULL);
 
-	return shovelerComponentTypeCreate(shovelerComponentTypeIdClient, activateClientComponent, deactivateClientComponent, /* requiresAuthority */ true, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
+	return shovelerComponentTypeCreate(shovelerComponentTypeIdClient, activateClientComponent, /* update */ NULL, deactivateClientComponent, /* requiresAuthority */ true, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
 }
 
 static void *activateClientComponent(ShovelerComponent *component)

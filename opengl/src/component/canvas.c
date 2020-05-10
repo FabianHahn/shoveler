@@ -16,7 +16,7 @@ ShovelerComponentType *shovelerComponentCreateCanvasType()
 	ShovelerComponentTypeConfigurationOption configurationOptions[1];
 	configurationOptions[SHOVELER_COMPONENT_CANVAS_OPTION_ID_NUM_LAYERS] = shovelerComponentTypeConfigurationOption("num_layers", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
 
-	return shovelerComponentTypeCreate(shovelerComponentTypeIdCanvas, activateCanvasComponent, deactivateCanvasComponent, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
+	return shovelerComponentTypeCreate(shovelerComponentTypeIdCanvas, activateCanvasComponent, /* update */ NULL, deactivateCanvasComponent, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
 }
 
 ShovelerCanvas *shovelerComponentGetCanvas(ShovelerComponent *component)

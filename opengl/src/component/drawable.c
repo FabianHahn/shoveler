@@ -20,7 +20,7 @@ ShovelerComponentType *shovelerComponentCreateDrawableType()
 	configurationOptions[SHOVELER_COMPONENT_DRAWABLE_OPTION_ID_TILES_WIDTH] = shovelerComponentTypeConfigurationOption("tiles_width", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ true, /* liveUpdate */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_DRAWABLE_OPTION_ID_TILES_HEIGHT] = shovelerComponentTypeConfigurationOption("tiles_height", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ true, /* liveUpdate */ NULL);
 
-	return shovelerComponentTypeCreate(shovelerComponentTypeIdDrawable, activateDrawableComponent, deactivateDrawableComponent, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
+	return shovelerComponentTypeCreate(shovelerComponentTypeIdDrawable, activateDrawableComponent, /* update */ NULL, deactivateDrawableComponent, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
 }
 
 ShovelerDrawable *shovelerComponentGetDrawable(ShovelerComponent *component)

@@ -12,12 +12,12 @@ static void deactivateTilesetComponent(ShovelerComponent *component);
 ShovelerComponentType *shovelerComponentCreateTilesetType()
 {
 	ShovelerComponentTypeConfigurationOption configurationOptions[4];
-	configurationOptions[SHOVELER_COMPONENT_TILESET_OPTION_ID_IMAGE] = shovelerComponentTypeConfigurationOptionDependency("image", shovelerComponentTypeIdImage, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+	configurationOptions[SHOVELER_COMPONENT_TILESET_OPTION_ID_IMAGE] = shovelerComponentTypeConfigurationOptionDependency("image", shovelerComponentTypeIdImage, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* liveUpdateDependency */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_TILESET_OPTION_ID_NUM_COLUMNS] = shovelerComponentTypeConfigurationOption("num_columns", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_TILESET_OPTION_ID_NUM_ROWS] = shovelerComponentTypeConfigurationOption("num_rows", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_TILESET_OPTION_ID_PADDING] = shovelerComponentTypeConfigurationOption("padding", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
 
-	return shovelerComponentTypeCreate(shovelerComponentTypeIdTileset, activateTilesetComponent, deactivateTilesetComponent, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
+	return shovelerComponentTypeCreate(shovelerComponentTypeIdTileset, activateTilesetComponent, /* update */ NULL, deactivateTilesetComponent, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
 }
 
 ShovelerTileset *shovelerComponentGetTileset(ShovelerComponent *component)

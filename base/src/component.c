@@ -33,26 +33,26 @@ ShovelerComponentTypeConfigurationOption shovelerComponentTypeConfigurationOptio
 	configurationOption.type = type;
 	configurationOption.isOptional = isOptional;
 	configurationOption.liveUpdate = liveUpdate;
-	configurationOption.updateDependency = NULL;
+	configurationOption.liveUpdateDependency = NULL;
 	configurationOption.dependencyComponentTypeId = NULL;
 
 	return configurationOption;
 }
 
-ShovelerComponentTypeConfigurationOption shovelerComponentTypeConfigurationOptionDependency(const char *name, const char *dependencyComponentTypeId, bool isArray, bool isOptional, ShovelerComponentTypeConfigurationOptionLiveUpdateFunction *liveUpdate, ShovelerComponentTypeConfigurationOptionUpdateDependencyFunction *updateDependency)
+ShovelerComponentTypeConfigurationOption shovelerComponentTypeConfigurationOptionDependency(const char *name, const char *dependencyComponentTypeId, bool isArray, bool isOptional, ShovelerComponentTypeConfigurationOptionLiveUpdateFunction *liveUpdate, ShovelerComponentTypeConfigurationOptionLiveUpdateDependencyFunction *liveUpdateDependency)
 {
 	ShovelerComponentTypeConfigurationOption configurationOption;
 	configurationOption.name = name;
 	configurationOption.type = isArray ? SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_ENTITY_ID_ARRAY : SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_ENTITY_ID;
 	configurationOption.isOptional = isOptional;
 	configurationOption.liveUpdate = liveUpdate;
-	configurationOption.updateDependency = updateDependency;
+	configurationOption.liveUpdateDependency = liveUpdateDependency;
 	configurationOption.dependencyComponentTypeId = dependencyComponentTypeId;
 
 	return configurationOption;
 }
 
-ShovelerComponentType *shovelerComponentTypeCreate(const char *id, ShovelerComponentTypeActivationFunction *activate, ShovelerComponentTypeDeactivationFunction *deactivate, bool requiresAuthority, int numConfigurationOptions, const ShovelerComponentTypeConfigurationOption *configurationOptions)
+ShovelerComponentType *shovelerComponentTypeCreate(const char *id, ShovelerComponentTypeActivationFunction *activate, ShovelerComponentTypeUpdateFunction *update, ShovelerComponentTypeDeactivationFunction *deactivate, bool requiresAuthority, int numConfigurationOptions, const ShovelerComponentTypeConfigurationOption *configurationOptions)
 {
 	assert(numConfigurationOptions >= 0);
 
@@ -61,6 +61,7 @@ ShovelerComponentType *shovelerComponentTypeCreate(const char *id, ShovelerCompo
 	componentType->numConfigurationOptions = numConfigurationOptions;
 	componentType->configurationOptions = NULL;
 	componentType->activate = activate;
+	componentType->update = update;
 	componentType->deactivate = deactivate;
 	componentType->requiresAuthority = requiresAuthority;
 
@@ -233,6 +234,26 @@ bool shovelerComponentActivate(ShovelerComponent *component)
 bool shovelerComponentIsActive(ShovelerComponent *component)
 {
 	return component->data != NULL;
+}
+
+bool shovelerComponentUpdate(ShovelerComponent *component, double dt)
+{
+	if(!shovelerComponentIsActive(component)) {
+		return false;
+	}
+
+	if(component->type->update == NULL) {
+		return false;
+	}
+
+	if(!component->type->update(component, dt)) {
+		return false;
+	}
+
+	// update reverse dependencies
+	component->viewAdapter->forEachReverseDependency(component, updateReverseDependency, /* callbackUserData */ NULL, component->viewAdapter->userData);
+
+	return true;
 }
 
 void shovelerComponentDeactivate(ShovelerComponent *component)
@@ -529,6 +550,7 @@ static void updateReverseDependency(ShovelerComponent *sourceComponent, Shoveler
 		return;
 	}
 
+	bool requiresReactivation = false;
 	for(int id = 0; id < sourceComponent->type->numConfigurationOptions; id++) {
 		const ShovelerComponentTypeConfigurationOption *configurationOption = &sourceComponent->type->configurationOptions[id];
 		ShovelerComponentConfigurationValue *configurationValue = &sourceComponent->configurationValues[id];
@@ -563,12 +585,26 @@ static void updateReverseDependency(ShovelerComponent *sourceComponent, Shoveler
 			}
 		}
 
-		if(configurationOption->updateDependency != NULL) {
-			configurationOption->updateDependency(sourceComponent, configurationOption, targetComponent);
+		if(configurationOption->liveUpdateDependency == NULL) {
+			// At least one component on the source component doesn't know how to live update the
+			// dependency on the target component updating, so the component as a whole needs to
+			// reactivate. This also means that we can stop iterating over the remaining options,
+			// since they will be reinitialized even if they could be live updated and pointed
+			// to the same target.
+			requiresReactivation = true;
+			break;
 		}
+
+		configurationOption->liveUpdateDependency(sourceComponent, configurationOption, targetComponent);
 
 		// recursively update reverse dependencies
 		sourceComponent->viewAdapter->forEachReverseDependency(sourceComponent, updateReverseDependency, /* callbackUserData */ NULL, sourceComponent->viewAdapter->userData);
+	}
+
+	if(requiresReactivation) {
+		// reactivate the source component
+		shovelerComponentDeactivate(sourceComponent);
+		shovelerComponentActivate(sourceComponent);
 	}
 }
 

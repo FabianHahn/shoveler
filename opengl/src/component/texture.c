@@ -12,9 +12,9 @@ static void deactivateTextureComponent(ShovelerComponent *component);
 ShovelerComponentType *shovelerComponentCreateTextureType()
 {
 	ShovelerComponentTypeConfigurationOption configurationOptions[1];
-	configurationOptions[SHOVELER_COMPONENT_TEXTURE_OPTION_ID_IMAGE] = shovelerComponentTypeConfigurationOptionDependency("image", shovelerComponentTypeIdImage, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+	configurationOptions[SHOVELER_COMPONENT_TEXTURE_OPTION_ID_IMAGE] = shovelerComponentTypeConfigurationOptionDependency("image", shovelerComponentTypeIdImage, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* liveUpdateDependency */ NULL);
 
-	return shovelerComponentTypeCreate(shovelerComponentTypeIdTexture, activateTextureComponent, deactivateTextureComponent, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
+	return shovelerComponentTypeCreate(shovelerComponentTypeIdTexture, activateTextureComponent, /* update */ NULL, deactivateTextureComponent, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
 }
 
 ShovelerTexture *shovelerComponentGetTexture(ShovelerComponent *component)

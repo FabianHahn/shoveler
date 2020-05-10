@@ -16,11 +16,11 @@ static void deactivateTilemapComponent(ShovelerComponent *component);
 ShovelerComponentType *shovelerComponentCreateTilemapType()
 {
 	ShovelerComponentTypeConfigurationOption configurationOptions[3];
-	configurationOptions[SHOVELER_COMPONENT_TILEMAP_OPTION_ID_TILES] = shovelerComponentTypeConfigurationOptionDependency("tiles", shovelerComponentTypeIdTilemapTiles, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
-	configurationOptions[SHOVELER_COMPONENT_TILEMAP_OPTION_ID_COLLIDERS] = shovelerComponentTypeConfigurationOptionDependency("colliders", shovelerComponentTypeIdTilemapColliders, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
-	configurationOptions[SHOVELER_COMPONENT_TILEMAP_OPTION_ID_TILESETS] = shovelerComponentTypeConfigurationOptionDependency("tilesets", shovelerComponentTypeIdTileset, /* isArray */ true, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+	configurationOptions[SHOVELER_COMPONENT_TILEMAP_OPTION_ID_TILES] = shovelerComponentTypeConfigurationOptionDependency("tiles", shovelerComponentTypeIdTilemapTiles, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* liveUpdateDependency */ NULL);
+	configurationOptions[SHOVELER_COMPONENT_TILEMAP_OPTION_ID_COLLIDERS] = shovelerComponentTypeConfigurationOptionDependency("colliders", shovelerComponentTypeIdTilemapColliders, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* liveUpdateDependency */ NULL);
+	configurationOptions[SHOVELER_COMPONENT_TILEMAP_OPTION_ID_TILESETS] = shovelerComponentTypeConfigurationOptionDependency("tilesets", shovelerComponentTypeIdTileset, /* isArray */ true, /* isOptional */ false, /* liveUpdate */ NULL, /* liveUpdateDependency */ NULL);
 
-	return shovelerComponentTypeCreate(shovelerComponentTypeIdTilemap, activateTilemapComponent, deactivateTilemapComponent, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
+	return shovelerComponentTypeCreate(shovelerComponentTypeIdTilemap, activateTilemapComponent, /* update */ NULL, deactivateTilemapComponent, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
 }
 
 ShovelerTilemap *shovelerComponentGetTilemap(ShovelerComponent *component)

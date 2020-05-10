@@ -36,11 +36,11 @@ public:
 
 		otherConfigurationOptions[COMPONENT_CONFIGURATION_OPTION_LIVE_UPDATE] = shovelerComponentTypeConfigurationOption(liveUpdateConfigurationOptionName, SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_STRING, /* isOptional */ false, liveUpdateComponent);
 
-		ShovelerComponentType *componentType = shovelerComponentTypeCreate(componentTypeId, activateComponent, deactivateComponent, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
+		ShovelerComponentType *componentType = shovelerComponentTypeCreate(componentTypeId, activateComponent, /* update */ NULL, deactivateComponent, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
 		bool componentTypeAdded = shovelerViewAddComponentType(view, componentType);
 		ASSERT_TRUE(componentTypeAdded);
 
-		ShovelerComponentType *otherComponentType = shovelerComponentTypeCreate(otherComponentTypeId, NULL, NULL, /* requiresAuthority */ true, sizeof(otherConfigurationOptions) / sizeof(otherConfigurationOptions[0]), otherConfigurationOptions);
+		ShovelerComponentType *otherComponentType = shovelerComponentTypeCreate(otherComponentTypeId, /* activate */ NULL, /* update */ NULL, /* deactivate */ NULL, /* requiresAuthority */ true, sizeof(otherConfigurationOptions) / sizeof(otherConfigurationOptions[0]), otherConfigurationOptions);
 		bool otherComponentTypeAdded = shovelerViewAddComponentType(view, otherComponentType);
 		ASSERT_TRUE(otherComponentTypeAdded);
 

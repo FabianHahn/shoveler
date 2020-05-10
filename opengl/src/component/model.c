@@ -14,15 +14,15 @@ const char *const shovelerComponentTypeIdModel = "model";
 
 static void *activateModelComponent(ShovelerComponent *component);
 static void deactivateModelComponent(ShovelerComponent *component);
-static void updateModelPositionDependency(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent);
+static void liveUpdateModelPositionDependency(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent);
 static GLuint convertPolygonMode(ShovelerComponentModelPolygonMode polygonMode);
 
 ShovelerComponentType *shovelerComponentCreateModelType()
 {
 	ShovelerComponentTypeConfigurationOption configurationOptions[9];
-	configurationOptions[SHOVELER_COMPONENT_MODEL_OPTION_ID_POSITION] = shovelerComponentTypeConfigurationOptionDependency("position", shovelerComponentTypeIdPosition, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, updateModelPositionDependency);
-	configurationOptions[SHOVELER_COMPONENT_MODEL_OPTION_ID_DRAWABLE] = shovelerComponentTypeConfigurationOptionDependency("drawable", shovelerComponentTypeIdDrawable, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
-	configurationOptions[SHOVELER_COMPONENT_MODEL_OPTION_ID_MATERIAL] = shovelerComponentTypeConfigurationOptionDependency("material", shovelerComponentTypeIdMaterial, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+	configurationOptions[SHOVELER_COMPONENT_MODEL_OPTION_ID_POSITION] = shovelerComponentTypeConfigurationOptionDependency("position", shovelerComponentTypeIdPosition, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, liveUpdateModelPositionDependency);
+	configurationOptions[SHOVELER_COMPONENT_MODEL_OPTION_ID_DRAWABLE] = shovelerComponentTypeConfigurationOptionDependency("drawable", shovelerComponentTypeIdDrawable, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* liveUpdateDependency */ NULL);
+	configurationOptions[SHOVELER_COMPONENT_MODEL_OPTION_ID_MATERIAL] = shovelerComponentTypeConfigurationOptionDependency("material", shovelerComponentTypeIdMaterial, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* liveUpdateDependency */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_MODEL_OPTION_ID_ROTATION] = shovelerComponentTypeConfigurationOption("rotation", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_VECTOR3, /* isOptional */ false, /* liveUpdate */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_MODEL_OPTION_ID_SCALE] = shovelerComponentTypeConfigurationOption("scale", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_VECTOR3, /* isOptional */ false, /* liveUpdate */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_MODEL_OPTION_ID_VISIBLE] = shovelerComponentTypeConfigurationOption("visible", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BOOL, /* isOptional */ false, /* liveUpdate */ NULL);
@@ -30,7 +30,7 @@ ShovelerComponentType *shovelerComponentCreateModelType()
 	configurationOptions[SHOVELER_COMPONENT_MODEL_OPTION_ID_CASTS_SHADOW] = shovelerComponentTypeConfigurationOption("casts_shadow", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BOOL, /* isOptional */ false, /* liveUpdate */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_MODEL_OPTION_ID_POLYGON_MODE] = shovelerComponentTypeConfigurationOption("polygon_mode", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
 
-	return shovelerComponentTypeCreate(shovelerComponentTypeIdModel, activateModelComponent, deactivateModelComponent, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
+	return shovelerComponentTypeCreate(shovelerComponentTypeIdModel, activateModelComponent, /* update */ NULL, deactivateModelComponent, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
 }
 
 ShovelerModel *shovelerComponentGetModel(ShovelerComponent *component)
@@ -89,7 +89,7 @@ static void deactivateModelComponent(ShovelerComponent *component)
 	shovelerSceneRemoveModel(scene, model);
 }
 
-static void updateModelPositionDependency(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent)
+static void liveUpdateModelPositionDependency(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent)
 {
 	ShovelerModel *model = (ShovelerModel *) component->data;
 

@@ -18,7 +18,7 @@ ShovelerComponentType *shovelerComponentCreateTilemapCollidersType()
 	configurationOptions[SHOVELER_COMPONENT_TILEMAP_COLLIDERS_OPTION_NUM_ROWS] = shovelerComponentTypeConfigurationOption("num_rows", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ true, /* liveUpdate */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_TILEMAP_COLLIDERS_OPTION_COLLIDERS] = shovelerComponentTypeConfigurationOption("colliders", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BYTES, /* isOptional */ false, liveUpdateCollidersOption);
 
-	return shovelerComponentTypeCreate(shovelerComponentTypeIdTilemapColliders, activateTilemapCollidersComponent, deactivateTilemapCollidersComponent, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
+	return shovelerComponentTypeCreate(shovelerComponentTypeIdTilemapColliders, activateTilemapCollidersComponent, /* update */ NULL, deactivateTilemapCollidersComponent, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
 }
 
 const bool *shovelerComponentGetTilemapColliders(ShovelerComponent *component)

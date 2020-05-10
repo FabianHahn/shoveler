@@ -15,12 +15,12 @@ const char *const shovelerComponentTypeIdLight = "light";
 
 static void *activateLightComponent(ShovelerComponent *component);
 static void deactivateLightComponent(ShovelerComponent *component);
-static void updateLightPositionDependency(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent);
+static void liveUpdateLightPositionDependency(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent);
 
 ShovelerComponentType *shovelerComponentCreateLightType()
 {
 	ShovelerComponentTypeConfigurationOption configurationOptions[8];
-	configurationOptions[SHOVELER_COMPONENT_LIGHT_OPTION_ID_POSITION] = shovelerComponentTypeConfigurationOptionDependency("position", shovelerComponentTypeIdPosition, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, updateLightPositionDependency);
+	configurationOptions[SHOVELER_COMPONENT_LIGHT_OPTION_ID_POSITION] = shovelerComponentTypeConfigurationOptionDependency("position", shovelerComponentTypeIdPosition, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, liveUpdateLightPositionDependency);
 	configurationOptions[SHOVELER_COMPONENT_LIGHT_OPTION_ID_TYPE] = shovelerComponentTypeConfigurationOption("type", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_LIGHT_OPTION_ID_WIDTH] = shovelerComponentTypeConfigurationOption("width", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_LIGHT_OPTION_ID_HEIGHT] = shovelerComponentTypeConfigurationOption("height", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
@@ -29,7 +29,7 @@ ShovelerComponentType *shovelerComponentCreateLightType()
 	configurationOptions[SHOVELER_COMPONENT_LIGHT_OPTION_ID_EXPONENTIAL_FACTOR] = shovelerComponentTypeConfigurationOption("exponential_factor", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_FLOAT, /* isOptional */ false, /* liveUpdate */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_LIGHT_OPTION_ID_COLOR] = shovelerComponentTypeConfigurationOption("tiles_height", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_VECTOR3, /* isOptional */ false, /* liveUpdate */ NULL);
 
-	return shovelerComponentTypeCreate(shovelerComponentTypeIdLight, activateLightComponent, deactivateLightComponent, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
+	return shovelerComponentTypeCreate(shovelerComponentTypeIdLight, activateLightComponent, /* update */ NULL, deactivateLightComponent, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
 }
 
 ShovelerLight *shovelerComponentGetLight(ShovelerComponent *component)
@@ -92,7 +92,7 @@ static void deactivateLightComponent(ShovelerComponent *component)
 	shovelerSceneRemoveLight(scene, light);
 }
 
-static void updateLightPositionDependency(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent)
+static void liveUpdateLightPositionDependency(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent)
 {
 	ShovelerLight *light = (ShovelerLight *) component->data;
 

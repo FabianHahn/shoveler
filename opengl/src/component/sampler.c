@@ -15,7 +15,7 @@ ShovelerComponentType *shovelerComponentCreateSamplerType()
 	configurationOptions[SHOVELER_COMPONENT_SAMPLER_OPTION_ID_USE_MIPMAPS] = shovelerComponentTypeConfigurationOption("use_mipmaps", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BOOL, /* isOptional */ false, /* liveUpdate */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_SAMPLER_OPTION_ID_CLAMP] = shovelerComponentTypeConfigurationOption("clamp", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BOOL, /* isOptional */ false, /* liveUpdate */ NULL);
 
-	return shovelerComponentTypeCreate(shovelerComponentTypeIdSampler, activateSamplerComponent, deactivateSamplerComponent, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
+	return shovelerComponentTypeCreate(shovelerComponentTypeIdSampler, activateSamplerComponent, /* update */ NULL, deactivateSamplerComponent, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
 }
 
 ShovelerSampler *shovelerComponentGetSampler(ShovelerComponent *component)

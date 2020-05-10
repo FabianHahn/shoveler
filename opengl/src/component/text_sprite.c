@@ -14,13 +14,13 @@ static void deactivateTextSpriteComponent(ShovelerComponent *component);
 ShovelerComponentType *shovelerComponentCreateTextType()
 {
 	ShovelerComponentTypeConfigurationOption configurationOptions[5];
-	configurationOptions[SHOVELER_COMPONENT_TEXT_SPRITE_OPTION_ID_MATERIAL] = shovelerComponentTypeConfigurationOptionDependency("material", shovelerComponentTypeIdMaterial, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
-	configurationOptions[SHOVELER_COMPONENT_TEXT_SPRITE_OPTION_ID_FONT_ATLAS] = shovelerComponentTypeConfigurationOptionDependency("font_atlas", /* TODO */ shovelerComponentTypeIdPosition, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+	configurationOptions[SHOVELER_COMPONENT_TEXT_SPRITE_OPTION_ID_MATERIAL] = shovelerComponentTypeConfigurationOptionDependency("material", shovelerComponentTypeIdMaterial, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* liveUpdateDependency */ NULL);
+	configurationOptions[SHOVELER_COMPONENT_TEXT_SPRITE_OPTION_ID_FONT_ATLAS] = shovelerComponentTypeConfigurationOptionDependency("font_atlas", /* TODO */ shovelerComponentTypeIdPosition, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* liveUpdateDependency */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_TEXT_SPRITE_OPTION_ID_FONT_SIZE] = shovelerComponentTypeConfigurationOption("font_size", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_FLOAT, /* isOptional */ false, /* liveUpdate */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_TEXT_SPRITE_OPTION_ID_CONTENT] = shovelerComponentTypeConfigurationOption("content", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_STRING, /* isOptional */ false, /* liveUpdate */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_TEXT_SPRITE_OPTION_ID_COLOR] = shovelerComponentTypeConfigurationOption("color", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_VECTOR4, /* isOptional */ false, /* liveUpdate */ NULL);
 
-	return shovelerComponentTypeCreate(shovelerComponentTypeIdTextSprite, activateTextSpriteComponent, deactivateTextSpriteComponent, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
+	return shovelerComponentTypeCreate(shovelerComponentTypeIdTextSprite, activateTextSpriteComponent, /* update */ NULL, deactivateTextSpriteComponent, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
 }
 
 ShovelerSprite *shovelerComponentGetTextSprite(ShovelerComponent *component)

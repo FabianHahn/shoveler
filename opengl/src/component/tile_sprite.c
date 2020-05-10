@@ -13,12 +13,12 @@ static void deactivateTileSpriteComponent(ShovelerComponent *component);
 ShovelerComponentType *shovelerComponentCreateTileSpriteType()
 {
 	ShovelerComponentTypeConfigurationOption configurationOptions[4];
-	configurationOptions[SHOVELER_COMPONENT_TILE_SPRITE_OPTION_ID_MATERIAL] = shovelerComponentTypeConfigurationOptionDependency("material", shovelerComponentTypeIdMaterial, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
-	configurationOptions[SHOVELER_COMPONENT_TILE_SPRITE_OPTION_ID_TILESET] = shovelerComponentTypeConfigurationOptionDependency("tileset", shovelerComponentTypeIdTileset, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* updateDependency */ NULL);
+	configurationOptions[SHOVELER_COMPONENT_TILE_SPRITE_OPTION_ID_MATERIAL] = shovelerComponentTypeConfigurationOptionDependency("material", shovelerComponentTypeIdMaterial, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* liveUpdateDependency */ NULL);
+	configurationOptions[SHOVELER_COMPONENT_TILE_SPRITE_OPTION_ID_TILESET] = shovelerComponentTypeConfigurationOptionDependency("tileset", shovelerComponentTypeIdTileset, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* liveUpdateDependency */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_TILE_SPRITE_OPTION_ID_TILESET_COLUMN] = shovelerComponentTypeConfigurationOption("tileset_column", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_TILE_SPRITE_OPTION_ID_TILESET_ROW] = shovelerComponentTypeConfigurationOption("tileset_row", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
 
-	return shovelerComponentTypeCreate(shovelerComponentTypeIdTileSprite, activateTileSpriteComponent, deactivateTileSpriteComponent, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
+	return shovelerComponentTypeCreate(shovelerComponentTypeIdTileSprite, activateTileSpriteComponent, /* update */ NULL, deactivateTileSpriteComponent, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
 }
 
 ShovelerSprite *shovelerComponentGetTileSprite(ShovelerComponent *component)
