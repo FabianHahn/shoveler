@@ -15,15 +15,21 @@ ShovelerFontAtlasTexture *shovelerFontAtlasTextureCreate(ShovelerFontAtlas *font
 	return fontAtlasTexture;
 }
 
-void shovelerFontAtlasTextureUpdate(ShovelerFontAtlasTexture *fontAtlasTexture)
+bool shovelerFontAtlasTextureUpdate(ShovelerFontAtlasTexture *fontAtlasTexture)
 {
+	bool newTextureGenerated = false;
+
 	if(fontAtlasTexture->texture == NULL || fontAtlasTexture->atlasImageSize != fontAtlasTexture->fontAtlas->image->width) {
 		shovelerTextureFree(fontAtlasTexture->texture);
 		fontAtlasTexture->atlasImageSize = fontAtlasTexture->fontAtlas->image->width;
 		fontAtlasTexture->texture = shovelerTextureCreate2d(fontAtlasTexture->fontAtlas->image, false);
+		newTextureGenerated = true;
 	}
 
+	// TODO: only update the texture if the font atlas is "dirty"
 	shovelerTextureUpdate(fontAtlasTexture->texture);
+
+	return newTextureGenerated;
 }
 
 void shovelerFontAtlasTextureFree(ShovelerFontAtlasTexture *fontAtlasTexture)
