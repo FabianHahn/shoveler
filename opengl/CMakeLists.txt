@@ -17,6 +17,7 @@ set(SHOVELER_OPENGL_SRC
 	src/component/shader_cache.c
 	src/component/sprite.c
 	src/component/text_sprite.c
+	src/component/text_texture_renderer.c
 	src/component/texture.c
 	src/component/tile_sprite.c
 	src/component/tile_sprite_animation.c
@@ -90,6 +91,7 @@ set(SHOVELER_OPENGL_SRC
 	include/shoveler/component/shader_cache.h
 	include/shoveler/component/sprite.h
 	include/shoveler/component/text_sprite.h
+	include/shoveler/component/text_texture_renderer.h
 	include/shoveler/component/texture.h
 	include/shoveler/component/tile_sprite.h
 	include/shoveler/component/tile_sprite_animation.h
