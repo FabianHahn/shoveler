@@ -7,6 +7,7 @@ set(SHOVELER_OPENGL_SRC
 	src/component/client.c
 	src/component/controller.c
 	src/component/drawable.c
+	src/component/font_atlas_texture.c
 	src/component/light.c
 	src/component/material.c
 	src/component/model.c
@@ -78,6 +79,7 @@ set(SHOVELER_OPENGL_SRC
 	include/shoveler/component/client.h
 	include/shoveler/component/controller.h
 	include/shoveler/component/drawable.h
+	include/shoveler/component/font_atlas_texture.h
 	include/shoveler/component/light.h
 	include/shoveler/component/material.h
 	include/shoveler/component/model.h
