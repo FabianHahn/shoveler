@@ -18,17 +18,19 @@ typedef struct ShovelerViewStruct {
 	ShovelerViewUpdateAuthoritativeComponentFunction *updateAuthoritativeComponent;
 	void *updateAuthoritativeComponentUserData;
 	/** map from string component type name to (ShovelerComponentType *) */
-	/* private */ GHashTable *componentTypes;
+	GHashTable *componentTypes;
+	/* set of (ShovelerComponent *) */
+	GHashTable *updateComponents;
 	/** map from entity id (long long int) to entities (ShovelerViewEntity *) */
-	/* private */ GHashTable *entities;
+	GHashTable *entities;
 	/** map from string target name to target type */
-	/* private */ GHashTable *targets;
+	GHashTable *targets;
 	/** map from source (ShovelerViewQualifiedComponent *) to list of (ShovelerViewQualifiedComponent *) */
-	/* private */ GHashTable *dependencies;
+	GHashTable *dependencies;
 	/** map from target (ShovelerViewQualifiedComponent *) to list of (ShovelerViewQualifiedComponent *) */
-	/* private */ GHashTable *reverseDependencies;
+	GHashTable *reverseDependencies;
 	/** list of (ShovelerViewDependencyCallback *) */
-	/* private */ GQueue *dependencyCallbacks;
+	GQueue *dependencyCallbacks;
 	ShovelerComponentViewAdapter *adapter;
 	int numEntities;
 	int numComponents;
@@ -76,6 +78,8 @@ void shovelerViewEntityUndelegate(ShovelerViewEntity *entity, const char *compon
 void shovelerViewEntitySetType(ShovelerViewEntity *entity, const char *type);
 ShovelerComponent *shovelerViewEntityAddComponent(ShovelerViewEntity *entity, const char *componentTypeId);
 bool shovelerViewEntityRemoveComponent(ShovelerViewEntity *entity, const char *componentTypeId);
+/** Updates all components, returning the number of components updated. */
+int shovelerViewUpdate(ShovelerView *view, double dt);
 /** Sets a target that is expected to be freed by the caller. */
 bool shovelerViewSetTarget(ShovelerView *view, const char *targetName, void *target);
 /** Creates the view's dependency graph to as a graphviz dot digraph string. */

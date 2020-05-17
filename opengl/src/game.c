@@ -192,6 +192,7 @@ int shovelerGameRenderFrame(ShovelerGame *game)
 
 	shovelerExecutorUpdate(game->updateExecutor, elapsedNs(dt));
 	shovelerControllerUpdate(game->controller, dt);
+	shovelerViewUpdate(game->view, dt);
 	game->update(game, dt);
 
 	updateViewCounters(game);

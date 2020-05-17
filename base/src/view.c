@@ -35,6 +35,7 @@ ShovelerView *shovelerViewCreate(ShovelerViewUpdateAuthoritativeComponentFunctio
 	view->dependencies = g_hash_table_new_full(qualifiedComponentHash, qualifiedComponentEqual, free, freeQualifiedComponents);
 	view->reverseDependencies = g_hash_table_new_full(qualifiedComponentHash, qualifiedComponentEqual, free, freeQualifiedComponents);
 	view->dependencyCallbacks = g_queue_new();
+	view->updateComponents = g_hash_table_new(g_direct_hash, g_direct_equal);
 	view->adapter = malloc(sizeof(ShovelerComponentViewAdapter));
 	view->adapter->getComponent = getComponent;
 	view->adapter->updateAuthoritativeComponent = updateAuthoritativeComponentAdapter;
@@ -236,6 +237,10 @@ ShovelerComponent *shovelerViewEntityAddComponent(ShovelerViewEntity *entity, co
 		return NULL;
 	}
 
+	if(componentType->update != NULL) {
+		g_hash_table_add(entity->view->updateComponents, component);
+	}
+
 	entity->view->numComponents++;
 	shovelerLogTrace("Added component '%s' to entity %lld.", componentTypeId, entity->id);
 	return component;
@@ -252,7 +257,30 @@ bool shovelerViewEntityRemoveComponent(ShovelerViewEntity *entity, const char *c
 	shovelerLogTrace("Removed component '%s' from entity %lld.", componentTypeId, entity->id);
 
 	g_hash_table_remove(entity->components, componentTypeId);
+
+	if(component->type->update != NULL) {
+		g_hash_table_remove(entity->view->updateComponents, component);
+	}
+
 	return true;
+}
+
+int shovelerViewUpdate(ShovelerView *view, double dt)
+{
+	int numUpdated = 0;
+
+	GHashTableIter updateComponentIter;
+	ShovelerComponent *updateComponent;
+	g_hash_table_iter_init(&updateComponentIter, view->updateComponents);
+	while(g_hash_table_iter_next(&updateComponentIter, (gpointer *) &updateComponent, (gpointer *) NULL)) {
+		assert(updateComponent->type->update != NULL);
+
+		if(updateComponent->type->update(updateComponent, dt)) {
+			numUpdated++;
+		}
+	}
+
+	return numUpdated;
 }
 
 bool shovelerViewSetTarget(ShovelerView *view, const char *targetName, void *target)
@@ -343,6 +371,7 @@ bool shovelerViewRemoveDependencyCallback(ShovelerView *view, ShovelerViewDepend
 void shovelerViewFree(ShovelerView *view)
 {
 	g_hash_table_destroy(view->entities);
+	g_hash_table_destroy(view->updateComponents);
 	g_hash_table_destroy(view->targets);
 	g_hash_table_destroy(view->reverseDependencies);
 	g_hash_table_destroy(view->dependencies);
