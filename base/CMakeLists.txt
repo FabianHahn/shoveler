@@ -77,6 +77,8 @@ set(SHOVELER_BASE_TEST_SRC
 	src/view_test.cpp
 )
 
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SHOVELER_BASE_SRC} ${SHOVELER_BASE_TEST_SRC})
+
 add_library(shoveler_base ${SHOVELER_BASE_SRC})
 add_library(shoveler::shoveler_base ALIAS shoveler_base)
 set_property(TARGET shoveler_base PROPERTY C_STANDARD 11)

@@ -153,6 +153,8 @@ set(SHOVELER_OPENGL_TEST_SRC
 	src/test.cpp
 )
 
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SHOVELER_OPENGL_SRC} ${SHOVELER_OPENGL_TEST_SRC})
+
 add_library(shoveler_opengl ${SHOVELER_OPENGL_SRC})
 add_library(shoveler::shoveler_opengl ALIAS shoveler_opengl)
 set_property(TARGET shoveler_opengl PROPERTY C_STANDARD 11)
