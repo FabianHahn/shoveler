@@ -208,6 +208,7 @@ int main(int argc, char *argv[])
 	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(resourceImageComponent, SHOVELER_COMPONENT_IMAGE_OPTION_ID_RESOURCE, 6);
 	shovelerComponentActivate(resourceImageComponent);
 	ShovelerComponent *resourceTextureComponent = shovelerViewEntityAddComponent(resourceEntity, shovelerComponentTypeIdTexture);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(resourceTextureComponent, SHOVELER_COMPONENT_TEXTURE_OPTION_ID_TYPE, SHOVELER_COMPONENT_TEXTURE_TYPE_IMAGE);
 	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(resourceTextureComponent, SHOVELER_COMPONENT_TEXTURE_OPTION_ID_IMAGE, 6);
 	shovelerComponentActivate(resourceTextureComponent);
 	ShovelerComponent *resourceSamplerComponent = shovelerViewEntityAddComponent(resourceEntity, shovelerComponentTypeIdSampler);
@@ -302,6 +303,7 @@ int main(int argc, char *argv[])
 	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(animationImageComponent, SHOVELER_COMPONENT_IMAGE_OPTION_ID_RESOURCE, 11);
 	shovelerComponentActivate(animationImageComponent);
 	ShovelerComponent *animationTextureComponent = shovelerViewEntityAddComponent(animationTilesetEntity, shovelerComponentTypeIdTexture);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(animationTextureComponent, SHOVELER_COMPONENT_TEXTURE_OPTION_ID_TYPE, SHOVELER_COMPONENT_TEXTURE_TYPE_IMAGE);
 	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(animationTextureComponent, SHOVELER_COMPONENT_TEXTURE_OPTION_ID_IMAGE, 11);
 	shovelerComponentActivate(animationTextureComponent);
 	ShovelerComponent *animationTilesetComponent = shovelerViewEntityAddComponent(animationTilesetEntity, shovelerComponentTypeIdTileset);
