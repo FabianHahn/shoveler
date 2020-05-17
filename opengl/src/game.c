@@ -8,6 +8,7 @@
 #include "shoveler/component/colliders.h"
 #include "shoveler/component/controller.h"
 #include "shoveler/component/fonts.h"
+#include "shoveler/component/render_state.h"
 #include "shoveler/component/scene.h"
 #include "shoveler/component/shader_cache.h"
 #include "shoveler/canvas.h"
@@ -143,6 +144,7 @@ ShovelerGame *shovelerGameCreate(ShovelerGameUpdateCallback *update, ShovelerGam
 	shovelerViewSetTarget(game->view, shovelerComponentViewTargetIdColliders, game->colliders);
 	shovelerViewSetTarget(game->view, shovelerComponentViewTargetIdController, game->controller);
 	shovelerViewSetTarget(game->view, shovelerComponentViewTargetIdFonts, game->fonts);
+	shovelerViewSetTarget(game->view, shovelerComponentViewTargetIdRenderState, &game->renderState);
 	shovelerViewSetTarget(game->view, shovelerComponentViewTargetIdScene, game->scene);
 	shovelerViewSetTarget(game->view, shovelerComponentViewTargetIdShaderCache, game->shaderCache);
 

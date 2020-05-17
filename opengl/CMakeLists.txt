@@ -11,6 +11,7 @@ set(SHOVELER_OPENGL_SRC
 	src/component/light.c
 	src/component/material.c
 	src/component/model.c
+	src/component/render_state.c
 	src/component/sampler.c
 	src/component/scene.c
 	src/component/shader_cache.c
@@ -83,6 +84,7 @@ set(SHOVELER_OPENGL_SRC
 	include/shoveler/component/light.h
 	include/shoveler/component/material.h
 	include/shoveler/component/model.h
+	include/shoveler/component/render_state.h
 	include/shoveler/component/sampler.h
 	include/shoveler/component/scene.h
 	include/shoveler/component/shader_cache.h
