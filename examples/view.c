@@ -82,26 +82,6 @@ int main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	shovelerViewAddComponentType(game->view, shovelerComponentCreateCanvasType());
-	shovelerViewAddComponentType(game->view, shovelerComponentCreateClientType());
-	shovelerViewAddComponentType(game->view, shovelerComponentCreateDrawableType());
-	shovelerViewAddComponentType(game->view, shovelerComponentCreateImageType());
-	shovelerViewAddComponentType(game->view, shovelerComponentCreateLightType());
-	shovelerViewAddComponentType(game->view, shovelerComponentCreateMaterialType());
-	shovelerViewAddComponentType(game->view, shovelerComponentCreateModelType());
-	shovelerViewAddComponentType(game->view, shovelerComponentCreatePositionType());
-	shovelerViewAddComponentType(game->view, shovelerComponentCreateResourceType());
-	shovelerViewAddComponentType(game->view, shovelerComponentCreateSamplerType());
-	shovelerViewAddComponentType(game->view, shovelerComponentCreateTextureType());
-	shovelerViewAddComponentType(game->view, shovelerComponentCreateSpriteType());
-	shovelerViewAddComponentType(game->view, shovelerComponentCreateTileSpriteType());
-	shovelerViewAddComponentType(game->view, shovelerComponentCreateTileSpriteAnimationType());
-	shovelerViewAddComponentType(game->view, shovelerComponentCreateTilemapType());
-	shovelerViewAddComponentType(game->view, shovelerComponentCreateTilemapCollidersType());
-	shovelerViewAddComponentType(game->view, shovelerComponentCreateTilemapSpriteType());
-	shovelerViewAddComponentType(game->view, shovelerComponentCreateTilemapTilesType());
-	shovelerViewAddComponentType(game->view, shovelerComponentCreateTilesetType());
-
 	ShovelerResources *resources = shovelerResourcesCreate(NULL, NULL);
 	shovelerResourcesImagePngRegister(resources);
 	shovelerViewSetTarget(game->view, shovelerComponentViewTargetIdResources, resources);

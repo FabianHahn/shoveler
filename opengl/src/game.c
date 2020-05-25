@@ -4,13 +4,38 @@
 
 #include "shoveler/camera/perspective.h"
 #include "shoveler/drawable/quad.h"
-#include "shoveler/material/canvas.h"
+#include "shoveler/component/canvas.h"
+#include "shoveler/component/client.h"
 #include "shoveler/component/colliders.h"
 #include "shoveler/component/controller.h"
+#include "shoveler/component/drawable.h"
+#include "shoveler/component/font.h"
+#include "shoveler/component/font_atlas.h"
+#include "shoveler/component/font_atlas_texture.h"
 #include "shoveler/component/fonts.h"
+#include "shoveler/component/image.h"
+#include "shoveler/component/light.h"
+#include "shoveler/component/material.h"
+#include "shoveler/component/model.h"
+#include "shoveler/component/position.h"
 #include "shoveler/component/render_state.h"
+#include "shoveler/component/resource.h"
+#include "shoveler/component/resources.h"
+#include "shoveler/component/sampler.h"
 #include "shoveler/component/scene.h"
 #include "shoveler/component/shader_cache.h"
+#include "shoveler/component/sprite.h"
+#include "shoveler/component/text_sprite.h"
+#include "shoveler/component/text_texture_renderer.h"
+#include "shoveler/component/texture.h"
+#include "shoveler/component/tile_sprite.h"
+#include "shoveler/component/tile_sprite_animation.h"
+#include "shoveler/component/tilemap.h"
+#include "shoveler/component/tilemap_colliders.h"
+#include "shoveler/component/tilemap_sprite.h"
+#include "shoveler/component/tilemap_tiles.h"
+#include "shoveler/component/tileset.h"
+#include "shoveler/material/canvas.h"
 #include "shoveler/canvas.h"
 #include "shoveler/colliders.h"
 #include "shoveler/font.h"
@@ -22,6 +47,7 @@
 #include "shoveler/opengl.h"
 #include "shoveler/scene.h"
 #include "shoveler/shader_cache.h"
+#include "shoveler/view.h"
 
 static void updateScreenspaceCanvasRegion(ShovelerGame *game);
 static void keyHandler(ShovelerInput *input, int key, int scancode, int action, int mods, void *unused);
@@ -147,6 +173,31 @@ ShovelerGame *shovelerGameCreate(ShovelerGameUpdateCallback *update, ShovelerGam
 	shovelerViewSetTarget(game->view, shovelerComponentViewTargetIdRenderState, &game->renderState);
 	shovelerViewSetTarget(game->view, shovelerComponentViewTargetIdScene, game->scene);
 	shovelerViewSetTarget(game->view, shovelerComponentViewTargetIdShaderCache, game->shaderCache);
+
+	shovelerViewAddComponentType(game->view, shovelerComponentCreateCanvasType());
+	shovelerViewAddComponentType(game->view, shovelerComponentCreateClientType());
+	shovelerViewAddComponentType(game->view, shovelerComponentCreateDrawableType());
+	shovelerViewAddComponentType(game->view, shovelerComponentCreateFontType());
+	shovelerViewAddComponentType(game->view, shovelerComponentCreateFontAtlasType());
+	shovelerViewAddComponentType(game->view, shovelerComponentCreateFontAtlasTextureType());
+	shovelerViewAddComponentType(game->view, shovelerComponentCreateImageType());
+	shovelerViewAddComponentType(game->view, shovelerComponentCreateLightType());
+	shovelerViewAddComponentType(game->view, shovelerComponentCreateMaterialType());
+	shovelerViewAddComponentType(game->view, shovelerComponentCreateModelType());
+	shovelerViewAddComponentType(game->view, shovelerComponentCreatePositionType());
+	shovelerViewAddComponentType(game->view, shovelerComponentCreateResourceType());
+	shovelerViewAddComponentType(game->view, shovelerComponentCreateSamplerType());
+	shovelerViewAddComponentType(game->view, shovelerComponentCreateTextureType());
+	shovelerViewAddComponentType(game->view, shovelerComponentCreateSpriteType());
+	shovelerViewAddComponentType(game->view, shovelerComponentCreateTextSpriteType());
+	shovelerViewAddComponentType(game->view, shovelerComponentCreateTextTextureRendererType());
+	shovelerViewAddComponentType(game->view, shovelerComponentCreateTileSpriteType());
+	shovelerViewAddComponentType(game->view, shovelerComponentCreateTileSpriteAnimationType());
+	shovelerViewAddComponentType(game->view, shovelerComponentCreateTilemapType());
+	shovelerViewAddComponentType(game->view, shovelerComponentCreateTilemapCollidersType());
+	shovelerViewAddComponentType(game->view, shovelerComponentCreateTilemapSpriteType());
+	shovelerViewAddComponentType(game->view, shovelerComponentCreateTilemapTilesType());
+	shovelerViewAddComponentType(game->view, shovelerComponentCreateTilesetType());
 
 	ShovelerGlobalContext *global = shovelerGlobalGetContext();
 	g_hash_table_insert(global->games, game->window, game);
