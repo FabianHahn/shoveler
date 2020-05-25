@@ -11,7 +11,7 @@ const char *const shovelerComponentTypeIdTextSprite = "text_sprite";
 static void *activateTextSpriteComponent(ShovelerComponent *component);
 static void deactivateTextSpriteComponent(ShovelerComponent *component);
 
-ShovelerComponentType *shovelerComponentCreateTextType()
+ShovelerComponentType *shovelerComponentCreateTextSpriteType()
 {
 	ShovelerComponentTypeConfigurationOption configurationOptions[5];
 	configurationOptions[SHOVELER_COMPONENT_TEXT_SPRITE_OPTION_ID_MATERIAL] = shovelerComponentTypeConfigurationOptionDependency("material", shovelerComponentTypeIdMaterial, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* liveUpdateDependency */ NULL);
