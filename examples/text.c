@@ -140,6 +140,7 @@ int main(int argc, char *argv[])
 	shovelerSpriteFree(screenspaceTextSprite);
 	shovelerSpriteFree(textSprite);
 	shovelerTilesetFree(textTileset);
+	shovelerTextureFree(shovelerTextTexture);
 	shovelerTextTextureRendererFree(textTextureRenderer);
 	shovelerFontAtlasTextureFree(fontAtlasTexture);
 	shovelerFontAtlasFree(fontAtlas);

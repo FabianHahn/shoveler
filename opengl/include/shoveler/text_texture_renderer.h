@@ -32,8 +32,6 @@ typedef struct ShovelerTextTextureRendererStruct {
 	ShovelerModel *textModel;
 	ShovelerCanvas *textCanvas;
 	ShovelerSprite *textSprite;
-	/* map from texture text to (ShovelerTextTexture *) */
-	GHashTable *textures;
 } ShovelerTextTextureRenderer;
 
 /** Create a renderer with the caller retaining ownership over the passed font atlas texture. */

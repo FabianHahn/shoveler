@@ -15,9 +15,6 @@
 #include "shoveler/text_texture_renderer.h"
 #include "shoveler/texture.h"
 
-static void freeTextTexture(void *textTexturePointer);
-static ShovelerTexture *render(ShovelerTextTextureRenderer *renderer, const char *text, ShovelerRenderState *renderState);
-
 ShovelerTextTextureRenderer *shovelerTextTextureRendererCreate(ShovelerFontAtlasTexture *fontAtlasTexture, ShovelerShaderCache *shaderCache)
 {
 	ShovelerTextTextureRenderer *renderer = malloc(sizeof(ShovelerTextTextureRenderer));
@@ -34,51 +31,10 @@ ShovelerTextTextureRenderer *shovelerTextTextureRendererCreate(ShovelerFontAtlas
 	shovelerCanvasAddSprite(renderer->textCanvas, /* layerId */ 0, renderer->textSprite);
 	shovelerMaterialCanvasSetActive(renderer->canvasMaterial, renderer->textCanvas);
 
-	renderer->textures = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, freeTextTexture);
-
 	return renderer;
 }
 
 ShovelerTexture *shovelerTextTextureRendererRender(ShovelerTextTextureRenderer *renderer, const char *text, ShovelerRenderState *renderState)
-{
-	ShovelerTextTexture *textTexture = g_hash_table_lookup(renderer->textures, text);
-	if(textTexture == NULL) {
-		ShovelerTexture *texture = render(renderer, text, renderState);
-
-		if(texture != NULL) {
-			textTexture = malloc(sizeof(ShovelerTextTextureRenderer));
-			textTexture->text = strdup(text);
-			textTexture->texture = texture;
-			g_hash_table_insert(renderer->textures, textTexture->text, textTexture);
-		}
-	}
-
-	return textTexture != NULL ? textTexture->texture : NULL;
-}
-
-void shovelerTextTextureRendererFree(ShovelerTextTextureRenderer *renderer)
-{
-	g_hash_table_destroy(renderer->textures);
-
-	shovelerSpriteFree(renderer->textSprite);
-	shovelerCanvasFree(renderer->textCanvas);
-	shovelerSceneRemoveModel(renderer->textScene, renderer->textModel);
-	shovelerDrawableFree(renderer->textQuad);
-	shovelerMaterialFree(renderer->textMaterial);
-	shovelerMaterialFree(renderer->canvasMaterial);
-	shovelerSceneFree(renderer->textScene);
-	free(renderer);
-}
-
-static void freeTextTexture(void *textTexturePointer)
-{
-	ShovelerTextTexture *textTexture = textTexturePointer;
-	free(textTexture->text);
-	shovelerTextureFree(textTexture->texture);
-	free(textTexture);
-}
-
-static ShovelerTexture *render(ShovelerTextTextureRenderer *renderer, const char *text, ShovelerRenderState *renderState)
 {
 	float currentWidth = 0.0f;
 	float currentHeightTop = 0.0f;
@@ -122,4 +78,16 @@ static ShovelerTexture *render(ShovelerTextTextureRenderer *renderer, const char
 	ShovelerTexture *texture = framebuffer->renderTarget;
 	shovelerFramebufferFree(framebuffer, /* keepTargets */ true);
 	return texture;
+}
+
+void shovelerTextTextureRendererFree(ShovelerTextTextureRenderer *renderer)
+{
+	shovelerSpriteFree(renderer->textSprite);
+	shovelerCanvasFree(renderer->textCanvas);
+	shovelerSceneRemoveModel(renderer->textScene, renderer->textModel);
+	shovelerDrawableFree(renderer->textQuad);
+	shovelerMaterialFree(renderer->textMaterial);
+	shovelerMaterialFree(renderer->canvasMaterial);
+	shovelerSceneFree(renderer->textScene);
+	free(renderer);
 }
