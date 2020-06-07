@@ -198,8 +198,8 @@ ShovelerSceneRenderPassOptions createRenderPassOptions(ShovelerScene *scene, Ren
 		break;
 		case RENDER_MODE_EMITTERS:
 			options.emitters = true;
-			options.renderState.blendSourceFactor = GL_ONE;
-			options.renderState.blendDestinationFactor = GL_ONE;
+			options.renderState.blendSourceFactor = GL_SRC_ALPHA;
+			options.renderState.blendDestinationFactor = GL_ONE_MINUS_SRC_ALPHA;
 			options.renderState.depthFunction = GL_LESS;
 			options.renderState.depthMask = GL_TRUE;
 		break;
