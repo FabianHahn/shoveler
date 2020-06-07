@@ -13,12 +13,13 @@ const char *const shovelerComponentTypeIdClient = "client";
 
 static void *activateClientComponent(ShovelerComponent *component);
 static void deactivateClientComponent(ShovelerComponent *component);
+static void liveUpdateClientPositionDependency(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent);
 static void moveController(ShovelerController *controller, ShovelerVector3 position, void *componentPointer);
 
 ShovelerComponentType *shovelerComponentCreateClientType()
 {
 	ShovelerComponentTypeConfigurationOption configurationOptions[2];
-	configurationOptions[SHOVELER_COMPONENT_CLIENT_OPTION_ID_POSITION] = shovelerComponentTypeConfigurationOptionDependency("position", shovelerComponentTypeIdPosition, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* liveUpdateDependency */ NULL);
+	configurationOptions[SHOVELER_COMPONENT_CLIENT_OPTION_ID_POSITION] = shovelerComponentTypeConfigurationOptionDependency("position", shovelerComponentTypeIdPosition, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, liveUpdateClientPositionDependency);
 	configurationOptions[SHOVELER_COMPONENT_CLIENT_OPTION_ID_MODEL] = shovelerComponentTypeConfigurationOptionDependency("model", shovelerComponentTypeIdModel, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* liveUpdateDependency */ NULL);
 
 	return shovelerComponentTypeCreate(shovelerComponentTypeIdClient, activateClientComponent, /* update */ NULL, deactivateClientComponent, /* requiresAuthority */ true, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
@@ -67,6 +68,11 @@ static void deactivateClientComponent(ShovelerComponent *component)
 
 		model->visible = true;
 	}
+}
+
+static void liveUpdateClientPositionDependency(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent)
+{
+	// nothing to do, but we don't want to be reactivated
 }
 
 static void moveController(ShovelerController *controller, ShovelerVector3 position, void *componentPointer)
