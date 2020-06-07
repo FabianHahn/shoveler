@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
 	nearestNeighborSampler = shovelerSamplerCreate(false, true, true);
 	interpolatingSampler = shovelerSamplerCreate(true, true, true);
 
-	colorMaterial = shovelerMaterialColorCreate(game->shaderCache, /* screenspace */ false, shovelerVector3(0.7, 0.7, 0.7));
+	colorMaterial = shovelerMaterialColorCreate(game->shaderCache, /* screenspace */ false, shovelerVector4(0.7, 0.7, 0.7, 1.0));
 
 	ShovelerImage *image = shovelerImageCreate(2, 2, 3);
 	shovelerImageClear(image);
@@ -173,7 +173,7 @@ int main(int argc, char *argv[])
 	shovelerSceneAddLight(game->scene, pointlight2);
 
 	point = shovelerDrawablePointCreate();
-	particleMaterial = shovelerMaterialParticleCreate(game->shaderCache, shovelerVector3(1.0f, 1.0f, 1.0f));
+	particleMaterial = shovelerMaterialParticleCreate(game->shaderCache, shovelerVector4(1.0f, 1.0f, 1.0f, 1.0f));
 	ShovelerModel *pointlightModel = shovelerModelCreate(point, particleMaterial);
 	pointlightModel->scale = shovelerVector3(0.5f, 0.5f, 0);
 	pointlightModel->castsShadow = false;

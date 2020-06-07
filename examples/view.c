@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
 	ShovelerViewEntity *grayColorMaterialEntity = shovelerViewAddEntity(game->view, 2);
 	ShovelerComponent *grayColorMaterialComponent = shovelerViewEntityAddComponent(grayColorMaterialEntity, shovelerComponentTypeIdMaterial);
 	shovelerComponentUpdateCanonicalConfigurationOptionInt(grayColorMaterialComponent, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TYPE, SHOVELER_COMPONENT_MATERIAL_TYPE_COLOR);
-	shovelerComponentUpdateCanonicalConfigurationOptionVector3(grayColorMaterialComponent, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_COLOR, shovelerVector3(0.7f, 0.7f, 0.7f));
+	shovelerComponentUpdateCanonicalConfigurationOptionVector4(grayColorMaterialComponent, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_COLOR, shovelerVector4(0.7f, 0.7f, 0.7f, 1.0f));
 	shovelerComponentActivate(grayColorMaterialComponent);
 
 	ShovelerViewEntity *cubeEntity = shovelerViewAddEntity(game->view, 3);
@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
 	shovelerComponentActivate(pointDrawableComponent);
 	ShovelerComponent *whiteParticleMaterialComponent = shovelerViewEntityAddComponent(pointEntity, shovelerComponentTypeIdMaterial);
 	shovelerComponentUpdateCanonicalConfigurationOptionInt(whiteParticleMaterialComponent, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TYPE, SHOVELER_COMPONENT_MATERIAL_TYPE_PARTICLE);
-	shovelerComponentUpdateCanonicalConfigurationOptionVector3(whiteParticleMaterialComponent, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_COLOR, shovelerVector3(1.0f, 1.0f, 1.0f));
+	shovelerComponentUpdateCanonicalConfigurationOptionVector4(whiteParticleMaterialComponent, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_COLOR, shovelerVector4(1.0f, 1.0f, 1.0f, 1.0f));
 	shovelerComponentActivate(whiteParticleMaterialComponent);
 	ShovelerComponent *lightModelComponent = shovelerViewEntityAddComponent(pointEntity, shovelerComponentTypeIdModel);
 	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(lightModelComponent, SHOVELER_COMPONENT_MODEL_OPTION_ID_POSITION, 5);

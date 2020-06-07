@@ -30,7 +30,7 @@ ShovelerComponentType *shovelerComponentCreateMaterialType()
 	configurationOptions[SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TEXTURE_SAMPLER] = shovelerComponentTypeConfigurationOptionDependency("texture_sampler", shovelerComponentTypeIdSampler, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* liveUpdateDependency */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TILEMAP] = shovelerComponentTypeConfigurationOptionDependency("tilemap", shovelerComponentTypeIdTilemap, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* liveUpdateDependency */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_MATERIAL_OPTION_ID_CANVAS] = shovelerComponentTypeConfigurationOptionDependency("canvas", shovelerComponentTypeIdCanvas, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* liveUpdateDependency */ NULL);
-	configurationOptions[SHOVELER_COMPONENT_MATERIAL_OPTION_ID_COLOR] = shovelerComponentTypeConfigurationOption("color", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_VECTOR3, /* isOptional */ true, /* liveUpdate */ NULL);
+	configurationOptions[SHOVELER_COMPONENT_MATERIAL_OPTION_ID_COLOR] = shovelerComponentTypeConfigurationOption("color", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_VECTOR4, /* isOptional */ true, /* liveUpdate */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_MATERIAL_OPTION_ID_CANVAS_REGION_POSITION] = shovelerComponentTypeConfigurationOption("canvas_region_position", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_VECTOR2, /* isOptional */ true, /* liveUpdate */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_MATERIAL_OPTION_ID_CANVAS_REGION_SIZE] = shovelerComponentTypeConfigurationOption("canvas_region_size", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_VECTOR2, /* isOptional */ true, /* liveUpdate */ NULL);
 
@@ -54,7 +54,7 @@ static void *activateMaterialComponent(ShovelerComponent *component)
 	ShovelerMaterial *material;
 	switch (type) {
 		case SHOVELER_COMPONENT_MATERIAL_TYPE_COLOR: {
-			ShovelerVector3 color = shovelerComponentGetConfigurationValueVector3(component, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_COLOR);
+			ShovelerVector4 color = shovelerComponentGetConfigurationValueVector4(component, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_COLOR);
 			material = shovelerMaterialColorCreate(shaderCache, /* screenspace */ false, color);
 		} break;
 		case SHOVELER_COMPONENT_MATERIAL_TYPE_TEXTURE: {
@@ -73,7 +73,7 @@ static void *activateMaterialComponent(ShovelerComponent *component)
 			material = shovelerMaterialTextureCreate(shaderCache, /* screenspace */ false, textureType, texture, false, sampler, false);
 		} break;
 		case SHOVELER_COMPONENT_MATERIAL_TYPE_PARTICLE: {
-			ShovelerVector3 color = shovelerComponentGetConfigurationValueVector3(component, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_COLOR);
+			ShovelerVector4 color = shovelerComponentGetConfigurationValueVector4(component, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_COLOR);
 			material = shovelerMaterialParticleCreate(shaderCache, color);
 		} break;
 		case SHOVELER_COMPONENT_MATERIAL_TYPE_TILEMAP: {

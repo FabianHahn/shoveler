@@ -68,7 +68,7 @@ static const char *geometryShaderSource =
 static const char *fragmentShaderSource =
 		"#version 400\n"
 		"\n"
-		"uniform vec3 particleColor;\n"
+		"uniform vec4 particleColor;\n"
 		"\n"
 		"in vec2 worldUv;\n"
 		"\n"
@@ -79,10 +79,10 @@ static const char *fragmentShaderSource =
 		"	vec2 coordinates = 2.0 * (worldUv - vec2(0.5, 0.5));\n"
 		"	float intensity = 1.0 - pow(clamp(length(coordinates), 0.0, 1.0), 8.0);\n"
 		""
-		"	fragmentColor = vec4(intensity * particleColor, 0.0);\n"
+		"	fragmentColor = vec4(intensity * particleColor);\n"
 		"}\n";
 
-ShovelerMaterial *shovelerMaterialParticleCreate(ShovelerShaderCache *shaderCache, ShovelerVector3 color)
+ShovelerMaterial *shovelerMaterialParticleCreate(ShovelerShaderCache *shaderCache, ShovelerVector4 color)
 {
 	GLuint vertexShaderObject = shovelerShaderProgramCompileFromString(vertexShaderSource, GL_VERTEX_SHADER);
 	GLuint geometryShaderObject = shovelerShaderProgramCompileFromString(geometryShaderSource, GL_GEOMETRY_SHADER);
@@ -90,7 +90,7 @@ ShovelerMaterial *shovelerMaterialParticleCreate(ShovelerShaderCache *shaderCach
 	GLuint program = shovelerShaderProgramLink(vertexShaderObject, geometryShaderObject, fragmentShaderObject, true);
 	ShovelerMaterial *material = shovelerMaterialCreate(shaderCache, /* screenspace */ false, program);
 
-	shovelerUniformMapInsert(material->uniforms, "particleColor", shovelerUniformCreateVector3(color));
+	shovelerUniformMapInsert(material->uniforms, "particleColor", shovelerUniformCreateVector4(color));
 
 	return material;
 }
