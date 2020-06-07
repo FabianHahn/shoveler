@@ -16,11 +16,38 @@ typedef struct {
 
 static void freeMaterialTextureData(ShovelerMaterial *material);
 
-static const char *fragmentShaderSource =
+static const char *fragmentShaderSourceColor =
+		"#version 400\n"
+		"\n"
+		"uniform bool sceneDebugMode;\n"
+		"uniform bool depthOnly;\n"
+		"uniform sampler2D textureImage;\n"
+		"\n"
+		"in vec3 worldPosition;\n"
+		"in vec2 worldUv;\n"
+		"\n"
+		"out vec4 fragmentColor;\n"
+		"\n"
+		"void main()\n"
+		"{\n"
+		"	vec4 color;\n"
+		"	if(sceneDebugMode) {\n"
+		"		color = vec4(worldUv.xy, worldUv.y, 1.0);\n"
+		"	} else if(depthOnly) {\n"
+		"		color = vec4(texture2D(textureImage, worldUv).r);\n"
+		"	} else {\n"
+		"		color = vec4(texture2D(textureImage, worldUv).rgb, 1.0);\n"
+		"	}\n"
+		"\n"
+		"	fragmentColor = color;\n"
+		"}\n";
+
+static const char *fragmentShaderSourcePhong =
 		"#version 400\n"
 		""
 		"uniform vec3 cameraPosition;\n"
 		""
+		"uniform bool sceneDebugMode;\n"
 		"uniform vec3 lightColor;\n"
 		"uniform float lightAmbientFactor;\n"
 		"uniform float lightExponentialShadowFactor;\n"
@@ -72,13 +99,19 @@ static const char *fragmentShaderSource =
 		"	vec3 reflectedLight = -reflect(-lightDirection, normal);\n"
 		"	float specularFactor = pow(clamp(dot(reflectedLight, cameraDirection), 0.0, 1.0), 250.0);\n"
 		""
-		"	fragmentColor = vec4(clamp(lightAmbientFactor * color + exponentialShadowFactor * diffuseFactor * color * lightColor + exponentialShadowFactor * specularFactor * lightColor, 0.0, 1.0), 1.0);\n"
+		"	if(sceneDebugMode) {\n"
+		"		fragmentColor = vec4(worldUv.xy, worldUv.y, 1.0);\n"
+		"	} else {\n"
+		"		fragmentColor = vec4(clamp(lightAmbientFactor * color + exponentialShadowFactor * diffuseFactor * color * lightColor + exponentialShadowFactor * specularFactor * lightColor, 0.0, 1.0), 1.0);\n"
+		"	}\n"
 		"}\n";
 
-ShovelerMaterial *shovelerMaterialTextureCreate(ShovelerShaderCache *shaderCache, bool screenspace, ShovelerTexture *texture, bool manageTexture, ShovelerSampler *sampler, bool manageSampler)
+ShovelerMaterial *shovelerMaterialTextureCreate(ShovelerShaderCache *shaderCache, bool screenspace, ShovelerMaterialTextureType type, ShovelerTexture *texture, bool manageTexture, ShovelerSampler *sampler, bool manageSampler)
 {
 	GLuint vertexShaderObject = shovelerShaderProgramModelVertexCreate(screenspace);
-	GLuint fragmentShaderObject = shovelerShaderProgramCompileFromString(fragmentShaderSource, GL_FRAGMENT_SHADER);
+	GLuint fragmentShaderObject = shovelerShaderProgramCompileFromString(
+		type == SHOVELER_MATERIAL_TEXTURE_TYPE_PHONG ? fragmentShaderSourcePhong : fragmentShaderSourceColor,
+		GL_FRAGMENT_SHADER);
 	GLuint program = shovelerShaderProgramLink(vertexShaderObject, 0, fragmentShaderObject, true);
 
 	ShovelerMaterial *material = shovelerMaterialCreate(shaderCache, screenspace, program);
@@ -92,6 +125,7 @@ ShovelerMaterial *shovelerMaterialTextureCreate(ShovelerShaderCache *shaderCache
 	material->freeData = freeMaterialTextureData;
 	material->data = materialTextureData;
 
+	shovelerUniformMapInsert(material->uniforms, "depthOnly", shovelerUniformCreateInt(type == SHOVELER_MATERIAL_TEXTURE_TYPE_DEPTH));
 	shovelerUniformMapInsert(material->uniforms, "textureImage", shovelerUniformCreateTexture(texture, sampler));
 
 	return material;

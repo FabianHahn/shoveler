@@ -200,6 +200,7 @@ int main(int argc, char *argv[])
 	ShovelerViewEntity *textureMaterialEntity = shovelerViewAddEntity(game->view, 7);
 	ShovelerComponent *textureMaterialComponent = shovelerViewEntityAddComponent(textureMaterialEntity, shovelerComponentTypeIdMaterial);
 	shovelerComponentUpdateCanonicalConfigurationOptionInt(textureMaterialComponent, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TYPE, SHOVELER_COMPONENT_MATERIAL_TYPE_TEXTURE);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(textureMaterialComponent, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TEXTURE_TYPE, SHOVELER_MATERIAL_TEXTURE_TYPE_PHONG);
 	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(textureMaterialComponent, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TEXTURE, 6);
 	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(textureMaterialComponent, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TEXTURE_SAMPLER, 6);
 	shovelerComponentActivate(textureMaterialComponent);

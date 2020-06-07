@@ -131,6 +131,7 @@ int main(int argc, char *argv[])
 	shovelerComponentActivate(drawableComponent);
 	ShovelerComponent *materialComponent = shovelerViewEntityAddComponent(textEntity, shovelerComponentTypeIdMaterial);
 	shovelerComponentUpdateCanonicalConfigurationOptionInt(materialComponent, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TYPE, SHOVELER_COMPONENT_MATERIAL_TYPE_TEXTURE);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(materialComponent, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TEXTURE_TYPE, SHOVELER_MATERIAL_TEXTURE_TYPE_ALBEDO);
 	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(materialComponent, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TEXTURE, 2);
 	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(materialComponent, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TEXTURE_SAMPLER, 2);
 	shovelerComponentActivate(materialComponent);

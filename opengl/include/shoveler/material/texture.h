@@ -7,6 +7,12 @@
 
 typedef struct ShovelerShaderCacheStruct ShovelerShaderCache; // forward declaration: shader_cache.h
 
-ShovelerMaterial *shovelerMaterialTextureCreate(ShovelerShaderCache *shaderCache, bool screenspace, ShovelerTexture *texture, bool manageTexture, ShovelerSampler *sampler, bool manageSampler);
+typedef enum {
+	SHOVELER_MATERIAL_TEXTURE_TYPE_DEPTH,
+	SHOVELER_MATERIAL_TEXTURE_TYPE_ALBEDO,
+	SHOVELER_MATERIAL_TEXTURE_TYPE_PHONG,
+} ShovelerMaterialTextureType;
+
+ShovelerMaterial *shovelerMaterialTextureCreate(ShovelerShaderCache *shaderCache, bool screenspace, ShovelerMaterialTextureType type, ShovelerTexture *texture, bool manageTexture, ShovelerSampler *sampler, bool manageSampler);
 
 #endif
