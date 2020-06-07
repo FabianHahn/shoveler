@@ -8,6 +8,8 @@
 #include "shoveler/uniform_map.h"
 
 typedef struct {
+	/** color in alpha mask mode */
+	ShovelerVector4 color;
 	ShovelerTexture *texture;
 	bool manageTexture;
 	ShovelerSampler *sampler;
@@ -21,6 +23,8 @@ static const char *fragmentShaderSourceColor =
 		"\n"
 		"uniform bool sceneDebugMode;\n"
 		"uniform bool depthOnly;\n"
+		"uniform bool alphaMask;\n"
+		"uniform vec4 color;\n"
 		"uniform sampler2D textureImage;\n"
 		"\n"
 		"in vec3 worldPosition;\n"
@@ -30,16 +34,15 @@ static const char *fragmentShaderSourceColor =
 		"\n"
 		"void main()\n"
 		"{\n"
-		"	vec4 color;\n"
 		"	if(sceneDebugMode) {\n"
-		"		color = vec4(worldUv.xy, worldUv.y, 1.0);\n"
+		"		fragmentColor = vec4(worldUv.xy, worldUv.y, 1.0);\n"
 		"	} else if(depthOnly) {\n"
-		"		color = vec4(texture2D(textureImage, worldUv).r);\n"
+		"		fragmentColor = vec4(texture2D(textureImage, worldUv).r);\n"
+		"	} else if(alphaMask) {\n"
+		"		fragmentColor = vec4(color.rgb, color.a * texture2D(textureImage, worldUv).r);\n"
 		"	} else {\n"
-		"		color = vec4(texture2D(textureImage, worldUv).rgb, 1.0);\n"
+		"		fragmentColor = vec4(texture2D(textureImage, worldUv).rgb, 1.0);\n"
 		"	}\n"
-		"\n"
-		"	fragmentColor = color;\n"
 		"}\n";
 
 static const char *fragmentShaderSourcePhong =
@@ -117,6 +120,7 @@ ShovelerMaterial *shovelerMaterialTextureCreate(ShovelerShaderCache *shaderCache
 	ShovelerMaterial *material = shovelerMaterialCreate(shaderCache, screenspace, program);
 
 	ShovelerMaterialTextureData *materialTextureData = malloc(sizeof(ShovelerMaterialTextureData));
+	materialTextureData->color = shovelerVector4(0.0f, 0.0f, 0.0f, 0.0f);
 	materialTextureData->texture = texture;
 	materialTextureData->manageTexture = manageTexture;
 	materialTextureData->sampler = sampler;
@@ -125,10 +129,18 @@ ShovelerMaterial *shovelerMaterialTextureCreate(ShovelerShaderCache *shaderCache
 	material->freeData = freeMaterialTextureData;
 	material->data = materialTextureData;
 
+	shovelerUniformMapInsert(material->uniforms, "color", shovelerUniformCreateVector4Pointer(&materialTextureData->color));
 	shovelerUniformMapInsert(material->uniforms, "depthOnly", shovelerUniformCreateInt(type == SHOVELER_MATERIAL_TEXTURE_TYPE_DEPTH));
+	shovelerUniformMapInsert(material->uniforms, "alphaMask", shovelerUniformCreateInt(type == SHOVELER_MATERIAL_TEXTURE_TYPE_ALPHA_MASK));
 	shovelerUniformMapInsert(material->uniforms, "textureImage", shovelerUniformCreateTexture(texture, sampler));
 
 	return material;
+}
+
+void shovelerMaterialTextureSetAlphaMaskColor(ShovelerMaterial *material, ShovelerVector4 color)
+{
+	ShovelerMaterialTextureData *materialTextureData = material->data;
+	materialTextureData->color = color;
 }
 
 static void freeMaterialTextureData(ShovelerMaterial *material)

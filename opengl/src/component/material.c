@@ -68,9 +68,14 @@ static void *activateMaterialComponent(ShovelerComponent *component)
 			ShovelerSampler *sampler = shovelerComponentGetSampler(textureSamplerComponent);
 			assert(sampler != NULL);
 
-			ShovelerMaterialTextureType textureType = shovelerComponentGetConfigurationValueInt(component, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TEXTURE_TYPE);
+			ShovelerMaterialTextureType materialTextureType = shovelerComponentGetConfigurationValueInt(component, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TEXTURE_TYPE);
 
-			material = shovelerMaterialTextureCreate(shaderCache, /* screenspace */ false, textureType, texture, false, sampler, false);
+			material = shovelerMaterialTextureCreate(shaderCache, /* screenspace */ false, materialTextureType, texture, false, sampler, false);
+
+			if(materialTextureType == SHOVELER_MATERIAL_TEXTURE_TYPE_ALPHA_MASK) {
+				ShovelerVector4 color = shovelerComponentGetConfigurationValueVector4(component, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_COLOR);
+				shovelerMaterialTextureSetAlphaMaskColor(material, color);
+			}
 		} break;
 		case SHOVELER_COMPONENT_MATERIAL_TYPE_PARTICLE: {
 			ShovelerVector4 color = shovelerComponentGetConfigurationValueVector4(component, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_COLOR);
