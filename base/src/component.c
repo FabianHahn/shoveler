@@ -166,10 +166,12 @@ bool shovelerComponentUpdateConfigurationOption(ShovelerComponent *component, in
 	if(wasActive) {
 		if(canLiveUpdate) {
 			// live update value
-			configurationOption->liveUpdate(component, configurationOption, configurationValue);
+			bool propagateUpdate = configurationOption->liveUpdate(component, configurationOption, configurationValue);
 
-			// update reverse dependencies
-			component->viewAdapter->forEachReverseDependency(component, updateReverseDependency, /* callbackUserData */ NULL, component->viewAdapter->userData);
+			if(propagateUpdate) {
+				// update reverse dependencies
+				component->viewAdapter->forEachReverseDependency(component, updateReverseDependency, /* callbackUserData */ NULL, component->viewAdapter->userData);
+			}
 		} else {
 			// cannot live update, so try reactivating again
 			shovelerComponentActivate(component);
@@ -595,10 +597,12 @@ static void updateReverseDependency(ShovelerComponent *sourceComponent, Shoveler
 			break;
 		}
 
-		configurationOption->liveUpdateDependency(sourceComponent, configurationOption, targetComponent);
+		bool propagateUpdate = configurationOption->liveUpdateDependency(sourceComponent, configurationOption, targetComponent);
 
-		// recursively update reverse dependencies
-		sourceComponent->viewAdapter->forEachReverseDependency(sourceComponent, updateReverseDependency, /* callbackUserData */ NULL, sourceComponent->viewAdapter->userData);
+		if(propagateUpdate) {
+			// recursively update reverse dependencies
+			sourceComponent->viewAdapter->forEachReverseDependency(sourceComponent, updateReverseDependency, /* callbackUserData */ NULL, sourceComponent->viewAdapter->userData);
+		}
 	}
 
 	if(requiresReactivation) {

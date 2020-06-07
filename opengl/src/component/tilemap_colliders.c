@@ -8,7 +8,7 @@ const char *const shovelerComponentTypeIdTilemapColliders = "tilemap_colliders";
 
 static void *activateTilemapCollidersComponent(ShovelerComponent *component);
 static void deactivateTilemapCollidersComponent(ShovelerComponent *component);
-static void liveUpdateCollidersOption(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *value);
+static bool liveUpdateCollidersOption(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *value);
 static void updateColliders(ShovelerComponent *component, bool *colliders);
 
 ShovelerComponentType *shovelerComponentCreateTilemapCollidersType()
@@ -46,12 +46,14 @@ static void deactivateTilemapCollidersComponent(ShovelerComponent *component)
 	free(colliders);
 }
 
-static void liveUpdateCollidersOption(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *value)
+static bool liveUpdateCollidersOption(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *value)
 {
 	bool *colliders = (bool *) component->data;
 	assert(colliders != NULL);
 
 	updateColliders(component, colliders);
+
+	return false; // don't propagate
 }
 
 static void updateColliders(ShovelerComponent *component, bool *colliders)

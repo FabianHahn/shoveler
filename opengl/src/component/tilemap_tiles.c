@@ -10,7 +10,7 @@ const char *const shovelerComponentTypeIdTilemapTiles = "tilemap_tiles";
 
 static void *activateTilemapTilesComponent(ShovelerComponent *component);
 static void deactivateTilemapTilesComponent(ShovelerComponent *component);
-static void liveUpdateTilesOption(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *value);
+static bool liveUpdateTilesOption(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *value);
 static void updateTiles(ShovelerComponent *component, ShovelerTexture *texture);
 static bool isComponentImageResourceEntityDefinition(ShovelerComponent *component);
 static bool isComponentConfigurationOptionDefinition(ShovelerComponent *component);
@@ -71,7 +71,7 @@ static void deactivateTilemapTilesComponent(ShovelerComponent *component)
 	shovelerTextureFree(texture);
 }
 
-static void liveUpdateTilesOption(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *value)
+static bool liveUpdateTilesOption(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *value)
 {
 	ShovelerTexture *texture = (ShovelerTexture *) component->data;
 	assert(texture != NULL);
@@ -79,6 +79,8 @@ static void liveUpdateTilesOption(ShovelerComponent *component, const ShovelerCo
 	if(!isComponentImageResourceEntityDefinition(component) && isComponentConfigurationOptionDefinition(component)) {
 		updateTiles(component, texture);
 	}
+
+	return false; // don't propagate
 }
 
 static void updateTiles(ShovelerComponent *component, ShovelerTexture *texture)

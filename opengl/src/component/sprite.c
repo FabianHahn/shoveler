@@ -17,7 +17,7 @@ const char *const shovelerComponentTypeIdSprite = "sprite";
 
 static void *activateSpriteComponent(ShovelerComponent *component);
 static void deactivateSpriteComponent(ShovelerComponent *component);
-static void liveUpdateSpritePositionDependency(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent);
+static bool liveUpdateSpritePositionDependency(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent);
 static ShovelerVector2 getSpritePosition(ShovelerComponent *component);
 
 ShovelerComponentType *shovelerComponentCreateSpriteType()
@@ -104,12 +104,14 @@ static void deactivateSpriteComponent(ShovelerComponent *component)
 	shovelerCanvasRemoveSprite(canvas, layerId, sprite);
 }
 
-static void liveUpdateSpritePositionDependency(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent)
+static bool liveUpdateSpritePositionDependency(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent)
 {
 	ShovelerSprite *sprite = (ShovelerSprite *) component->data;
 	assert(sprite != NULL);
 
 	shovelerSpriteUpdatePosition(sprite, getSpritePosition(component));
+
+	return false; // don't propagate
 }
 
 static ShovelerVector2 getSpritePosition(ShovelerComponent *component)

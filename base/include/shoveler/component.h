@@ -53,8 +53,8 @@ typedef struct ShovelerComponentConfigurationValueStruct {
 	};
 } ShovelerComponentConfigurationValue;
 
-typedef void (ShovelerComponentTypeConfigurationOptionLiveUpdateFunction)(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *value);
-typedef void (ShovelerComponentTypeConfigurationOptionLiveUpdateDependencyFunction)(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent);
+typedef bool (ShovelerComponentTypeConfigurationOptionLiveUpdateFunction)(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *value);
+typedef bool (ShovelerComponentTypeConfigurationOptionLiveUpdateDependencyFunction)(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent);
 
 typedef struct ShovelerComponentTypeConfigurationOptionStruct {
 	const char *name;
@@ -115,7 +115,9 @@ typedef struct ShovelerComponentStruct {
  * Constructor for a configuration option.
  *
  * If the passed live update function is not NULL, this indicates that the configuration option can
- * be updated by calling that function instead of deactivating and reactivating the component.
+ * be updated by calling that function instead of deactivating and reactivating the component. If
+ * the live update function returns true, the update is propagated down to its reverse
+ * dependencies.
  */
 ShovelerComponentTypeConfigurationOption shovelerComponentTypeConfigurationOption(const char *name, ShovelerComponentConfigurationOptionType type, bool isOptional, ShovelerComponentTypeConfigurationOptionLiveUpdateFunction *liveUpdate);
 /**
@@ -126,11 +128,14 @@ ShovelerComponentTypeConfigurationOption shovelerComponentTypeConfigurationOptio
  * entity ID contains an activated component of the specified type.
  *
  * If the passed live update function is not NULL, this indicates that the configuration option can
- * be updated by calling that function instead of deactivating and reactivating the component.
+ * be updated by calling that function instead of deactivating and reactivating the component. If
+ * the live update function returns true, the update is propagated down to its reverse
+ * dependencies.
  *
  * If the component is active and the passed live update dependency function is not NULL, it will
  * be called whenever the dependency this component value points to is updated instead of
- * reactivating this component.
+ * reactivating this component. If live update dependency function returns true, the update is
+ * propagated down to its reverse dependencies.
  */
 ShovelerComponentTypeConfigurationOption shovelerComponentTypeConfigurationOptionDependency(const char *name, const char *dependencyComponentTypeId, bool isArray, bool isOptional, ShovelerComponentTypeConfigurationOptionLiveUpdateFunction *liveUpdate, ShovelerComponentTypeConfigurationOptionLiveUpdateDependencyFunction *liveUpdateDependency);
 
@@ -146,9 +151,9 @@ ShovelerComponentTypeConfigurationOption shovelerComponentTypeConfigurationOptio
  * succeeds.
  *
  * If an update function is specified and not NULL, it will be called whenever a component instance
- * of this type is updated by the view. It must return true if an update was actually performed,
- * which will then propogate down to its reverse dependencies. If it returns false, no other
- * component depending on it will be notified or reactivated based on the update.
+ * of this type is updated by the view. If the update function returns true, the update will
+ * propagate down to the component's reverse dependencies. If it returns false, no other component
+ * depending on it will be notified or reactivated based on the update.
  *
  * If a deactivation function is specified, it will be called when a component instance of this
  * type deactivates. It is intended to free any memory or registrations performed by the activation
@@ -221,11 +226,44 @@ GString *shovelerComponentConfigurationValuePrint(const ShovelerComponentConfigu
 
 /**
  * A ShovelerComponentTypeConfigurationOptionLiveUpdateFunction that does nothing and can be
- * passed to shovelerComponentTypeAddConfigurationOption.
+ * passed to shovelerComponentTypeConfigurationOption. It doesn't propagate the update.
  */
-static inline void shovelerComponentLiveUpdateNoop(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *value)
+static inline bool shovelerComponentLiveUpdateNoop(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *value)
 {
 	// deliberately do nothing
+	return false;
+}
+
+/**
+ * A ShovelerComponentTypeConfigurationOptionLiveUpdateFunction that does propagates the update
+ * to reverse dependencies but otherwise does nothing. It can be passed to
+ * shovelerComponentTypeConfigurationOption.
+ */
+static inline bool shovelerComponentLiveUpdatePropagate(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *value)
+{
+	// deliberately do nothing
+	return true;
+}
+
+/**
+ * A ShovelerComponentTypeConfigurationOptionLiveUpdateDependencyFunction that does nothing and can
+ * be passed to shovelerComponentTypeConfigurationOptionDependency. It doesn't propagate the update.
+ */
+static inline bool shovelerComponentLiveUpdateDependencyNoop(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent)
+{
+	// deliberately do nothing
+	return false;
+}
+
+/**
+ * A ShovelerComponentTypeConfigurationOptionLiveUpdateDependencyFunction that does propagates the update
+ * to reverse dependencies but otherwise does nothing. It can be passed to
+ * shovelerComponentTypeConfigurationOptionDependency.
+ */
+static inline bool shovelerComponentLiveUpdateDependencyPropagate(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent)
+{
+	// deliberately do nothing
+	return true;
 }
 
 static inline bool shovelerComponentUpdateConfigurationOptionEntityId(ShovelerComponent *component, int id, long long int entityIdValue)

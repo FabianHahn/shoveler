@@ -12,7 +12,7 @@ const char *const shovelerComponentTypeIdTileSpriteAnimation = "tile_sprite_anim
 
 static void *activateTileSpriteAnimationComponent(ShovelerComponent *component);
 static void deactivateTileSpriteAnimationComponent(ShovelerComponent *component);
-static void liveUpdateTileSpriteAnimationPositionDependency(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent);
+static bool liveUpdateTileSpriteAnimationPositionDependency(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent);
 static ShovelerVector2 getTileSpriteAnimationPosition(ShovelerComponent *component);
 
 ShovelerComponentType *shovelerComponentCreateTileSpriteAnimationType()
@@ -60,12 +60,14 @@ static void deactivateTileSpriteAnimationComponent(ShovelerComponent *component)
 	shovelerTileSpriteAnimationFree(animation);
 }
 
-static void liveUpdateTileSpriteAnimationPositionDependency(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent)
+static bool liveUpdateTileSpriteAnimationPositionDependency(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent)
 {
 	ShovelerTileSpriteAnimation *animation = (ShovelerTileSpriteAnimation *) component->data;
 	assert(animation != NULL);
 
 	shovelerTileSpriteAnimationUpdate(animation, getTileSpriteAnimationPosition(component));
+
+	return false; // don't propagate
 }
 
 static ShovelerVector2 getTileSpriteAnimationPosition(ShovelerComponent *component)

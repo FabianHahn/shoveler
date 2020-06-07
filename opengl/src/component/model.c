@@ -14,7 +14,7 @@ const char *const shovelerComponentTypeIdModel = "model";
 
 static void *activateModelComponent(ShovelerComponent *component);
 static void deactivateModelComponent(ShovelerComponent *component);
-static void liveUpdateModelPositionDependency(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent);
+static bool liveUpdateModelPositionDependency(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent);
 static GLuint convertPolygonMode(ShovelerComponentModelPolygonMode polygonMode);
 
 ShovelerComponentType *shovelerComponentCreateModelType()
@@ -89,7 +89,7 @@ static void deactivateModelComponent(ShovelerComponent *component)
 	shovelerSceneRemoveModel(scene, model);
 }
 
-static void liveUpdateModelPositionDependency(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent)
+static bool liveUpdateModelPositionDependency(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent)
 {
 	ShovelerModel *model = (ShovelerModel *) component->data;
 
@@ -100,6 +100,8 @@ static void liveUpdateModelPositionDependency(ShovelerComponent *component, cons
 
 	model->translation = *positionCoordinates;
 	shovelerModelUpdateTransformation(model);
+
+	return false; // don't propagate
 }
 
 static GLuint convertPolygonMode(ShovelerComponentModelPolygonMode polygonMode)

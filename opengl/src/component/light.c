@@ -15,7 +15,7 @@ const char *const shovelerComponentTypeIdLight = "light";
 
 static void *activateLightComponent(ShovelerComponent *component);
 static void deactivateLightComponent(ShovelerComponent *component);
-static void liveUpdateLightPositionDependency(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent);
+static bool liveUpdateLightPositionDependency(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent);
 
 ShovelerComponentType *shovelerComponentCreateLightType()
 {
@@ -92,7 +92,7 @@ static void deactivateLightComponent(ShovelerComponent *component)
 	shovelerSceneRemoveLight(scene, light);
 }
 
-static void liveUpdateLightPositionDependency(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent)
+static bool liveUpdateLightPositionDependency(ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, ShovelerComponent *dependencyComponent)
 {
 	ShovelerLight *light = (ShovelerLight *) component->data;
 
@@ -102,4 +102,6 @@ static void liveUpdateLightPositionDependency(ShovelerComponent *component, cons
 	assert(positionCoordinates != NULL);
 
 	shovelerLightUpdatePosition(light, *positionCoordinates);
+
+	return false; // don't propagate
 }
