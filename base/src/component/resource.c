@@ -11,7 +11,7 @@ static void deactivateResourceComponent(ShovelerComponent *component);
 ShovelerComponentType *shovelerComponentCreateResourceType()
 {
 	ShovelerComponentTypeConfigurationOption configurationOptions[1];
-	configurationOptions[SHOVELER_COMPONENT_RESOURCE_OPTION_ID_BUFFER] = shovelerComponentTypeConfigurationOption("type_id", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BYTES, /* isOptional */ false, /* liveUpdate */ NULL);
+	configurationOptions[SHOVELER_COMPONENT_RESOURCE_OPTION_ID_BUFFER] = shovelerComponentTypeConfigurationOption("buffer", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BYTES, /* isOptional */ false, /* liveUpdate */ NULL);
 
 	return shovelerComponentTypeCreate(shovelerComponentTypeIdResource, /* activate */ NULL, /* update */ NULL, /* deactivate */ NULL, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
 }
