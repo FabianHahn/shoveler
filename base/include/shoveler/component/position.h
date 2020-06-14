@@ -9,10 +9,17 @@ typedef struct ShovelerComponentStruct ShovelerComponent; // forward declaration
 extern const char *const shovelerComponentTypeIdPosition;
 
 typedef enum {
+	SHOVELER_COMPONENT_POSITION_TYPE_ABSOLUTE,
+	SHOVELER_COMPONENT_POSITION_TYPE_RELATIVE,
+} ShovelerComponentPositionType;
+
+typedef enum {
+	SHOVELER_COMPONENT_POSITION_OPTION_ID_TYPE,
 	SHOVELER_COMPONENT_POSITION_OPTION_ID_COORDINATES,
+	SHOVELER_COMPONENT_POSITION_OPTION_ID_RELATIVE_PARENT_POSITION,
 } ShovelerComponentPositionOptionId;
 
 ShovelerComponentType *shovelerComponentCreatePositionType();
-const ShovelerVector3 *shovelerComponentGetPositionCoordinates(ShovelerComponent *component);
+ShovelerVector3 shovelerComponentGetPositionCoordinates(ShovelerComponent *component);
 
 #endif

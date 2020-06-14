@@ -148,6 +148,7 @@ int main(int argc, char *argv[])
 	shovelerComponentUpdateCanonicalConfigurationOptionInt(modelComponent, SHOVELER_COMPONENT_MODEL_OPTION_ID_POLYGON_MODE, SHOVELER_COMPONENT_MODEL_POLYGON_MODE_FILL);
 	shovelerComponentActivate(modelComponent);
 	ShovelerComponent *positionComponent = shovelerViewEntityAddComponent(textEntity, shovelerComponentTypeIdPosition);
+	shovelerComponentUpdateCanonicalConfigurationOptionInt(positionComponent, SHOVELER_COMPONENT_POSITION_OPTION_ID_TYPE, SHOVELER_COMPONENT_POSITION_TYPE_ABSOLUTE);
 	shovelerComponentUpdateCanonicalConfigurationOptionVector3(positionComponent, SHOVELER_COMPONENT_POSITION_OPTION_ID_COORDINATES, shovelerVector3(0.0f, 0.0f, 10.0f));
 	shovelerComponentActivate(positionComponent);
 

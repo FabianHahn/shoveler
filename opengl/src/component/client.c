@@ -30,11 +30,11 @@ static void *activateClientComponent(ShovelerComponent *component)
 
 	ShovelerComponent *positionComponent = shovelerComponentGetDependency(component, SHOVELER_COMPONENT_CLIENT_OPTION_ID_POSITION);
 	assert(positionComponent != NULL);
-	const ShovelerVector3 *positionCoordinates = shovelerComponentGetPositionCoordinates(positionComponent);
+	ShovelerVector3 positionCoordinates = shovelerComponentGetPositionCoordinates(positionComponent);
 
 	ShovelerController *controller = shovelerComponentGetViewController(component);
 	ShovelerReferenceFrame frame = controller->frame;
-	frame.position = *positionCoordinates;
+	frame.position = positionCoordinates;
 	shovelerControllerSetFrame(controller, &frame);
 
 	ShovelerControllerMoveCallback *moveCallback = shovelerControllerAddMoveCallback(controller, moveController, component);
@@ -74,8 +74,6 @@ static void moveController(ShovelerController *controller, ShovelerVector3 posit
 	ShovelerComponent *component = componentPointer;
 
 	ShovelerComponent *positionComponent = shovelerComponentGetDependency(component, SHOVELER_COMPONENT_CLIENT_OPTION_ID_POSITION);
-	assert(positionComponent != NULL);
-	const ShovelerVector3 *positionCoordinates = shovelerComponentGetPositionCoordinates(positionComponent);
 	assert(positionComponent != NULL);
 
 	shovelerComponentUpdateConfigurationOptionVector3(positionComponent, SHOVELER_COMPONENT_POSITION_OPTION_ID_COORDINATES, position);

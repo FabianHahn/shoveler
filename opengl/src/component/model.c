@@ -46,8 +46,7 @@ static void *activateModelComponent(ShovelerComponent *component)
 
 	ShovelerComponent *positionComponent = shovelerComponentGetDependency(component, SHOVELER_COMPONENT_MODEL_OPTION_ID_POSITION);
 	assert(positionComponent != NULL);
-	const ShovelerVector3 *positionCoordinates = shovelerComponentGetPositionCoordinates(positionComponent);
-	assert(positionCoordinates != NULL);
+	ShovelerVector3 positionCoordinates = shovelerComponentGetPositionCoordinates(positionComponent);
 
 	ShovelerComponent *drawableComponent = shovelerComponentGetDependency(component, SHOVELER_COMPONENT_MODEL_OPTION_ID_DRAWABLE);
 	assert(drawableComponent != NULL);
@@ -60,7 +59,7 @@ static void *activateModelComponent(ShovelerComponent *component)
 	assert(material != NULL);
 
 	ShovelerModel *model = shovelerModelCreate(drawable, material);
-	model->translation = *positionCoordinates;
+	model->translation = positionCoordinates;
 	model->rotation = shovelerComponentGetConfigurationValueVector3(component, SHOVELER_COMPONENT_MODEL_OPTION_ID_ROTATION);
 	model->scale = shovelerComponentGetConfigurationValueVector3(component, SHOVELER_COMPONENT_MODEL_OPTION_ID_SCALE);
 	model->visible = shovelerComponentGetConfigurationValueBool(component, SHOVELER_COMPONENT_MODEL_OPTION_ID_VISIBLE);
@@ -95,10 +94,9 @@ static bool liveUpdateModelPositionDependency(ShovelerComponent *component, cons
 
 	ShovelerComponent *positionComponent = shovelerComponentGetDependency(component, SHOVELER_COMPONENT_MODEL_OPTION_ID_POSITION);
 	assert(positionComponent != NULL);
-	const ShovelerVector3 *positionCoordinates = shovelerComponentGetPositionCoordinates(positionComponent);
-	assert(positionCoordinates != NULL);
+	ShovelerVector3 positionCoordinates = shovelerComponentGetPositionCoordinates(positionComponent);
 
-	model->translation = *positionCoordinates;
+	model->translation = positionCoordinates;
 	shovelerModelUpdateTransformation(model);
 
 	return false; // don't propagate

@@ -74,13 +74,12 @@ static ShovelerVector2 getTileSpriteAnimationPosition(ShovelerComponent *compone
 {
 	ShovelerComponent *positionComponent = shovelerComponentGetDependency(component, SHOVELER_COMPONENT_TILE_SPRITE_ANIMATION_OPTION_POSITION);
 	assert(positionComponent != NULL);
-	const ShovelerVector3 *positionCoordinates = shovelerComponentGetPositionCoordinates(positionComponent);
-	assert(positionCoordinates != NULL);
+	ShovelerVector3 positionCoordinates = shovelerComponentGetPositionCoordinates(positionComponent);
 
 	ShovelerCoordinateMapping positionMappingX = shovelerComponentGetConfigurationValueInt(component, SHOVELER_COMPONENT_TILE_SPRITE_ANIMATION_OPTION_POSITION_MAPPING_X);
 	ShovelerCoordinateMapping positionMappingY = shovelerComponentGetConfigurationValueInt(component, SHOVELER_COMPONENT_TILE_SPRITE_ANIMATION_OPTION_POSITION_MAPPING_Y);
 
 	return shovelerVector2(
-		shovelerCoordinateMap(*positionCoordinates, positionMappingX),
-		shovelerCoordinateMap(*positionCoordinates, positionMappingY));
+		shovelerCoordinateMap(positionCoordinates, positionMappingX),
+		shovelerCoordinateMap(positionCoordinates, positionMappingY));
 }

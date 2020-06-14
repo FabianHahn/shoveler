@@ -118,13 +118,12 @@ static ShovelerVector2 getSpritePosition(ShovelerComponent *component)
 {
 	ShovelerComponent *positionComponent = shovelerComponentGetDependency(component, SHOVELER_COMPONENT_SPRITE_OPTION_ID_POSITION);
 	assert(positionComponent != NULL);
-	const ShovelerVector3 *positionCoordinates = shovelerComponentGetPositionCoordinates(positionComponent);
-	assert(positionCoordinates != NULL);
+	ShovelerVector3 positionCoordinates = shovelerComponentGetPositionCoordinates(positionComponent);
 
 	ShovelerCoordinateMapping positionMappingX = (ShovelerCoordinateMapping) shovelerComponentGetConfigurationValueInt(component, SHOVELER_COMPONENT_SPRITE_OPTION_ID_POSITION_MAPPING_X);
 	ShovelerCoordinateMapping positionMappingY = (ShovelerCoordinateMapping) shovelerComponentGetConfigurationValueInt(component, SHOVELER_COMPONENT_SPRITE_OPTION_ID_POSITION_MAPPING_Y);
 
 	return shovelerVector2(
-		shovelerCoordinateMap(*positionCoordinates, positionMappingX),
-		shovelerCoordinateMap(*positionCoordinates, positionMappingY));
+		shovelerCoordinateMap(positionCoordinates, positionMappingX),
+		shovelerCoordinateMap(positionCoordinates, positionMappingY));
 }
