@@ -19,6 +19,7 @@ set(SHOVELER_OPENGL_SRC
 	src/component/text_sprite.c
 	src/component/text_texture_renderer.c
 	src/component/texture.c
+	src/component/texture_sprite.c
 	src/component/tile_sprite.c
 	src/component/tile_sprite_animation.c
 	src/component/tilemap.c
@@ -61,6 +62,7 @@ set(SHOVELER_OPENGL_SRC
 	src/shader_program.c
 	src/shader.c
 	src/sprite/text.c
+	src/sprite/texture.c
 	src/sprite/tile.c
 	src/sprite/tilemap.c
 	src/sprite.c
@@ -92,6 +94,7 @@ set(SHOVELER_OPENGL_SRC
 	include/shoveler/component/text_sprite.h
 	include/shoveler/component/text_texture_renderer.h
 	include/shoveler/component/texture.h
+	include/shoveler/component/texture_sprite.h
 	include/shoveler/component/tile_sprite.h
 	include/shoveler/component/tile_sprite_animation.h
 	include/shoveler/component/tilemap.h
@@ -138,6 +141,7 @@ set(SHOVELER_OPENGL_SRC
 	include/shoveler/shader_program.h
 	include/shoveler/shader.h
 	include/shoveler/sprite/text.h
+	include/shoveler/sprite/texture.h
 	include/shoveler/sprite/tile.h
 	include/shoveler/sprite/tilemap.h
 	include/shoveler/sprite.h

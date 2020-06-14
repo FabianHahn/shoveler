@@ -143,18 +143,35 @@ void shovelerMaterialTileSpriteSetActiveRegion(ShovelerMaterial *material, Shove
 	materialData->activeRegionSize = regionSize;
 }
 
-void shovelerMaterialTileSpriteSetActive(ShovelerMaterial *material, const ShovelerSpriteTile *spriteTile)
+void shovelerMaterialTileSpriteSetActiveTile(ShovelerMaterial *material, int tilesetColumn, int tilesetRow)
 {
 	MaterialData *materialData = material->data;
-	materialData->activeSpriteTilesetColumn = spriteTile->tilesetColumn;
-	materialData->activeSpriteTilesetRow = spriteTile->tilesetRow;
-	materialData->activeSpritePosition = spriteTile->sprite.position;
-	materialData->activeSpriteSize = spriteTile->sprite.size;
-	materialData->activeTilesetRows = spriteTile->tileset->rows;
-	materialData->activeTilesetColumns = spriteTile->tileset->columns;
-	materialData->activeTilesetPadding = spriteTile->tileset->padding;
-	materialData->activeTilesetTexture = spriteTile->tileset->texture;
-	materialData->activeTilesetSampler = spriteTile->tileset->sampler;
+	materialData->activeSpriteTilesetColumn = tilesetColumn;
+	materialData->activeSpriteTilesetRow = tilesetRow;
+}
+
+void shovelerMaterialTileSpriteSetActiveTileset(ShovelerMaterial *material, ShovelerTileset *tileset)
+{
+	MaterialData *materialData = material->data;
+	materialData->activeTilesetRows = tileset->rows;
+	materialData->activeTilesetColumns = tileset->columns;
+	materialData->activeTilesetPadding = tileset->padding;
+	materialData->activeTilesetTexture = tileset->texture;
+	materialData->activeTilesetSampler = tileset->sampler;
+}
+
+void shovelerMaterialTileSpriteSetActiveSprite(ShovelerMaterial *material, ShovelerVector2 position, ShovelerVector2 size)
+{
+	MaterialData *materialData = material->data;
+	materialData->activeSpritePosition = position;
+	materialData->activeSpriteSize = size;
+}
+
+void shovelerMaterialTileSpriteSetActive(ShovelerMaterial *material, const ShovelerSpriteTile *spriteTile)
+{
+	shovelerMaterialTileSpriteSetActiveTile(material, spriteTile->tilesetColumn, spriteTile->tilesetRow);
+	shovelerMaterialTileSpriteSetActiveTileset(material, spriteTile->tileset);
+	shovelerMaterialTileSpriteSetActiveSprite(material, spriteTile->sprite.position, spriteTile->sprite.size);
 }
 
 static void freeMaterialData(ShovelerMaterial *material)
