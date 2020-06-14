@@ -42,5 +42,7 @@ static bool renderTilemapSprite(ShovelerSprite *sprite, ShovelerVector2 regionPo
 
 static void freeTilemapSprite(ShovelerSprite *sprite)
 {
-	free(sprite);
+	ShovelerSpriteTilemap *tilemapSprite = (ShovelerSpriteTilemap *) sprite->data;
+
+	free(tilemapSprite);
 }

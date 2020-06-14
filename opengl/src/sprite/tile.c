@@ -46,5 +46,7 @@ static bool renderSpriteTile(ShovelerSprite *sprite, ShovelerVector2 regionPosit
 
 static void freeSpriteTile(ShovelerSprite *sprite)
 {
-	free(sprite);
+	ShovelerSpriteTile *spriteTile = (ShovelerSpriteTile *) sprite->data;
+
+	free(spriteTile);
 }
