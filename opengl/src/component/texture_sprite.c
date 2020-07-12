@@ -28,7 +28,7 @@ ShovelerSprite *shovelerComponentGetTextureSprite(ShovelerComponent *component)
 
 static void *activateTextureSpriteComponent(ShovelerComponent *component)
 {
-	ShovelerComponent *materialComponent = shovelerComponentGetDependency(component, SHOVELER_COMPONENT_TEXTURE_SPRITE_OPTION_ID_TEXTURE);
+	ShovelerComponent *materialComponent = shovelerComponentGetDependency(component, SHOVELER_COMPONENT_TEXTURE_SPRITE_OPTION_ID_MATERIAL);
 	assert(materialComponent != NULL);
 	ShovelerMaterial *material = shovelerComponentGetMaterial(materialComponent);
 	assert(material != NULL);
