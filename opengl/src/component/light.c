@@ -47,7 +47,7 @@ static void *activateLightComponent(ShovelerComponent *component)
 
 	ShovelerComponent *positionComponent = shovelerComponentGetDependency(component, SHOVELER_COMPONENT_LIGHT_OPTION_ID_POSITION);
 	assert(positionComponent != NULL);
-	ShovelerVector3 positionCoordinates = shovelerComponentGetPositionCoordinates(positionComponent);
+	const ShovelerVector3 *position = shovelerComponentGetPosition(positionComponent);
 
 	ShovelerComponentLightType type = shovelerComponentGetConfigurationValueInt(component, SHOVELER_COMPONENT_LIGHT_OPTION_ID_TYPE);
 	ShovelerLight *light;
@@ -65,7 +65,7 @@ static void *activateLightComponent(ShovelerComponent *component)
 			float exponentialFactor = shovelerComponentGetConfigurationValueFloat(component, SHOVELER_COMPONENT_LIGHT_OPTION_ID_EXPONENTIAL_FACTOR);
 			ShovelerVector3 color = shovelerComponentGetConfigurationValueVector3(component, SHOVELER_COMPONENT_LIGHT_OPTION_ID_COLOR);
 
-			light = shovelerLightPointCreate(shaderCache, positionCoordinates, width, height, samples, ambientFactor, exponentialFactor, color);
+			light = shovelerLightPointCreate(shaderCache, *position, width, height, samples, ambientFactor, exponentialFactor, color);
 		} break;
 		default:
 			shovelerLogWarning("Trying to create light with unknown light type %d, ignoring.", type);
@@ -97,9 +97,9 @@ static bool liveUpdateLightPositionDependency(ShovelerComponent *component, cons
 
 	ShovelerComponent *positionComponent = shovelerComponentGetDependency(component, SHOVELER_COMPONENT_LIGHT_OPTION_ID_POSITION);
 	assert(positionComponent != NULL);
-	ShovelerVector3 positionCoordinates = shovelerComponentGetPositionCoordinates(positionComponent);
+	const ShovelerVector3 *position = shovelerComponentGetPosition(positionComponent);
 
-	shovelerLightUpdatePosition(light, positionCoordinates);
+	shovelerLightUpdatePosition(light, *position);
 
 	return false; // don't propagate
 }

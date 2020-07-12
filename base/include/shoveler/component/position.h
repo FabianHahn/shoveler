@@ -20,6 +20,6 @@ typedef enum {
 } ShovelerComponentPositionOptionId;
 
 ShovelerComponentType *shovelerComponentCreatePositionType();
-ShovelerVector3 shovelerComponentGetPositionCoordinates(ShovelerComponent *component);
+const ShovelerVector3 *shovelerComponentGetPosition(ShovelerComponent *component);
 
 #endif
