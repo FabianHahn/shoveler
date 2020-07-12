@@ -7,6 +7,7 @@
 #include "shoveler/component/canvas.h"
 #include "shoveler/component/position.h"
 #include "shoveler/component/text_sprite.h"
+#include "shoveler/component/texture_sprite.h"
 #include "shoveler/component/tile_sprite.h"
 #include "shoveler/component/tilemap_sprite.h"
 #include "shoveler/component.h"
@@ -22,7 +23,7 @@ static ShovelerVector2 getSpritePosition(ShovelerComponent *component);
 
 ShovelerComponentType *shovelerComponentCreateSpriteType()
 {
-	ShovelerComponentTypeConfigurationOption configurationOptions[10];
+	ShovelerComponentTypeConfigurationOption configurationOptions[11];
 	configurationOptions[SHOVELER_COMPONENT_SPRITE_OPTION_ID_POSITION] = shovelerComponentTypeConfigurationOptionDependency("position", shovelerComponentTypeIdPosition, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, liveUpdateSpritePositionDependency);
 	configurationOptions[SHOVELER_COMPONENT_SPRITE_OPTION_ID_POSITION_MAPPING_X] = shovelerComponentTypeConfigurationOption("position_mapping_x", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_SPRITE_OPTION_ID_POSITION_MAPPING_Y] = shovelerComponentTypeConfigurationOption("position_mapping_y", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
@@ -33,6 +34,7 @@ ShovelerComponentType *shovelerComponentCreateSpriteType()
 	configurationOptions[SHOVELER_COMPONENT_SPRITE_OPTION_ID_TEXT_SPRITE] = shovelerComponentTypeConfigurationOptionDependency("text_sprite", shovelerComponentTypeIdTextSprite, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* liveUpdateDependency */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_SPRITE_OPTION_ID_TILE_SPRITE] = shovelerComponentTypeConfigurationOptionDependency("tile_sprite", shovelerComponentTypeIdTileSprite, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* liveUpdateDependency */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_SPRITE_OPTION_ID_TILEMAP_SPRITE] = shovelerComponentTypeConfigurationOptionDependency("tilemap_sprite", shovelerComponentTypeIdTilemapSprite, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* liveUpdateDependency */ NULL);
+	configurationOptions[SHOVELER_COMPONENT_SPRITE_OPTION_ID_TEXTURE_SPRITE] = shovelerComponentTypeConfigurationOptionDependency("texture_sprite", shovelerComponentTypeIdTextureSprite, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* liveUpdateDependency */ NULL);
 
 	return shovelerComponentTypeCreate(shovelerComponentTypeIdSprite, activateSpriteComponent, /* update */ NULL, deactivateSpriteComponent, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
 }
@@ -49,7 +51,8 @@ static void *activateSpriteComponent(ShovelerComponent *component)
 	bool hasTextSprite = shovelerComponentHasConfigurationValue(component, SHOVELER_COMPONENT_SPRITE_OPTION_ID_TEXT_SPRITE);
 	bool hasTileSprite = shovelerComponentHasConfigurationValue(component, SHOVELER_COMPONENT_SPRITE_OPTION_ID_TILE_SPRITE);
 	bool hasTilemapSprite = shovelerComponentHasConfigurationValue(component, SHOVELER_COMPONENT_SPRITE_OPTION_ID_TILEMAP_SPRITE);
-	int numDependencies = (hasTextSprite ? 1 : 0) + (hasTileSprite ? 1 : 0) + (hasTilemapSprite ? 1 : 0);
+	bool hasTextureSprite = shovelerComponentHasConfigurationValue(component, SHOVELER_COMPONENT_SPRITE_OPTION_ID_TEXTURE_SPRITE);
+	int numDependencies = (hasTextSprite ? 1 : 0) + (hasTileSprite ? 1 : 0) + (hasTilemapSprite ? 1 : 0) + (hasTextureSprite ? 1 : 0);
 
 	if(numDependencies != 1) {
 		shovelerLogWarning("Failed to activate canvas component of entity %lld: Exactly one dependency option must be set, but found %d set options.", component->entityId, numDependencies);
@@ -73,6 +76,12 @@ static void *activateSpriteComponent(ShovelerComponent *component)
 		ShovelerComponent *tilemapSpriteComponent = shovelerComponentGetDependency(component, SHOVELER_COMPONENT_SPRITE_OPTION_ID_TILEMAP_SPRITE);
 		assert(tilemapSpriteComponent != NULL);
 		sprite = shovelerComponentGetTilemapSprite(tilemapSpriteComponent);
+	}
+
+	if(hasTextureSprite) {
+		ShovelerComponent *textureSpriteComponent = shovelerComponentGetDependency(component, SHOVELER_COMPONENT_SPRITE_OPTION_ID_TEXTURE_SPRITE);
+		assert(textureSpriteComponent != NULL);
+		sprite = shovelerComponentGetTextureSprite(textureSpriteComponent);
 	}
 
 	assert(sprite != NULL);
