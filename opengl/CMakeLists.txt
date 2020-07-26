@@ -47,6 +47,7 @@ set(SHOVELER_OPENGL_SRC
 	src/material/particle.c
 	src/material/text.c
 	src/material/texture.c
+	src/material/texture_sprite.c
 	src/material/tile_sprite.c
 	src/material/tilemap.c
 	src/material/variation.c
@@ -125,6 +126,7 @@ set(SHOVELER_OPENGL_SRC
 	include/shoveler/material/particle.h
 	include/shoveler/material/text.h
 	include/shoveler/material/texture.h
+	include/shoveler/material/texture_sprite.h
 	include/shoveler/material/tile_sprite.h
 	include/shoveler/material/tilemap.h
 	include/shoveler/material/variation.h
