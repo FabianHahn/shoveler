@@ -10,6 +10,7 @@
 #include "shoveler/material/particle.h"
 #include "shoveler/material/text.h"
 #include "shoveler/material/texture.h"
+#include "shoveler/material/texture_sprite.h"
 #include "shoveler/material/tile_sprite.h"
 #include "shoveler/material/tilemap.h"
 #include "shoveler/component.h"
@@ -24,9 +25,10 @@ static bool validateOptionalConfigurationOption(ShovelerComponent *component, Sh
 
 ShovelerComponentType *shovelerComponentCreateMaterialType()
 {
-	ShovelerComponentTypeConfigurationOption configurationOptions[9];
+	ShovelerComponentTypeConfigurationOption configurationOptions[10];
 	configurationOptions[SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TYPE] = shovelerComponentTypeConfigurationOption("type", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TEXTURE_TYPE] = shovelerComponentTypeConfigurationOption("texture_type", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ true, /* liveUpdate */ NULL);
+	configurationOptions[SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TEXTURE_SPRITE_TYPE] = shovelerComponentTypeConfigurationOption("texture_sprite_type", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ true, /* liveUpdate */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TEXTURE] = shovelerComponentTypeConfigurationOptionDependency("texture", shovelerComponentTypeIdTexture, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* liveUpdateDependency */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TEXTURE_SAMPLER] = shovelerComponentTypeConfigurationOptionDependency("texture_sampler", shovelerComponentTypeIdSampler, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* liveUpdateDependency */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TILEMAP] = shovelerComponentTypeConfigurationOptionDependency("tilemap", shovelerComponentTypeIdTilemap, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* liveUpdateDependency */ NULL);
@@ -138,6 +140,25 @@ static void *activateMaterialComponent(ShovelerComponent *component)
 			material = shovelerMaterialCanvasCreate(shaderCache, /* screenspace */ false);
 			shovelerMaterialCanvasSetActive(material, canvas);
 			shovelerMaterialCanvasSetActiveRegion(material, canvasRegionPosition, canvasRegionSize);
+		} break;
+		case SHOVELER_COMPONENT_MATERIAL_TYPE_TEXTURE_SPRITE: {
+			if(!validateOptionalConfigurationOption(component, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TEXTURE_SPRITE_TYPE, "texture sprite")) {
+				return NULL;
+			}
+
+			ShovelerMaterialTextureSpriteType textureSpriteType = shovelerComponentGetConfigurationValueInt(component, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_TEXTURE_SPRITE_TYPE);
+			if(textureSpriteType == SHOVELER_MATERIAL_TEXTURE_SPRITE_TYPE_ALPHA_MASK) {
+				if(!validateOptionalConfigurationOption(component, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_COLOR, "texture sprite with texture type alpha mask")) {
+					return NULL;
+				}
+			}
+
+			material = shovelerMaterialTextureSpriteCreate(shaderCache, /* screenspace */ false, textureSpriteType);
+
+			if(textureSpriteType == SHOVELER_MATERIAL_TEXTURE_SPRITE_TYPE_ALPHA_MASK) {
+				ShovelerVector4 color = shovelerComponentGetConfigurationValueVector4(component, SHOVELER_COMPONENT_MATERIAL_OPTION_ID_COLOR);
+				shovelerMaterialTextureSpriteSetColor(material, color);
+			}
 		} break;
 		case SHOVELER_COMPONENT_MATERIAL_TYPE_TILE_SPRITE: {
 			material = shovelerMaterialTileSpriteCreate(shaderCache, /* screenspace */ false);
