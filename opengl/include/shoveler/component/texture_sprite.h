@@ -10,6 +10,7 @@ extern const char *const shovelerComponentTypeIdTextureSprite;
 typedef enum {
 	SHOVELER_COMPONENT_TEXTURE_SPRITE_OPTION_ID_MATERIAL,
 	SHOVELER_COMPONENT_TEXTURE_SPRITE_OPTION_ID_TEXTURE,
+	SHOVELER_COMPONENT_TEXTURE_SPRITE_OPTION_ID_SAMPLER,
 } ShovelerComponentTextureSpriteOptionId;
 
 ShovelerComponentType *shovelerComponentCreateTextureSpriteType();

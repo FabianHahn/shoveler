@@ -1,6 +1,7 @@
 #include "shoveler/component/texture_sprite.h"
 
 #include "shoveler/component/material.h"
+#include "shoveler/component/sampler.h"
 #include "shoveler/component/texture.h"
 #include "shoveler/component.h"
 #include "shoveler/sprite/texture.h"
@@ -12,9 +13,10 @@ static void deactivateTextureSpriteComponent(ShovelerComponent *component);
 
 ShovelerComponentType *shovelerComponentCreateTextureSpriteType()
 {
-	ShovelerComponentTypeConfigurationOption configurationOptions[2];
+	ShovelerComponentTypeConfigurationOption configurationOptions[3];
 	configurationOptions[SHOVELER_COMPONENT_TEXTURE_SPRITE_OPTION_ID_MATERIAL] = shovelerComponentTypeConfigurationOptionDependency("material", shovelerComponentTypeIdMaterial, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* liveUpdateDependency */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_TEXTURE_SPRITE_OPTION_ID_TEXTURE] = shovelerComponentTypeConfigurationOptionDependency("texture", shovelerComponentTypeIdTexture, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* liveUpdateDependency */ NULL);
+	configurationOptions[SHOVELER_COMPONENT_TEXTURE_SPRITE_OPTION_ID_SAMPLER] = shovelerComponentTypeConfigurationOptionDependency("texture", shovelerComponentTypeIdSampler, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* liveUpdateDependency */ NULL);
 
 	return shovelerComponentTypeCreate(shovelerComponentTypeIdTextureSprite, activateTextureSpriteComponent, /* update */ NULL, deactivateTextureSpriteComponent, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
 }
@@ -38,7 +40,12 @@ static void *activateTextureSpriteComponent(ShovelerComponent *component)
 	ShovelerTexture *texture = shovelerComponentGetTexture(textureComponent);
 	assert(texture != NULL);
 
-	ShovelerSprite *textureSprite = shovelerSpriteTextureCreate(material, texture);
+	ShovelerComponent *samplerComponent = shovelerComponentGetDependency(component, SHOVELER_COMPONENT_TEXTURE_SPRITE_OPTION_ID_SAMPLER);
+	assert(samplerComponent != NULL);
+	ShovelerSampler *sampler = shovelerComponentGetSampler(samplerComponent);
+	assert(sampler != NULL);
+
+	ShovelerSprite *textureSprite = shovelerSpriteTextureCreate(material, texture, sampler);
 	return textureSprite;
 }
 
