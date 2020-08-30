@@ -9,7 +9,7 @@
 #include <shoveler/image/png.h>
 #include <shoveler/material/canvas.h>
 #include <shoveler/material/text.h>
-#include <shoveler/material/tile_sprite.h>
+#include <shoveler/material/texture_sprite.h>
 #include <shoveler/canvas.h>
 #include <shoveler/constants.h>
 #include <shoveler/controller.h>
@@ -23,10 +23,11 @@
 #include <shoveler/input.h>
 #include <shoveler/model.h>
 #include <shoveler/opengl.h>
+#include <shoveler/sampler.h>
 #include <shoveler/scene.h>
 #include <shoveler/shader_program.h>
 #include <shoveler/sprite/text.h>
-#include <shoveler/sprite/tile.h>
+#include <shoveler/sprite/texture.h>
 #include <shoveler/text_texture_renderer.h>
 #include <shoveler/texture.h>
 #include <shoveler/tileset.h>
@@ -100,12 +101,13 @@ int main(int argc, char *argv[])
 
 	ShovelerTextTextureRenderer *textTextureRenderer = shovelerTextTextureRendererCreate(fontAtlasTexture, game->shaderCache);
 	ShovelerTexture *shovelerTextTexture = shovelerTextTextureRendererRender(textTextureRenderer, "shoveler", &game->renderState);
-	ShovelerTileset *textTileset = shovelerTilesetCreateFromTexture(shovelerTextTexture, /* columns */ 1, /* rows */ 1, /* padding */ 0);
+	ShovelerSampler *textureSampler = shovelerSamplerCreate(/* interpolate */ true, /* useMipmaps */ true, /* clamp */ true);
 
-	ShovelerMaterial *tileSpriteMaterial = shovelerMaterialTileSpriteCreate(game->shaderCache, /* screenspace */ false);
-	ShovelerSprite *textSprite = shovelerSpriteTileCreate(tileSpriteMaterial, textTileset, /* tilesetRow */ 0, /* tilesetColumn */ 0);
-	textSprite->position = shovelerVector2(0.5f, 0.5f);
-	textSprite->size = shovelerVector2(1.0f, (float) shovelerTextTexture->height / shovelerTextTexture->width);
+	ShovelerMaterial *textureSpriteMaterial = shovelerMaterialTextureSpriteCreate(game->shaderCache, /* screenspace */ false, SHOVELER_MATERIAL_TEXTURE_SPRITE_TYPE_ALPHA_MASK);
+	shovelerMaterialTextureSpriteSetColor(textureSpriteMaterial, shovelerVector4(0.0f, 1.0f, 0.0f, 1.0f));
+	ShovelerSprite *textSprite = shovelerSpriteTextureCreate(textureSpriteMaterial, shovelerTextTexture, textureSampler);
+	shovelerSpriteUpdatePosition(textSprite, shovelerVector2(0.5f, 0.5f));
+	shovelerSpriteUpdateSize(textSprite, shovelerVector2(1.0f, (float) shovelerTextTexture->height / shovelerTextTexture->width));
 	shovelerCanvasAddSprite(canvas, /* layerId */ 0, textSprite);
 
 	ShovelerMaterial *textMaterial = shovelerMaterialTextCreate(game->shaderCache, /* screenspace */ true);
@@ -135,11 +137,11 @@ int main(int argc, char *argv[])
 	shovelerDrawableFree(quad);
 	shovelerMaterialFree(canvasMaterial);
 	shovelerMaterialFree(textMaterial);
-	shovelerMaterialFree(tileSpriteMaterial);
+	shovelerMaterialFree(textureSpriteMaterial);
 	shovelerCanvasFree(canvas);
 	shovelerSpriteFree(screenspaceTextSprite);
 	shovelerSpriteFree(textSprite);
-	shovelerTilesetFree(textTileset);
+	shovelerSamplerFree(textureSampler);
 	shovelerTextureFree(shovelerTextTexture);
 	shovelerTextTextureRendererFree(textTextureRenderer);
 	shovelerFontAtlasTextureFree(fontAtlasTexture);
