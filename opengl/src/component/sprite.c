@@ -24,11 +24,11 @@ static ShovelerVector2 getSpritePosition(ShovelerComponent *component);
 ShovelerComponentType *shovelerComponentCreateSpriteType()
 {
 	ShovelerComponentTypeConfigurationOption configurationOptions[11];
-	configurationOptions[SHOVELER_COMPONENT_SPRITE_OPTION_ID_POSITION] = shovelerComponentTypeConfigurationOptionDependency("position", shovelerComponentTypeIdPosition, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, liveUpdateSpritePositionDependency);
-	configurationOptions[SHOVELER_COMPONENT_SPRITE_OPTION_ID_POSITION_MAPPING_X] = shovelerComponentTypeConfigurationOption("position_mapping_x", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
-	configurationOptions[SHOVELER_COMPONENT_SPRITE_OPTION_ID_POSITION_MAPPING_Y] = shovelerComponentTypeConfigurationOption("position_mapping_y", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
+	configurationOptions[SHOVELER_COMPONENT_SPRITE_OPTION_ID_POSITION] = shovelerComponentTypeConfigurationOptionDependency("position", shovelerComponentTypeIdPosition, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, liveUpdateSpritePositionDependency);
+	configurationOptions[SHOVELER_COMPONENT_SPRITE_OPTION_ID_POSITION_MAPPING_X] = shovelerComponentTypeConfigurationOption("position_mapping_x", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ true, /* liveUpdate */ NULL);
+	configurationOptions[SHOVELER_COMPONENT_SPRITE_OPTION_ID_POSITION_MAPPING_Y] = shovelerComponentTypeConfigurationOption("position_mapping_y", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ true, /* liveUpdate */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_SPRITE_OPTION_ID_ENABLE_COLLIDER] = shovelerComponentTypeConfigurationOption("enable_collider", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_BOOL, /* isOptional */ false, /* liveUpdate */ NULL);
-	configurationOptions[SHOVELER_COMPONENT_SPRITE_OPTION_ID_SIZE] = shovelerComponentTypeConfigurationOption("size", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_VECTOR2, /* isOptional */ false, /* liveUpdate */ NULL);
+	configurationOptions[SHOVELER_COMPONENT_SPRITE_OPTION_ID_SIZE] = shovelerComponentTypeConfigurationOption("size", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_VECTOR2, /* isOptional */ true, /* liveUpdate */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_SPRITE_OPTION_ID_CANVAS] = shovelerComponentTypeConfigurationOptionDependency("canvas", shovelerComponentTypeIdCanvas, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* liveUpdateDependency */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_SPRITE_OPTION_ID_LAYER] = shovelerComponentTypeConfigurationOption("layer", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_INT, /* isOptional */ false, /* liveUpdate */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_SPRITE_OPTION_ID_TEXT_SPRITE] = shovelerComponentTypeConfigurationOptionDependency("text_sprite", shovelerComponentTypeIdTextSprite, /* isArray */ false, /* isOptional */ true, /* liveUpdate */ NULL, /* liveUpdateDependency */ NULL);
@@ -86,8 +86,16 @@ static void *activateSpriteComponent(ShovelerComponent *component)
 
 	assert(sprite != NULL);
 
-	shovelerSpriteUpdatePosition(sprite, getSpritePosition(component));
-	shovelerSpriteUpdateSize(sprite, shovelerComponentGetConfigurationValueVector2(component, SHOVELER_COMPONENT_SPRITE_OPTION_ID_SIZE));
+	if (shovelerComponentHasConfigurationValue(component, SHOVELER_COMPONENT_SPRITE_OPTION_ID_POSITION)
+			&& shovelerComponentHasConfigurationValue(component, SHOVELER_COMPONENT_SPRITE_OPTION_ID_POSITION_MAPPING_X)
+			&& shovelerComponentHasConfigurationValue(component, SHOVELER_COMPONENT_SPRITE_OPTION_ID_POSITION_MAPPING_Y)) {
+		shovelerSpriteUpdatePosition(sprite, getSpritePosition(component));
+	}
+
+	if (shovelerComponentHasConfigurationValue(component, SHOVELER_COMPONENT_SPRITE_OPTION_ID_SIZE)) {
+		shovelerSpriteUpdateSize(sprite, shovelerComponentGetConfigurationValueVector2(component, SHOVELER_COMPONENT_SPRITE_OPTION_ID_SIZE));
+	}
+
 	shovelerSpriteSetEnableCollider(sprite, shovelerComponentGetConfigurationValueBool(component, SHOVELER_COMPONENT_SPRITE_OPTION_ID_ENABLE_COLLIDER));
 
 	ShovelerComponent *canvasComponent = shovelerComponentGetDependency(component, SHOVELER_COMPONENT_SPRITE_OPTION_ID_CANVAS);
@@ -118,13 +126,21 @@ static bool liveUpdateSpritePositionDependency(ShovelerComponent *component, con
 	ShovelerSprite *sprite = (ShovelerSprite *) component->data;
 	assert(sprite != NULL);
 
-	shovelerSpriteUpdatePosition(sprite, getSpritePosition(component));
+	if (shovelerComponentHasConfigurationValue(component, SHOVELER_COMPONENT_SPRITE_OPTION_ID_POSITION)
+			&& shovelerComponentHasConfigurationValue(component, SHOVELER_COMPONENT_SPRITE_OPTION_ID_POSITION_MAPPING_X)
+			&& shovelerComponentHasConfigurationValue(component, SHOVELER_COMPONENT_SPRITE_OPTION_ID_POSITION_MAPPING_Y)) {
+		shovelerSpriteUpdatePosition(sprite, getSpritePosition(component));
+	}
 
 	return false; // don't propagate
 }
 
 static ShovelerVector2 getSpritePosition(ShovelerComponent *component)
 {
+	assert(shovelerComponentHasConfigurationValue(component, SHOVELER_COMPONENT_SPRITE_OPTION_ID_POSITION));
+	assert(shovelerComponentHasConfigurationValue(component, SHOVELER_COMPONENT_SPRITE_OPTION_ID_POSITION_MAPPING_X));
+	assert(shovelerComponentHasConfigurationValue(component, SHOVELER_COMPONENT_SPRITE_OPTION_ID_POSITION_MAPPING_Y));
+
 	ShovelerComponent *positionComponent = shovelerComponentGetDependency(component, SHOVELER_COMPONENT_SPRITE_OPTION_ID_POSITION);
 	assert(positionComponent != NULL);
 	const ShovelerVector3 *position = shovelerComponentGetPosition(positionComponent);
