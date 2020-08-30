@@ -13,10 +13,11 @@ static void deactivateTextureSpriteComponent(ShovelerComponent *component);
 
 ShovelerComponentType *shovelerComponentCreateTextureSpriteType()
 {
-	ShovelerComponentTypeConfigurationOption configurationOptions[3];
+	ShovelerComponentTypeConfigurationOption configurationOptions[4];
 	configurationOptions[SHOVELER_COMPONENT_TEXTURE_SPRITE_OPTION_ID_MATERIAL] = shovelerComponentTypeConfigurationOptionDependency("material", shovelerComponentTypeIdMaterial, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* liveUpdateDependency */ NULL);
 	configurationOptions[SHOVELER_COMPONENT_TEXTURE_SPRITE_OPTION_ID_TEXTURE] = shovelerComponentTypeConfigurationOptionDependency("texture", shovelerComponentTypeIdTexture, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* liveUpdateDependency */ NULL);
-	configurationOptions[SHOVELER_COMPONENT_TEXTURE_SPRITE_OPTION_ID_SAMPLER] = shovelerComponentTypeConfigurationOptionDependency("texture", shovelerComponentTypeIdSampler, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* liveUpdateDependency */ NULL);
+	configurationOptions[SHOVELER_COMPONENT_TEXTURE_SPRITE_OPTION_ID_SAMPLER] = shovelerComponentTypeConfigurationOptionDependency("sampler", shovelerComponentTypeIdSampler, /* isArray */ false, /* isOptional */ false, /* liveUpdate */ NULL, /* liveUpdateDependency */ NULL);
+	configurationOptions[SHOVELER_COMPONENT_TEXTURE_SPRITE_OPTION_ID_SCALE] = shovelerComponentTypeConfigurationOption("scale", SHOVELER_COMPONENT_CONFIGURATION_OPTION_TYPE_VECTOR2, /* isOptional */ false, /* liveUpdate */ NULL);
 
 	return shovelerComponentTypeCreate(shovelerComponentTypeIdTextureSprite, activateTextureSpriteComponent, /* update */ NULL, deactivateTextureSpriteComponent, /* requiresAuthority */ false, sizeof(configurationOptions) / sizeof(configurationOptions[0]), configurationOptions);
 }
@@ -46,6 +47,11 @@ static void *activateTextureSpriteComponent(ShovelerComponent *component)
 	assert(sampler != NULL);
 
 	ShovelerSprite *textureSprite = shovelerSpriteTextureCreate(material, texture, sampler);
+
+	ShovelerVector2 scale = shovelerComponentGetConfigurationValueVector2(component, SHOVELER_COMPONENT_TEXTURE_SPRITE_OPTION_ID_SCALE);
+
+	shovelerSpriteUpdateSize(textureSprite, shovelerVector2(scale.values[0] * texture->width, scale.values[1] * texture->height));
+
 	return textureSprite;
 }
 
