@@ -14,6 +14,7 @@ set(SHOVELER_BASE_SRC
 	src/colliders.c
 	src/color.c
 	src/component.c
+	src/component_data.c
 	src/compression.c
 	src/executor.c
 	src/file.c
@@ -42,6 +43,7 @@ set(SHOVELER_BASE_SRC
 	include/shoveler/colliders.h
 	include/shoveler/color.h
 	include/shoveler/component.h
+	include/shoveler/component_data.h
 	include/shoveler/compression.h
 	include/shoveler/constants.h
 	include/shoveler/executor.h
