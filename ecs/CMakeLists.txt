@@ -2,9 +2,13 @@ set(SHOVELER_ECS_SRC
 	src/component.c
 	src/component_field.c
 	src/component_type.c
+	src/system.c
+	src/world.c
 	include/shoveler/component.h
 	include/shoveler/component_field.h
 	include/shoveler/component_type.h
+	include/shoveler/system.h
+	include/shoveler/world.h
 )
 
 set(SHOVELER_ECS_TEST_SRC
