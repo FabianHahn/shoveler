@@ -1,6 +1,15 @@
 set(SHOVELER_ECS_SRC
-	src/component_data.c
-	include/shoveler/component_data.h
+	src/component.c
+	src/component_field.c
+	src/component_type.c
+	include/shoveler/component.h
+	include/shoveler/component_field.h
+	include/shoveler/component_type.h
+)
+
+set(SHOVELER_ECS_TEST_SRC
+	src/component_test.cpp
+	src/test.cpp
 )
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SHOVELER_ECS_SRC})
@@ -34,3 +43,13 @@ if(SHOVELER_INSTALL)
 		DESTINATION include)
 endif()
 
+if(SHOVELER_BUILD_TESTS)
+	add_executable(shoveler_ecs_test ${SHOVELER_ECS_TEST_SRC})
+
+	target_include_directories(shoveler_ecs_test
+		PRIVATE src)
+
+	target_link_libraries(shoveler_ecs_test shoveler::shoveler_ecs GTest::gtest)
+	set_property(TARGET shoveler_ecs_test PROPERTY CXX_STANDARD 11)
+	add_test(shoveler_ecs shoveler_ecs_test)
+endif()
