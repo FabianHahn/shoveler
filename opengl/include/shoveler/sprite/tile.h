@@ -14,6 +14,6 @@ typedef struct ShovelerSpriteTileStruct {
 
 ShovelerSprite *shovelerSpriteTileCreate(ShovelerMaterial *material, ShovelerTileset *tileset, int tilesetRow, int tilesetColumn);
 ShovelerTileset *shovelerSpriteTileGetTileset(ShovelerSprite *sprite);
-ShovelerTileset *shovelerSpriteTileSetIndices(ShovelerSprite *sprite, int tilesetRow, int tilesetColumn);
+void shovelerSpriteTileSetIndices(ShovelerSprite *sprite, int tilesetRow, int tilesetColumn);
 
 #endif

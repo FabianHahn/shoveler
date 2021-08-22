@@ -26,7 +26,7 @@ ShovelerTileset *shovelerSpriteTileGetTileset(ShovelerSprite *sprite)
 	return spriteTile->tileset;
 }
 
-ShovelerTileset *shovelerSpriteTileSetIndices(ShovelerSprite *sprite, int tilesetRow, int tilesetColumn)
+void shovelerSpriteTileSetIndices(ShovelerSprite *sprite, int tilesetRow, int tilesetColumn)
 {
 	ShovelerSpriteTile *spriteTile = (ShovelerSpriteTile *) sprite->data;
 
