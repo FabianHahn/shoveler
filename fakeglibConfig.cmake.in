@@ -1,6 +1,6 @@
 include(CMakeFindDependencyMacro)
 
 if(NOT TARGET fakeglib::fakeglib)
-    include("fakeglibTargets.cmake")
+    include("${CMAKE_CURRENT_LIST_DIR}/fakeglibTargets.cmake")
 endif()
 

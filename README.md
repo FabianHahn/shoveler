@@ -1,7 +1,7 @@
-[![Build Status](https://api.travis-ci.org/FabianHahn/fakeglib.svg)](https://travis-ci.org/FabianHahn/fakeglib)
+[![Build Status](https://app.travis-ci.com/FabianHahn/fakeglib.svg?branch=master)](https://app.travis-ci.com/github/FabianHahn/fakeglib)
 
 # fakeglib
-A partial implementation of [glib](https://github.com/GNOME/glib)'s [C API](https://developer.gnome.org/glib/2.48/) in C++.
+A partial implementation of [glib](https://github.com/GNOME/glib)'s [C API](https://docs.gtk.org/glib/) in C++.
 
 ## Why?
 C is a great programming language, but generally lacks a standard library of common dynamic data structures such as strings, lists, or maps with a native C API.
@@ -15,14 +15,14 @@ The requirements for *fakeglib* are:
 * Native development: Uses [CMake](https://cmake.org/) to generate native build files for each supported platform.
 
 ## What?
-*fakeglib* currently implements the following parts of [glib](https://github.com/GNOME/glib)'s [C API](https://developer.gnome.org/glib/2.48/):
-* [Basic Types](https://developer.gnome.org/glib/2.48/glib-Basic-Types.html) ([minimal](lib/include/fakeglib/GTypes.h))
-* [Memory Allocation](https://developer.gnome.org/glib/2.48/glib-Memory-Allocation.html) ([minimal](lib/include/fakeglib/GMemory.h))
-* [GDateTime](https://developer.gnome.org/glib/2.48/glib-GDateTime.html) ([minimal](lib/include/fakeglib//GDateTime.h))
-* [Date and Time Functions](https://developer.gnome.org/glib/2.48/glib-Date-and-Time-Functions.html) ([minimal](lib/include/fakeglib/GTime.h))
-* [Doubly-Linked Lists](https://developer.gnome.org/glib/2.48/glib-Doubly-Linked-Lists.html) ([full](lib/include/fakeglib//GList.h))
-* [Double-Ended Queues](https://developer.gnome.org/glib/2.48/glib-Double-ended-Queues.html) ([full](lib/include/fakeglib/GQueue.h))
-* [Hash Tables](https://developer.gnome.org/glib/2.48/glib-Hash-Tables.html) ([full](lib/include/fakeglib/GHashTable.h))
-* [Strings](https://developer.gnome.org/glib/2.48/glib-Strings.html) ([partial](lib/include/fakeglib/GString.h))
-* [String Utility Functions](https://developer.gnome.org/glib/2.48/glib-String-Utility-Functions.html) ([partial](lib/include/fakeglib/GStringUtil.h))
-
+*fakeglib* currently implements the following parts of [glib](https://github.com/GNOME/glib)'s [C API](https://docs.gtk.org/glib/):
+* [Array](https://docs.gtk.org/glib/struct.Array.html) ([partial](lib/include/fakeglib/GArray.h), no sorting and binary search functions)
+* Basic Types ([minimal](lib/include/fakeglib/GTypes.h))
+* Memory Allocation ([minimal](lib/include/fakeglib/GMemory.h))
+* [GDateTime](https://docs.gtk.org/glib/struct.DateTime.html) ([minimal](lib/include/fakeglib//GDateTime.h))
+* Date and Time Functions ([minimal](lib/include/fakeglib/GTime.h))
+* [Doubly-Linked Lists](https://docs.gtk.org/glib/struct.List.html) ([full](lib/include/fakeglib/GList.h))
+* [Double-Ended Queues](https://docs.gtk.org/glib/struct.Queue.html) ([full](lib/include/fakeglib/GQueue.h))
+* [Hash Tables](https://docs.gtk.org/glib/struct.HashTable.html) ([full](lib/include/fakeglib/GHashTable.h))
+* [Strings](https://docs.gtk.org/glib/struct.String.html) ([partial](lib/include/fakeglib/GString.h), no ASCII/Unichar functions)
+* String Utility Functions ([partial](lib/include/fakeglib/GStringUtil.h))
