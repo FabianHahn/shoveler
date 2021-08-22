@@ -1,11 +1,11 @@
+os: linux
+dist: focal
 language: cpp
 compiler:
     - clang
     - gcc
 addons:
     apt:
-        sources:
-            - george-edison55-precise-backports
         packages:
             - cmake
             - cmake-data

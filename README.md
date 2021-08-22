@@ -1,4 +1,4 @@
-[![Build Status](https://api.travis-ci.org/FabianHahn/shoveler.svg)](https://travis-ci.org/FabianHahn/shoveler)
+[![Build Status](https://app.travis-ci.com/FabianHahn/shoveler.svg?branch=master)](https://app.travis-ci.com/github/FabianHahn/shoveler)
 
 # shoveler
 
