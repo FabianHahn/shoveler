@@ -1,6 +1,7 @@
 include(GenerateExportHeader)
 
 set(FAKEGLIB_LIB_SRC
+	src/GArray.cpp
 	src/GDateTime.cpp
 	src/GHashTable.cpp
 	src/GList.cpp
@@ -9,6 +10,7 @@ set(FAKEGLIB_LIB_SRC
 	src/GString.cpp
 	src/GStringUtil.cpp
 	src/GTime.cpp
+	include/fakeglib/GArray.h
 	include/fakeglib/GDateTime.h
 	include/fakeglib/GHashTable.h
 	include/fakeglib/GList.h
@@ -17,6 +19,7 @@ set(FAKEGLIB_LIB_SRC
 	include/fakeglib/GString.h
 	include/fakeglib/GStringUtil.h
 	include/fakeglib/GTime.h
+	include/fakeglib/GTypes.h
 	include/glib.h
 )
 
