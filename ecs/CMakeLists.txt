@@ -5,6 +5,7 @@ set(SHOVELER_ECS_SRC
 	src/component_type.c
 	src/schema.c
 	src/system.c
+	src/world.c
 	include/shoveler/component.h
 	include/shoveler/component_field.h
 	include/shoveler/component_system.h
@@ -12,12 +13,14 @@ set(SHOVELER_ECS_SRC
 	include/shoveler/entity_component_id.h
 	include/shoveler/schema.h
 	include/shoveler/system.h
+	include/shoveler/world.h
 )
 
 set(SHOVELER_ECS_TEST_SRC
 	src/component_test.cpp
 	src/test.cpp
 	src/test_component_types.h
+	src/world_test.cpp
 )
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SHOVELER_ECS_SRC})
