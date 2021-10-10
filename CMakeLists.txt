@@ -109,6 +109,7 @@ if(SHOVELER_INSTALL)
 endif()
 
 add_subdirectory(base)
+add_subdirectory(ecs)
 add_subdirectory(examples)
 add_subdirectory(opengl)
 add_subdirectory(thirdparty)
