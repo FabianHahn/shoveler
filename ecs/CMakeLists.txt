@@ -1,6 +1,8 @@
 set(SHOVELER_ECS_SRC
 	src/component_field.c
+	src/component_type.c
 	include/shoveler/component_field.h
+	include/shoveler/component_type.h
 )
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SHOVELER_ECS_SRC})
