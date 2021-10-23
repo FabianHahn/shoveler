@@ -4,12 +4,14 @@ set(SHOVELER_ECS_SRC
 	src/component_system.c
 	src/component_type.c
 	src/schema.c
+	src/system.c
 	include/shoveler/component.h
 	include/shoveler/component_field.h
 	include/shoveler/component_system.h
 	include/shoveler/component_type.h
 	include/shoveler/entity_component_id.h
 	include/shoveler/schema.h
+	include/shoveler/system.h
 )
 
 set(SHOVELER_ECS_TEST_SRC
