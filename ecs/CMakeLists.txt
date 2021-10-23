@@ -2,10 +2,12 @@ set(SHOVELER_ECS_SRC
 	src/component.c
 	src/component_field.c
 	src/component_type.c
+	src/schema.c
 	include/shoveler/component.h
 	include/shoveler/component_field.h
 	include/shoveler/component_type.h
 	include/shoveler/entity_component_id.h
+	include/shoveler/schema.h
 )
 
 set(SHOVELER_ECS_TEST_SRC
