@@ -1,6 +1,8 @@
 set(SHOVELER_SCHEMA_SRC
 	src/schema/base.c
+	src/schema/opengl.c
 	include/shoveler/schema/base.h
+	include/shoveler/schema/opengl.h
 )
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SHOVELER_SCHEMA_SRC})
