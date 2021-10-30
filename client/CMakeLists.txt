@@ -8,6 +8,7 @@ set(SHOVELER_CLIENT_SRC
 	include/shoveler/component/image.h
 	include/shoveler/component/light.h
 	include/shoveler/component/material.h
+	include/shoveler/component/model.h
 	include/shoveler/component/position.h
 	include/shoveler/component/resource.h
 	include/shoveler/component/sampler.h
@@ -26,6 +27,7 @@ set(SHOVELER_CLIENT_SRC
 	src/component/image.c
 	src/component/light.c
 	src/component/material.c
+	src/component/model.c
 	src/component/position.c
 	src/component/sampler.c
 	src/component/text_texture_renderer.c
