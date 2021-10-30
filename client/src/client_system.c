@@ -12,6 +12,7 @@
 #include "shoveler/component/image.h"
 #include "shoveler/component/light.h"
 #include "shoveler/component/material.h"
+#include "shoveler/component/model.h"
 #include "shoveler/component/position.h"
 #include "shoveler/component/resource.h"
 #include "shoveler/component/sampler.h"
@@ -92,6 +93,7 @@ ShovelerClientSystem* shovelerClientSystemCreate(
   shovelerClientSystemAddImageSystem(clientSystem);
   shovelerClientSystemAddLightSystem(clientSystem);
   shovelerClientSystemAddMaterialSystem(clientSystem);
+  shovelerClientSystemAddModelSystem(clientSystem);
   shovelerClientSystemAddPositionSystem(clientSystem);
   shovelerClientSystemAddSamplerSystem(clientSystem);
   shovelerClientSystemAddTextTextureRendererSystem(clientSystem);
