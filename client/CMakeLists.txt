@@ -1,6 +1,7 @@
 set(SHOVELER_CLIENT_SRC
 	include/shoveler/client_system.h
 	include/shoveler/component/canvas.h
+	include/shoveler/component/client.h
 	include/shoveler/component/drawable.h
 	include/shoveler/component/font.h
 	include/shoveler/component/font_atlas.h
@@ -20,6 +21,7 @@ set(SHOVELER_CLIENT_SRC
 	include/shoveler/component/tileset.h
 	src/client_system.c
 	src/component/canvas.c
+	src/component/client.c
 	src/component/drawable.c
 	src/component/font.c
 	src/component/font_atlas.c
