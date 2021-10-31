@@ -5,6 +5,7 @@
 
 #include "shoveler/colliders.h"
 #include "shoveler/component/font.h"
+#include "shoveler/component/font_atlas.h"
 #include "shoveler/component/image.h"
 #include "shoveler/component/position.h"
 #include "shoveler/component/resource.h"
@@ -72,6 +73,7 @@ ShovelerClientSystem* shovelerClientSystemCreate(
   shovelerSchemaOpenglRegister(clientSystem->schema);
 
   shovelerClientSystemAddFontSystem(clientSystem);
+  shovelerClientSystemAddFontAtlasSystem(clientSystem);
   shovelerClientSystemAddImageSystem(clientSystem);
   shovelerClientSystemAddPositionSystem(clientSystem);
 
