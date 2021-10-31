@@ -16,6 +16,7 @@
 #include "shoveler/component/sampler.h"
 #include "shoveler/component/text_texture_renderer.h"
 #include "shoveler/component/texture.h"
+#include "shoveler/component/tilemap.h"
 #include "shoveler/component/tilemap_colliders.h"
 #include "shoveler/component/tilemap_tiles.h"
 #include "shoveler/component/tileset.h"
@@ -93,6 +94,7 @@ ShovelerClientSystem* shovelerClientSystemCreate(
   shovelerClientSystemAddSamplerSystem(clientSystem);
   shovelerClientSystemAddTextTextureRendererSystem(clientSystem);
   shovelerClientSystemAddTextureSystem(clientSystem);
+  shovelerClientSystemAddTilemapSystem(clientSystem);
   shovelerClientSystemAddTilemapCollidersSystem(clientSystem);
   shovelerClientSystemAddTilemapTilesSystem(clientSystem);
   shovelerClientSystemAddTilesetSystem(clientSystem);
