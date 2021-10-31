@@ -12,6 +12,7 @@ set(SHOVELER_CLIENT_SRC
 	include/shoveler/component/sampler.h
 	include/shoveler/component/text_texture_renderer.h
 	include/shoveler/component/texture.h
+	include/shoveler/component/tileset.h
 	src/client_system.c
 	src/component/canvas.c
 	src/component/drawable.c
@@ -24,6 +25,7 @@ set(SHOVELER_CLIENT_SRC
 	src/component/sampler.c
 	src/component/text_texture_renderer.c
 	src/component/texture.c
+	src/component/tileset.c
 )
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SHOVELER_CLIENT_SRC})
