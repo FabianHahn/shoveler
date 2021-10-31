@@ -5,6 +5,7 @@
 
 #include "shoveler/colliders.h"
 #include "shoveler/component/image.h"
+#include "shoveler/component/position.h"
 #include "shoveler/component/resource.h"
 #include "shoveler/controller.h"
 #include "shoveler/executor.h"
@@ -70,6 +71,7 @@ ShovelerClientSystem* shovelerClientSystemCreate(
   shovelerSchemaOpenglRegister(clientSystem->schema);
 
   shovelerClientSystemAddImageSystem(clientSystem);
+  shovelerClientSystemAddPositionSystem(clientSystem);
 
   return clientSystem;
 }
