@@ -25,6 +25,7 @@
 #include "shoveler/component/tile_sprite_animation.h"
 #include "shoveler/component/tilemap.h"
 #include "shoveler/component/tilemap_colliders.h"
+#include "shoveler/component/tilemap_sprite.h"
 #include "shoveler/component/tilemap_tiles.h"
 #include "shoveler/component/tileset.h"
 #include "shoveler/controller.h"
@@ -110,6 +111,7 @@ ShovelerClientSystem* shovelerClientSystemCreate(
   shovelerClientSystemAddTileSpriteAnimationSystem(clientSystem);
   shovelerClientSystemAddTilemapSystem(clientSystem);
   shovelerClientSystemAddTilemapCollidersSystem(clientSystem);
+  shovelerClientSystemAddTilemapSpriteSystem(clientSystem);
   shovelerClientSystemAddTilemapTilesSystem(clientSystem);
   shovelerClientSystemAddTilesetSystem(clientSystem);
 
