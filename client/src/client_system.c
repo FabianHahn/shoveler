@@ -17,6 +17,7 @@
 #include "shoveler/component/position.h"
 #include "shoveler/component/resource.h"
 #include "shoveler/component/sampler.h"
+#include "shoveler/component/sprite.h"
 #include "shoveler/component/text_sprite.h"
 #include "shoveler/component/text_texture_renderer.h"
 #include "shoveler/component/texture.h"
@@ -103,6 +104,7 @@ ShovelerClientSystem* shovelerClientSystemCreate(
   shovelerClientSystemAddModelSystem(clientSystem);
   shovelerClientSystemAddPositionSystem(clientSystem);
   shovelerClientSystemAddSamplerSystem(clientSystem);
+  shovelerClientSystemAddSpriteSystem(clientSystem);
   shovelerClientSystemAddTextSpriteSystem(clientSystem);
   shovelerClientSystemAddTextTextureRendererSystem(clientSystem);
   shovelerClientSystemAddTextureSystem(clientSystem);
