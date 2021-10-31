@@ -11,6 +11,7 @@
 #include "shoveler/component/image.h"
 #include "shoveler/component/position.h"
 #include "shoveler/component/resource.h"
+#include "shoveler/component/sampler.h"
 #include "shoveler/controller.h"
 #include "shoveler/executor.h"
 #include "shoveler/font.h"
@@ -80,6 +81,7 @@ ShovelerClientSystem* shovelerClientSystemCreate(
   shovelerClientSystemAddFontAtlasSystem(clientSystem);
   shovelerClientSystemAddImageSystem(clientSystem);
   shovelerClientSystemAddPositionSystem(clientSystem);
+  shovelerClientSystemAddSamplerSystem(clientSystem);
 
   return clientSystem;
 }
