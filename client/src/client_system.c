@@ -20,6 +20,7 @@
 #include "shoveler/component/text_sprite.h"
 #include "shoveler/component/text_texture_renderer.h"
 #include "shoveler/component/texture.h"
+#include "shoveler/component/texture_sprite.h"
 #include "shoveler/component/tile_sprite.h"
 #include "shoveler/component/tile_sprite_animation.h"
 #include "shoveler/component/tilemap.h"
@@ -104,6 +105,7 @@ ShovelerClientSystem* shovelerClientSystemCreate(
   shovelerClientSystemAddTextSpriteSystem(clientSystem);
   shovelerClientSystemAddTextTextureRendererSystem(clientSystem);
   shovelerClientSystemAddTextureSystem(clientSystem);
+  shovelerClientSystemAddTextureSpriteSystem(clientSystem);
   shovelerClientSystemAddTileSpriteSystem(clientSystem);
   shovelerClientSystemAddTileSpriteAnimationSystem(clientSystem);
   shovelerClientSystemAddTilemapSystem(clientSystem);
