@@ -4,6 +4,7 @@ set(SHOVELER_CLIENT_SRC
 	include/shoveler/component/drawable.h
 	include/shoveler/component/font.h
 	include/shoveler/component/font_atlas.h
+	include/shoveler/component/font_atlas_texture.h
 	include/shoveler/component/image.h
 	include/shoveler/component/position.h
 	include/shoveler/component/resource.h
@@ -13,6 +14,7 @@ set(SHOVELER_CLIENT_SRC
 	src/component/drawable.c
 	src/component/font.c
 	src/component/font_atlas.c
+	src/component/font_atlas_texture.c
 	src/component/image.c
 	src/component/position.c
 	src/component/sampler.c

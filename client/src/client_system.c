@@ -8,6 +8,7 @@
 #include "shoveler/component/drawable.h"
 #include "shoveler/component/font.h"
 #include "shoveler/component/font_atlas.h"
+#include "shoveler/component/font_atlas_texture.h"
 #include "shoveler/component/image.h"
 #include "shoveler/component/position.h"
 #include "shoveler/component/resource.h"
@@ -79,6 +80,7 @@ ShovelerClientSystem* shovelerClientSystemCreate(
   shovelerClientSystemAddDrawableSystem(clientSystem);
   shovelerClientSystemAddFontSystem(clientSystem);
   shovelerClientSystemAddFontAtlasSystem(clientSystem);
+  shovelerClientSystemAddFontAtlasTextureSystem(clientSystem);
   shovelerClientSystemAddImageSystem(clientSystem);
   shovelerClientSystemAddPositionSystem(clientSystem);
   shovelerClientSystemAddSamplerSystem(clientSystem);
