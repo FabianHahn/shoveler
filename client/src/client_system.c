@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #include "shoveler/colliders.h"
+#include "shoveler/component/image.h"
 #include "shoveler/component/resource.h"
 #include "shoveler/controller.h"
 #include "shoveler/executor.h"
@@ -67,6 +68,8 @@ ShovelerClientSystem* shovelerClientSystemCreate(
 
   shovelerSchemaBaseRegister(clientSystem->schema);
   shovelerSchemaOpenglRegister(clientSystem->schema);
+
+  shovelerClientSystemAddImageSystem(clientSystem);
 
   return clientSystem;
 }
