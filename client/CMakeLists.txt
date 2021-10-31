@@ -1,5 +1,6 @@
 set(SHOVELER_CLIENT_SRC
 	include/shoveler/client_system.h
+	include/shoveler/component/resource.h
 	src/client_system.c
 )
 
