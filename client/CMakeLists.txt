@@ -15,6 +15,7 @@ set(SHOVELER_CLIENT_SRC
 	include/shoveler/component/sampler.h
 	include/shoveler/component/text_texture_renderer.h
 	include/shoveler/component/texture.h
+	include/shoveler/component/tile_sprite.h
 	include/shoveler/component/tilemap.h
 	include/shoveler/component/tilemap_colliders.h
 	include/shoveler/component/tilemap_tiles.h
@@ -34,6 +35,7 @@ set(SHOVELER_CLIENT_SRC
 	src/component/sampler.c
 	src/component/text_texture_renderer.c
 	src/component/texture.c
+	src/component/tile_sprite.c
 	src/component/tilemap.c
 	src/component/tilemap_colliders.c
 	src/component/tilemap_tiles.c
