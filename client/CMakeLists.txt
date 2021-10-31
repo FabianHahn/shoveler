@@ -1,9 +1,11 @@
 set(SHOVELER_CLIENT_SRC
 	include/shoveler/client_system.h
 	include/shoveler/component/image.h
+	include/shoveler/component/position.h
 	include/shoveler/component/resource.h
 	src/client_system.c
 	src/component/image.c
+	src/component/position.c
 )
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SHOVELER_CLIENT_SRC})
