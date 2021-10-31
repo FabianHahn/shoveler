@@ -21,6 +21,7 @@ set(SHOVELER_CLIENT_SRC
 	include/shoveler/component/tile_sprite_animation.h
 	include/shoveler/component/tilemap.h
 	include/shoveler/component/tilemap_colliders.h
+	include/shoveler/component/tilemap_sprite.h
 	include/shoveler/component/tilemap_tiles.h
 	include/shoveler/component/tileset.h
 	src/client_system.c
@@ -44,6 +45,7 @@ set(SHOVELER_CLIENT_SRC
 	src/component/tile_sprite_animation.c
 	src/component/tilemap.c
 	src/component/tilemap_colliders.c
+	src/component/tilemap_sprite.c
 	src/component/tilemap_tiles.c
 	src/component/tileset.c
 )
