@@ -14,6 +14,7 @@
 #include "shoveler/component/resource.h"
 #include "shoveler/component/sampler.h"
 #include "shoveler/component/text_texture_renderer.h"
+#include "shoveler/component/texture.h"
 #include "shoveler/controller.h"
 #include "shoveler/executor.h"
 #include "shoveler/font.h"
@@ -86,6 +87,7 @@ ShovelerClientSystem* shovelerClientSystemCreate(
   shovelerClientSystemAddPositionSystem(clientSystem);
   shovelerClientSystemAddSamplerSystem(clientSystem);
   shovelerClientSystemAddTextTextureRendererSystem(clientSystem);
+  shovelerClientSystemAddTextureSystem(clientSystem);
 
   return clientSystem;
 }
