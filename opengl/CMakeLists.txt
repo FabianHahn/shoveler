@@ -36,6 +36,7 @@ set(SHOVELER_OPENGL_SRC
 	src/font_atlas_texture.c
 	src/framebuffer.c
 	src/game.c
+	src/game_view.c
 	src/global.c
 	src/input.c
 	src/light/point.c
@@ -114,6 +115,7 @@ set(SHOVELER_OPENGL_SRC
 	include/shoveler/font_atlas_texture.h
 	include/shoveler/framebuffer.h
 	include/shoveler/game.h
+	include/shoveler/game_view.h
 	include/shoveler/global.h
 	include/shoveler/input.h
 	include/shoveler/light/point.h

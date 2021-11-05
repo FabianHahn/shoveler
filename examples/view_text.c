@@ -25,7 +25,7 @@
 #include <shoveler/constants.h>
 #include <shoveler/controller.h>
 #include <shoveler/file.h>
-#include <shoveler/game.h>
+#include <shoveler/game_view.h>
 #include <shoveler/global.h>
 #include <shoveler/opengl.h>
 #include <shoveler/projection.h>
@@ -38,7 +38,7 @@ static double time = 0.0;
 
 static GString *getImageData(ShovelerImage *image);
 static void updateGame(ShovelerGame *game, double dt);
-static void updateAuthoritativeViewComponent(ShovelerGame *game, ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *value, void *unused);
+static void updateAuthoritativeViewComponent(ShovelerView *view, ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *value, void *userData);
 
 int main(int argc, char *argv[])
 {
@@ -83,19 +83,20 @@ int main(int argc, char *argv[])
 	controllerSettings.boundingBoxSize2 = 0.0f;
 	controllerSettings.boundingBoxSize3 = 0.0f;
 
-	ShovelerGame *game = shovelerGameCreate(updateGame, updateAuthoritativeViewComponent, /* updateAuthoritativeViewComponentUserData */ NULL, &windowSettings, &cameraSettings, &controllerSettings);
+	ShovelerGame *game = shovelerGameCreate(updateGame, &windowSettings, &cameraSettings, &controllerSettings);
 	if(game == NULL) {
 		return EXIT_FAILURE;
 	}
+	ShovelerView *view = shovelerGameViewCreate(game, updateAuthoritativeViewComponent, NULL);
 
 	game->controller->lockTiltX = true;
 	game->controller->lockTiltY = true;
 
 	ShovelerResources *resources = shovelerResourcesCreate(NULL, NULL);
 	shovelerResourcesImagePngRegister(resources);
-	shovelerViewSetTarget(game->view, shovelerComponentViewTargetIdResources, resources);
+	shovelerViewSetTarget(view, shovelerComponentViewTargetIdResources, resources);
 
-	ShovelerViewEntity *fontEntity = shovelerViewAddEntity(game->view, 1);
+	ShovelerViewEntity *fontEntity = shovelerViewAddEntity(view, 1);
 	ShovelerComponent *resourceComponent = shovelerViewEntityAddComponent(fontEntity, shovelerComponentTypeIdResource);
 	shovelerComponentUpdateCanonicalConfigurationOptionBytes(resourceComponent, SHOVELER_COMPONENT_RESOURCE_OPTION_ID_BUFFER, contents, contentsSize);
 	shovelerComponentActivate(resourceComponent);
@@ -115,7 +116,7 @@ int main(int argc, char *argv[])
 	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(textTextureRendererComponent, SHOVELER_COMPONENT_TEXT_TEXTURE_RENDERER_OPTION_ID_FONT_ATLAS_TEXTURE, 1);
 	shovelerComponentActivate(textTextureRendererComponent);
 
-	ShovelerViewEntity *textEntity = shovelerViewAddEntity(game->view, 2);
+	ShovelerViewEntity *textEntity = shovelerViewAddEntity(view, 2);
 	ShovelerComponent *textureComponent = shovelerViewEntityAddComponent(textEntity, shovelerComponentTypeIdTexture);
 	shovelerComponentUpdateCanonicalConfigurationOptionInt(textureComponent, SHOVELER_COMPONENT_TEXTURE_OPTION_ID_TYPE, SHOVELER_COMPONENT_TEXTURE_TYPE_TEXT);
 	shovelerComponentUpdateCanonicalConfigurationOptionEntityId(textureComponent, SHOVELER_COMPONENT_TEXTURE_OPTION_ID_TEXT_TEXTURE_RENDERER, 1);
@@ -173,7 +174,7 @@ static void updateGame(ShovelerGame *game, double dt)
 	shovelerCameraUpdateView(game->camera);
 }
 
-static void updateAuthoritativeViewComponent(ShovelerGame *game, ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *value, void *unused)
+static void updateAuthoritativeViewComponent(ShovelerView *view, ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *value, void *userData)
 {
 	GString *printedValue = shovelerComponentConfigurationValuePrint(value);
 

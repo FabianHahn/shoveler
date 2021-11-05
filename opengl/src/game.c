@@ -4,37 +4,6 @@
 
 #include "shoveler/camera/perspective.h"
 #include "shoveler/drawable/quad.h"
-#include "shoveler/component/canvas.h"
-#include "shoveler/component/client.h"
-#include "shoveler/component/colliders.h"
-#include "shoveler/component/controller.h"
-#include "shoveler/component/drawable.h"
-#include "shoveler/component/font.h"
-#include "shoveler/component/font_atlas.h"
-#include "shoveler/component/font_atlas_texture.h"
-#include "shoveler/component/fonts.h"
-#include "shoveler/component/image.h"
-#include "shoveler/component/light.h"
-#include "shoveler/component/material.h"
-#include "shoveler/component/model.h"
-#include "shoveler/component/position.h"
-#include "shoveler/component/render_state.h"
-#include "shoveler/component/resource.h"
-#include "shoveler/component/resources.h"
-#include "shoveler/component/sampler.h"
-#include "shoveler/component/scene.h"
-#include "shoveler/component/shader_cache.h"
-#include "shoveler/component/sprite.h"
-#include "shoveler/component/text_sprite.h"
-#include "shoveler/component/text_texture_renderer.h"
-#include "shoveler/component/texture.h"
-#include "shoveler/component/tile_sprite.h"
-#include "shoveler/component/tile_sprite_animation.h"
-#include "shoveler/component/tilemap.h"
-#include "shoveler/component/tilemap_colliders.h"
-#include "shoveler/component/tilemap_sprite.h"
-#include "shoveler/component/tilemap_tiles.h"
-#include "shoveler/component/tileset.h"
 #include "shoveler/material/canvas.h"
 #include "shoveler/canvas.h"
 #include "shoveler/colliders.h"
@@ -47,16 +16,13 @@
 #include "shoveler/opengl.h"
 #include "shoveler/scene.h"
 #include "shoveler/shader_cache.h"
-#include "shoveler/view.h"
 
 static void updateScreenspaceCanvasRegion(ShovelerGame *game);
 static void keyHandler(ShovelerInput *input, int key, int scancode, int action, int mods, void *unused);
 static gint64 elapsedNs(double dt);
 static void printFps(void *gamePointer);
-static void updateAuthoritativeComponent(ShovelerView *view, ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *value, void *gamePointer);
-static void updateViewCounters(ShovelerGame *game);
 
-ShovelerGame *shovelerGameCreate(ShovelerGameUpdateCallback *update, ShovelerGameUpdateAuthoritativeViewComponentFunction *updateAuthoritativeViewComponent, void *updateAuthoritativeViewComponentUserData, const ShovelerGameWindowSettings *windowSettings, const ShovelerGameCameraSettings *cameraSettings, const ShovelerGameControllerSettings *controllerSettings)
+ShovelerGame *shovelerGameCreate(ShovelerGameUpdateCallback *update, const ShovelerGameWindowSettings *windowSettings, const ShovelerGameCameraSettings *cameraSettings, const ShovelerGameControllerSettings *controllerSettings)
 {
 	ShovelerGame *game = malloc(sizeof(ShovelerGame));
 	game->windowedWidth = windowSettings->windowedWidth;
@@ -141,7 +107,6 @@ ShovelerGame *shovelerGameCreate(ShovelerGameUpdateCallback *update, ShovelerGam
 	game->colliders = shovelerCollidersCreate();
 	game->controller = shovelerControllerCreate(game->window, game->input, game->colliders, &controllerSettings->frame, controllerSettings->moveFactor, controllerSettings->tiltFactor, controllerSettings->boundingBoxSize2, controllerSettings->boundingBoxSize3);
 	game->fonts = shovelerFontsCreate();
-	game->view = shovelerViewCreate(updateAuthoritativeComponent, game);
 
 	game->screenspaceCanvas = shovelerCanvasCreate(/* numLayers */ 1);
 	game->screenspaceCanvasQuad = shovelerDrawableQuadCreate();
@@ -152,8 +117,6 @@ ShovelerGame *shovelerGameCreate(ShovelerGameUpdateCallback *update, ShovelerGam
 	shovelerSceneAddModel(game->scene, game->screenspaceCanvasModel);
 
 	game->update = update;
-	game->updateAuthoritativeViewComponent = updateAuthoritativeViewComponent;
-	game->updateAuthoritativeViewComponentUserData = updateAuthoritativeViewComponentUserData;
 	game->lastFrameTime = glfwGetTime();
 	game->lastFpsPrintTime = game->lastFrameTime;
 	game->framesSinceLastFpsPrint = 0;
@@ -166,38 +129,6 @@ ShovelerGame *shovelerGameCreate(ShovelerGameUpdateCallback *update, ShovelerGam
 	shovelerExecutorSchedulePeriodic(game->updateExecutor, 1000, 1000, printFps, game);
 
 	shovelerCameraPerspectiveAttachController(game->camera, game->controller);
-
-	shovelerViewSetTarget(game->view, shovelerComponentViewTargetIdColliders, game->colliders);
-	shovelerViewSetTarget(game->view, shovelerComponentViewTargetIdController, game->controller);
-	shovelerViewSetTarget(game->view, shovelerComponentViewTargetIdFonts, game->fonts);
-	shovelerViewSetTarget(game->view, shovelerComponentViewTargetIdRenderState, &game->renderState);
-	shovelerViewSetTarget(game->view, shovelerComponentViewTargetIdScene, game->scene);
-	shovelerViewSetTarget(game->view, shovelerComponentViewTargetIdShaderCache, game->shaderCache);
-
-	shovelerViewAddComponentType(game->view, shovelerComponentCreateCanvasType());
-	shovelerViewAddComponentType(game->view, shovelerComponentCreateClientType());
-	shovelerViewAddComponentType(game->view, shovelerComponentCreateDrawableType());
-	shovelerViewAddComponentType(game->view, shovelerComponentCreateFontType());
-	shovelerViewAddComponentType(game->view, shovelerComponentCreateFontAtlasType());
-	shovelerViewAddComponentType(game->view, shovelerComponentCreateFontAtlasTextureType());
-	shovelerViewAddComponentType(game->view, shovelerComponentCreateImageType());
-	shovelerViewAddComponentType(game->view, shovelerComponentCreateLightType());
-	shovelerViewAddComponentType(game->view, shovelerComponentCreateMaterialType());
-	shovelerViewAddComponentType(game->view, shovelerComponentCreateModelType());
-	shovelerViewAddComponentType(game->view, shovelerComponentCreatePositionType());
-	shovelerViewAddComponentType(game->view, shovelerComponentCreateResourceType());
-	shovelerViewAddComponentType(game->view, shovelerComponentCreateSamplerType());
-	shovelerViewAddComponentType(game->view, shovelerComponentCreateTextureType());
-	shovelerViewAddComponentType(game->view, shovelerComponentCreateSpriteType());
-	shovelerViewAddComponentType(game->view, shovelerComponentCreateTextSpriteType());
-	shovelerViewAddComponentType(game->view, shovelerComponentCreateTextTextureRendererType());
-	shovelerViewAddComponentType(game->view, shovelerComponentCreateTileSpriteType());
-	shovelerViewAddComponentType(game->view, shovelerComponentCreateTileSpriteAnimationType());
-	shovelerViewAddComponentType(game->view, shovelerComponentCreateTilemapType());
-	shovelerViewAddComponentType(game->view, shovelerComponentCreateTilemapCollidersType());
-	shovelerViewAddComponentType(game->view, shovelerComponentCreateTilemapSpriteType());
-	shovelerViewAddComponentType(game->view, shovelerComponentCreateTilemapTilesType());
-	shovelerViewAddComponentType(game->view, shovelerComponentCreateTilesetType());
 
 	ShovelerGlobalContext *global = shovelerGlobalGetContext();
 	g_hash_table_insert(global->games, game->window, game);
@@ -245,10 +176,7 @@ int shovelerGameRenderFrame(ShovelerGame *game)
 
 	shovelerExecutorUpdate(game->updateExecutor, elapsedNs(dt));
 	shovelerControllerUpdate(game->controller, dt);
-	shovelerViewUpdate(game->view, dt);
 	game->update(game, dt);
-
-	updateViewCounters(game);
 
 	int rendered = shovelerSceneRenderFrame(game->scene, game->camera, game->framebuffer, &game->renderState);
 	shovelerFramebufferBlitToDefault(game->framebuffer);
@@ -273,7 +201,6 @@ void shovelerGameFree(ShovelerGame *game)
 	shovelerDrawableFree(game->screenspaceCanvasQuad);
 	shovelerCanvasFree(game->screenspaceCanvas);
 
-	shovelerViewFree(game->view);
 	shovelerFontsFree(game->fonts);
 	shovelerControllerFree(game->controller);
 	shovelerCollidersFree(game->colliders);
@@ -303,11 +230,6 @@ static void keyHandler(ShovelerInput *input, int key, int scancode, int action, 
 		glfwSetWindowShouldClose(input->game->window, GLFW_TRUE);
 	}
 
-	if(key == GLFW_KEY_F9 && action == GLFW_PRESS) {
-		shovelerLogInfo("F9 key pressed, writing view dependency graph.");
-		shovelerViewWriteDependencyGraph(input->game->view, "view_dependencies.dot");
-	}
-
 	if(key == GLFW_KEY_F10 && action == GLFW_PRESS) {
 		shovelerLogInfo("F10 key pressed, toggling scene debug mode.");
 		shovelerSceneToggleDebugMode(input->game->scene);
@@ -335,37 +257,4 @@ static void printFps(void *gamePointer)
 
 	game->lastFpsPrintTime = now;
 	game->framesSinceLastFpsPrint = 0;
-}
-
-static void updateAuthoritativeComponent(ShovelerView *view, ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *value, void *gamePointer)
-{
-	ShovelerGame *game = (ShovelerGame *) gamePointer;
-
-	if(game->updateAuthoritativeViewComponent != NULL) {
-		game->updateAuthoritativeViewComponent(game, component, configurationOption, value, game->updateAuthoritativeViewComponentUserData);
-	}
-}
-
-static void updateViewCounters(ShovelerGame *game)
-{
-	bool viewCountersChanged = game->lastViewCounters.numEntities != game->view->numEntities
-		|| game->lastViewCounters.numComponents != game->view->numComponents
-		|| game->lastViewCounters.numComponentDependencies != game->view->numComponentDependencies
-		|| game->lastViewCounters.numActiveComponents != game->view->numActiveComponents
-		|| game->lastViewCounters.numDelegatedComponents != game->view->numDelegatedComponents;
-
-	if(viewCountersChanged) {
-		game->lastViewCounters.numEntities = game->view->numEntities;
-		game->lastViewCounters.numComponents = game->view->numComponents;
-		game->lastViewCounters.numComponentDependencies = game->view->numComponentDependencies;
-		game->lastViewCounters.numActiveComponents = game->view->numActiveComponents;
-		game->lastViewCounters.numDelegatedComponents = game->view->numDelegatedComponents;
-
-		shovelerLogInfo("View changed: %u entities, %u components (%u dependencies, %u active, %u delegated).",
-			game->lastViewCounters.numEntities,
-			game->lastViewCounters.numComponents,
-			game->lastViewCounters.numComponentDependencies,
-			game->lastViewCounters.numActiveComponents,
-			game->lastViewCounters.numDelegatedComponents);
-	}
 }

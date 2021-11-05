@@ -14,7 +14,6 @@
 #include <shoveler/input.h>
 #include <shoveler/projection.h>
 #include <shoveler/scene.h>
-#include <shoveler/view.h>
 
 typedef struct ShovelerCanvasStruct ShovelerCanvas; // forward declaration: canvas.h
 typedef struct ShovelerCollidersStruct ShovelerColliders; // forward declaration: colliders.h
@@ -24,7 +23,6 @@ typedef struct ShovelerGameStruct ShovelerGame; // forward declaration: below
 typedef struct ShovelerShaderCacheStruct ShovelerShaderCache; // forward declaration: shader_cache.h
 
 typedef void (ShovelerGameUpdateCallback)(ShovelerGame *game, double dt);
-typedef void (ShovelerGameUpdateAuthoritativeViewComponentFunction)(ShovelerGame *game, ShovelerComponent *component, const ShovelerComponentTypeConfigurationOption *configurationOption, const ShovelerComponentConfigurationValue *value, void *userData);
 
 typedef struct {
 	const char *windowTitle;
@@ -64,14 +62,11 @@ typedef struct ShovelerGameStruct {
 	ShovelerColliders *colliders;
 	ShovelerController *controller;
 	ShovelerFonts *fonts;
-	ShovelerView *view;
 	ShovelerCanvas *screenspaceCanvas;
 	ShovelerDrawable *screenspaceCanvasQuad;
 	ShovelerMaterial *screenspaceCanvasMaterial;
 	ShovelerModel *screenspaceCanvasModel;
 	ShovelerGameUpdateCallback *update;
-	ShovelerGameUpdateAuthoritativeViewComponentFunction *updateAuthoritativeViewComponent;
-	void *updateAuthoritativeViewComponentUserData;
 	double lastFrameTime;
 	double lastFpsPrintTime;
 	int framesSinceLastFpsPrint;
@@ -84,7 +79,7 @@ typedef struct ShovelerGameStruct {
 	} lastViewCounters;
 } ShovelerGame;
 
-ShovelerGame *shovelerGameCreate(ShovelerGameUpdateCallback *update, ShovelerGameUpdateAuthoritativeViewComponentFunction *updateAuthoritativeViewComponent, void *updateAuthoritativeViewComponentUserData, const ShovelerGameWindowSettings *windowSettings, const ShovelerGameCameraSettings *cameraSettings, const ShovelerGameControllerSettings *controllerSettings);
+ShovelerGame *shovelerGameCreate(ShovelerGameUpdateCallback *update, const ShovelerGameWindowSettings *windowSettings, const ShovelerGameCameraSettings *cameraSettings, const ShovelerGameControllerSettings *controllerSettings);
 ShovelerGame *shovelerGameGetForWindow(GLFWwindow *window);
 void shovelerGameToggleFullscreen(ShovelerGame *game);
 int shovelerGameRenderFrame(ShovelerGame *game);
