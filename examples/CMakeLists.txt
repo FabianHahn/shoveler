@@ -6,6 +6,10 @@ set(SHOVELER_EXAMPLE_CANVAS_LAYERS_SRC
 	canvas_layers.c
 )
 
+set(SHOVELER_EXAMPLE_CLIENT_SRC
+	client.c
+)
+
 set(SHOVELER_EXAMPLE_LIGHTS_SRC
 	lights.c
 )
@@ -30,6 +34,10 @@ if(SHOVELER_BUILD_EXAMPLES)
 	add_executable(shoveler_example_canvas_layers ${SHOVELER_EXAMPLE_CANVAS_LAYERS_SRC})
 	set_property(TARGET shoveler_example_canvas_layers PROPERTY C_STANDARD 11)
 	target_link_libraries(shoveler_example_canvas_layers shoveler::shoveler_opengl)
+
+	add_executable(shoveler_example_client ${SHOVELER_EXAMPLE_CLIENT_SRC})
+	set_property(TARGET shoveler_example_client PROPERTY C_STANDARD 11)
+	target_link_libraries(shoveler_example_client shoveler::shoveler_client)
 
 	add_executable(shoveler_example_font font.c)
 	set_property(TARGET shoveler_example_font PROPERTY C_STANDARD 11)
@@ -58,7 +66,8 @@ if(SHOVELER_BUILD_EXAMPLES)
 	if(SHOVELER_INSTALL)
 		install(TARGETS
 				shoveler_example_canvas
-				shoveler_example_chunk
+				shoveler_example_canvas_layers
+				shoveler_example_client
 				shoveler_example_font
 				shoveler_example_lights
 				shoveler_example_text
