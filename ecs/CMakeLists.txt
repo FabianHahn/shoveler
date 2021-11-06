@@ -6,6 +6,7 @@ set(SHOVELER_ECS_SRC
 	src/schema.c
 	src/system.c
 	src/world.c
+	src/world_dependency_graph.c
 	include/shoveler/component.h
 	include/shoveler/component_field.h
 	include/shoveler/component_system.h
@@ -14,6 +15,7 @@ set(SHOVELER_ECS_SRC
 	include/shoveler/schema.h
 	include/shoveler/system.h
 	include/shoveler/world.h
+	include/shoveler/world_dependency_graph.h
 )
 
 set(SHOVELER_ECS_TEST_SRC
