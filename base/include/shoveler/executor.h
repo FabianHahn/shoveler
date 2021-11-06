@@ -7,14 +7,14 @@
 
 typedef void (ShovelerExecutorCallbackFunction)(void *userData);
 
-typedef struct {
+typedef struct ShovelerExecutorCallbackStruct {
 	gint64 expiry;
 	int intervalMs;
 	ShovelerExecutorCallbackFunction *callbackFunction;
 	void *userData;
 } ShovelerExecutorCallback;
 
-typedef struct {
+typedef struct ShovelerExecutorStruct {
 	gint64 lastUpdate;
 	/** set of (ShovelerExecutorCallback *) */
 	GHashTable *callbacks;
