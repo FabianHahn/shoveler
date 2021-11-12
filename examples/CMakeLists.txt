@@ -49,11 +49,11 @@ if(SHOVELER_BUILD_EXAMPLES)
 
 	add_executable(shoveler_example_view ${SHOVELER_EXAMPLE_VIEW_SRC})
 	set_property(TARGET shoveler_example_view PROPERTY C_STANDARD 11)
-	target_link_libraries(shoveler_example_view shoveler::shoveler_opengl)
+	target_link_libraries(shoveler_example_view shoveler::shoveler_view_opengl)
 
 	add_executable(shoveler_example_view_text ${SHOVELER_EXAMPLE_VIEW_TEXT_SRC})
 	set_property(TARGET shoveler_example_view_text PROPERTY C_STANDARD 11)
-	target_link_libraries(shoveler_example_view_text shoveler::shoveler_opengl)
+	target_link_libraries(shoveler_example_view_text shoveler::shoveler_view_opengl)
 
 	if(SHOVELER_INSTALL)
 		install(TARGETS

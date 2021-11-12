@@ -1,19 +1,10 @@
 set(SHOVELER_BASE_SRC
-	src/component/colliders.c
-	src/component/font.c
-	src/component/font_atlas.c
-	src/component/fonts.c
-	src/component/image.c
-	src/component/position.c
-	src/component/resource.c
-	src/component/resources.c
 	src/image/png.c
 	src/image/ppm.c
 	src/resources/image_png.c
 	src/collider.c
 	src/colliders.c
 	src/color.c
-	src/component.c
 	src/compression.c
 	src/executor.c
 	src/file.c
@@ -25,23 +16,13 @@ set(SHOVELER_BASE_SRC
 	src/log.c
 	src/projection.c
 	src/resources.c
-	src/view.c
 	include/shoveler/collider/box.h
-	include/shoveler/component/colliders.h
-	include/shoveler/component/font.h
-	include/shoveler/component/font_atlas.h
-	include/shoveler/component/fonts.h
-	include/shoveler/component/image.h
-	include/shoveler/component/position.h
-	include/shoveler/component/resource.h
-	include/shoveler/component/resources.h
 	include/shoveler/image/png.h
 	include/shoveler/image/ppm.h
 	include/shoveler/resources/image_png.h
 	include/shoveler/collider.h
 	include/shoveler/colliders.h
 	include/shoveler/color.h
-	include/shoveler/component.h
 	include/shoveler/compression.h
 	include/shoveler/constants.h
 	include/shoveler/executor.h
@@ -56,7 +37,6 @@ set(SHOVELER_BASE_SRC
 	include/shoveler/projection.h
 	include/shoveler/resources.h
 	include/shoveler/types.h
-	include/shoveler/view.h
 )
 
 set(SHOVELER_BASE_TEST_SRC
@@ -65,7 +45,6 @@ set(SHOVELER_BASE_TEST_SRC
 	src/resources/image_png_test.cpp
 	src/colliders_test.cpp
 	src/color_test.cpp
-	src/component_test.cpp
 	src/compression_test.cpp
 	src/executor_test.cpp
 	src/frustum_test.cpp
@@ -74,7 +53,6 @@ set(SHOVELER_BASE_TEST_SRC
 	src/resources_test.cpp
 	src/test.cpp
 	src/types_test.cpp
-	src/view_test.cpp
 )
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SHOVELER_BASE_SRC} ${SHOVELER_BASE_TEST_SRC})
