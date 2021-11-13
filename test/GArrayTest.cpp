@@ -47,6 +47,24 @@ TEST_F(GArrayTest, Fill)
 	}
 }
 
+TEST_F(GArrayTest, FillCleared)
+{
+	static constexpr guint numElements = 50;
+
+	array = g_array_new(/* zero_terminated */ false, /* clear */ true, sizeof(guint));
+	ASSERT_EQ(g_array_get_element_size(array), sizeof(int));
+	ASSERT_EQ(array->len, 0);
+
+	for (guint i = 0; i < numElements; i++) {
+		g_array_append_val(array, i);
+		ASSERT_EQ(array->len, i + 1);
+
+		for (guint j = 0; j <= i; j++) {
+			ASSERT_EQ(g_array_index(array, guint, j), j);
+		}
+	}
+}
+
 TEST_F(GArrayTest, FillZeroTerminated)
 {
 	static constexpr guint numElements = 50;
