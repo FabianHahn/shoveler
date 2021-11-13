@@ -36,7 +36,7 @@ void GRealArray::Grow()
 	data = newData;
 
 	if (isCleared) {
-		memset(&data[allocated], 0, allocated * elementSize);
+		memset(&data[allocated * elementSize], 0, allocated * elementSize);
 	}
 
 	allocated *= 2;
