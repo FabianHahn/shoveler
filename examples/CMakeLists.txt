@@ -22,14 +22,6 @@ set(SHOVELER_EXAMPLE_TILES_SRC
 	tiles.c
 )
 
-set(SHOVELER_EXAMPLE_VIEW_SRC
-	view.c
-)
-
-set(SHOVELER_EXAMPLE_VIEW_TEXT_SRC
-	view_text.c
-)
-
 if(SHOVELER_BUILD_EXAMPLES)
 	add_executable(shoveler_example_canvas ${SHOVELER_EXAMPLE_CANVAS_SRC})
 	set_property(TARGET shoveler_example_canvas PROPERTY C_STANDARD 11)
@@ -63,14 +55,6 @@ if(SHOVELER_BUILD_EXAMPLES)
 	set_property(TARGET shoveler_example_tiles PROPERTY C_STANDARD 11)
 	target_link_libraries(shoveler_example_tiles shoveler::shoveler_opengl)
 
-	add_executable(shoveler_example_view ${SHOVELER_EXAMPLE_VIEW_SRC})
-	set_property(TARGET shoveler_example_view PROPERTY C_STANDARD 11)
-	target_link_libraries(shoveler_example_view shoveler::shoveler_view_opengl)
-
-	add_executable(shoveler_example_view_text ${SHOVELER_EXAMPLE_VIEW_TEXT_SRC})
-	set_property(TARGET shoveler_example_view_text PROPERTY C_STANDARD 11)
-	target_link_libraries(shoveler_example_view_text shoveler::shoveler_view_opengl)
-
 	if(SHOVELER_INSTALL)
 		install(TARGETS
 				shoveler_example_canvas
@@ -81,8 +65,6 @@ if(SHOVELER_BUILD_EXAMPLES)
 				shoveler_example_lights
 				shoveler_example_text
 				shoveler_example_tiles
-				shoveler_example_view
-				shoveler_example_view_text
 			EXPORT shoveler-targets
 			LIBRARY DESTINATION lib
 			ARCHIVE DESTINATION lib
