@@ -10,6 +10,10 @@ set(SHOVELER_EXAMPLE_CLIENT_SRC
 	client.c
 )
 
+set(SHOVELER_EXAMPLE_CLIENT_TEXT_SRC
+	client_text.c
+)
+
 set(SHOVELER_EXAMPLE_LIGHTS_SRC
 	lights.c
 )
@@ -38,6 +42,10 @@ if(SHOVELER_BUILD_EXAMPLES)
 	add_executable(shoveler_example_client ${SHOVELER_EXAMPLE_CLIENT_SRC})
 	set_property(TARGET shoveler_example_client PROPERTY C_STANDARD 11)
 	target_link_libraries(shoveler_example_client shoveler::shoveler_client)
+
+	add_executable(shoveler_example_client_text ${SHOVELER_EXAMPLE_CLIENT_TEXT_SRC})
+	set_property(TARGET shoveler_example_client_text PROPERTY C_STANDARD 11)
+	target_link_libraries(shoveler_example_client_text shoveler::shoveler_client)
 
 	add_executable(shoveler_example_font font.c)
 	set_property(TARGET shoveler_example_font PROPERTY C_STANDARD 11)
@@ -68,6 +76,7 @@ if(SHOVELER_BUILD_EXAMPLES)
 				shoveler_example_canvas
 				shoveler_example_canvas_layers
 				shoveler_example_client
+				shoveler_example_client_text
 				shoveler_example_font
 				shoveler_example_lights
 				shoveler_example_text
