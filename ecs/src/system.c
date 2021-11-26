@@ -12,6 +12,7 @@ ShovelerSystem* shovelerSystemCreate() {
   ShovelerSystem* system = malloc(sizeof(ShovelerSystem));
   system->componentSystems = g_hash_table_new_full(
       g_str_hash, g_str_equal, /* key_destroy_func */ NULL, freeComponentSystem);
+  system->numActiveComponents = 0;
 
   return system;
 }
@@ -21,7 +22,7 @@ ShovelerComponentSystem* shovelerSystemForComponentType(
   ShovelerComponentSystem* componentSystem =
       g_hash_table_lookup(system->componentSystems, componentType->id);
   if (componentSystem == NULL) {
-    componentSystem = shovelerComponentSystemCreate(componentType);
+    componentSystem = shovelerComponentSystemCreate(system, componentType);
     bool inserted =
         g_hash_table_insert(system->componentSystems, (gpointer) componentType->id, componentSystem);
     assert(inserted);

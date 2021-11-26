@@ -4,29 +4,38 @@
 
 #include "shoveler/component.h"
 #include "shoveler/component_type.h"
+#include "shoveler/system.h"
 
-static bool requiresAuthority(ShovelerComponent* component, void* userData);
+static bool requiresAuthority(ShovelerComponent* component, void* componentSystemPointer);
 static bool canLiveUpdateField(
-    ShovelerComponent* component, int fieldId, const ShovelerComponentField* field, void* userData);
+    ShovelerComponent* component,
+    int fieldId,
+    const ShovelerComponentField* field,
+    void* componentSystemPointer);
 static bool canLiveUpdateDependencyField(
-    ShovelerComponent* component, int fieldId, const ShovelerComponentField* field, void* userData);
+    ShovelerComponent* component,
+    int fieldId,
+    const ShovelerComponentField* field,
+    void* componentSystemPointer);
 static bool liveUpdateField(
     ShovelerComponent* component,
     int fieldId,
     const ShovelerComponentField* field,
     ShovelerComponentFieldValue* fieldValue,
-    void* userData);
+    void* componentSystemPointer);
 static bool liveUpdateDependencyField(
     ShovelerComponent* component,
     int fieldId,
     const ShovelerComponentField* field,
     ShovelerComponent* dependencyComponent,
-    void* userData);
-static void* activateComponent(ShovelerComponent* component, void* userData);
-static bool updateComponent(ShovelerComponent* component, double dt, void* userData);
-static void deactivateComponent(ShovelerComponent* component, void* userData);
+    void* componentSystemPointer);
+static void* activateComponent(ShovelerComponent* component, void* componentSystemPointer);
+static bool updateComponent(ShovelerComponent* component, double dt, void* componentSystemPointer);
+static void deactivateComponent(ShovelerComponent* component, void* componentSystemPointer);
 
-ShovelerComponentSystem* shovelerComponentSystemCreate(ShovelerComponentType* componentType) {
+ShovelerComponentSystem* shovelerComponentSystemCreate(
+    ShovelerSystem *system,
+    ShovelerComponentType* componentType) {
   ShovelerComponentSystem* componentSystem = malloc(sizeof(ShovelerComponentSystem));
   componentSystem->componentAdapter = malloc(sizeof(ShovelerComponentSystemAdapter));
   componentSystem->componentAdapter->requiresAuthority = requiresAuthority;
@@ -38,6 +47,7 @@ ShovelerComponentSystem* shovelerComponentSystemCreate(ShovelerComponentType* co
   componentSystem->componentAdapter->updateComponent = updateComponent;
   componentSystem->componentAdapter->deactivateComponent = deactivateComponent;
   componentSystem->componentAdapter->userData = componentSystem;
+  componentSystem->system = system;
   componentSystem->componentType = componentType;
   componentSystem->requiresAuthority = false;
   componentSystem->fieldOptions =
@@ -126,7 +136,12 @@ static void* activateComponent(ShovelerComponent* component, void* componentSyst
   ShovelerComponentSystem* componentSystem = componentSystemPointer;
 
   if (componentSystem->activateComponent != NULL) {
-    return componentSystem->activateComponent(component, componentSystem->callbackUserData);
+    void *activation =
+        componentSystem->activateComponent(component, componentSystem->callbackUserData);
+    if (activation) {
+      componentSystem->system->numActiveComponents++;
+    }
+    return activation;
   }
 
   return component;
@@ -147,5 +162,6 @@ static void deactivateComponent(ShovelerComponent* component, void* componentSys
 
   if (componentSystem->deactivateComponent != NULL) {
     componentSystem->deactivateComponent(component, componentSystem->callbackUserData);
+    componentSystem->system->numActiveComponents--;
   }
 }

@@ -47,6 +47,7 @@ typedef struct ShovelerClientSystemStruct {
     unsigned int numEntities;
     unsigned int numComponents;
     unsigned int numComponentDependencies;
+    unsigned int numActiveComponents;
   } lastWorldCounters;
 } ShovelerClientSystem;
 

@@ -9,6 +9,7 @@ typedef struct ShovelerComponentTypeStruct ShovelerComponentType;
 typedef struct ShovelerSystemStruct {
   /** map from string component type id to (ShovelerComponentSystem *) */
   GHashTable* componentSystems;
+  int numActiveComponents;
 } ShovelerSystem;
 
 ShovelerSystem* shovelerSystemCreate();

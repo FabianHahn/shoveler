@@ -9,6 +9,7 @@ typedef struct ShovelerComponentStruct ShovelerComponent;
 typedef struct ShovelerComponentSystemAdapterStruct ShovelerComponentSystemAdapter;
 typedef struct ShovelerComponentSystemStruct ShovelerComponentSystem;
 typedef struct ShovelerComponentTypeStruct ShovelerComponentType;
+typedef struct ShovelerSystemStruct ShovelerSystem;
 
 typedef bool(ShovelerComponentSystemLiveUpdateFieldFunction)(
     ShovelerComponent* component,
@@ -36,6 +37,7 @@ typedef struct ShovelerComponentSystemFieldOptionsStruct {
 
 typedef struct ShovelerComponentSystemStruct {
   ShovelerComponentSystemAdapter* componentAdapter;
+  ShovelerSystem *system;
   ShovelerComponentType* componentType;
   bool requiresAuthority;
   ShovelerComponentSystemFieldOptions* fieldOptions;
@@ -45,7 +47,9 @@ typedef struct ShovelerComponentSystemStruct {
   void* callbackUserData;
 } ShovelerComponentSystem;
 
-ShovelerComponentSystem* shovelerComponentSystemCreate(ShovelerComponentType* componentType);
+ShovelerComponentSystem* shovelerComponentSystemCreate(
+    ShovelerSystem *system,
+    ShovelerComponentType* componentType);
 void shovelerComponentSystemFree(ShovelerComponentSystem* componentSystem);
 
 /**

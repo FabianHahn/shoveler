@@ -88,6 +88,7 @@ ShovelerClientSystem* shovelerClientSystemCreate(
   clientSystem->lastWorldCounters.numEntities = 0;
   clientSystem->lastWorldCounters.numComponents = 0;
   clientSystem->lastWorldCounters.numComponentDependencies = 0;
+  clientSystem->lastWorldCounters.numActiveComponents = 0;
 
   shovelerSchemaBaseRegister(clientSystem->schema);
   shovelerSchemaOpenglRegister(clientSystem->schema);
@@ -161,18 +162,23 @@ static void clientSystemUpdateWorldCounters(void* clientSystemPointer) {
           g_hash_table_size(clientSystem->world->entities) ||
       clientSystem->lastWorldCounters.numComponents != clientSystem->world->numComponents ||
       clientSystem->lastWorldCounters.numComponentDependencies !=
-          clientSystem->world->numComponentDependencies;
+          clientSystem->world->numComponentDependencies ||
+      clientSystem->lastWorldCounters.numActiveComponents !=
+          clientSystem->system->numActiveComponents;
 
   if (worldCountersChanged) {
     clientSystem->lastWorldCounters.numEntities = g_hash_table_size(clientSystem->world->entities);
     clientSystem->lastWorldCounters.numComponents = clientSystem->world->numComponents;
     clientSystem->lastWorldCounters.numComponentDependencies =
         clientSystem->world->numComponentDependencies;
+    clientSystem->lastWorldCounters.numActiveComponents =
+        clientSystem->system->numActiveComponents;
 
     shovelerLogInfo(
-        "World changed: %u entities, %u components, %u dependencies.",
+        "World changed: %u entities, %u components (%u dependencies, %u active).",
         clientSystem->lastWorldCounters.numEntities,
         clientSystem->lastWorldCounters.numComponents,
-        clientSystem->lastWorldCounters.numComponentDependencies);
+        clientSystem->lastWorldCounters.numComponentDependencies,
+        clientSystem->lastWorldCounters.numActiveComponents);
   }
 }
