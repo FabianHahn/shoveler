@@ -77,3 +77,23 @@ cd examples
 cd Release
 lights.exe
 ```
+
+## Architecture
+
+### Entity component system
+
+Shoveler comes with its own entity component system that consists of the following main parts:
+ - **Component types** define a number of **component fields** with primitive types such as string, integer or boolean. Each component type has a unique **component type ID**. A **schema** is a collection of such component types, keyed by component type IDs.
+ - A **component** is an instance of a specific component type with concrete values set for all of its component fields.
+ - A **world** is a collections of **entities** that can each contain any number of components from the world's schema. Entities have an **entity ID** that identifies them and that they are keyed by in the world.
+ - A **component system** adds logic to components of a particular component type. A **system** collects various different component system for different component types and makes them available to a world.
+ - Components can be **activated** and **deactivated** using the system of the world they belong to. In most component systems, activating a component of that type has the effect of adding some object to the game simulation. For example, activating a `light` or a `model` component in the client system will add a light source or a 3D model to the scene, respectively.
+ - Components can specify **dependencies** on other components in the world through a special component field type. A dependency takes the form of an entity ID and a component type ID. A component can only be activated if each of its dependencies has been activated already. Conversely, if a component is deactivated, all of its reverse dependencies will first be recursively deactivated as well. For example, the `model` component declares a dependency on a `drawable` component to specify what 3D geometry should be rendered for the 3D model it adds to the scene.
+ - A world's **dependency graph** can be exported in [GraphViz DOT format](https://www.graphviz.org/doc/info/lang.html) and visualized as a graph. Pressing F9 in a game client will write a file called `world_dependencies.dot` into the working directory. This can then be converted in an SVG file using the command `dot -Tsvg -oworld_dependencies.svg world_dependencies.dot`. Open the `world_dependencies.svg` file in an appropriate image viewer such as Google Chrome to see the graph.
+ - When a component field of a component is updated, the component itself is deactivated and reactivated with the new field value. Component systems can specify that certain field values may be **live updated** to skip this reactivation. For example, the `model` component's `position` dependency may be live updated. If the `position` component's coordinates change, there is no need to remove and recreate the 3D model in the scene. Instead, when the live update happens, the component system for the `model` component will simply update the 3D model's transform.
+ - Components may be **delegated** or **undelegated** to indicate whether the system has **authority** over them. Some component types may only activate in a component system if the component is authoritative. For example, a `client` component indicates that a player is controlling the character represented by the entity containing the component. It will only activate for the `client` component the player has authority over, and not for other players with their own `client` components the player will meet in the game world.
+
+A schema with component type definitions and a **client system** that comes with component systems for most of shoveler's engine concepts is bundled with the engine.
+The [client example](examples/client.c) shows how the client system can be used explicitly to create a simple 3D scene.
+The separate [shoveler-spatialos](https://github.com/FabianHahn/shoveler-spatialos) project makes use of the client system to add multiplayer support to shoveler using [Improbable's SpatialOS](https://improbable.io/spatialos).
+While the existing client system's focus is on driving a game client, the idea is that there will also be a **server system** in the future that is able to execute server side logic using the same shared schema.
