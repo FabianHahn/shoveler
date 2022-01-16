@@ -18,6 +18,7 @@ static ShovelerComponent* getComponent(
     void* userData);
 static void worldUpdateAuthoritativeComponent(
     ShovelerComponent* component,
+    int fieldId,
     const ShovelerComponentField* field,
     const ShovelerComponentFieldValue* value,
     void* userData);
@@ -253,13 +254,14 @@ static ShovelerComponent* getComponent(
 
 static void worldUpdateAuthoritativeComponent(
     ShovelerComponent* component,
+    int fieldId,
     const ShovelerComponentField* field,
     const ShovelerComponentFieldValue* value,
     void* worldPointer) {
   ShovelerWorld* world = (ShovelerWorld*) worldPointer;
 
   world->updateAuthoritativeComponent(
-      world, component, field, value, world->updateAuthoritativeComponentUserData);
+      world, component, fieldId, field, value, world->updateAuthoritativeComponentUserData);
 }
 
 static void addDependency(

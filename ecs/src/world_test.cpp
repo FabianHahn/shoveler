@@ -32,6 +32,7 @@ struct DependencyCallbackCall {
 static void updateAuthoritativeComponent(
     ShovelerWorld* world,
     ShovelerComponent* component,
+    int fieldId,
     const ShovelerComponentField* field,
     const ShovelerComponentFieldValue* value,
     void* userData);
@@ -219,6 +220,7 @@ TEST_F(ShovelerWorldTest, addRemoveDependency) {
 static void updateAuthoritativeComponent(
     ShovelerWorld* world,
     ShovelerComponent* component,
+    int fieldId,
     const ShovelerComponentField* field,
     const ShovelerComponentFieldValue* value,
     void* testPointer) {

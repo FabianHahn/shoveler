@@ -17,6 +17,7 @@ typedef struct ShovelerWorldStruct ShovelerWorld;
 typedef void(ShovelerWorldUpdateAuthoritativeComponentFunction)(
     ShovelerWorld* world,
     ShovelerComponent* component,
+    int fieldId,
     const ShovelerComponentField* field,
     const ShovelerComponentFieldValue* value,
     void* userData);

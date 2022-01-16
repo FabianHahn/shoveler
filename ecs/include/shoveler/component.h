@@ -23,6 +23,7 @@ typedef ShovelerComponent*(ShovelerComponentWorldAdapterGetComponentFunction)(
     void* userData);
 typedef void(ShovelerComponentWorldAdapterUpdateAuthoritativeComponentFunction)(
     ShovelerComponent* component,
+    int fieldId,
     const ShovelerComponentField* field,
     const ShovelerComponentFieldValue* value,
     void* userData);

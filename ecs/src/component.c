@@ -141,7 +141,7 @@ bool shovelerComponentUpdateField(
     }
 
     component->worldAdapter->updateAuthoritativeComponent(
-        component, field, value, component->worldAdapter->userData);
+        component, fieldId, field, value, component->worldAdapter->userData);
   }
 
   bool wasActive = component->systemData != NULL;

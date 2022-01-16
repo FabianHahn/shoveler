@@ -25,6 +25,7 @@ static ShovelerComponent* getComponent(
     void* userData);
 static void updateAuthoritativeComponent(
     ShovelerComponent* component,
+    int fieldId,
     const ShovelerComponentField* field,
     const ShovelerComponentFieldValue* value,
     void* userData);
@@ -504,6 +505,7 @@ static ShovelerComponent* getComponent(
 
 static void updateAuthoritativeComponent(
     ShovelerComponent* component,
+    int fieldId,
     const ShovelerComponentField* field,
     const ShovelerComponentFieldValue* value,
     void* testPointer) {

@@ -48,6 +48,7 @@
 static void clientSystemUpdateAuthoritativeComponent(
     ShovelerWorld* world,
     ShovelerComponent* component,
+    int fieldId,
     const ShovelerComponentField* field,
     const ShovelerComponentFieldValue* value,
     void* clientSystemPointer);
@@ -134,6 +135,7 @@ void shovelerClientSystemFree(ShovelerClientSystem* clientSystem) {
 static void clientSystemUpdateAuthoritativeComponent(
     ShovelerWorld* world,
     ShovelerComponent* component,
+    int fieldId,
     const ShovelerComponentField* field,
     const ShovelerComponentFieldValue* value,
     void* clientSystemPointer) {
