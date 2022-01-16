@@ -118,6 +118,7 @@ ShovelerGame *shovelerGameCreate(ShovelerGameUpdateCallback *update, const Shove
 
 	game->update = update;
 	game->lastFrameTime = glfwGetTime();
+	game->printFps = true;
 	game->lastFpsPrintTime = game->lastFrameTime;
 	game->framesSinceLastFpsPrint = 0;
 	game->lastViewCounters.numEntities = 0;
@@ -249,6 +250,11 @@ static gint64 elapsedNs(double dt)
 static void printFps(void *gamePointer)
 {
 	ShovelerGame *game = gamePointer;
+
+	if (!game->printFps) {
+		return;
+	}
+
 	double now = glfwGetTime();
 	double secondsSinceLastFpsPrint = now - game->lastFpsPrintTime;
 

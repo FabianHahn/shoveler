@@ -68,6 +68,7 @@ typedef struct ShovelerGameStruct {
 	ShovelerModel *screenspaceCanvasModel;
 	ShovelerGameUpdateCallback *update;
 	double lastFrameTime;
+	bool printFps;
 	double lastFpsPrintTime;
 	int framesSinceLastFpsPrint;
 	struct {
