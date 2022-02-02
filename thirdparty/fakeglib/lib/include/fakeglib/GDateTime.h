@@ -21,6 +21,7 @@ FAKEGLIB_API gint g_date_time_get_day_of_month(GDateTime *datetime);
 FAKEGLIB_API gint g_date_time_get_hour(GDateTime *datetime);
 FAKEGLIB_API gint g_date_time_get_minute(GDateTime *datetime);
 FAKEGLIB_API gint g_date_time_get_second(GDateTime *datetime);
+FAKEGLIB_API gint g_date_time_get_microsecond(GDateTime *datetime);
 FAKEGLIB_API gint64 g_date_time_to_unix(GDateTime *datetime);
 
 #ifdef __cplusplus

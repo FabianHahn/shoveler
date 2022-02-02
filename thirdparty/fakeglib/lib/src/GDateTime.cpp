@@ -10,7 +10,8 @@ static std::mutex chronoMutex;
 static std::mutex referenceMutex;
 
 struct GDateTimeStruct {
-	std::time_t time;
+	std::chrono::system_clock::time_point time;
+	std::time_t timeT;
 	bool isUtc;
 	unsigned int referenceCount;
 };
@@ -34,7 +35,8 @@ FAKEGLIB_API GDateTime *g_date_time_ref(GDateTime *dateTime)
 FAKEGLIB_API GDateTime *g_date_time_new_now_local()
 {
 	GDateTime *dateTime = new GDateTime{};
-	dateTime->time = std::time(NULL);
+	dateTime->time = std::chrono::system_clock::now();
+	dateTime->timeT = std::chrono::system_clock::to_time_t(dateTime->time);
 	dateTime->isUtc = false;
 	dateTime->referenceCount = 1;
 	return dateTime;
@@ -43,7 +45,8 @@ FAKEGLIB_API GDateTime *g_date_time_new_now_local()
 FAKEGLIB_API GDateTime *g_date_time_new_now_utc()
 {
 	GDateTime *dateTime = new GDateTime{};
-	dateTime->time = std::time(NULL);
+	dateTime->time = std::chrono::system_clock::now();
+	dateTime->timeT = std::chrono::system_clock::to_time_t(dateTime->time);
 	dateTime->isUtc = true;
 	dateTime->referenceCount = 1;
 	return dateTime;
@@ -55,9 +58,9 @@ FAKEGLIB_API gint g_date_time_get_year(GDateTime *dateTime)
 
 	struct tm *tm;
 	if(dateTime->isUtc) {
-		tm = std::gmtime(&dateTime->time);
+		tm = std::gmtime(&dateTime->timeT);
 	} else {
-		tm = std::localtime(&dateTime->time);
+		tm = std::localtime(&dateTime->timeT);
 	}
 
 	return tm->tm_year + 1900;
@@ -69,9 +72,9 @@ FAKEGLIB_API gint g_date_time_get_month(GDateTime *dateTime)
 
 	struct tm *tm;
 	if(dateTime->isUtc) {
-		tm = std::gmtime(&dateTime->time);
+		tm = std::gmtime(&dateTime->timeT);
 	} else {
-		tm = std::localtime(&dateTime->time);
+		tm = std::localtime(&dateTime->timeT);
 	}
 
 	return tm->tm_mon + 1;
@@ -83,9 +86,9 @@ FAKEGLIB_API gint g_date_time_get_day_of_month(GDateTime *dateTime)
 
 	struct tm *tm;
 	if(dateTime->isUtc) {
-		tm = std::gmtime(&dateTime->time);
+		tm = std::gmtime(&dateTime->timeT);
 	} else {
-		tm = std::localtime(&dateTime->time);
+		tm = std::localtime(&dateTime->timeT);
 	}
 
 	return tm->tm_mday;
@@ -97,9 +100,9 @@ FAKEGLIB_API gint g_date_time_get_hour(GDateTime *dateTime)
 
 	struct tm *tm;
 	if(dateTime->isUtc) {
-		tm = std::gmtime(&dateTime->time);
+		tm = std::gmtime(&dateTime->timeT);
 	} else {
-		tm = std::localtime(&dateTime->time);
+		tm = std::localtime(&dateTime->timeT);
 	}
 
 	return tm->tm_hour;
@@ -111,9 +114,9 @@ FAKEGLIB_API gint g_date_time_get_minute(GDateTime *dateTime)
 
 	struct tm *tm;
 	if(dateTime->isUtc) {
-		tm = std::gmtime(&dateTime->time);
+		tm = std::gmtime(&dateTime->timeT);
 	} else {
-		tm = std::localtime(&dateTime->time);
+		tm = std::localtime(&dateTime->timeT);
 	}
 
 	return tm->tm_min;
@@ -125,9 +128,9 @@ FAKEGLIB_API gint g_date_time_get_second(GDateTime *dateTime)
 
 	struct tm *tm;
 	if(dateTime->isUtc) {
-		tm = std::gmtime(&dateTime->time);
+		tm = std::gmtime(&dateTime->timeT);
 	} else {
-		tm = std::localtime(&dateTime->time);
+		tm = std::localtime(&dateTime->timeT);
 	}
 
 	if(tm->tm_sec >= 60) {
@@ -137,7 +140,14 @@ FAKEGLIB_API gint g_date_time_get_second(GDateTime *dateTime)
 	}
 }
 
+FAKEGLIB_API gint g_date_time_get_microsecond(GDateTime *datetime)
+{
+	std::chrono::system_clock::duration tp = datetime->time.time_since_epoch();
+	tp -= std::chrono::duration_cast<std::chrono::seconds>(tp);
+	return static_cast<gint>(tp / std::chrono::microseconds{1});
+}
+
 FAKEGLIB_API gint64 g_date_time_to_unix(GDateTime *datetime)
 {
-	return std::chrono::seconds(datetime->time).count();
+	return std::chrono::seconds(datetime->timeT).count();
 }

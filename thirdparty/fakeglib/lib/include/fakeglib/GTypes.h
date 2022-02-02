@@ -14,6 +14,7 @@ typedef unsigned long gsize;
 typedef signed long gssize;
 typedef int gint;
 typedef unsigned int guint;
+typedef unsigned long gulong;
 typedef int64_t gint64;
 typedef void * gpointer;
 typedef const void * gconstpointer;

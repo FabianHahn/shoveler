@@ -29,3 +29,9 @@ TEST_F(GTimeTest, getRealTime)
 	gint64 realTime = g_get_real_time();
 	std::cout << "real time: " << realTime << std::endl;
 }
+
+TEST_F(GTimeTest, usleep)
+{
+	// cannot really assert on value, but we can at least test executing without crashing
+	g_usleep(1);
+}
