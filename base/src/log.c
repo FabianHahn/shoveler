@@ -76,7 +76,17 @@ static char *formatLogMessage(const char *file, int line, ShovelerLogLevel level
 	GDateTime *now = g_date_time_new_now_local();
 	GString *result = g_string_new("");
 
-	g_string_append_printf(result, "[%02d:%02d:%02d] (%s:%s:%d) %s", g_date_time_get_hour(now), g_date_time_get_minute(now), g_date_time_get_second(now), getStaticLogLevelName(level), strippedLocation, line, message);
+	g_string_append_printf(
+		result,
+		"[%02d:%02d:%02d.%03d] (%s:%s:%d) %s",
+		g_date_time_get_hour(now),
+		g_date_time_get_minute(now),
+		g_date_time_get_second(now),
+		g_date_time_get_microsecond(now) / 1000,
+		getStaticLogLevelName(level),
+		strippedLocation,
+		line,
+		message);
 
 	g_date_time_unref(now);
 	return g_string_free(result, false);
