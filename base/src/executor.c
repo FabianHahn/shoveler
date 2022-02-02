@@ -15,9 +15,9 @@ ShovelerExecutor *shovelerExecutorCreateDirect()
 	return executor;
 }
 
-void shovelerExecutorUpdate(ShovelerExecutor *executor, gint64 elapsedNs)
+void shovelerExecutorUpdate(ShovelerExecutor *executor, gint64 elapsedUs)
 {
-	executor->lastUpdate += elapsedNs;
+	executor->lastUpdate += elapsedUs;
 
 	GHashTableIter iter;
 	ShovelerExecutorCallback *callback;

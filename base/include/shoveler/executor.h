@@ -21,7 +21,7 @@ typedef struct ShovelerExecutorStruct {
 } ShovelerExecutor;
 
 ShovelerExecutor *shovelerExecutorCreateDirect();
-void shovelerExecutorUpdate(ShovelerExecutor *executor, gint64 elapsedNs);
+void shovelerExecutorUpdate(ShovelerExecutor *executor, gint64 elapsedUs);
 void shovelerExecutorUpdateNow(ShovelerExecutor *executor);
 ShovelerExecutorCallback *shovelerExecutorSchedulePeriodic(ShovelerExecutor *executor, int timeoutMs, int intervalMs, ShovelerExecutorCallbackFunction *callbackFunction, void *userData);
 bool shovelerExecutorRemoveCallback(ShovelerExecutor *executor, ShovelerExecutorCallback *callback);
