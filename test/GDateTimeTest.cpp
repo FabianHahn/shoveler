@@ -58,3 +58,10 @@ TEST_F(GDateTimeTest, getSecond)
 	ASSERT_GE(second, 0) << "current second should be at least 0";
 	ASSERT_LE(second, 59) << "current second should be at most 59";
 }
+
+TEST_F(GDateTimeTest, getMicrosecond)
+{
+	gint microsecond = g_date_time_get_microsecond(dateTime);
+	ASSERT_GE(microsecond, 0) << "current microsecond should be at least 0";
+	ASSERT_LT(microsecond, 1000000) << "current microsecond should be smaller than 1000000";
+}

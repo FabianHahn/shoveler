@@ -12,6 +12,7 @@ extern "C" {
 
 FAKEGLIB_API gint64 g_get_monotonic_time();
 FAKEGLIB_API gint64 g_get_real_time();
+FAKEGLIB_API void g_usleep(gulong microseconds);
 
 #ifdef __cplusplus
 }
