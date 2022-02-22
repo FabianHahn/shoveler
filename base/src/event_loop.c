@@ -14,6 +14,7 @@ ShovelerEventLoop* shovelerEventLoopCreate(
 	eventLoop->userData = userData;
 	eventLoop->tickStartTime = g_get_monotonic_time();
 	eventLoop->lastTickTime = eventLoop->tickStartTime;
+	return eventLoop;
 }
 
 void shovelerEventLoopTick(ShovelerEventLoop* eventLoop)
