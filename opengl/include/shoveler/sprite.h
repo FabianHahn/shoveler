@@ -38,7 +38,7 @@ static inline bool shovelerSpriteRender(ShovelerSprite *sprite, ShovelerVector2 
 
 static inline void shovelerSpriteFree(ShovelerSprite *sprite)
 {
-	return sprite->free(sprite);
+	sprite->free(sprite);
 }
 
 #endif
