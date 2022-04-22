@@ -258,14 +258,38 @@ static inline ShovelerVector3 shovelerVector3Cross(ShovelerVector3 a, ShovelerVe
 	return c;
 }
 
+static inline float shovelerVector2Dot(ShovelerVector2 a, ShovelerVector2 b)
+{
+	return a.values[0] * b.values[0] + a.values[1] * b.values[1];
+}
+
 static inline float shovelerVector3Dot(ShovelerVector3 a, ShovelerVector3 b)
 {
 	return a.values[0] * b.values[0] + a.values[1] * b.values[1] + a.values[2] * b.values[2];
 }
 
+static inline float shovelerVector2LengthSquared(ShovelerVector2 a)
+{
+	return shovelerVector2Dot(a, a);
+}
+
+static inline float shovelerVector3LengthSquared(ShovelerVector3 a)
+{
+	return shovelerVector3Dot(a, a);
+}
+
+static inline ShovelerVector2 shovelerVector2Normalize(ShovelerVector2 a)
+{
+	float length = sqrtf(shovelerVector2LengthSquared(a));
+	ShovelerVector2 an;
+	an.values[0] = a.values[0] / length;
+	an.values[1] = a.values[1] / length;
+	return an;
+}
+
 static inline ShovelerVector3 shovelerVector3Normalize(ShovelerVector3 a)
 {
-	float length = sqrtf(a.values[0] * a.values[0] + a.values[1] * a.values[1] + a.values[2] * a.values[2]);
+	float length = sqrtf(shovelerVector3LengthSquared(a));
 	ShovelerVector3 an;
 	an.values[0] = a.values[0] / length;
 	an.values[1] = a.values[1] / length;
@@ -288,6 +312,20 @@ static inline ShovelerVector3 shovelerVector3LinearCombination(float alpha, Shov
 	c.values[1] = alpha * a.values[1] + beta * b.values[1];
 	c.values[2] = alpha * a.values[2] + beta * b.values[2];
 	return c;
+}
+
+static inline bool shovelerVector2Equals(ShovelerVector2 a, ShovelerVector2 b, float eps)
+{
+	ShovelerVector2 diff = shovelerVector2LinearCombination(1.0f, a, -1.0f, b);
+	float diffLength2 = shovelerVector2LengthSquared(diff);
+	return diffLength2 < eps * eps;
+}
+
+static inline bool shovelerVector3Equals(ShovelerVector3 a, ShovelerVector3 b, float eps)
+{
+	ShovelerVector3 diff = shovelerVector3LinearCombination(1.0f, a, -1.0f, b);
+	float diffLength2 = shovelerVector3LengthSquared(diff);
+	return diffLength2 < eps * eps;
 }
 
 static inline ShovelerMatrix shovelerMatrixCreateRotationX(float angle)
