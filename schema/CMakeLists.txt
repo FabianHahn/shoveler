@@ -1,7 +1,9 @@
 set(SHOVELER_SCHEMA_SRC
 	src/schema/base.c
+	src/schema/components.c
 	src/schema/opengl.c
 	include/shoveler/schema/base.h
+	include/shoveler/schema/components.h
 	include/shoveler/schema/opengl.h
 )
 
