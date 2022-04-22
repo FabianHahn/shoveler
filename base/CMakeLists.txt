@@ -15,6 +15,8 @@ set(SHOVELER_BASE_SRC
 	src/image.c
 	src/input_stream.c
 	src/log.c
+	src/map.c
+	src/map_chunk.c
 	src/projection.c
 	src/resources.c
 	include/shoveler/collider/box.h
@@ -36,6 +38,10 @@ set(SHOVELER_BASE_SRC
 	include/shoveler/image.h
 	include/shoveler/input_stream.h
 	include/shoveler/log.h
+	include/shoveler/map.h
+	include/shoveler/map_chunk.h
+	include/shoveler/map_dimensions.h
+	include/shoveler/map_tile.h
 	include/shoveler/position_quantizer.h
 	include/shoveler/projection.h
 	include/shoveler/resources.h
