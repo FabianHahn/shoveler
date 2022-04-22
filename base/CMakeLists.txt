@@ -36,6 +36,7 @@ set(SHOVELER_BASE_SRC
 	include/shoveler/image.h
 	include/shoveler/input_stream.h
 	include/shoveler/log.h
+	include/shoveler/position_quantizer.h
 	include/shoveler/projection.h
 	include/shoveler/resources.h
 	include/shoveler/types.h
@@ -52,6 +53,7 @@ set(SHOVELER_BASE_TEST_SRC
 	src/frustum_test.cpp
 	src/image_testing.cpp
 	src/image_testing.h
+	src/position_quantizer_test.cpp
 	src/resources_test.cpp
 	src/test.cpp
 	src/types_test.cpp
