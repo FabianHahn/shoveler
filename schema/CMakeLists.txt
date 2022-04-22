@@ -2,9 +2,13 @@ set(SHOVELER_SCHEMA_SRC
 	src/schema/base.c
 	src/schema/components.c
 	src/schema/opengl.c
+	src/tiles/seeder.c
+	src/tiles/tileset.c
 	include/shoveler/schema/base.h
 	include/shoveler/schema/components.h
 	include/shoveler/schema/opengl.h
+	include/shoveler/tiles/seeder.h
+	include/shoveler/tiles/tileset.h
 )
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SHOVELER_SCHEMA_SRC})
