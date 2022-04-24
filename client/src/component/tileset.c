@@ -31,12 +31,12 @@ static void* activateTilesetComponent(ShovelerComponent* component, void* client
   ShovelerImage* image = shovelerComponentGetImage(imageComponent);
   assert(image != NULL);
 
-  int numColumns = shovelerComponentGetFieldValueInt(
-      component, SHOVELER_COMPONENT_TILESET_FIELD_ID_NUM_COLUMNS);
-  int numRows = shovelerComponentGetFieldValueInt(
-      component, SHOVELER_COMPONENT_TILESET_FIELD_ID_NUM_ROWS);
-  int padding = shovelerComponentGetFieldValueInt(
-      component, SHOVELER_COMPONENT_TILESET_FIELD_ID_PADDING);
+  int numColumns =
+      shovelerComponentGetFieldValueInt(component, SHOVELER_COMPONENT_TILESET_FIELD_ID_NUM_COLUMNS);
+  int numRows =
+      shovelerComponentGetFieldValueInt(component, SHOVELER_COMPONENT_TILESET_FIELD_ID_NUM_ROWS);
+  int padding =
+      shovelerComponentGetFieldValueInt(component, SHOVELER_COMPONENT_TILESET_FIELD_ID_PADDING);
   ShovelerTileset* tileset = shovelerTilesetCreate(image, numColumns, numRows, padding);
 
   return tileset;

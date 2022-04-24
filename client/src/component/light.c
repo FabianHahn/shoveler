@@ -53,18 +53,18 @@ static void* activateLightComponent(ShovelerComponent* component, void* clientSy
     shovelerLogWarning("Trying to create light with unsupported spot type, ignoring.");
     return NULL;
   case SHOVELER_COMPONENT_LIGHT_TYPE_POINT: {
-    int width = shovelerComponentGetFieldValueInt(
-        component, SHOVELER_COMPONENT_LIGHT_FIELD_ID_WIDTH);
-    int height = shovelerComponentGetFieldValueInt(
-        component, SHOVELER_COMPONENT_LIGHT_FIELD_ID_HEIGHT);
-    int samples = shovelerComponentGetFieldValueInt(
-        component, SHOVELER_COMPONENT_LIGHT_FIELD_ID_SAMPLES);
+    int width =
+        shovelerComponentGetFieldValueInt(component, SHOVELER_COMPONENT_LIGHT_FIELD_ID_WIDTH);
+    int height =
+        shovelerComponentGetFieldValueInt(component, SHOVELER_COMPONENT_LIGHT_FIELD_ID_HEIGHT);
+    int samples =
+        shovelerComponentGetFieldValueInt(component, SHOVELER_COMPONENT_LIGHT_FIELD_ID_SAMPLES);
     float ambientFactor = shovelerComponentGetFieldValueFloat(
         component, SHOVELER_COMPONENT_LIGHT_FIELD_ID_AMBIENT_FACTOR);
     float exponentialFactor = shovelerComponentGetFieldValueFloat(
         component, SHOVELER_COMPONENT_LIGHT_FIELD_ID_EXPONENTIAL_FACTOR);
-    ShovelerVector3 color = shovelerComponentGetFieldValueVector3(
-        component, SHOVELER_COMPONENT_LIGHT_FIELD_ID_COLOR);
+    ShovelerVector3 color =
+        shovelerComponentGetFieldValueVector3(component, SHOVELER_COMPONENT_LIGHT_FIELD_ID_COLOR);
 
     light = shovelerLightPointCreate(
         clientSystem->shaderCache,

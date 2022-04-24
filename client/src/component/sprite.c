@@ -41,14 +41,14 @@ void shovelerClientSystemAddSpriteSystem(ShovelerClientSystem* clientSystem) {
 }
 
 static void* activateSpriteComponent(ShovelerComponent* component, void* clientSystemPointer) {
-  bool hasTextSprite = shovelerComponentHasFieldValue(
-      component, SHOVELER_COMPONENT_SPRITE_FIELD_ID_TEXT_SPRITE);
-  bool hasTileSprite = shovelerComponentHasFieldValue(
-      component, SHOVELER_COMPONENT_SPRITE_FIELD_ID_TILE_SPRITE);
-  bool hasTilemapSprite = shovelerComponentHasFieldValue(
-      component, SHOVELER_COMPONENT_SPRITE_FIELD_ID_TILEMAP_SPRITE);
-  bool hasTextureSprite = shovelerComponentHasFieldValue(
-      component, SHOVELER_COMPONENT_SPRITE_FIELD_ID_TEXTURE_SPRITE);
+  bool hasTextSprite =
+      shovelerComponentHasFieldValue(component, SHOVELER_COMPONENT_SPRITE_FIELD_ID_TEXT_SPRITE);
+  bool hasTileSprite =
+      shovelerComponentHasFieldValue(component, SHOVELER_COMPONENT_SPRITE_FIELD_ID_TILE_SPRITE);
+  bool hasTilemapSprite =
+      shovelerComponentHasFieldValue(component, SHOVELER_COMPONENT_SPRITE_FIELD_ID_TILEMAP_SPRITE);
+  bool hasTextureSprite =
+      shovelerComponentHasFieldValue(component, SHOVELER_COMPONENT_SPRITE_FIELD_ID_TEXTURE_SPRITE);
   int numDependencies = (hasTextSprite ? 1 : 0) + (hasTileSprite ? 1 : 0) +
       (hasTilemapSprite ? 1 : 0) + (hasTextureSprite ? 1 : 0);
 
@@ -92,8 +92,7 @@ static void* activateSpriteComponent(ShovelerComponent* component, void* clientS
 
   assert(sprite != NULL);
 
-  if (shovelerComponentHasFieldValue(
-          component, SHOVELER_COMPONENT_SPRITE_FIELD_ID_POSITION) &&
+  if (shovelerComponentHasFieldValue(component, SHOVELER_COMPONENT_SPRITE_FIELD_ID_POSITION) &&
       shovelerComponentHasFieldValue(
           component, SHOVELER_COMPONENT_SPRITE_FIELD_ID_POSITION_MAPPING_X) &&
       shovelerComponentHasFieldValue(
@@ -104,8 +103,7 @@ static void* activateSpriteComponent(ShovelerComponent* component, void* clientS
   if (shovelerComponentHasFieldValue(component, SHOVELER_COMPONENT_SPRITE_FIELD_ID_SIZE)) {
     shovelerSpriteUpdateSize(
         sprite,
-        shovelerComponentGetFieldValueVector2(
-            component, SHOVELER_COMPONENT_SPRITE_FIELD_ID_SIZE));
+        shovelerComponentGetFieldValueVector2(component, SHOVELER_COMPONENT_SPRITE_FIELD_ID_SIZE));
   }
 
   shovelerSpriteSetEnableCollider(
@@ -118,8 +116,8 @@ static void* activateSpriteComponent(ShovelerComponent* component, void* clientS
   assert(canvasComponent != NULL);
   ShovelerCanvas* canvas = shovelerComponentGetCanvas(canvasComponent);
 
-  int layerId = shovelerComponentGetFieldValueInt(
-      component, SHOVELER_COMPONENT_SPRITE_FIELD_ID_LAYER);
+  int layerId =
+      shovelerComponentGetFieldValueInt(component, SHOVELER_COMPONENT_SPRITE_FIELD_ID_LAYER);
   shovelerCanvasAddSprite(canvas, layerId, sprite);
 
   return sprite;
@@ -134,8 +132,8 @@ static void deactivateSpriteComponent(ShovelerComponent* component, void* client
   assert(canvasComponent != NULL);
   ShovelerCanvas* canvas = shovelerComponentGetCanvas(canvasComponent);
 
-  int layerId = shovelerComponentGetFieldValueInt(
-      component, SHOVELER_COMPONENT_SPRITE_FIELD_ID_LAYER);
+  int layerId =
+      shovelerComponentGetFieldValueInt(component, SHOVELER_COMPONENT_SPRITE_FIELD_ID_LAYER);
   shovelerCanvasRemoveSprite(canvas, layerId, sprite);
 }
 
@@ -148,8 +146,7 @@ static bool liveUpdateSpritePositionDependency(
   ShovelerSprite* sprite = (ShovelerSprite*) component->systemData;
   assert(sprite != NULL);
 
-  if (shovelerComponentHasFieldValue(
-          component, SHOVELER_COMPONENT_SPRITE_FIELD_ID_POSITION) &&
+  if (shovelerComponentHasFieldValue(component, SHOVELER_COMPONENT_SPRITE_FIELD_ID_POSITION) &&
       shovelerComponentHasFieldValue(
           component, SHOVELER_COMPONENT_SPRITE_FIELD_ID_POSITION_MAPPING_X) &&
       shovelerComponentHasFieldValue(
@@ -161,8 +158,7 @@ static bool liveUpdateSpritePositionDependency(
 }
 
 static ShovelerVector2 getSpritePosition(ShovelerComponent* component) {
-  assert(shovelerComponentHasFieldValue(
-      component, SHOVELER_COMPONENT_SPRITE_FIELD_ID_POSITION));
+  assert(shovelerComponentHasFieldValue(component, SHOVELER_COMPONENT_SPRITE_FIELD_ID_POSITION));
   assert(shovelerComponentHasFieldValue(
       component, SHOVELER_COMPONENT_SPRITE_FIELD_ID_POSITION_MAPPING_X));
   assert(shovelerComponentHasFieldValue(

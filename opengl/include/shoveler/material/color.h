@@ -6,6 +6,7 @@
 
 typedef struct ShovelerShaderCacheStruct ShovelerShaderCache; // forward declaration: shader_cache.h
 
-ShovelerMaterial *shovelerMaterialColorCreate(ShovelerShaderCache *shaderCache, bool screenspace, ShovelerVector4 color);
+ShovelerMaterial* shovelerMaterialColorCreate(
+    ShovelerShaderCache* shaderCache, bool screenspace, ShovelerVector4 color);
 
 #endif

@@ -3,6 +3,6 @@
 
 #include <shoveler/drawable.h>
 
-ShovelerDrawable *shovelerDrawableQuadCreate();
+ShovelerDrawable* shovelerDrawableQuadCreate();
 
 #endif

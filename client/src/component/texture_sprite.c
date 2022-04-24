@@ -9,9 +9,9 @@
 #include "shoveler/component_system.h"
 #include "shoveler/log.h"
 #include "shoveler/schema.h"
-#include "shoveler/texture.h"
 #include "shoveler/sprite/texture.h"
 #include "shoveler/system.h"
+#include "shoveler/texture.h"
 
 static void* activateTextureSpriteComponent(
     ShovelerComponent* component, void* clientSystemPointer);
@@ -30,7 +30,8 @@ void shovelerClientSystemAddTextureSpriteSystem(ShovelerClientSystem* clientSyst
   componentSystem->callbackUserData = clientSystem;
 }
 
-static void* activateTextureSpriteComponent(ShovelerComponent* component, void* clientSystemPointer) {
+static void* activateTextureSpriteComponent(
+    ShovelerComponent* component, void* clientSystemPointer) {
   ShovelerComponent* materialComponent = shovelerComponentGetDependency(
       component, SHOVELER_COMPONENT_TEXTURE_SPRITE_FIELD_ID_MATERIAL);
   assert(materialComponent != NULL);
@@ -61,7 +62,8 @@ static void* activateTextureSpriteComponent(ShovelerComponent* component, void* 
   return textureSprite;
 }
 
-static void deactivateTextureSpriteComponent(ShovelerComponent* component, void* clientSystemPointer) {
+static void deactivateTextureSpriteComponent(
+    ShovelerComponent* component, void* clientSystemPointer) {
   ShovelerSprite* TextureSprite = (ShovelerSprite*) component->systemData;
   assert(TextureSprite != NULL);
 

@@ -5,23 +5,19 @@
 
 struct ShovelerDrawableStruct;
 
-typedef bool (ShovelerDrawableDrawFunction)(struct ShovelerDrawableStruct *drawable);
-typedef void (ShovelerDrawableFreeFunction)(struct ShovelerDrawableStruct *drawable);
+typedef bool(ShovelerDrawableDrawFunction)(struct ShovelerDrawableStruct* drawable);
+typedef void(ShovelerDrawableFreeFunction)(struct ShovelerDrawableStruct* drawable);
 
 typedef struct ShovelerDrawableStruct {
-	ShovelerDrawableDrawFunction *draw;
-	ShovelerDrawableFreeFunction *free;
-	void *data;
+  ShovelerDrawableDrawFunction* draw;
+  ShovelerDrawableFreeFunction* free;
+  void* data;
 } ShovelerDrawable;
 
-static inline bool shovelerDrawableDraw(ShovelerDrawable *drawable)
-{
-	return drawable->draw(drawable);
+static inline bool shovelerDrawableDraw(ShovelerDrawable* drawable) {
+  return drawable->draw(drawable);
 }
 
-static inline void shovelerDrawableFree(ShovelerDrawable *drawable)
-{
-	drawable->free(drawable);
-}
+static inline void shovelerDrawableFree(ShovelerDrawable* drawable) { drawable->free(drawable); }
 
 #endif

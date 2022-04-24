@@ -1,5 +1,3 @@
-#include <glad/glad.h>
-#include <glib.h>
 #include <shoveler/camera/perspective.h>
 #include <shoveler/client_system.h>
 #include <shoveler/component.h>

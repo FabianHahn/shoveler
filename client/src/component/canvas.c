@@ -29,8 +29,8 @@ void shovelerClientSystemAddCanvasSystem(ShovelerClientSystem* clientSystem) {
 static void* activateCanvasComponent(ShovelerComponent* component, void* clientSystemPointer) {
   ShovelerClientSystem* clientSystem = clientSystemPointer;
 
-  int numLayers = shovelerComponentGetFieldValueInt(
-      component, SHOVELER_COMPONENT_CANVAS_FIELD_ID_NUM_LAYERS);
+  int numLayers =
+      shovelerComponentGetFieldValueInt(component, SHOVELER_COMPONENT_CANVAS_FIELD_ID_NUM_LAYERS);
   if (numLayers < 1) {
     shovelerLogWarning(
         "Failed to activate canvas component on entity %lld: num_layers option must be positive, "

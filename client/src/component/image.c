@@ -36,8 +36,8 @@ static void* activateImageComponent(ShovelerComponent* component, void* clientSy
   int bufferSize;
   shovelerComponentGetResource(resourceComponent, &bufferData, &bufferSize);
 
-  ShovelerComponentImageFormat format = shovelerComponentGetFieldValueInt(
-      component, SHOVELER_COMPONENT_IMAGE_FIELD_ID_FORMAT);
+  ShovelerComponentImageFormat format =
+      shovelerComponentGetFieldValueInt(component, SHOVELER_COMPONENT_IMAGE_FIELD_ID_FORMAT);
   switch (format) {
   case SHOVELER_COMPONENT_IMAGE_FORMAT_PNG:
     return shovelerImagePngReadBuffer(bufferData, bufferSize);

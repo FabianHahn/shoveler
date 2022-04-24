@@ -5,8 +5,8 @@
 #include "shoveler/client_system.h"
 #include "shoveler/component/image.h"
 #include "shoveler/component_system.h"
-#include "shoveler/log.h"
 #include "shoveler/image.h"
+#include "shoveler/log.h"
 #include "shoveler/schema.h"
 #include "shoveler/system.h"
 #include "shoveler/texture.h"
@@ -143,15 +143,13 @@ static void updateTiles(ShovelerComponent* component, ShovelerTexture* texture) 
 }
 
 static bool isComponentImageResourceEntityDefinition(ShovelerComponent* component) {
-  return shovelerComponentHasFieldValue(
-      component, SHOVELER_COMPONENT_TILEMAP_TILES_OPTION_IMAGE);
+  return shovelerComponentHasFieldValue(component, SHOVELER_COMPONENT_TILEMAP_TILES_OPTION_IMAGE);
 }
 
 static bool isComponentConfigurationOptionDefinition(ShovelerComponent* component) {
   return shovelerComponentHasFieldValue(
              component, SHOVELER_COMPONENT_TILEMAP_TILES_OPTION_NUM_COLUMNS) &&
-      shovelerComponentHasFieldValue(
-             component, SHOVELER_COMPONENT_TILEMAP_TILES_OPTION_NUM_ROWS) &&
+      shovelerComponentHasFieldValue(component, SHOVELER_COMPONENT_TILEMAP_TILES_OPTION_NUM_ROWS) &&
       shovelerComponentHasFieldValue(
              component, SHOVELER_COMPONENT_TILEMAP_TILES_OPTION_TILESET_COLUMNS) &&
       shovelerComponentHasFieldValue(

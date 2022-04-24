@@ -3,6 +3,6 @@
 
 #include <shoveler/image.h>
 
-void shovelerTilesCreateTileset(ShovelerImage **outputTileset, int *outputColumns, int *outputRows);
+void shovelerTilesCreateTileset(ShovelerImage** outputTileset, int* outputColumns, int* outputRows);
 
 #endif

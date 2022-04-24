@@ -5,6 +5,11 @@
 
 struct ShovelerShaderCacheStruct; // forward declaration: shader_cache.h
 
-ShovelerFilter *shovelerFilterDepthTextureGaussianCreate(struct ShovelerShaderCacheStruct *shaderCache, int width, int height, GLsizei samples, float exponentialFactor);
+ShovelerFilter* shovelerFilterDepthTextureGaussianCreate(
+    struct ShovelerShaderCacheStruct* shaderCache,
+    int width,
+    int height,
+    GLsizei samples,
+    float exponentialFactor);
 
 #endif

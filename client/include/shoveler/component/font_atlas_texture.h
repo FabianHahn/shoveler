@@ -11,7 +11,8 @@ typedef struct ShovelerFontAtlasTextureStruct ShovelerFontAtlasTexture;
 
 void shovelerClientSystemAddFontAtlasTextureSystem(ShovelerClientSystem* clientSystem);
 
-static inline ShovelerFontAtlasTexture* shovelerComponentGetFontAtlasTexture(ShovelerComponent* component) {
+static inline ShovelerFontAtlasTexture* shovelerComponentGetFontAtlasTexture(
+    ShovelerComponent* component) {
   assert(component->type->id == shovelerComponentTypeIdFontAtlasTexture);
   return component->systemData;
 }

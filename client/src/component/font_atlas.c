@@ -33,8 +33,8 @@ static void* activateFontAtlasComponent(ShovelerComponent* component, void* clie
 
   int fontSize = shovelerComponentGetFieldValueInt(
       component, SHOVELER_COMPONENT_FONT_ATLAS_FIELD_ID_FONT_SIZE);
-  int padding = shovelerComponentGetFieldValueInt(
-      component, SHOVELER_COMPONENT_FONT_ATLAS_FIELD_ID_PADDING);
+  int padding =
+      shovelerComponentGetFieldValueInt(component, SHOVELER_COMPONENT_FONT_ATLAS_FIELD_ID_PADDING);
 
   return shovelerFontAtlasCreate(font, fontSize, padding);
 }

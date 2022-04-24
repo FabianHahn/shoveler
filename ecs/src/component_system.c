@@ -34,8 +34,7 @@ static bool updateComponent(ShovelerComponent* component, double dt, void* compo
 static void deactivateComponent(ShovelerComponent* component, void* componentSystemPointer);
 
 ShovelerComponentSystem* shovelerComponentSystemCreate(
-    ShovelerSystem *system,
-    ShovelerComponentType* componentType) {
+    ShovelerSystem* system, ShovelerComponentType* componentType) {
   ShovelerComponentSystem* componentSystem = malloc(sizeof(ShovelerComponentSystem));
   componentSystem->componentAdapter = malloc(sizeof(ShovelerComponentSystemAdapter));
   componentSystem->componentAdapter->requiresAuthority = requiresAuthority;
@@ -136,7 +135,7 @@ static void* activateComponent(ShovelerComponent* component, void* componentSyst
   ShovelerComponentSystem* componentSystem = componentSystemPointer;
 
   if (componentSystem->activateComponent != NULL) {
-    void *activation =
+    void* activation =
         componentSystem->activateComponent(component, componentSystem->callbackUserData);
     if (activation) {
       componentSystem->system->numActiveComponents++;

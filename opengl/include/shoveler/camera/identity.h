@@ -7,10 +7,10 @@
 struct ShovelerShaderCacheStruct; // forward declaration: shader_cache.h
 
 typedef struct {
-	ShovelerCamera camera;
+  ShovelerCamera camera;
 } ShovelerCameraIdentity;
 
-ShovelerCamera *shovelerCameraIdentityCreate(struct ShovelerShaderCacheStruct *shaderCache);
-void shovelerCameraIdentityFree(ShovelerCamera *camera);
+ShovelerCamera* shovelerCameraIdentityCreate(struct ShovelerShaderCacheStruct* shaderCache);
+void shovelerCameraIdentityFree(ShovelerCamera* camera);
 
 #endif

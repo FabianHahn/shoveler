@@ -28,8 +28,8 @@ static void* activateSamplerComponent(ShovelerComponent* component, void* client
       component, SHOVELER_COMPONENT_SAMPLER_FIELD_ID_INTERPOLATE);
   bool useMipmaps = shovelerComponentGetFieldValueBool(
       component, SHOVELER_COMPONENT_SAMPLER_FIELD_ID_USE_MIPMAPS);
-  bool clamp = shovelerComponentGetFieldValueBool(
-      component, SHOVELER_COMPONENT_SAMPLER_FIELD_ID_CLAMP);
+  bool clamp =
+      shovelerComponentGetFieldValueBool(component, SHOVELER_COMPONENT_SAMPLER_FIELD_ID_CLAMP);
 
   ShovelerSampler* sampler = shovelerSamplerCreate(interpolate, useMipmaps, clamp);
   return sampler;

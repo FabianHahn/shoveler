@@ -3,11 +3,11 @@
 #include <assert.h>
 
 #include "shoveler/client_system.h"
-#include "shoveler/component_system.h"
-#include "shoveler/model.h"
-#include "shoveler/component/position.h"
 #include "shoveler/component/drawable.h"
 #include "shoveler/component/material.h"
+#include "shoveler/component/position.h"
+#include "shoveler/component_system.h"
+#include "shoveler/model.h"
 #include "shoveler/scene.h"
 #include "shoveler/schema.h"
 #include "shoveler/shader_cache.h"
@@ -59,18 +59,18 @@ static void* activateModelComponent(ShovelerComponent* component, void* clientSy
 
   ShovelerModel* model = shovelerModelCreate(drawable, material);
   model->translation = *position;
-  model->rotation = shovelerComponentGetFieldValueVector3(
-      component, SHOVELER_COMPONENT_MODEL_FIELD_ID_ROTATION);
-  model->scale = shovelerComponentGetFieldValueVector3(
-      component, SHOVELER_COMPONENT_MODEL_FIELD_ID_SCALE);
-  model->visible = shovelerComponentGetFieldValueBool(
-      component, SHOVELER_COMPONENT_MODEL_FIELD_ID_VISIBLE);
-  model->emitter = shovelerComponentGetFieldValueBool(
-      component, SHOVELER_COMPONENT_MODEL_FIELD_ID_EMITTER);
-  model->castsShadow = shovelerComponentGetFieldValueBool(
-      component, SHOVELER_COMPONENT_MODEL_FIELD_ID_CASTS_SHADOW);
-  model->polygonMode = convertPolygonMode(shovelerComponentGetFieldValueInt(
-      component, SHOVELER_COMPONENT_MODEL_FIELD_ID_POLYGON_MODE));
+  model->rotation =
+      shovelerComponentGetFieldValueVector3(component, SHOVELER_COMPONENT_MODEL_FIELD_ID_ROTATION);
+  model->scale =
+      shovelerComponentGetFieldValueVector3(component, SHOVELER_COMPONENT_MODEL_FIELD_ID_SCALE);
+  model->visible =
+      shovelerComponentGetFieldValueBool(component, SHOVELER_COMPONENT_MODEL_FIELD_ID_VISIBLE);
+  model->emitter =
+      shovelerComponentGetFieldValueBool(component, SHOVELER_COMPONENT_MODEL_FIELD_ID_EMITTER);
+  model->castsShadow =
+      shovelerComponentGetFieldValueBool(component, SHOVELER_COMPONENT_MODEL_FIELD_ID_CASTS_SHADOW);
+  model->polygonMode = convertPolygonMode(
+      shovelerComponentGetFieldValueInt(component, SHOVELER_COMPONENT_MODEL_FIELD_ID_POLYGON_MODE));
   shovelerModelUpdateTransformation(model);
 
   shovelerSceneAddModel(clientSystem->scene, model);

@@ -1,134 +1,134 @@
-#include "shoveler/log.h"
 #include "shoveler/render_state.h"
 
-void shovelerRenderStateReset(const ShovelerRenderState *renderState)
-{
-	if(renderState->blend) {
-		glEnable(GL_BLEND);
-	} else {
-		glDisable(GL_BLEND);
-	}
+#include "shoveler/log.h"
 
-	glBlendFunc(renderState->blendSourceFactor, renderState->blendDestinationFactor);
+void shovelerRenderStateReset(const ShovelerRenderState* renderState) {
+  if (renderState->blend) {
+    glEnable(GL_BLEND);
+  } else {
+    glDisable(GL_BLEND);
+  }
 
-	if(renderState->depthTest) {
-		glEnable(GL_DEPTH_TEST);
-	} else {
-		glDisable(GL_DEPTH_TEST);
-	}
+  glBlendFunc(renderState->blendSourceFactor, renderState->blendDestinationFactor);
 
-	glDepthFunc(renderState->depthFunction);
-	glDepthMask(renderState->depthMask);
+  if (renderState->depthTest) {
+    glEnable(GL_DEPTH_TEST);
+  } else {
+    glDisable(GL_DEPTH_TEST);
+  }
+
+  glDepthFunc(renderState->depthFunction);
+  glDepthMask(renderState->depthMask);
 }
 
-void shovelerRenderStateSet(ShovelerRenderState *renderState, const ShovelerRenderState *targetRenderState)
-{
-	if(targetRenderState->blend != renderState->blend) {
-		if(targetRenderState->blend) {
-			glEnable(GL_BLEND);
-		} else {
-			glDisable(GL_BLEND);
-		}
-	}
+void shovelerRenderStateSet(
+    ShovelerRenderState* renderState, const ShovelerRenderState* targetRenderState) {
+  if (targetRenderState->blend != renderState->blend) {
+    if (targetRenderState->blend) {
+      glEnable(GL_BLEND);
+    } else {
+      glDisable(GL_BLEND);
+    }
+  }
 
-	if(targetRenderState->blendSourceFactor != renderState->blendSourceFactor || targetRenderState->blendDestinationFactor != renderState->blendDestinationFactor) {
-		glBlendFunc(targetRenderState->blendSourceFactor, targetRenderState->blendDestinationFactor);
-	}
+  if (targetRenderState->blendSourceFactor != renderState->blendSourceFactor ||
+      targetRenderState->blendDestinationFactor != renderState->blendDestinationFactor) {
+    glBlendFunc(targetRenderState->blendSourceFactor, targetRenderState->blendDestinationFactor);
+  }
 
-	if(targetRenderState->depthTest != renderState->depthTest) {
-		if(targetRenderState->depthTest) {
-			glEnable(GL_DEPTH_TEST);
-		} else {
-			glDisable(GL_DEPTH_TEST);
-		}
-	}
+  if (targetRenderState->depthTest != renderState->depthTest) {
+    if (targetRenderState->depthTest) {
+      glEnable(GL_DEPTH_TEST);
+    } else {
+      glDisable(GL_DEPTH_TEST);
+    }
+  }
 
-	if(targetRenderState->depthFunction != renderState->depthFunction) {
-		glDepthFunc(targetRenderState->depthFunction);
-	}
+  if (targetRenderState->depthFunction != renderState->depthFunction) {
+    glDepthFunc(targetRenderState->depthFunction);
+  }
 
-	if(targetRenderState->depthMask != renderState->depthMask) {
-		glDepthMask(targetRenderState->depthMask);
-	}
+  if (targetRenderState->depthMask != renderState->depthMask) {
+    glDepthMask(targetRenderState->depthMask);
+  }
 
-	*renderState = *targetRenderState;
+  *renderState = *targetRenderState;
 }
 
+void shovelerRenderStateSetVerbose(
+    ShovelerRenderState* renderState, const ShovelerRenderState* targetRenderState) {
+  if (targetRenderState->blend != renderState->blend) {
+    shovelerLogInfo("%s blending.", targetRenderState->blend ? "Enabling" : "Disabling");
+    if (targetRenderState->blend) {
+      glEnable(GL_BLEND);
+    } else {
+      glDisable(GL_BLEND);
+    }
+  }
 
-void shovelerRenderStateSetVerbose(ShovelerRenderState *renderState, const ShovelerRenderState *targetRenderState)
-{
-	if(targetRenderState->blend != renderState->blend) {
-		shovelerLogInfo("%s blending.", targetRenderState->blend ? "Enabling" : "Disabling");
-		if(targetRenderState->blend) {
-			glEnable(GL_BLEND);
-		} else {
-			glDisable(GL_BLEND);
-		}
-	}
+  if (targetRenderState->blendSourceFactor != renderState->blendSourceFactor ||
+      targetRenderState->blendDestinationFactor != renderState->blendDestinationFactor) {
+    shovelerLogInfo(
+        "Changing blend function to source = %u, destination = %u.",
+        targetRenderState->blendSourceFactor,
+        targetRenderState->blendDestinationFactor);
+    glBlendFunc(targetRenderState->blendSourceFactor, targetRenderState->blendDestinationFactor);
+  }
 
-	if(targetRenderState->blendSourceFactor != renderState->blendSourceFactor || targetRenderState->blendDestinationFactor != renderState->blendDestinationFactor) {
-		shovelerLogInfo("Changing blend function to source = %u, destination = %u.", targetRenderState->blendSourceFactor, targetRenderState->blendDestinationFactor);
-		glBlendFunc(targetRenderState->blendSourceFactor, targetRenderState->blendDestinationFactor);
-	}
+  if (targetRenderState->depthTest != renderState->depthTest) {
+    shovelerLogInfo("%s depth test.", targetRenderState->depthTest ? "Enabling" : "Disabling");
+    if (targetRenderState->depthTest) {
+      glEnable(GL_DEPTH_TEST);
+    } else {
+      glDisable(GL_DEPTH_TEST);
+    }
+  }
 
-	if(targetRenderState->depthTest != renderState->depthTest) {
-		shovelerLogInfo("%s depth test.", targetRenderState->depthTest ? "Enabling" : "Disabling");
-		if(targetRenderState->depthTest) {
-			glEnable(GL_DEPTH_TEST);
-		} else {
-			glDisable(GL_DEPTH_TEST);
-		}
-	}
+  if (targetRenderState->depthFunction != renderState->depthFunction) {
+    shovelerLogInfo("Changing depth function to %u.", targetRenderState->depthFunction);
+    glDepthFunc(targetRenderState->depthFunction);
+  }
 
-	if(targetRenderState->depthFunction != renderState->depthFunction) {
-		shovelerLogInfo("Changing depth function to %u.", targetRenderState->depthFunction);
-		glDepthFunc(targetRenderState->depthFunction);
-	}
+  if (targetRenderState->depthMask != renderState->depthMask) {
+    shovelerLogInfo("%s depth mask.", targetRenderState->depthMask ? "Enabling" : "Disabling");
+    glDepthMask(targetRenderState->depthMask);
+  }
 
-	if(targetRenderState->depthMask != renderState->depthMask) {
-		shovelerLogInfo("%s depth mask.", targetRenderState->depthMask ? "Enabling" : "Disabling");
-		glDepthMask(targetRenderState->depthMask);
-	}
-
-	*renderState = *targetRenderState;
+  *renderState = *targetRenderState;
 }
 
-void shovelerRenderStateEnableBlend(ShovelerRenderState *renderState, GLenum sourceFactor, GLenum destinationFactor)
-{
-	renderState->blend = true;
-	renderState->blendSourceFactor = sourceFactor;
-	renderState->blendDestinationFactor = destinationFactor;
+void shovelerRenderStateEnableBlend(
+    ShovelerRenderState* renderState, GLenum sourceFactor, GLenum destinationFactor) {
+  renderState->blend = true;
+  renderState->blendSourceFactor = sourceFactor;
+  renderState->blendDestinationFactor = destinationFactor;
 
-	glEnable(GL_BLEND);
-	glBlendFunc(sourceFactor, destinationFactor);
+  glEnable(GL_BLEND);
+  glBlendFunc(sourceFactor, destinationFactor);
 }
 
-void shovelerRenderStateDisableBlend(ShovelerRenderState *renderState)
-{
-	renderState->blend = false;
+void shovelerRenderStateDisableBlend(ShovelerRenderState* renderState) {
+  renderState->blend = false;
 
-	glDisable(GL_BLEND);
+  glDisable(GL_BLEND);
 }
 
-void shovelerRenderStateEnableDepthTest(ShovelerRenderState *renderState, GLenum depthFunction)
-{
-	renderState->depthTest = true;
-	renderState->depthFunction = depthFunction;
+void shovelerRenderStateEnableDepthTest(ShovelerRenderState* renderState, GLenum depthFunction) {
+  renderState->depthTest = true;
+  renderState->depthFunction = depthFunction;
 
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(depthFunction);
+  glEnable(GL_DEPTH_TEST);
+  glDepthFunc(depthFunction);
 }
 
-void shovelerRenderStateDisableDepthTest(ShovelerRenderState *renderState)
-{
-	renderState->depthTest = false;
+void shovelerRenderStateDisableDepthTest(ShovelerRenderState* renderState) {
+  renderState->depthTest = false;
 
-	glDisable(GL_DEPTH_TEST);
+  glDisable(GL_DEPTH_TEST);
 }
 
-void shovelerRenderStateSetDepthMask(ShovelerRenderState *renderState, GLboolean enabled)
-{
-	renderState->depthMask = enabled;
+void shovelerRenderStateSetDepthMask(ShovelerRenderState* renderState, GLboolean enabled) {
+  renderState->depthMask = enabled;
 
-	glDepthMask(enabled);
+  glDepthMask(enabled);
 }

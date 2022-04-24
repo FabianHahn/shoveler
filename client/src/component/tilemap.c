@@ -57,8 +57,8 @@ static void* activateTilemapComponent(ShovelerComponent* component, void* client
 
   ShovelerTilemap* tilemap = shovelerTilemapCreate(tiles, colliders);
 
-  const ShovelerComponentFieldValue* tilesetsValue = shovelerComponentGetFieldValue(
-      component, SHOVELER_COMPONENT_TILEMAP_FIELD_ID_TILESETS);
+  const ShovelerComponentFieldValue* tilesetsValue =
+      shovelerComponentGetFieldValue(component, SHOVELER_COMPONENT_TILEMAP_FIELD_ID_TILESETS);
   assert(tilesetsValue != NULL);
 
   for (int i = 0; i < tilesetsValue->entityIdArrayValue.size; i++) {

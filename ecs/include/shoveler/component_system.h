@@ -37,7 +37,7 @@ typedef struct ShovelerComponentSystemFieldOptionsStruct {
 
 typedef struct ShovelerComponentSystemStruct {
   ShovelerComponentSystemAdapter* componentAdapter;
-  ShovelerSystem *system;
+  ShovelerSystem* system;
   ShovelerComponentType* componentType;
   bool requiresAuthority;
   ShovelerComponentSystemFieldOptions* fieldOptions;
@@ -48,8 +48,7 @@ typedef struct ShovelerComponentSystemStruct {
 } ShovelerComponentSystem;
 
 ShovelerComponentSystem* shovelerComponentSystemCreate(
-    ShovelerSystem *system,
-    ShovelerComponentType* componentType);
+    ShovelerSystem* system, ShovelerComponentType* componentType);
 void shovelerComponentSystemFree(ShovelerComponentSystem* componentSystem);
 
 /**

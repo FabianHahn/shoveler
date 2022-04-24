@@ -3,6 +3,6 @@
 
 #include <shoveler/drawable.h>
 
-ShovelerDrawable *shovelerDrawableTilesCreate(unsigned char width, unsigned char height);
+ShovelerDrawable* shovelerDrawableTilesCreate(unsigned char width, unsigned char height);
 
 #endif

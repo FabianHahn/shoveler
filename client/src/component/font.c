@@ -31,8 +31,8 @@ static void* activateFontComponent(ShovelerComponent* component, void* clientSys
       shovelerComponentGetDependency(component, SHOVELER_COMPONENT_FONT_FIELD_ID_RESOURCE);
   assert(resourceComponent != NULL);
 
-  const char* name = shovelerComponentGetFieldValueString(
-      component, SHOVELER_COMPONENT_FONT_FIELD_ID_NAME);
+  const char* name =
+      shovelerComponentGetFieldValueString(component, SHOVELER_COMPONENT_FONT_FIELD_ID_NAME);
 
   const unsigned char* bufferData;
   int bufferSize;

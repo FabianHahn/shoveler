@@ -5,7 +5,7 @@
 
 typedef struct ShovelerWorldStruct ShovelerWorld;
 
-GString *shovelerWorldDependencyGraphCreate(ShovelerWorld *world);
-bool shovelerWorldDependencyGraphWrite(ShovelerWorld *world, const char *filename);
+GString* shovelerWorldDependencyGraphCreate(ShovelerWorld* world);
+bool shovelerWorldDependencyGraphWrite(ShovelerWorld* world, const char* filename);
 
 #endif

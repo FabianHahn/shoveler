@@ -5,15 +5,16 @@
 #include <stdbool.h>
 
 typedef struct {
-	long long int nextFreshEntityId;
-	/** set of (long long int) entity IDs */
-	GHashTable* allocations;
-	GArray* freeList;
+  long long int nextFreshEntityId;
+  /** set of (long long int) entity IDs */
+  GHashTable* allocations;
+  GArray* freeList;
 } ShovelerEntityIdAllocator;
 
 ShovelerEntityIdAllocator* shovelerCreateEntityIdAllocator();
 long long int shovelerEntityIdAllocatorAllocate(ShovelerEntityIdAllocator* allocator);
-bool shovelerEntityIdAllocatorDeallocate(ShovelerEntityIdAllocator* allocator, long long int entityId);
+bool shovelerEntityIdAllocatorDeallocate(
+    ShovelerEntityIdAllocator* allocator, long long int entityId);
 void shovelerEntityIdAllocatorFree(ShovelerEntityIdAllocator* allocator);
 
 #endif

@@ -3,8 +3,8 @@
 
 #include <shoveler/resources.h>
 
-static const char *shovelerResourcesImagePngTypeId = "image/png";
+static const char* shovelerResourcesImagePngTypeId = "image/png";
 
-bool shovelerResourcesImagePngRegister(ShovelerResources *resources);
+bool shovelerResourcesImagePngRegister(ShovelerResources* resources);
 
 #endif

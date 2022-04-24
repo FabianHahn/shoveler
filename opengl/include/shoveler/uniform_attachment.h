@@ -4,12 +4,14 @@
 #include <shoveler/uniform.h>
 
 typedef struct {
-	ShovelerUniform *uniform;
-	GLint location;
+  ShovelerUniform* uniform;
+  GLint location;
 } ShovelerUniformAttachment;
 
-ShovelerUniformAttachment *shovelerUniformAttachmentCreate(ShovelerUniform *uniform, GLint location);
-bool shovelerUniformAttachmentUse(ShovelerUniformAttachment *uniformAttachment, GLuint *textureUnitIndexCounter);
-void shovelerUniformAttachmentFree(ShovelerUniformAttachment *uniformAttachment);
+ShovelerUniformAttachment* shovelerUniformAttachmentCreate(
+    ShovelerUniform* uniform, GLint location);
+bool shovelerUniformAttachmentUse(
+    ShovelerUniformAttachment* uniformAttachment, GLuint* textureUnitIndexCounter);
+void shovelerUniformAttachmentFree(ShovelerUniformAttachment* uniformAttachment);
 
 #endif

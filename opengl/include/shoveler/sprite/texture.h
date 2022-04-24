@@ -8,9 +8,9 @@ typedef struct ShovelerTextureStruct ShovelerTexture; // forward declaration: te
 typedef struct ShovelerTilesetStruct ShovelerTileset; // forward declaration: tileset.h
 
 typedef struct ShovelerSpriteTextureStruct {
-	ShovelerSprite sprite;
-	ShovelerTexture *texture;
-	ShovelerSampler *sampler;
+  ShovelerSprite sprite;
+  ShovelerTexture* texture;
+  ShovelerSampler* sampler;
 } ShovelerSpriteTexture;
 
 /**
@@ -19,6 +19,7 @@ typedef struct ShovelerSpriteTextureStruct {
  * The passed material must be of type texture sprite. The caller retains ownership over the passed
  * material and sampler.
  */
-ShovelerSprite *shovelerSpriteTextureCreate(ShovelerMaterial *material, ShovelerTexture *texture, ShovelerSampler *sampler);
+ShovelerSprite* shovelerSpriteTextureCreate(
+    ShovelerMaterial* material, ShovelerTexture* texture, ShovelerSampler* sampler);
 
 #endif

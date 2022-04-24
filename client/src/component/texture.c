@@ -32,12 +32,11 @@ static void* activateTextureComponent(ShovelerComponent* component, void* client
 
   ShovelerTexture* texture;
 
-  ShovelerComponentTextureType type = shovelerComponentGetFieldValueInt(
-      component, SHOVELER_COMPONENT_TEXTURE_FIELD_ID_TYPE);
+  ShovelerComponentTextureType type =
+      shovelerComponentGetFieldValueInt(component, SHOVELER_COMPONENT_TEXTURE_FIELD_ID_TYPE);
   switch (type) {
   case SHOVELER_COMPONENT_TEXTURE_TYPE_IMAGE: {
-    if (!shovelerComponentHasFieldValue(
-            component, SHOVELER_COMPONENT_TEXTURE_FIELD_ID_IMAGE)) {
+    if (!shovelerComponentHasFieldValue(component, SHOVELER_COMPONENT_TEXTURE_FIELD_ID_IMAGE)) {
       shovelerLogWarning(
           "Failed to activate texture component of entity %lld: No image dependency specified",
           component->entityId);
@@ -70,19 +69,19 @@ static void* activateTextureComponent(ShovelerComponent* component, void* client
         shovelerComponentGetTextTextureRenderer(textTextureRendererComponent);
     assert(textTextureRenderer != NULL);
 
-    if (!shovelerComponentHasFieldValue(
-            component, SHOVELER_COMPONENT_TEXTURE_FIELD_ID_TEXT)) {
+    if (!shovelerComponentHasFieldValue(component, SHOVELER_COMPONENT_TEXTURE_FIELD_ID_TEXT)) {
       shovelerLogWarning(
           "Failed to activate texture component of entity %lld: No text to render specified",
           component->entityId);
       return NULL;
     }
 
-    const char* text = shovelerComponentGetFieldValueString(
-        component, SHOVELER_COMPONENT_TEXTURE_FIELD_ID_TEXT);
+    const char* text =
+        shovelerComponentGetFieldValueString(component, SHOVELER_COMPONENT_TEXTURE_FIELD_ID_TEXT);
     assert(text != NULL);
 
-    texture = shovelerTextTextureRendererRender(textTextureRenderer, text, clientSystem->renderState);
+    texture =
+        shovelerTextTextureRendererRender(textTextureRenderer, text, clientSystem->renderState);
   } break;
   default:
     shovelerLogWarning(

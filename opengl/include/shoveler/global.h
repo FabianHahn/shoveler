@@ -1,19 +1,17 @@
 #ifndef SHOVELER_GLOBAL_H
 #define SHOVELER_GLOBAL_H
 
+#include <glib.h>
+#include <shoveler/log.h>
 #include <stdbool.h>
 #include <stdio.h> // FILE
 
-#include <glib.h>
-
-#include <shoveler/log.h>
-
 typedef struct {
-	GHashTable *games;
+  GHashTable* games;
 } ShovelerGlobalContext;
 
 bool shovelerGlobalInit();
-ShovelerGlobalContext *shovelerGlobalGetContext();
+ShovelerGlobalContext* shovelerGlobalGetContext();
 void shovelerGlobalUninit();
 
 #endif

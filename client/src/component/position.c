@@ -42,8 +42,8 @@ void shovelerClientSystemAddPositionSystem(ShovelerClientSystem* clientSystem) {
 }
 
 static void* activatePositionComponent(ShovelerComponent* component, void* clientSystemPointer) {
-  ShovelerComponentPositionType type = shovelerComponentGetFieldValueInt(
-      component, SHOVELER_COMPONENT_POSITION_FIELD_ID_TYPE);
+  ShovelerComponentPositionType type =
+      shovelerComponentGetFieldValueInt(component, SHOVELER_COMPONENT_POSITION_FIELD_ID_TYPE);
   bool hasRelativeParentPosition = shovelerComponentHasFieldValue(
       component, SHOVELER_COMPONENT_POSITION_FIELD_ID_RELATIVE_PARENT_POSITION);
 
@@ -90,8 +90,8 @@ static bool liveUpdatePositionReleativeParent(
 void updatePosition(ShovelerComponent* component) {
   ShovelerVector3* position = component->systemData;
 
-  ShovelerComponentPositionType type = shovelerComponentGetFieldValueInt(
-      component, SHOVELER_COMPONENT_POSITION_FIELD_ID_TYPE);
+  ShovelerComponentPositionType type =
+      shovelerComponentGetFieldValueInt(component, SHOVELER_COMPONENT_POSITION_FIELD_ID_TYPE);
   ShovelerVector3 coordinates = shovelerComponentGetFieldValueVector3(
       component, SHOVELER_COMPONENT_POSITION_FIELD_ID_COORDINATES);
 

@@ -18,8 +18,8 @@ bool shovelerSchemaAddComponentType(ShovelerSchema* schema, ShovelerComponentTyp
   return g_hash_table_insert(schema->componentTypes, (gpointer) componentType->id, componentType);
 }
 
-ShovelerComponentType *shovelerSchemaGetComponentType(
-    ShovelerSchema* schema, const char *componentTypeId) {
+ShovelerComponentType* shovelerSchemaGetComponentType(
+    ShovelerSchema* schema, const char* componentTypeId) {
   return g_hash_table_lookup(schema->componentTypes, componentTypeId);
 }
 

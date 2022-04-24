@@ -1,52 +1,71 @@
+#include "shoveler/sprite/tile.h"
+
 #include <stdlib.h> // malloc free
 
-#include "shoveler/material/tile_sprite.h"
-#include "shoveler/sprite/tile.h"
 #include "shoveler/material.h"
+#include "shoveler/material/tile_sprite.h"
 #include "shoveler/sprite.h"
 
-static bool renderSpriteTile(ShovelerSprite *sprite, ShovelerVector2 regionPosition, ShovelerVector2 regionSize, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerRenderState *renderState);
-static void freeSpriteTile(ShovelerSprite *sprite);
+static bool renderSpriteTile(
+    ShovelerSprite* sprite,
+    ShovelerVector2 regionPosition,
+    ShovelerVector2 regionSize,
+    ShovelerScene* scene,
+    ShovelerCamera* camera,
+    ShovelerLight* light,
+    ShovelerModel* model,
+    ShovelerRenderState* renderState);
+static void freeSpriteTile(ShovelerSprite* sprite);
 
-ShovelerSprite *shovelerSpriteTileCreate(ShovelerMaterial *material, ShovelerTileset *tileset, int tilesetRow, int tilesetColumn)
-{
-	ShovelerSpriteTile *spriteTile = malloc(sizeof(ShovelerSpriteTile));
-	shovelerSpriteInit(&spriteTile->sprite, material, /* intersect */ NULL, renderSpriteTile, freeSpriteTile, spriteTile);
-	spriteTile->tileset = tileset;
-	spriteTile->tilesetRow = tilesetRow;
-	spriteTile->tilesetColumn = tilesetColumn;
+ShovelerSprite* shovelerSpriteTileCreate(
+    ShovelerMaterial* material, ShovelerTileset* tileset, int tilesetRow, int tilesetColumn) {
+  ShovelerSpriteTile* spriteTile = malloc(sizeof(ShovelerSpriteTile));
+  shovelerSpriteInit(
+      &spriteTile->sprite,
+      material,
+      /* intersect */ NULL,
+      renderSpriteTile,
+      freeSpriteTile,
+      spriteTile);
+  spriteTile->tileset = tileset;
+  spriteTile->tilesetRow = tilesetRow;
+  spriteTile->tilesetColumn = tilesetColumn;
 
-	return &spriteTile->sprite;
+  return &spriteTile->sprite;
 }
 
-ShovelerTileset *shovelerSpriteTileGetTileset(ShovelerSprite *sprite)
-{
-	ShovelerSpriteTile *spriteTile = (ShovelerSpriteTile *) sprite->data;
+ShovelerTileset* shovelerSpriteTileGetTileset(ShovelerSprite* sprite) {
+  ShovelerSpriteTile* spriteTile = (ShovelerSpriteTile*) sprite->data;
 
-	return spriteTile->tileset;
+  return spriteTile->tileset;
 }
 
-void shovelerSpriteTileSetIndices(ShovelerSprite *sprite, int tilesetRow, int tilesetColumn)
-{
-	ShovelerSpriteTile *spriteTile = (ShovelerSpriteTile *) sprite->data;
+void shovelerSpriteTileSetIndices(ShovelerSprite* sprite, int tilesetRow, int tilesetColumn) {
+  ShovelerSpriteTile* spriteTile = (ShovelerSpriteTile*) sprite->data;
 
-	spriteTile->tilesetRow = tilesetRow;
-	spriteTile->tilesetColumn = tilesetColumn;
+  spriteTile->tilesetRow = tilesetRow;
+  spriteTile->tilesetColumn = tilesetColumn;
 }
 
-static bool renderSpriteTile(ShovelerSprite *sprite, ShovelerVector2 regionPosition, ShovelerVector2 regionSize, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerRenderState *renderState)
-{
-	ShovelerSpriteTile *spriteTile = (ShovelerSpriteTile *) sprite->data;
+static bool renderSpriteTile(
+    ShovelerSprite* sprite,
+    ShovelerVector2 regionPosition,
+    ShovelerVector2 regionSize,
+    ShovelerScene* scene,
+    ShovelerCamera* camera,
+    ShovelerLight* light,
+    ShovelerModel* model,
+    ShovelerRenderState* renderState) {
+  ShovelerSpriteTile* spriteTile = (ShovelerSpriteTile*) sprite->data;
 
-	shovelerMaterialTileSpriteSetActiveRegion(sprite->material, regionPosition, regionSize);
-	shovelerMaterialTileSpriteSetActive(sprite->material, spriteTile);
+  shovelerMaterialTileSpriteSetActiveRegion(sprite->material, regionPosition, regionSize);
+  shovelerMaterialTileSpriteSetActive(sprite->material, spriteTile);
 
-	return shovelerMaterialRender(sprite->material, scene, camera, light, model, renderState);
+  return shovelerMaterialRender(sprite->material, scene, camera, light, model, renderState);
 }
 
-static void freeSpriteTile(ShovelerSprite *sprite)
-{
-	ShovelerSpriteTile *spriteTile = (ShovelerSpriteTile *) sprite->data;
+static void freeSpriteTile(ShovelerSprite* sprite) {
+  ShovelerSpriteTile* spriteTile = (ShovelerSpriteTile*) sprite->data;
 
-	free(spriteTile);
+  free(spriteTile);
 }

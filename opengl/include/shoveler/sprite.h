@@ -12,33 +12,52 @@ typedef struct ShovelerRenderStateStruct ShovelerRenderState; // forward declara
 typedef struct ShovelerSceneStruct ShovelerScene; // forward declaration: scene.h
 typedef struct ShovelerSpriteStruct ShovelerSprite; // forward declaration: below
 
-typedef bool (ShovelerSpriteRenderFunction)(ShovelerSprite *sprite, ShovelerVector2 regionPosition, ShovelerVector2 regionSize, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerRenderState *renderState);
-typedef void (ShovelerSpriteFreeFunction)(ShovelerSprite *sprite);
+typedef bool(ShovelerSpriteRenderFunction)(
+    ShovelerSprite* sprite,
+    ShovelerVector2 regionPosition,
+    ShovelerVector2 regionSize,
+    ShovelerScene* scene,
+    ShovelerCamera* camera,
+    ShovelerLight* light,
+    ShovelerModel* model,
+    ShovelerRenderState* renderState);
+typedef void(ShovelerSpriteFreeFunction)(ShovelerSprite* sprite);
 
 typedef struct ShovelerSpriteStruct {
-	ShovelerVector2 position;
-	ShovelerVector2 size;
-	ShovelerCollider2 collider;
-	bool enableCollider;
-	ShovelerMaterial *material;
-	ShovelerSpriteRenderFunction *render;
-	ShovelerSpriteFreeFunction *free;
-	void *data;
+  ShovelerVector2 position;
+  ShovelerVector2 size;
+  ShovelerCollider2 collider;
+  bool enableCollider;
+  ShovelerMaterial* material;
+  ShovelerSpriteRenderFunction* render;
+  ShovelerSpriteFreeFunction* free;
+  void* data;
 } ShovelerSprite;
 
-void shovelerSpriteInit(ShovelerSprite *sprite, ShovelerMaterial *material, ShovelerCollider2IntersectFunction *interesect, ShovelerSpriteRenderFunction *render, ShovelerSpriteFreeFunction *free, void *data);
-void shovelerSpriteUpdatePosition(ShovelerSprite *sprite, ShovelerVector2 position);
-void shovelerSpriteUpdateSize(ShovelerSprite *sprite, ShovelerVector2 size);
-void shovelerSpriteSetEnableCollider(ShovelerSprite *sprite, bool enableCollider);
+void shovelerSpriteInit(
+    ShovelerSprite* sprite,
+    ShovelerMaterial* material,
+    ShovelerCollider2IntersectFunction* interesect,
+    ShovelerSpriteRenderFunction* render,
+    ShovelerSpriteFreeFunction* free,
+    void* data);
+void shovelerSpriteUpdatePosition(ShovelerSprite* sprite, ShovelerVector2 position);
+void shovelerSpriteUpdateSize(ShovelerSprite* sprite, ShovelerVector2 size);
+void shovelerSpriteSetEnableCollider(ShovelerSprite* sprite, bool enableCollider);
 
-static inline bool shovelerSpriteRender(ShovelerSprite *sprite, ShovelerVector2 regionPosition, ShovelerVector2 regionSize, ShovelerScene *scene, ShovelerCamera *camera, ShovelerLight *light, ShovelerModel *model, ShovelerRenderState *renderState)
-{
-	return sprite->render(sprite, regionPosition, regionSize, scene, camera, light, model, renderState);
+static inline bool shovelerSpriteRender(
+    ShovelerSprite* sprite,
+    ShovelerVector2 regionPosition,
+    ShovelerVector2 regionSize,
+    ShovelerScene* scene,
+    ShovelerCamera* camera,
+    ShovelerLight* light,
+    ShovelerModel* model,
+    ShovelerRenderState* renderState) {
+  return sprite->render(
+      sprite, regionPosition, regionSize, scene, camera, light, model, renderState);
 }
 
-static inline void shovelerSpriteFree(ShovelerSprite *sprite)
-{
-	sprite->free(sprite);
-}
+static inline void shovelerSpriteFree(ShovelerSprite* sprite) { sprite->free(sprite); }
 
 #endif

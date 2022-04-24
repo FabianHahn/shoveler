@@ -23,8 +23,8 @@ ShovelerComponentSystem* shovelerSystemForComponentType(
       g_hash_table_lookup(system->componentSystems, componentType->id);
   if (componentSystem == NULL) {
     componentSystem = shovelerComponentSystemCreate(system, componentType);
-    bool inserted =
-        g_hash_table_insert(system->componentSystems, (gpointer) componentType->id, componentSystem);
+    bool inserted = g_hash_table_insert(
+        system->componentSystems, (gpointer) componentType->id, componentSystem);
     assert(inserted);
   }
 

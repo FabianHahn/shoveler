@@ -28,8 +28,8 @@ void shovelerClientSystemAddDrawableSystem(ShovelerClientSystem* clientSystem) {
 }
 
 static void* activateDrawableComponent(ShovelerComponent* component, void* clientSystemPointer) {
-  ShovelerComponentDrawableType type = shovelerComponentGetFieldValueInt(
-      component, SHOVELER_COMPONENT_DRAWABLE_FIELD_ID_TYPE);
+  ShovelerComponentDrawableType type =
+      shovelerComponentGetFieldValueInt(component, SHOVELER_COMPONENT_DRAWABLE_FIELD_ID_TYPE);
   switch (type) {
   case SHOVELER_COMPONENT_DRAWABLE_TYPE_CUBE:
     return shovelerDrawableCubeCreate();

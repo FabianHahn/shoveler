@@ -7,14 +7,14 @@ typedef struct ShovelerFontAtlasStruct ShovelerFontAtlas; // forward declaration
 typedef struct ShovelerTextureStruct ShovelerTexture; // forward declaration: texture.h
 
 typedef struct ShovelerFontAtlasTextureStruct {
-	ShovelerFontAtlas *fontAtlas;
-	unsigned int atlasImageSize;
-	ShovelerTexture *texture;
+  ShovelerFontAtlas* fontAtlas;
+  unsigned int atlasImageSize;
+  ShovelerTexture* texture;
 } ShovelerFontAtlasTexture;
 
-ShovelerFontAtlasTexture *shovelerFontAtlasTextureCreate(ShovelerFontAtlas *fontAtlas);
+ShovelerFontAtlasTexture* shovelerFontAtlasTextureCreate(ShovelerFontAtlas* fontAtlas);
 /* Updates the font atlas texture, returning true if a new texture was generated. */
-bool shovelerFontAtlasTextureUpdate(ShovelerFontAtlasTexture *fontAtlasTexture);
-void shovelerFontAtlasTextureFree(ShovelerFontAtlasTexture *fontAtlasTexture);
+bool shovelerFontAtlasTextureUpdate(ShovelerFontAtlasTexture* fontAtlasTexture);
+void shovelerFontAtlasTextureFree(ShovelerFontAtlasTexture* fontAtlasTexture);
 
 #endif
