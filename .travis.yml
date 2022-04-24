@@ -7,10 +7,12 @@ compiler:
 addons:
     apt:
         packages:
+            - clang-format-11
             - cmake
             - cmake-data
             - xorg-dev
 script:
+    - ./clang-format.sh
     - mkdir -p build
     - cd build
     - cmake ..
