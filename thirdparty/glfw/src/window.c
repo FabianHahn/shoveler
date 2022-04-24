@@ -25,6 +25,8 @@
 //    distribution.
 //
 //========================================================================
+// Please use C89 style variable declarations in this file because VS 2010
+//========================================================================
 
 #include "internal.h"
 
@@ -202,6 +204,8 @@ GLFWAPI GLFWwindow* glfwCreateWindow(int width, int height,
     window->floating    = wndconfig.floating;
     window->focusOnShow = wndconfig.focusOnShow;
     window->cursorMode  = GLFW_CURSOR_NORMAL;
+
+    window->doublebuffer = fbconfig.doublebuffer;
 
     window->minwidth    = GLFW_DONT_CARE;
     window->minheight   = GLFW_DONT_CARE;
@@ -1097,3 +1101,4 @@ GLFWAPI void glfwPostEmptyEvent(void)
     _GLFW_REQUIRE_INIT();
     _glfwPlatformPostEmptyEvent();
 }
+
