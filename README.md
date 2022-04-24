@@ -8,6 +8,7 @@
 ## Dependencies
 **shoveler** requires [CMake](https://cmake.org/) to build and bundles the following [third-party dependencies](thirdparty) as source:
  * [fakeglib](https://github.com/FabianHahn/fakeglib) - used as "standard library" for data structures
+ * [freetype](https://github.com/freetype/freetype) - used to load fonts and render text
  * [glad](https://github.com/Dav1dde/glad) - used to load OpenGL symbols
  * [glfw](http://www.glfw.org/) - used manage the OpenGL context and input handling
  * [libpng](https://github.com/glennrp/libpng) - used to load and write texture image files 
