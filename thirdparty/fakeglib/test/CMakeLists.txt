@@ -6,7 +6,7 @@ set(TEST_SRC
 	GQueueTest.cpp
 	GStringTest.cpp
 	GStringUtilTest.cpp
-	GTime.cpp
+	GTimeTest.cpp
 	main.cpp
 )
 
