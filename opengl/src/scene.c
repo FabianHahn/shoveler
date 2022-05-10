@@ -19,7 +19,6 @@ typedef enum {
 ShovelerSceneRenderPassOptions createRenderPassOptions(ShovelerScene* scene, RenderMode renderMode);
 static void freeLight(void* lightPointer);
 static void freeModel(void* modelPointer);
-static void freeShader(void* shaderPointer);
 
 ShovelerScene* shovelerSceneCreate(ShovelerShaderCache* shaderCache) {
   ShovelerScene* scene = malloc(sizeof(ShovelerScene));
@@ -264,7 +263,3 @@ static void freeModel(void* modelPointer) {
   ShovelerModel* model = modelPointer;
   shovelerModelFree(model);
 }
-
-static void freeHashTable(void* hashTablePointer) { g_hash_table_destroy(hashTablePointer); }
-
-static void freeShader(void* shaderPointer) { shovelerShaderFree(shaderPointer); }

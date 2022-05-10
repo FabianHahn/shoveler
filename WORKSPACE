@@ -2,17 +2,19 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
     name = "bazel_skylib",
+    sha256 = "1c531376ac7e5a180e0237938a2536de0c54d93f5c278634818e0efc952dd56c",
     urls = [
         "https://github.com/bazelbuild/bazel-skylib/releases/download/1.0.3/bazel-skylib-1.0.3.tar.gz",
         "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/releases/download/1.0.3/bazel-skylib-1.0.3.tar.gz",
     ],
-    sha256 = "1c531376ac7e5a180e0237938a2536de0c54d93f5c278634818e0efc952dd56c",
 )
 
 load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
+
 bazel_skylib_workspace()
 
 load("@bazel_skylib//lib:versions.bzl", "versions")
+
 versions.check(
     maximum_bazel_version = "5.1.1",
     minimum_bazel_version = "5.1.1",
@@ -38,6 +40,14 @@ http_archive(
     sha256 = "11b13952b78e55f399a5f185c9c46e3bec0da3989066ce76c984d446a8ef7090",
     strip_prefix = "freetype-VER-2-12-0",
     url = "https://github.com/freetype/freetype/archive/VER-2-12-0.tar.gz",
+)
+
+http_archive(
+    name = "glfw",
+    build_file = "@thirdparty//glfw:BUILD",
+    sha256 = "fd21a5f65bcc0fc3c76e0f8865776e852de09ef6fbc3620e09ce96d2b2807e04",
+    strip_prefix = "glfw-3.3.7",
+    url = "https://github.com/glfw/glfw/archive/3.3.7.tar.gz",
 )
 
 http_archive(
