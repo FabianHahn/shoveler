@@ -906,7 +906,6 @@ TEST_F(GQueueTest, linkIndex)
 {
 	int testData1 = 42;
 	int testData2 = 1337;
-	int testData3 = 27;
 
 	g_queue_push_tail(queue, &testData1);
 	g_queue_push_tail(queue, &testData2);
