@@ -51,10 +51,24 @@ cc_library(
         "include/GLFW/glfw3.h",
         "include/GLFW/glfw3native.h",
     ],
+    copts = select({
+        "@//:windows": [],
+        "@//:linux": [
+            "-pthread",
+        ],
+    }),
     defines = select({
         "@//:windows": [],
         "@//:linux": [
             "_GLFW_X11",
+        ],
+    }),
+    linkopts = select({
+        "@//:windows": [],
+        "@//:linux": [
+            "-ldl",
+            "-lX11",
+            "-pthread",
         ],
     }),
     strip_include_prefix = "include",
