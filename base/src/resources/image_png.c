@@ -27,7 +27,7 @@ static void* loadPng(
 
 static void freePng(ShovelerResourcesTypeLoader* typeLoader, void* resourceData) {
   ShovelerImage* pngImage = (ShovelerImage*) resourceData;
-  shovelerImageFree(resourceData);
+  shovelerImageFree(pngImage);
 }
 
 static void freeTypeLoader(ShovelerResourcesTypeLoader* typeLoader) {

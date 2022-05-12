@@ -167,8 +167,6 @@ int main(int argc, char* argv[]) {
 }
 
 static void shovelerSampleUpdate(ShovelerGame* game, double dt) {
-  ShovelerController* controller = shovelerCameraPerspectiveGetController(game->camera);
-
   shovelerCameraUpdateView(game->camera);
 
   frameTimeSinceLastUpdate += dt;

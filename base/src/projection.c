@@ -5,7 +5,6 @@
 #include "shoveler/frustum.h"
 #include "shoveler/types.h"
 
-static void printVector(const char* name, ShovelerVector3 v);
 static void computePlane(
     ShovelerVector3 p0, ShovelerVector3 p1, ShovelerVector3 p2, ShovelerPlane* outputPlane);
 

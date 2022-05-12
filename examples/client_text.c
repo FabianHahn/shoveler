@@ -21,11 +21,7 @@
 #include <stdlib.h> // EXIT_FAILURE, EXIT_SUCCESS
 #include <string.h> // memcpy
 
-static double time = 0.0;
-
-static GString* getImageData(ShovelerImage* image);
 static void updateGame(ShovelerGame* game, double dt);
-
 static void updateAuthoritativeComponent(
     ShovelerClientSystem* clientSystem,
     ShovelerComponent* component,
