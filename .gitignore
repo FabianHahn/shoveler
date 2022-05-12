@@ -1,4 +1,5 @@
 .*
+bazel-*
 build
 cmake-*
 CMakeLists.txt.*
