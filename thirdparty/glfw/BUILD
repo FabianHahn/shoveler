@@ -67,9 +67,14 @@ cc_library(
     linkopts = select({
         "@//:windows": [],
         "@//:linux": [
-            "-ldl",
-            "-lX11",
             "-pthread",
+            "-ldl",
+        ],
+    }),
+    deps = select({
+        "@//:windows": [],
+        "@//:linux": [
+            "@x11-linux-x86_x64",
         ],
     }),
 )

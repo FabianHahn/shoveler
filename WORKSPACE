@@ -66,6 +66,14 @@ http_archive(
 )
 
 http_archive(
+    name = "x11-linux-x86_x64",
+    build_file = "@thirdparty//x11-linux-x86_64:BUILD",
+    sha256 = "e97fe7c361624f9e1ee9f569d78e300d994cd10c38cf3b98c5ffe763911231a1",
+    strip_prefix = "sdk-linux-x86_64-ab7fa8f3a05b06e0b06f4277b484e27004bfb20f",
+    url = "https://github.com/hexops/sdk-linux-x86_64/archive/ab7fa8f3a05b06e0b06f4277b484e27004bfb20f.tar.gz",
+)
+
+http_archive(
     name = "zlib",
     build_file = "@thirdparty//zlib:BUILD",
     sha256 = "d8688496ea40fb61787500e863cc63c9afcbc524468cedeb478068924eb54932",
