@@ -41,7 +41,7 @@ cc_binary(
 )
 
 cc_binary(
-    name = "canvas_font",
+    name = "font",
     srcs = [
         "font.c",
     ],
