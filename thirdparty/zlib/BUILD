@@ -12,4 +12,5 @@ cc_library(
             "-Wno-implicit-function-declaration",
         ],
     }),
+    includes = ["."],
 )

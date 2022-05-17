@@ -63,6 +63,7 @@ cc_library(
             "_GLFW_X11",
         ],
     }),
+    includes = ["include"],
     linkopts = select({
         "@//:windows": [],
         "@//:linux": [
@@ -71,5 +72,4 @@ cc_library(
             "-pthread",
         ],
     }),
-    strip_include_prefix = "include",
 )
