@@ -3,7 +3,9 @@ bazel-*
 build
 cmake-*
 CMakeLists.txt.*
+external
 *.dot
 *.png
 *.svg
 *.autosave
+compile_commands.json
