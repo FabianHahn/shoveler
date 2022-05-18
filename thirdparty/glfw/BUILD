@@ -58,14 +58,20 @@ cc_library(
         ],
     }),
     defines = select({
-        "@//:windows": [],
+        "@//:windows": [
+            "_GLFW_WIN32",
+        ],
         "@//:linux": [
             "_GLFW_X11",
         ],
     }),
     includes = ["include"],
     linkopts = select({
-        "@//:windows": [],
+        "@//:windows": [
+            "-DEFAULTLIB:user32.lib",
+            "-DEFAULTLIB:gdi32.lib",
+            "-DEFAULTLIB:shell32.lib",
+        ],
         "@//:linux": [
             "-pthread",
             "-ldl",

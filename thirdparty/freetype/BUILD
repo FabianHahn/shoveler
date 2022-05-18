@@ -144,7 +144,7 @@ cc_library(
     defines = [
         "FT2_BUILD_LIBRARY",
         "FT_CONFIG_OPTION_USE_PNG",
-        "FT_CONFIG_OPTION_USE_ZLIB",
+        # "FT_CONFIG_OPTION_USE_ZLIB", not needed, ftoption.h sets this by default already
         "FT_CONFIG_OPTION_SYSTEM_ZLIB",
     ],
     includes = ["include"],
