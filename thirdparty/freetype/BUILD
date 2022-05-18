@@ -3,7 +3,7 @@ package(default_visibility = ["//visibility:public"])
 licenses(["notice"])
 
 cc_library(
-    name = "freetype",
+    name = "ft1",
     srcs = [
         "src/autofit/afblue.c",
         "src/autofit/afcjk.c",
@@ -66,6 +66,28 @@ cc_library(
         "src/cid/cidriver.c",
         "src/gzip/ftgzip.c",
         "src/lzw/ftlzw.c",
+    ],
+    hdrs = glob([
+        "src/**/*.h",
+        "include/**/*.h",
+    ]),
+    defines = [
+        "FT2_BUILD_LIBRARY",
+        "FT_CONFIG_OPTION_USE_PNG",
+        # "FT_CONFIG_OPTION_USE_ZLIB", not needed, ftoption.h sets this by default already
+        "FT_CONFIG_OPTION_SYSTEM_ZLIB",
+    ],
+    includes = ["include"],
+    textual_hdrs = glob(["src/**/*.c"]),
+    deps = [
+        "@libpng",
+        "@zlib",
+    ],
+)
+
+cc_library(
+    name = "ft2",
+    srcs = [
         "src/pcf/pcfdrivr.c",
         "src/pcf/pcfread.c",
         "src/pcf/pcfutil.c",
@@ -150,6 +172,29 @@ cc_library(
     includes = ["include"],
     textual_hdrs = glob(["src/**/*.c"]),
     deps = [
+        "@libpng",
+        "@zlib",
+    ],
+)
+
+
+cc_library(
+    name = "freetype",
+    hdrs = glob([
+        "src/**/*.h",
+        "include/**/*.h",
+    ]),
+    defines = [
+        "FT2_BUILD_LIBRARY",
+        "FT_CONFIG_OPTION_USE_PNG",
+        # "FT_CONFIG_OPTION_USE_ZLIB", not needed, ftoption.h sets this by default already
+        "FT_CONFIG_OPTION_SYSTEM_ZLIB",
+    ],
+    includes = ["include"],
+    textual_hdrs = glob(["src/**/*.c"]),
+    deps = [
+        ":ft1",
+        ":ft2",
         "@libpng",
         "@zlib",
     ],
