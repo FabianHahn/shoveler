@@ -30,6 +30,18 @@ cc_library(
             "src/wgl_context.c",
             "src/wgl_context.h",
         ],
+        "@//:windows_zig": [
+            "src/win32_init.c",
+            "src/win32_joystick.c",
+            "src/win32_joystick.h",
+            "src/win32_monitor.c",
+            "src/win32_platform.h",
+            "src/win32_time.c",
+            "src/win32_thread.c",
+            "src/win32_window.c",
+            "src/wgl_context.c",
+            "src/wgl_context.h",
+        ],
         "@//:linux": [
             "src/glx_context.c",
             "src/glx_context.h",
@@ -52,13 +64,16 @@ cc_library(
         "include/GLFW/glfw3native.h",
     ],
     copts = select({
-        "@//:windows": [],
         "@//:linux": [
             "-pthread",
         ],
+        "//conditions:default": [],
     }),
     defines = select({
         "@//:windows": [
+            "_GLFW_WIN32",
+        ],
+        "@//:windows_zig": [
             "_GLFW_WIN32",
         ],
         "@//:linux": [
@@ -72,15 +87,20 @@ cc_library(
             "-DEFAULTLIB:gdi32.lib",
             "-DEFAULTLIB:shell32.lib",
         ],
+        "@//:windows_zig": [
+            "-luser32",
+            "-lgdi32",
+            "-lshell32",
+        ],
         "@//:linux": [
             "-pthread",
             "-ldl",
         ],
     }),
     deps = select({
-        "@//:windows": [],
         "@//:linux": [
             "@x11-linux-x86_x64",
         ],
+        "//conditions:default": [],
     }),
 )

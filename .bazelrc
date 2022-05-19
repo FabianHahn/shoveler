@@ -1,1 +1,5 @@
 build --incompatible_enable_cc_toolchain_resolution
+build:linux --platforms @zig_sdk//platform:linux_amd64
+build:linux --extra_toolchains @zig_sdk//toolchain:linux_amd64_gnu.2.27
+build:windows --platforms @zig_sdk//platform:windows_amd64
+build:windows --extra_toolchains @zig_sdk//toolchain:windows_amd64
