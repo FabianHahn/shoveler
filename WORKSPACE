@@ -81,13 +81,11 @@ http_archive(
     url = "https://github.com/madler/zlib/archive/v1.2.12.tar.gz",
 )
 
-BAZEL_ZIG_CC_VERSION = "v0.7.2"
-
 http_archive(
     name = "bazel-zig-cc",
-    sha256 = "8f198ee98fa122d299b008db281329b80147d04fcdab03a55c31007b5edc8fde",
-    strip_prefix = "bazel-zig-cc-{}".format(BAZEL_ZIG_CC_VERSION),
-    urls = ["https://git.sr.ht/~motiejus/bazel-zig-cc/archive/{}.tar.gz".format(BAZEL_ZIG_CC_VERSION)],
+    sha256 = "b935f95dc4236a0cc3b125040c8de156bfa2b6e0ce29015e580bca4603fe5656",
+    strip_prefix = "bazel-zig-cc-81c8b5306f251c831e0ebb5e368d20d01e6f75bb",
+    url = "https://github.com/FabianHahn/bazel-zig-cc/archive/81c8b5306f251c831e0ebb5e368d20d01e6f75bb.tar.gz",
 )
 
 load("@bazel-zig-cc//toolchain:defs.bzl", zig_toolchains = "toolchains")
