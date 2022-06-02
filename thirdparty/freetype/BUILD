@@ -48,11 +48,6 @@ cc_library(
             "builds/windows/ftsystem.c",
             # TODO: compile and include src/base/ftver.rc
         ],
-        "@//:windows_zig": [
-            "builds/windows/ftdebug.c",
-            "builds/windows/ftsystem.c",
-            # TODO: compile and include src/base/ftver.rc
-        ],
         "@//:linux": [
             "src/base/ftdebug.c",
             "builds/unix/ftsystem.c",

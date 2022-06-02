@@ -83,9 +83,9 @@ http_archive(
 
 http_archive(
     name = "bazel-zig-cc",
-    sha256 = "b935f95dc4236a0cc3b125040c8de156bfa2b6e0ce29015e580bca4603fe5656",
-    strip_prefix = "bazel-zig-cc-81c8b5306f251c831e0ebb5e368d20d01e6f75bb",
-    url = "https://github.com/FabianHahn/bazel-zig-cc/archive/81c8b5306f251c831e0ebb5e368d20d01e6f75bb.tar.gz",
+    sha256 = "2161933e1343d5800ce840ad3005a7b3c7ab12166cb0f3ebc4f5980617c45217",
+    strip_prefix = "bazel-zig-cc-ceafe9a7a3455d8f9e6a53e60ac62b1c568fd1bc",
+    url = "https://github.com/FabianHahn/bazel-zig-cc/archive/ceafe9a7a3455d8f9e6a53e60ac62b1c568fd1bc.tar.gz",
 )
 
 load("@bazel-zig-cc//toolchain:defs.bzl", zig_toolchains = "toolchains")
