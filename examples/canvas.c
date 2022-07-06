@@ -25,7 +25,6 @@
 #include <shoveler/tileset.h>
 #include <stdlib.h> // EXIT_FAILURE, EXIT_SUCCESS
 
-static void shovelerSampleTerminate();
 static void shovelerSampleUpdate(ShovelerGame* game, double dt);
 
 static ShovelerSprite* characterSprite;
