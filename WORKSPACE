@@ -81,11 +81,11 @@ http_archive(
     url = "https://github.com/madler/zlib/archive/v1.2.12.tar.gz",
 )
 
-BAZEL_ZIG_CC_VERSION = "v0.8.2"
+BAZEL_ZIG_CC_VERSION = "v0.9.2"
 
 http_archive(
     name = "bazel-zig-cc",
-    sha256 = "216ee0e15417aa7ed3d1cb4627485fd00ae142e6bba10d3bcad1590e99e13e4c",
+    sha256 = "73afa7e1af49e3dbfa1bae9362438cdc51cb177c359a6041a7a403011179d0b5",
     strip_prefix = "bazel-zig-cc-{}".format(BAZEL_ZIG_CC_VERSION),
     urls = ["https://git.sr.ht/~motiejus/bazel-zig-cc/archive/{}.tar.gz".format(BAZEL_ZIG_CC_VERSION)],
 )
