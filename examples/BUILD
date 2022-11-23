@@ -50,6 +50,17 @@ cc_binary(
     ],
 )
 
+genrule(
+    name = "font_runner",
+    srcs = [
+        "@shoveler_assets//:OpenSans.ttf",
+    ],
+    outs = ["font_runner.dummy_out"],
+    cmd = "$(location :font) $(location @shoveler_assets//:OpenSans.ttf) && touch $@",
+    exec_tools = [":font"],
+    executable = True,
+)
+
 cc_binary(
     name = "lights",
     srcs = [
