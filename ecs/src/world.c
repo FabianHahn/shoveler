@@ -169,10 +169,14 @@ bool shovelerWorldEntityRemoveComponent(ShovelerWorldEntity* entity, const char*
     return false;
   }
 
+  // Deactivate the component before removing it. This is important because we don't want reverse
+  // dependencies to be deactivated within the hash map removal below, which would then make this
+  // component no longer visible to them during reverse dependency deactivation.
+  shovelerComponentDeactivate(component);
+  g_hash_table_remove(entity->components, componentTypeId);
+
   world->numComponents--;
   shovelerLogTrace("Removed component '%s' from entity %lld.", componentTypeId, entity->id);
-
-  g_hash_table_remove(entity->components, componentTypeId);
 
   return true;
 }
@@ -229,6 +233,17 @@ bool shovelerWorldRemoveDependencyCallback(
 }
 
 void shovelerWorldFree(ShovelerWorld* world) {
+  // Get keys list because the keys set will be modified while we iterate over the list.
+  GList* entityIdsList = g_hash_table_get_keys(world->entities);
+  for (GList* iter = entityIdsList; iter != NULL; iter = iter->next) {
+    long long int* entityIdPointer = iter->data;
+    shovelerWorldRemoveEntity(world, *entityIdPointer);
+  }
+  g_list_free(entityIdsList);
+
+  assert(g_hash_table_size(world->entities) == 0);
+  assert(g_hash_table_size(world->reverseDependencies) == 0);
+  assert(g_hash_table_size(world->dependencies) == 0);
   g_hash_table_destroy(world->entities);
   g_hash_table_destroy(world->reverseDependencies);
   g_hash_table_destroy(world->dependencies);
@@ -306,12 +321,17 @@ static void addDependency(
   }
 
   world->numComponentDependencies++;
-  shovelerLogTrace(
-      "Added dependency from component '%s' of entity %lld to component '%s' of entity %lld.",
-      component->type->id,
-      component->entityId,
-      targetComponentTypeId,
-      targetEntityId);
+
+  // Only print dependencies to other entities. Otherwise, we print all dummy dependencies added by
+  // newly created components which makes for spammy and misleading logs.
+  if (component->entityId != targetEntityId) {
+    shovelerLogTrace(
+        "Added dependency from component '%s' of entity %lld to component '%s' of entity %lld.",
+        component->type->id,
+        component->entityId,
+        targetComponentTypeId,
+        targetEntityId);
+  }
 }
 
 static bool removeDependency(
@@ -337,9 +357,17 @@ static bool removeDependency(
   if (!removeDependencyListEntry(dependencies, &dependencyTarget)) {
     return false;
   }
+  if (dependencies->len == 0) {
+    // Clean up list if it is now empty.
+    g_hash_table_remove(world->dependencies, &dependencySource);
+  }
 
   bool reverseDependencyRemoved = removeDependencyListEntry(reverseDependencies, &dependencySource);
   assert(reverseDependencyRemoved);
+  if (reverseDependencies->len == 0) {
+    // Clean up list if it is now empty.
+    g_hash_table_remove(world->reverseDependencies, &dependencyTarget);
+  }
 
   for (int i = 0; i < world->dependencyCallbacks->len; i++) {
     ShovelerWorldDependencyCallback* callback =
@@ -351,12 +379,18 @@ static bool removeDependency(
   }
 
   world->numComponentDependencies--;
-  shovelerLogTrace(
-      "Removed dependency from component '%s' of entity %lld to component '%s' of entity %lld.",
-      component->type->id,
-      component->entityId,
-      targetComponentTypeId,
-      targetEntityId);
+
+  // Only print dependencies to other entities. Otherwise, we print all dummy dependencies removed
+  // from newly created components which makes for spammy and misleading logs.
+  if (component->entityId != targetEntityId) {
+    shovelerLogTrace(
+        "Removed dependency from component '%s' of entity %lld to component '%s' of entity %lld.",
+        component->type->id,
+        component->entityId,
+        targetComponentTypeId,
+        targetEntityId);
+  }
+
   return true;
 }
 
