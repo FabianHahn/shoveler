@@ -80,7 +80,7 @@ typedef void(ShovelerComponentSystemAdapterDeactivateComponentFunction)(
 
 // Adapter struct to make a component integrate with a system.
 typedef struct ShovelerComponentSystemAdapterStruct {
-  /** Returns true if the specified component requries authority to be activated in this system. */
+  /** Returns true if the specified component requires authority to be activated in this system. */
   ShovelerComponentSystemAdapterRequiresAuthorityFunction* requiresAuthority;
   /**
    * If the specified field can be live updated, this indicates that the component can be
@@ -102,7 +102,7 @@ typedef struct ShovelerComponentSystemAdapterStruct {
   /**
    * Updates a component for the specified component if it is active.
    *
-   * In case the component is updated and the functin returns true, this update is then propagated
+   * In case the component is updated and the function returns true, this update is then propagated
    * recursively to other components depending on it.
    */
   ShovelerComponentSystemAdapterUpdateComponentFunction* updateComponent;

@@ -451,8 +451,8 @@ static void addFieldDependencies(
     }
   }
 
-  // If the component system is activate and one of the added dependencies' isn't, we need to
-  // deactivate it.
+  // If the component is activated and one of the added dependencies isn't, we need to deactivate
+  // it.
   if (component->systemData != NULL) {
     if (!checkDependenciesActive(component)) {
       shovelerComponentDeactivate(component);
