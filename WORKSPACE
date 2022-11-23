@@ -66,6 +66,14 @@ http_archive(
 )
 
 http_archive(
+    name = "shoveler_assets",
+    build_file = "@thirdparty//shoveler_assets:BUILD",
+    sha256 = "4d433cc2c1521d1d5e8a1ca2ae180547faa958c853cbff5399e610aede351452",
+    strip_prefix = "shoveler-assets-419e095beda1f6f43dedeb3957ddf5630913d34d",
+    url = "https://github.com/FabianHahn/shoveler-assets/archive/419e095beda1f6f43dedeb3957ddf5630913d34d.tar.gz",
+)
+
+http_archive(
     name = "x11-linux-x86_x64",
     build_file = "@thirdparty//x11-linux-x86_64:BUILD",
     sha256 = "e97fe7c361624f9e1ee9f569d78e300d994cd10c38cf3b98c5ffe763911231a1",
