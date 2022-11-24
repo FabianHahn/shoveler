@@ -1,5 +1,0 @@
-.*
-bazel-*
-build
-cmake-*
-CMakeLists.txt.user*
