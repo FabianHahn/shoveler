@@ -2,9 +2,10 @@
 
 set -e -u -o pipefail
 
+BAZEL_COMMAND="bazelisk"
 if ! command -v bazelisk >/dev/null; then
-  echo -e "\033[0;31mError: Bazelisk is not installed, aborting.\033[0m"
-  exit 1
+  echo -e "\033[0;33mWarning: Bazelisk is not installed, invoking system bazel.\033[0m"
+  BAZEL_COMMAND="bazel"
 fi
 
-exec -a "$0" bazelisk "$@"
+exec -a "$0" "$BAZEL_COMMAND" "$@"
