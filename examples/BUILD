@@ -59,6 +59,7 @@ genrule(
     cmd = "$(location :font) $(location @shoveler_assets//:OpenSans.ttf) && touch $@",
     exec_tools = [":font"],
     executable = True,
+    tags = ["manual"],
 )
 
 cc_binary(
