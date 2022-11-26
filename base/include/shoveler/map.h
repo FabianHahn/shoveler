@@ -7,7 +7,7 @@
 #include <shoveler/map_tile.h>
 #include <shoveler/types.h>
 
-typedef struct {
+typedef struct ShovelerMapStruct {
   ShovelerMapDimensions dimensions;
   ShovelerMapChunk* chunks;
 } ShovelerMap;
