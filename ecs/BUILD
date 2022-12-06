@@ -7,6 +7,7 @@ cc_library(
         "src/component_field.c",
         "src/component_system.c",
         "src/component_type.c",
+        "src/component_type_indexer.c",
         "src/entity_id_allocator.c",
         "src/schema.c",
         "src/system.c",
@@ -18,6 +19,7 @@ cc_library(
         "include/shoveler/component_field.h",
         "include/shoveler/component_system.h",
         "include/shoveler/component_type.h",
+        "include/shoveler/component_type_indexer.h",
         "include/shoveler/entity_component_id.h",
         "include/shoveler/entity_id_allocator.h",
         "include/shoveler/schema.h",
@@ -36,6 +38,7 @@ cc_test(
     srcs = [
         "src/component_field_value_wrapper.h",
         "src/component_test.cpp",
+        "src/component_type_indexer_test.cpp",
         "src/test.cpp",
         "src/test_component_types.h",
         "src/world_test.cpp",
