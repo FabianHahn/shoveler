@@ -3,6 +3,7 @@ package(default_visibility = ["//visibility:public"])
 cc_library(
     name = "ecs",
     srcs = [
+        "src/client_op.c",
         "src/component.c",
         "src/component_field.c",
         "src/component_system.c",
@@ -15,6 +16,7 @@ cc_library(
         "src/world_dependency_graph.c",
     ],
     hdrs = [
+        "include/shoveler/client_op.h",
         "include/shoveler/component.h",
         "include/shoveler/component_field.h",
         "include/shoveler/component_system.h",
@@ -36,6 +38,8 @@ cc_library(
 cc_test(
     name = "ecs_tests",
     srcs = [
+        "src/client_op_test.cpp",
+        "src/client_op_wrapper.h",
         "src/component_field_test.cpp",
         "src/component_field_value_wrapper.h",
         "src/component_test.cpp",
