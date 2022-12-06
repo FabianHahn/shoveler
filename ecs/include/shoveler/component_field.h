@@ -30,7 +30,6 @@ typedef struct ShovelerComponentFieldValueStruct {
     float floatValue;
     bool boolValue;
     int intValue;
-    unsigned int uintValue;
     // string value is owned by the struct itself
     char* stringValue;
     ShovelerVector2 vector2Value;
@@ -76,6 +75,18 @@ void shovelerComponentFieldAssignValue(
     ShovelerComponentFieldValue* target, const ShovelerComponentFieldValue* source);
 bool shovelerComponentFieldCompareValue(
     const ShovelerComponentFieldValue* a, const ShovelerComponentFieldValue* b);
+/** Appends the serialized representation of the field value to the passed string. */
+bool shovelerComponentFieldSerializeValue(
+    const ShovelerComponentFieldValue* fieldValue, GString* output);
+/**
+ * Deserializes from the passed buffer starting at readIndex, incrementing readIndex as bytes are
+ * read.
+ */
+bool shovelerComponentFieldDeserializeValue(
+    ShovelerComponentFieldValue* fieldValue,
+    const unsigned char* buffer,
+    int bufferSize,
+    int* readIndex);
 void shovelerComponentFieldFreeValue(ShovelerComponentFieldValue* fieldValue);
 
 #endif

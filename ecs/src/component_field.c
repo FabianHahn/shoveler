@@ -157,17 +157,9 @@ void shovelerComponentFieldAssignValue(
   assert(target != NULL);
   assert(target->type == source->type);
 
-  // no self assignment
-  assert(source != target);
-  assert(
-      source->type != SHOVELER_COMPONENT_FIELD_TYPE_ENTITY_ID_ARRAY ||
-      (source->entityIdArrayValue.entityIds != target->entityIdArrayValue.entityIds));
-  assert(
-      source->type != SHOVELER_COMPONENT_FIELD_TYPE_STRING ||
-      (source->stringValue != target->stringValue));
-  assert(
-      source->type != SHOVELER_COMPONENT_FIELD_TYPE_BYTES ||
-      (source->bytesValue.data != target->bytesValue.data));
+  if (source == target) {
+    return; // skip self assignment
+  }
 
   shovelerComponentFieldClearValue(target);
 
@@ -181,6 +173,9 @@ void shovelerComponentFieldAssignValue(
     target->entityIdValue = source->entityIdValue;
     break;
   case SHOVELER_COMPONENT_FIELD_TYPE_ENTITY_ID_ARRAY: {
+    if (source->entityIdArrayValue.entityIds == target->entityIdArrayValue.entityIds) {
+      break;
+    }
     if (source->entityIdArrayValue.size > 0) {
       size_t numElements = (size_t) source->entityIdArrayValue.size;
 
@@ -202,6 +197,9 @@ void shovelerComponentFieldAssignValue(
     target->intValue = source->intValue;
     break;
   case SHOVELER_COMPONENT_FIELD_TYPE_STRING:
+    if (source->stringValue == NULL || source->stringValue == target->stringValue) {
+      break;
+    }
     target->stringValue = strdup(source->stringValue);
     break;
   case SHOVELER_COMPONENT_FIELD_TYPE_VECTOR2:
@@ -214,13 +212,14 @@ void shovelerComponentFieldAssignValue(
     target->vector4Value = source->vector4Value;
     break;
   case SHOVELER_COMPONENT_FIELD_TYPE_BYTES: {
-    if (source->entityIdArrayValue.size > 0) {
-      size_t numBytes = (size_t) source->bytesValue.size;
-
-      target->bytesValue.data = malloc(numBytes * sizeof(unsigned char));
-      target->bytesValue.size = source->bytesValue.size;
-      memcpy(target->bytesValue.data, source->bytesValue.data, numBytes * sizeof(unsigned char));
+    if (source->bytesValue.size == 0 || source->bytesValue.data == target->bytesValue.data) {
+      break;
     }
+    size_t numBytes = (size_t) source->bytesValue.size;
+
+    target->bytesValue.data = malloc(numBytes * sizeof(unsigned char));
+    target->bytesValue.size = source->bytesValue.size;
+    memcpy(target->bytesValue.data, source->bytesValue.data, numBytes * sizeof(unsigned char));
   } break;
   }
 }
@@ -306,6 +305,207 @@ bool shovelerComponentFieldCompareValue(
   default:
     return false;
   }
+}
+
+bool shovelerComponentFieldSerializeValue(
+    const ShovelerComponentFieldValue* fieldValue, GString* output) {
+  char typeByte = fieldValue->type;
+  g_string_append_c(output, typeByte);
+  char isSetByte = fieldValue->isSet ? 1 : 0;
+  g_string_append_c(output, isSetByte);
+  if (!fieldValue->isSet) {
+    return true;
+  }
+
+  switch (fieldValue->type) {
+  case SHOVELER_COMPONENT_FIELD_TYPE_ENTITY_ID:
+    g_string_append_len(
+        output, (gchar*) &fieldValue->entityIdValue, sizeof(fieldValue->entityIdValue));
+    break;
+  case SHOVELER_COMPONENT_FIELD_TYPE_ENTITY_ID_ARRAY:
+    g_string_append_len(
+        output,
+        (gchar*) &fieldValue->entityIdArrayValue.size,
+        sizeof(fieldValue->entityIdArrayValue.size));
+    if (fieldValue->entityIdArrayValue.size > 0) {
+      g_string_append_len(
+          output,
+          (gchar*) fieldValue->entityIdArrayValue.entityIds,
+          fieldValue->entityIdArrayValue.size * (gssize) sizeof(long long int));
+    }
+    break;
+  case SHOVELER_COMPONENT_FIELD_TYPE_FLOAT:
+    g_string_append_len(output, (gchar*) &fieldValue->floatValue, sizeof(fieldValue->floatValue));
+    break;
+  case SHOVELER_COMPONENT_FIELD_TYPE_BOOL: {
+    char boolByte = fieldValue->boolValue ? 1 : 0;
+    g_string_append_c(output, boolByte);
+    break;
+  }
+  case SHOVELER_COMPONENT_FIELD_TYPE_INT:
+    g_string_append_len(output, (gchar*) &fieldValue->intValue, sizeof(fieldValue->intValue));
+    break;
+  case SHOVELER_COMPONENT_FIELD_TYPE_STRING: {
+    int stringLength = 0;
+    if (fieldValue->stringValue == NULL) {
+      g_string_append_len(output, (gchar*) &stringLength, sizeof(stringLength));
+    } else {
+      stringLength = (int) strlen(fieldValue->stringValue);
+      g_string_append_len(output, (gchar*) &stringLength, sizeof(stringLength));
+      g_string_append_len(output, (gchar*) fieldValue->stringValue, stringLength);
+    }
+    break;
+  }
+  case SHOVELER_COMPONENT_FIELD_TYPE_VECTOR2:
+    g_string_append_len(output, (gchar*) &fieldValue->vector2Value.values, 2 * sizeof(float));
+    break;
+  case SHOVELER_COMPONENT_FIELD_TYPE_VECTOR3:
+    g_string_append_len(output, (gchar*) &fieldValue->vector3Value.values, 3 * sizeof(float));
+    break;
+  case SHOVELER_COMPONENT_FIELD_TYPE_VECTOR4:
+    g_string_append_len(output, (gchar*) &fieldValue->vector4Value.values, 4 * sizeof(float));
+    break;
+  case SHOVELER_COMPONENT_FIELD_TYPE_BYTES:
+    g_string_append_len(
+        output, (gchar*) &fieldValue->bytesValue.size, sizeof(fieldValue->bytesValue.size));
+    if (fieldValue->bytesValue.size > 0) {
+      g_string_append_len(
+          output,
+          (gchar*) fieldValue->bytesValue.data,
+          fieldValue->bytesValue.size * (gssize) sizeof(unsigned char));
+    }
+    break;
+  default:
+    return false;
+  }
+
+  return true;
+}
+
+bool shovelerComponentFieldDeserializeValue(
+    ShovelerComponentFieldValue* fieldValue,
+    const unsigned char* buffer,
+    int bufferSize,
+    int* readIndex) {
+  shovelerComponentFieldClearValue(fieldValue);
+
+#define PARSE_VALUE(TARGET, TYPE) \
+  if (*readIndex + sizeof(TYPE) > bufferSize) { \
+    return false; \
+  } \
+  memcpy(&(TARGET), &buffer[*readIndex], sizeof(TYPE)); \
+  (*readIndex) += sizeof(TYPE)
+
+  char typeByte;
+  PARSE_VALUE(typeByte, char);
+  if (typeByte < 0 || typeByte > SHOVELER_COMPONENT_FIELD_TYPE_BYTES) {
+    return false;
+  }
+  fieldValue->type = (ShovelerComponentFieldType) typeByte;
+
+  bool isSetByte;
+  PARSE_VALUE(isSetByte, char);
+  fieldValue->isSet = isSetByte == 1;
+  if (!fieldValue->isSet) {
+    return true;
+  }
+
+  switch (fieldValue->type) {
+  case SHOVELER_COMPONENT_FIELD_TYPE_ENTITY_ID: {
+    PARSE_VALUE(fieldValue->entityIdValue, long long int);
+    break;
+  }
+  case SHOVELER_COMPONENT_FIELD_TYPE_ENTITY_ID_ARRAY: {
+    PARSE_VALUE(fieldValue->entityIdArrayValue.size, int);
+
+    if (fieldValue->entityIdArrayValue.size > 0) {
+      int valuesSize = fieldValue->entityIdArrayValue.size * (int) sizeof(long long int);
+      if (*readIndex + valuesSize > bufferSize) {
+        return false;
+      }
+      fieldValue->entityIdArrayValue.entityIds = malloc(valuesSize);
+      memcpy(fieldValue->entityIdArrayValue.entityIds, &buffer[*readIndex], valuesSize);
+      (*readIndex) += valuesSize;
+    }
+    break;
+  }
+  case SHOVELER_COMPONENT_FIELD_TYPE_FLOAT:
+    PARSE_VALUE(fieldValue->floatValue, float);
+    break;
+  case SHOVELER_COMPONENT_FIELD_TYPE_BOOL: {
+    char boolByte;
+    PARSE_VALUE(boolByte, char);
+    fieldValue->boolValue = boolByte == 1;
+    break;
+  }
+  case SHOVELER_COMPONENT_FIELD_TYPE_INT:
+    PARSE_VALUE(fieldValue->intValue, int);
+    break;
+  case SHOVELER_COMPONENT_FIELD_TYPE_STRING: {
+    int stringLength;
+    PARSE_VALUE(stringLength, int);
+
+    if (stringLength > 0) {
+      if (*readIndex + stringLength * sizeof(char) > bufferSize) {
+        return false;
+      }
+      fieldValue->stringValue = malloc((stringLength + 1) * sizeof(char));
+      memcpy(fieldValue->stringValue, &buffer[*readIndex], stringLength * sizeof(char));
+      fieldValue->stringValue[stringLength] = '\0';
+      (*readIndex) += stringLength;
+    }
+    break;
+  }
+  case SHOVELER_COMPONENT_FIELD_TYPE_VECTOR2: {
+    float x;
+    PARSE_VALUE(x, float);
+    float y;
+    PARSE_VALUE(y, float);
+    fieldValue->vector2Value = shovelerVector2(x, y);
+    break;
+  }
+  case SHOVELER_COMPONENT_FIELD_TYPE_VECTOR3: {
+    float x;
+    PARSE_VALUE(x, float);
+    float y;
+    PARSE_VALUE(y, float);
+    float z;
+    PARSE_VALUE(z, float);
+    fieldValue->vector3Value = shovelerVector3(x, y, z);
+    break;
+  }
+  case SHOVELER_COMPONENT_FIELD_TYPE_VECTOR4: {
+    float x;
+    PARSE_VALUE(x, float);
+    float y;
+    PARSE_VALUE(y, float);
+    float z;
+    PARSE_VALUE(z, float);
+    float w;
+    PARSE_VALUE(w, float);
+    fieldValue->vector4Value = shovelerVector4(x, y, z, w);
+    break;
+  }
+  case SHOVELER_COMPONENT_FIELD_TYPE_BYTES: {
+    PARSE_VALUE(fieldValue->bytesValue.size, int);
+
+    if (fieldValue->bytesValue.size > 0) {
+      if (*readIndex + fieldValue->bytesValue.size > bufferSize) {
+        return false;
+      }
+      fieldValue->bytesValue.data = malloc(fieldValue->bytesValue.size);
+      memcpy(fieldValue->bytesValue.data, &buffer[*readIndex], fieldValue->bytesValue.size);
+      (*readIndex) += fieldValue->bytesValue.size;
+    }
+    break;
+  }
+  default:
+    return false;
+  }
+
+#undef PARSE_VALUE
+
+  return true;
 }
 
 void shovelerComponentFieldFreeValue(ShovelerComponentFieldValue* fieldValue) {
