@@ -87,6 +87,7 @@ public:
         shovelerSystemForComponentType(system, componentType2);
     ShovelerComponentSystem* componentSystem3 =
         shovelerSystemForComponentType(system, componentType3);
+    componentSystem2->requiresAuthority = true;
     componentSystem1->activateComponent = activateComponent;
     componentSystem2->activateComponent = activateComponent;
     componentSystem3->activateComponent = activateComponent;
@@ -357,6 +358,45 @@ TEST_F(ShovelerWorldTest, updateAuthoritativeComponent) {
           &component1->type->fields[COMPONENT_TYPE_1_FIELD_PRIMITIVE],
           newFieldValue,
           /* isAuthoritative */ false)));
+}
+
+TEST_F(ShovelerWorldTest, delegateUndelegate) {
+  ShovelerWorldEntity* entity1 = shovelerWorldAddEntity(world, entityId1);
+  ShovelerComponent* component1 = shovelerWorldEntityAddComponent(entity1, componentType1Id);
+  ShovelerComponent* component2 = shovelerWorldEntityAddComponent(entity1, componentType2Id);
+  shovelerComponentUpdateCanonicalFieldEntityId(
+      component1, COMPONENT_TYPE_1_FIELD_DEPENDENCY_REACTIVATE, entityId1);
+
+  // Try to activate component 2, which should fail because it requires authority but isn't
+  // delegated.
+  bool activated = shovelerComponentActivate(component2);
+  ASSERT_FALSE(activated);
+
+  shovelerWorldEntityDelegateComponent(entity1, componentType2Id);
+  ASSERT_THAT(
+      onDelegateComponentCalls,
+      ElementsAre(OnDelegateComponentCall{world, entity1, componentType2Id}));
+
+  activated = shovelerComponentActivate(component2);
+  ASSERT_TRUE(activated);
+  ASSERT_THAT(activateComponentCalls, ElementsAre(component2, component1));
+  ASSERT_THAT(
+      onActivateComponentCalls,
+      ElementsAre(
+          OnActivateComponentCall{world, entity1, component2},
+          OnActivateComponentCall{world, entity1, component1}));
+
+  // Undelegate component 2, which should both deactivate it and its reverse dependency.
+  shovelerWorldEntityUndelegateComponent(entity1, componentType2Id);
+  ASSERT_THAT(
+      onUndelegateComponentCalls,
+      ElementsAre(OnUndelegateComponentCall{world, entity1, componentType2Id}));
+  ASSERT_THAT(deactivateComponentCalls, ElementsAre(component1, component2));
+  ASSERT_THAT(
+      onDeactivateComponentCalls,
+      ElementsAre(
+          OnDeactivateComponentCall{world, entity1, component1},
+          OnDeactivateComponentCall{world, entity1, component2}));
 }
 
 TEST_F(ShovelerWorldTest, addRemoveDependency) {
