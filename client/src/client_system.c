@@ -45,29 +45,17 @@
 #include "shoveler/world.h"
 #include "shoveler/world_dependency_graph.h"
 
-static void clientSystemUpdateAuthoritativeComponent(
-    ShovelerWorld* world,
-    ShovelerComponent* component,
-    int fieldId,
-    const ShovelerComponentField* field,
-    const ShovelerComponentFieldValue* value,
-    void* clientSystemPointer);
 static void clientSystemKeyHandler(
     ShovelerInput* input, int key, int scancode, int action, int mods, void* clientSystemPointer);
 static void clientSystemUpdateWorldCounters(void* clientSystemPointer);
 
 ShovelerClientSystem* shovelerClientSystemCreate(
-    ShovelerGame* game,
-    ShovelerClientSystemUpdateAuthoritativeComponentFunction* updateAuthoritativeComponent,
-    void* updateAuthoritativeComponentUserData) {
+    ShovelerGame* game, ShovelerWorldCallbacks* worldCallbacks) {
   ShovelerClientSystem* clientSystem = malloc(sizeof(ShovelerClientSystem));
   clientSystem->system = shovelerSystemCreate();
   clientSystem->schema = shovelerSchemaCreate();
-  clientSystem->world = shovelerWorldCreate(
-      clientSystem->schema,
-      clientSystem->system,
-      clientSystemUpdateAuthoritativeComponent,
-      clientSystem);
+  clientSystem->world =
+      shovelerWorldCreate(clientSystem->schema, clientSystem->system, worldCallbacks);
   clientSystem->executor = game->updateExecutor;
   clientSystem->input = game->input;
   clientSystem->colliders = game->colliders;
@@ -76,8 +64,6 @@ ShovelerClientSystem* shovelerClientSystemCreate(
   clientSystem->shaderCache = game->shaderCache;
   clientSystem->scene = game->scene;
   clientSystem->renderState = &game->renderState;
-  clientSystem->updateAuthoritativeComponent = updateAuthoritativeComponent;
-  clientSystem->updateAuthoritativeComponentUserData = updateAuthoritativeComponentUserData;
   clientSystem->keyCallback =
       shovelerInputAddKeyCallback(game->input, clientSystemKeyHandler, clientSystem);
   clientSystem->updateWorldCountersExecutorCallback = shovelerExecutorSchedulePeriodic(
@@ -130,21 +116,6 @@ void shovelerClientSystemFree(ShovelerClientSystem* clientSystem) {
   shovelerSchemaFree(clientSystem->schema);
   shovelerSystemFree(clientSystem->system);
   free(clientSystem);
-}
-
-static void clientSystemUpdateAuthoritativeComponent(
-    ShovelerWorld* world,
-    ShovelerComponent* component,
-    int fieldId,
-    const ShovelerComponentField* field,
-    const ShovelerComponentFieldValue* value,
-    void* clientSystemPointer) {
-  ShovelerClientSystem* clientSystem = clientSystemPointer;
-
-  if (clientSystem->updateAuthoritativeComponent != NULL) {
-    clientSystem->updateAuthoritativeComponent(
-        clientSystem, component, field, value, clientSystem->updateAuthoritativeComponentUserData);
-  }
 }
 
 static void clientSystemKeyHandler(

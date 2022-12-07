@@ -18,14 +18,8 @@ typedef struct ShovelerSchemaStruct ShovelerSchema;
 typedef struct ShovelerSceneStruct ShovelerScene;
 typedef struct ShovelerShaderCacheStruct ShovelerShaderCache;
 typedef struct ShovelerSystemStruct ShovelerSystem;
+typedef struct ShovelerWorldCallbacksStruct ShovelerWorldCallbacks;
 typedef struct ShovelerWorldStruct ShovelerWorld;
-
-typedef void(ShovelerClientSystemUpdateAuthoritativeComponentFunction)(
-    ShovelerClientSystem* clientSystem,
-    ShovelerComponent* component,
-    const ShovelerComponentField* field,
-    const ShovelerComponentFieldValue* value,
-    void* userData);
 
 typedef struct ShovelerClientSystemStruct {
   ShovelerSystem* system;
@@ -39,8 +33,6 @@ typedef struct ShovelerClientSystemStruct {
   ShovelerShaderCache* shaderCache;
   ShovelerScene* scene;
   ShovelerRenderState* renderState;
-  ShovelerClientSystemUpdateAuthoritativeComponentFunction* updateAuthoritativeComponent;
-  void* updateAuthoritativeComponentUserData;
   ShovelerInputKeyCallback* keyCallback;
   ShovelerExecutorCallback* updateWorldCountersExecutorCallback;
   struct {
@@ -52,9 +44,7 @@ typedef struct ShovelerClientSystemStruct {
 } ShovelerClientSystem;
 
 ShovelerClientSystem* shovelerClientSystemCreate(
-    ShovelerGame* game,
-    ShovelerClientSystemUpdateAuthoritativeComponentFunction* updateAuthoritativeComponent,
-    void* updateAuthoritativeComponentUserData);
+    ShovelerGame* game, ShovelerWorldCallbacks* worldCallbacks);
 void shovelerClientSystemFree(ShovelerClientSystem* clientSystem);
 
 #endif

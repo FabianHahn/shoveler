@@ -22,11 +22,14 @@
 #include <string.h> // memcpy
 
 static void updateGame(ShovelerGame* game, double dt);
-static void updateAuthoritativeComponent(
-    ShovelerClientSystem* clientSystem,
+static void onUpdateComponent(
+    ShovelerWorld* world,
+    ShovelerWorldEntity* entity,
     ShovelerComponent* component,
+    int fieldId,
     const ShovelerComponentField* field,
     const ShovelerComponentFieldValue* value,
+    bool isAuthoritative,
     void* userData);
 
 static ShovelerWorld* world = NULL;
@@ -80,10 +83,9 @@ int main(int argc, char* argv[]) {
     return EXIT_FAILURE;
   }
 
-  ShovelerClientSystem* clientSystem = shovelerClientSystemCreate(
-      game,
-      updateAuthoritativeComponent,
-      /* updateAuthoritativeComponentUserData */ NULL);
+  ShovelerWorldCallbacks worldCallbacks = shovelerWorldCallbacks();
+  worldCallbacks.onUpdateComponent = onUpdateComponent;
+  ShovelerClientSystem* clientSystem = shovelerClientSystemCreate(game, &worldCallbacks);
   world = clientSystem->world;
 
   game->controller->lockTiltX = true;
@@ -226,12 +228,19 @@ int main(int argc, char* argv[]) {
 
 static void updateGame(ShovelerGame* game, double dt) { shovelerCameraUpdateView(game->camera); }
 
-static void updateAuthoritativeComponent(
-    ShovelerClientSystem* clientSystem,
+static void onUpdateComponent(
+    ShovelerWorld* world,
+    ShovelerWorldEntity* entity,
     ShovelerComponent* component,
+    int fieldId,
     const ShovelerComponentField* field,
     const ShovelerComponentFieldValue* value,
+    bool isAuthoritative,
     void* userData) {
+  if (!isAuthoritative) {
+    return;
+  }
+
   GString* printedValue = shovelerComponentFieldPrintValue(value);
 
   shovelerLogInfo(
