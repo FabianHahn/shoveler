@@ -12,20 +12,82 @@ typedef struct ShovelerComponentWorldAdapterStruct ShovelerComponentWorldAdapter
 typedef struct ShovelerEntityComponentIdStruct ShovelerEntityComponentId;
 typedef struct ShovelerSchemaStruct ShovelerSchema;
 typedef struct ShovelerSystemStruct ShovelerSystem;
+typedef struct ShovelerWorldEntityStruct ShovelerWorldEntity;
 typedef struct ShovelerWorldStruct ShovelerWorld;
 
-typedef void(ShovelerWorldUpdateAuthoritativeComponentFunction)(
-    ShovelerWorld* world,
-    ShovelerComponent* component,
-    int fieldId,
-    const ShovelerComponentField* field,
-    const ShovelerComponentFieldValue* value,
-    void* userData);
+typedef struct ShovelerWorldCallbacksStruct {
+  void (*onAddEntity)(ShovelerWorld* world, ShovelerWorldEntity* entity, void* userData);
+  void (*onRemoveEntity)(ShovelerWorld* world, long long int entityId, void* userData);
+  void (*onAddComponent)(
+      ShovelerWorld* world,
+      ShovelerWorldEntity* entity,
+      ShovelerComponent* component,
+      void* userData);
+  /**
+   * Called after the field value has been updated, but before any potential side effect have been
+   * applied:
+   *  * If the field cannot be live updated, the component (and its reverse dependencies) have
+   *    already been deactivated but not reactivated yet.
+   *  * If the field can be Live field updated, the live update callback has not been called yet.
+   *  * For a dependency field, previous dependencies have been removed but new ones have not been
+   *    added yet.
+   */
+  void (*onUpdateComponent)(
+      ShovelerWorld* world,
+      ShovelerWorldEntity* entity,
+      ShovelerComponent* component,
+      int fieldId,
+      const ShovelerComponentField* field,
+      const ShovelerComponentFieldValue* value,
+      bool isAuthoritative,
+      void* userData);
+  /**
+   * Called after the component has been activated, but before any reverse dependencies are
+   * recursively activated.
+   */
+  void (*onActivateComponent)(
+      ShovelerWorld* world,
+      ShovelerWorldEntity* entity,
+      ShovelerComponent* component,
+      void* userData);
+  /**
+   * Called after the component has been deactivated, which means that all reverse dependencies have
+   * also already been recursively deactivated.
+   */
+  void (*onDeactivateComponent)(
+      ShovelerWorld* world,
+      ShovelerWorldEntity* entity,
+      ShovelerComponent* component,
+      void* userData);
+  void (*onDelegateComponent)(
+      ShovelerWorld* world,
+      ShovelerWorldEntity* entity,
+      const char* componentTypeId,
+      void* userData);
+  void (*onUndelegateComponent)(
+      ShovelerWorld* world,
+      ShovelerWorldEntity* entity,
+      const char* componentTypeId,
+      void* userData);
+  void (*onRemoveComponent)(
+      ShovelerWorld* world,
+      ShovelerWorldEntity* entity,
+      const char* componentTypeId,
+      void* userData);
+  void (*onAddDependency)(
+      ShovelerWorld* world,
+      const ShovelerEntityComponentId* dependencySource,
+      const ShovelerEntityComponentId* dependencyTarget,
+      void* userData);
+  void (*onRemoveDependency)(
+      ShovelerWorld* world,
+      const ShovelerEntityComponentId* dependencySource,
+      const ShovelerEntityComponentId* dependencyTarget,
+      void* userData);
+  void* userData;
+} ShovelerWorldCallbacks;
 
-typedef struct ShovelerWorldComponentTypeEntryStruct {
-  ShovelerComponentType* componentType;
-  ShovelerComponentSystemAdapter* componentSystemAdapter;
-} ShovelerWorldComponentTypeEntry;
+ShovelerWorldCallbacks shovelerWorldCallbacks();
 
 typedef struct ShovelerWorldStruct {
   /** map from entity id (long long int) to entities (ShovelerWorldEntity *) */
@@ -34,12 +96,9 @@ typedef struct ShovelerWorldStruct {
   GHashTable* dependencies;
   /** map from target (ShovelerEntityComponentId *) to array of (ShovelerEntityComponentId *) */
   GHashTable* reverseDependencies;
-  /** array of (ShovelerWorldDependencyCallback) */
-  GArray* dependencyCallbacks;
   ShovelerSchema* schema;
   ShovelerSystem* system;
-  ShovelerWorldUpdateAuthoritativeComponentFunction* updateAuthoritativeComponent;
-  void* updateAuthoritativeComponentUserData;
+  ShovelerWorldCallbacks* callbacks;
   ShovelerComponentWorldAdapter* componentWorldAdapter;
   int numComponentDependencies;
   int numComponents;
@@ -55,23 +114,9 @@ typedef struct ShovelerWorldEntityStruct {
   /* private */ GHashTable* authoritativeComponents;
 } ShovelerWorldEntity;
 
-typedef void(ShovelerWorldDependencyCallbackFunction)(
-    ShovelerWorld* world,
-    const ShovelerEntityComponentId* dependencySource,
-    const ShovelerEntityComponentId* dependencyTarget,
-    bool added,
-    void* userData);
-
-typedef struct {
-  ShovelerWorldDependencyCallbackFunction* function;
-  void* userData;
-} ShovelerWorldDependencyCallback;
-
+/** Caller retains ownership over passed objects. */
 ShovelerWorld* shovelerWorldCreate(
-    ShovelerSchema* schema,
-    ShovelerSystem* system,
-    ShovelerWorldUpdateAuthoritativeComponentFunction* updateAuthoritativeComponent,
-    void* updateAuthoritativeComponentUserData);
+    ShovelerSchema* schema, ShovelerSystem* system, ShovelerWorldCallbacks* callbacks);
 ShovelerComponentWorldAdapter* shovelerWorldGetComponentAdapter(ShovelerWorld* world);
 ShovelerWorldEntity* shovelerWorldAddEntity(ShovelerWorld* world, long long int entityId);
 bool shovelerWorldRemoveEntity(ShovelerWorld* world, long long int entityId);
@@ -82,10 +127,6 @@ void shovelerWorldEntityDelegateComponent(ShovelerWorldEntity* entity, const cha
 bool shovelerWorldEntityIsAuthoritative(ShovelerWorldEntity* entity, const char* componentTypeId);
 void shovelerWorldEntityUndelegateComponent(
     ShovelerWorldEntity* entity, const char* componentTypeId);
-const ShovelerWorldDependencyCallback* shovelerWorldAddDependencyCallback(
-    ShovelerWorld* world, ShovelerWorldDependencyCallbackFunction* function, void* userData);
-bool shovelerWorldRemoveDependencyCallback(
-    ShovelerWorld* world, const ShovelerWorldDependencyCallback* callback);
 void shovelerWorldFree(ShovelerWorld* world);
 
 static inline ShovelerWorldEntity* shovelerWorldGetEntity(

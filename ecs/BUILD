@@ -34,6 +34,7 @@ cc_library(
 cc_test(
     name = "ecs_tests",
     srcs = [
+        "src/component_field_value_wrapper.h",
         "src/component_test.cpp",
         "src/test.cpp",
         "src/test_component_types.h",

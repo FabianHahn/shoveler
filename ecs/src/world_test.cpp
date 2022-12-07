@@ -1,6 +1,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include "ecs/src/component_field_value_wrapper.h"
 #include <string>
 
 extern "C" {
@@ -22,57 +23,51 @@ using ::testing::SizeIs;
 const long long int entityId1 = 1;
 const long long int entityId2 = 2;
 
-struct DependencyCallbackCall {
-  ShovelerWorld* world;
-  ShovelerEntityComponentId dependencySource;
-  ShovelerEntityComponentId dependencyTarget;
-  bool added;
-};
-
-static void updateAuthoritativeComponent(
+void onAddEntity(ShovelerWorld* world, ShovelerWorldEntity* entity, void* userData);
+void onRemoveEntity(ShovelerWorld* world, long long int entityId, void* userData);
+void onAddComponent(
     ShovelerWorld* world,
+    ShovelerWorldEntity* entity,
+    ShovelerComponent* component,
+    void* userData);
+void onUpdateComponent(
+    ShovelerWorld* world,
+    ShovelerWorldEntity* entity,
     ShovelerComponent* component,
     int fieldId,
     const ShovelerComponentField* field,
     const ShovelerComponentFieldValue* value,
+    bool isAuthoritative,
     void* userData);
-static void dependencyCallback(
+void onActivateComponent(
+    ShovelerWorld* world,
+    ShovelerWorldEntity* entity,
+    ShovelerComponent* component,
+    void* userData);
+void onDeactivateComponent(
+    ShovelerWorld* world,
+    ShovelerWorldEntity* entity,
+    ShovelerComponent* component,
+    void* userData);
+void onDelegateComponent(
+    ShovelerWorld* world, ShovelerWorldEntity* entity, const char* componentTypeId, void* userData);
+void onUndelegateComponent(
+    ShovelerWorld* world, ShovelerWorldEntity* entity, const char* componentTypeId, void* userData);
+void onRemoveComponent(
+    ShovelerWorld* world, ShovelerWorldEntity* entity, const char* componentTypeId, void* userData);
+void onAddDependency(
     ShovelerWorld* world,
     const ShovelerEntityComponentId* dependencySource,
     const ShovelerEntityComponentId* dependencyTarget,
-    bool added,
+    void* userData);
+void onRemoveDependency(
+    ShovelerWorld* world,
+    const ShovelerEntityComponentId* dependencySource,
+    const ShovelerEntityComponentId* dependencyTarget,
     void* userData);
 
 static void* activateComponent(ShovelerComponent* component, void* userData);
 static void deactivateComponent(ShovelerComponent* component, void* userData);
-
-MATCHER_P4(
-    IsAddedDependency,
-    sourceEntityId,
-    sourceComponentTypeId,
-    targetEntityId,
-    targetComponentTypeId,
-    "") {
-  const DependencyCallbackCall& call = arg;
-  return call.dependencySource.entityId == sourceEntityId &&
-      call.dependencySource.componentTypeId == sourceComponentTypeId &&
-      call.dependencyTarget.entityId == targetEntityId &&
-      call.dependencyTarget.componentTypeId == targetComponentTypeId && call.added;
-}
-
-MATCHER_P4(
-    IsRemovedDependency,
-    sourceEntityId,
-    sourceComponentTypeId,
-    targetEntityId,
-    targetComponentTypeId,
-    "") {
-  const DependencyCallbackCall& call = arg;
-  return call.dependencySource.entityId == sourceEntityId &&
-      call.dependencySource.componentTypeId == sourceComponentTypeId &&
-      call.dependencyTarget.entityId == targetEntityId &&
-      call.dependencyTarget.componentTypeId == targetComponentTypeId && !call.added;
-}
 
 class ShovelerWorldTest : public ::testing::Test {
 public:
@@ -102,8 +97,21 @@ public:
     componentSystem2->callbackUserData = this;
     componentSystem3->callbackUserData = this;
 
-    world = shovelerWorldCreate(schema, system, updateAuthoritativeComponent, this);
-    shovelerWorldAddDependencyCallback(world, dependencyCallback, this);
+    callbacks = shovelerWorldCallbacks();
+    callbacks.onAddEntity = onAddEntity;
+    callbacks.onRemoveEntity = onRemoveEntity;
+    callbacks.onAddComponent = onAddComponent;
+    callbacks.onUpdateComponent = onUpdateComponent;
+    callbacks.onActivateComponent = onActivateComponent;
+    callbacks.onDeactivateComponent = onDeactivateComponent;
+    callbacks.onDelegateComponent = onDelegateComponent;
+    callbacks.onUndelegateComponent = onUndelegateComponent;
+    callbacks.onRemoveComponent = onRemoveComponent;
+    callbacks.onAddDependency = onAddDependency;
+    callbacks.onRemoveDependency = onRemoveDependency;
+    callbacks.userData = this;
+
+    world = shovelerWorldCreate(schema, system, &callbacks);
   }
 
   virtual void TearDown() {
@@ -115,24 +123,164 @@ public:
 
   ShovelerSchema* schema;
   ShovelerSystem* system;
+  ShovelerWorldCallbacks callbacks;
   ShovelerWorld* world;
 
-  struct UpdateAuthoritativeComponentCall {
+  struct OnAddEntityCall {
     ShovelerWorld* world;
-    ShovelerComponent* component;
-    const ShovelerComponentField* field;
-    const ShovelerComponentFieldValue* value;
-  };
-  std::vector<UpdateAuthoritativeComponentCall> updateAuthoritativeComponentCalls;
+    ShovelerWorldEntity* entity;
 
-  std::vector<DependencyCallbackCall> dependencyCallbackCalls;
-  std::vector<ShovelerComponent*> activateCalls;
-  std::vector<ShovelerComponent*> deactivateCalls;
+    bool operator==(const OnAddEntityCall& other) const {
+      return world == other.world && entity == other.entity;
+    }
+  };
+  std::vector<OnAddEntityCall> onAddEntityCalls;
+
+  struct OnRemoveEntityCall {
+    ShovelerWorld* world;
+    long long int entityId;
+
+    bool operator==(const OnRemoveEntityCall& other) const {
+      return world == other.world && entityId == other.entityId;
+    }
+  };
+  std::vector<OnRemoveEntityCall> onRemoveEntityCalls;
+
+  struct OnAddComponentCall {
+    ShovelerWorld* world;
+    ShovelerWorldEntity* entity;
+    ShovelerComponent* component;
+
+    bool operator==(const OnAddComponentCall& other) const {
+      return world == other.world && entity == other.entity && component == other.component;
+    }
+  };
+  std::vector<OnAddComponentCall> onAddComponentCalls;
+
+  struct OnUpdateComponentCall {
+    ShovelerWorld* world;
+    ShovelerWorldEntity* entity;
+    ShovelerComponent* component;
+    int fieldId;
+    const ShovelerComponentField* field;
+    ShovelerComponentFieldValueWrapper value;
+    bool isAuthoritative;
+  };
+  std::vector<OnUpdateComponentCall> onUpdateComponentCalls;
+
+  struct OnActivateComponentCall {
+    ShovelerWorld* world;
+    ShovelerWorldEntity* entity;
+    ShovelerComponent* component;
+
+    bool operator==(const OnActivateComponentCall& other) const {
+      return world == other.world && entity == other.entity && component == other.component;
+    }
+  };
+  std::vector<OnActivateComponentCall> onActivateComponentCalls;
+
+  struct OnDeactivateComponentCall {
+    ShovelerWorld* world;
+    ShovelerWorldEntity* entity;
+    ShovelerComponent* component;
+
+    bool operator==(const OnDeactivateComponentCall& other) const {
+      return world == other.world && entity == other.entity && component == other.component;
+    }
+  };
+  std::vector<OnDeactivateComponentCall> onDeactivateComponentCalls;
+
+  struct OnDelegateComponentCall {
+    ShovelerWorld* world;
+    ShovelerWorldEntity* entity;
+    const char* componentTypeId;
+
+    bool operator==(const OnDelegateComponentCall& other) const {
+      return world == other.world && entity == other.entity &&
+          componentTypeId == other.componentTypeId;
+    }
+  };
+  std::vector<OnDelegateComponentCall> onDelegateComponentCalls;
+
+  struct OnUndelegateComponentCall {
+    ShovelerWorld* world;
+    ShovelerWorldEntity* entity;
+    const char* componentTypeId;
+
+    bool operator==(const OnUndelegateComponentCall& other) const {
+      return world == other.world && entity == other.entity &&
+          componentTypeId == other.componentTypeId;
+    }
+  };
+  std::vector<OnUndelegateComponentCall> onUndelegateComponentCalls;
+
+  struct OnRemoveComponentCall {
+    ShovelerWorld* world;
+    ShovelerWorldEntity* entity;
+    const char* componentTypeId;
+
+    bool operator==(const OnRemoveComponentCall& other) const {
+      return world == other.world && entity == other.entity &&
+          componentTypeId == other.componentTypeId;
+    }
+  };
+  std::vector<OnRemoveComponentCall> onRemoveComponentCalls;
+
+  struct OnAddDependencyCall {
+    ShovelerWorld* world;
+    ShovelerEntityComponentId dependencySource;
+    ShovelerEntityComponentId dependencyTarget;
+
+    bool operator==(const OnAddDependencyCall& other) const {
+      return world == other.world && dependencySource.entityId == other.dependencySource.entityId &&
+          dependencySource.componentTypeId == other.dependencySource.componentTypeId &&
+          dependencyTarget.entityId == other.dependencyTarget.entityId &&
+          dependencyTarget.componentTypeId == other.dependencyTarget.componentTypeId;
+    }
+  };
+  std::vector<OnAddDependencyCall> onAddDependencyCalls;
+
+  struct OnRemoveDependencyCall {
+    ShovelerWorld* world;
+    ShovelerEntityComponentId dependencySource;
+    ShovelerEntityComponentId dependencyTarget;
+
+    bool operator==(const OnRemoveDependencyCall& other) const {
+      return world == other.world && dependencySource.entityId == other.dependencySource.entityId &&
+          dependencySource.componentTypeId == other.dependencySource.componentTypeId &&
+          dependencyTarget.entityId == other.dependencyTarget.entityId &&
+          dependencyTarget.componentTypeId == other.dependencyTarget.componentTypeId;
+    }
+  };
+  std::vector<OnRemoveDependencyCall> onRemoveDependencyCalls;
+
+  std::vector<ShovelerComponent*> activateComponentCalls;
+  std::vector<ShovelerComponent*> deactivateComponentCalls;
 };
+
+MATCHER_P7(
+    IsOnUpdateComponentIntValueCall,
+    world,
+    entity,
+    component,
+    fieldId,
+    field,
+    intValue,
+    isAuthoritative,
+    "") {
+  const ShovelerWorldTest::OnUpdateComponentCall& call = arg;
+  return call.world == world && call.entity && entity && call.component == component &&
+      call.fieldId == fieldId && call.field == field &&
+      call.value->type == SHOVELER_COMPONENT_FIELD_TYPE_INT && call.value->isSet &&
+      call.value->intValue == intValue && call.isAuthoritative == isAuthoritative;
+}
 
 TEST_F(ShovelerWorldTest, addRemoveEntity) {
   ShovelerWorldEntity* entity1 = shovelerWorldAddEntity(world, entityId1);
   ShovelerWorldEntity* entity2 = shovelerWorldAddEntity(world, entityId2);
+  ASSERT_THAT(
+      onAddEntityCalls,
+      ElementsAre(OnAddEntityCall{world, entity1}, OnAddEntityCall{world, entity2}));
   ASSERT_NE(entity1, entity2);
   ASSERT_EQ(shovelerWorldGetEntity(world, entityId1), entity1);
   ASSERT_EQ(shovelerWorldGetEntity(world, entityId2), entity2);
@@ -140,11 +288,15 @@ TEST_F(ShovelerWorldTest, addRemoveEntity) {
 
   bool removed = shovelerWorldRemoveEntity(world, entityId1);
   ASSERT_TRUE(removed);
+  ASSERT_THAT(onRemoveEntityCalls, ElementsAre(OnRemoveEntityCall{world, entityId1}));
   ASSERT_EQ(shovelerWorldGetEntity(world, entityId1), nullptr);
   ASSERT_EQ(shovelerWorldGetEntity(world, entityId2), entity2);
   ASSERT_EQ(shovelerWorldGetEntity(world, 1337), nullptr);
+
+  onRemoveEntityCalls.clear();
   bool removedAgain = shovelerWorldRemoveEntity(world, entityId1);
   ASSERT_FALSE(removedAgain);
+  ASSERT_THAT(onRemoveEntityCalls, IsEmpty());
 }
 
 TEST_F(ShovelerWorldTest, addRemoveComponent) {
@@ -152,21 +304,32 @@ TEST_F(ShovelerWorldTest, addRemoveComponent) {
   ShovelerWorldEntity* entity2 = shovelerWorldAddEntity(world, entityId2);
   ShovelerComponent* component1 = shovelerWorldEntityAddComponent(entity1, componentType1Id);
   ASSERT_NE(component1, nullptr);
-  ASSERT_EQ(shovelerWorldEntityAddComponent(entity1, componentType1Id), nullptr)
-      << "cannot add the same component twice";
+  ASSERT_EQ(component1->entityId, entityId1);
+  ASSERT_THAT(onAddComponentCalls, ElementsAre(OnAddComponentCall{world, entity1, component1}));
+  ShovelerComponent* addedAgain = shovelerWorldEntityAddComponent(entity1, componentType1Id);
+  ASSERT_EQ(addedAgain, nullptr) << "cannot add the same component twice";
+
+  onAddComponentCalls.clear();
   ShovelerComponent* component2 = shovelerWorldEntityAddComponent(entity1, componentType2Id);
   ASSERT_NE(component2, nullptr);
   ASSERT_NE(component1, component2);
+  ASSERT_EQ(component2->entityId, entityId1);
+  ASSERT_THAT(onAddComponentCalls, ElementsAre(OnAddComponentCall{world, entity1, component2}));
   ASSERT_EQ(shovelerWorldEntityGetComponent(entity1, componentType1Id), component1);
   ASSERT_EQ(shovelerWorldEntityGetComponent(entity1, componentType2Id), component2);
 
+  onAddComponentCalls.clear();
   ShovelerComponent* component3 = shovelerWorldEntityAddComponent(entity2, componentType1Id);
   ASSERT_NE(component3, nullptr);
   ASSERT_NE(component1, component3);
+  ASSERT_EQ(component3->entityId, entityId2);
+  ASSERT_THAT(onAddComponentCalls, ElementsAre(OnAddComponentCall{world, entity2, component3}));
   ASSERT_EQ(shovelerWorldEntityGetComponent(entity2, componentType1Id), component3);
 
   bool removed = shovelerWorldEntityRemoveComponent(entity1, componentType1Id);
   ASSERT_TRUE(removed);
+  ASSERT_THAT(
+      onRemoveComponentCalls, ElementsAre(OnRemoveComponentCall{world, entity1, componentType1Id}));
   ASSERT_EQ(shovelerWorldEntityGetComponent(entity1, componentType1Id), nullptr);
   ASSERT_EQ(shovelerWorldEntityGetComponent(entity1, componentType2Id), component2);
   ASSERT_EQ(shovelerWorldEntityGetComponent(entity2, componentType1Id), component3);
@@ -175,78 +338,186 @@ TEST_F(ShovelerWorldTest, addRemoveComponent) {
 }
 
 TEST_F(ShovelerWorldTest, updateAuthoritativeComponent) {
-  const int newConfigurationValue = 27;
+  const int newFieldValue = 27;
 
   ShovelerWorldEntity* entity1 = shovelerWorldAddEntity(world, entityId1);
   shovelerWorldEntityDelegateComponent(entity1, componentType1Id);
   ShovelerComponent* component1 = shovelerWorldEntityAddComponent(entity1, componentType1Id);
 
-  bool updated = shovelerComponentUpdateFieldInt(
-      component1, COMPONENT_TYPE_1_FIELD_PRIMITIVE, newConfigurationValue);
+  bool updated =
+      shovelerComponentUpdateFieldInt(component1, COMPONENT_TYPE_1_FIELD_PRIMITIVE, newFieldValue);
   ASSERT_TRUE(updated);
-  ASSERT_THAT(updateAuthoritativeComponentCalls, SizeIs(1));
-  ASSERT_EQ(updateAuthoritativeComponentCalls[0].world, world);
-  ASSERT_EQ(updateAuthoritativeComponentCalls[0].component, component1);
-  ASSERT_EQ(
-      updateAuthoritativeComponentCalls[0].field,
-      &component1->type->fields[COMPONENT_TYPE_1_FIELD_PRIMITIVE]);
+  ASSERT_THAT(
+      onUpdateComponentCalls,
+      ElementsAre(IsOnUpdateComponentIntValueCall(
+          world,
+          entity1,
+          component1,
+          COMPONENT_TYPE_1_FIELD_PRIMITIVE,
+          &component1->type->fields[COMPONENT_TYPE_1_FIELD_PRIMITIVE],
+          newFieldValue,
+          /* isAuthoritative */ false)));
 }
 
 TEST_F(ShovelerWorldTest, addRemoveDependency) {
   ShovelerWorldEntity* entity1 = shovelerWorldAddEntity(world, entityId1);
   ShovelerComponent* component1 = shovelerWorldEntityAddComponent(entity1, componentType1Id);
   ShovelerComponent* component2 = shovelerWorldEntityAddComponent(entity1, componentType2Id);
+  ASSERT_THAT(onAddDependencyCalls, IsEmpty()); // dependency fields are optional
+
   shovelerWorldEntityDelegateComponent(entity1, componentType2Id);
+  ASSERT_THAT(
+      onDelegateComponentCalls,
+      ElementsAre(OnDelegateComponentCall{world, entity1, componentType2Id}));
 
   shovelerComponentUpdateCanonicalFieldEntityId(
       component1, COMPONENT_TYPE_1_FIELD_DEPENDENCY_REACTIVATE, entityId1);
-  shovelerComponentActivate(component2);
   ASSERT_THAT(
-      dependencyCallbackCalls,
-      ElementsAre(IsAddedDependency(entityId1, componentType1Id, entityId1, componentType2Id)));
-  dependencyCallbackCalls.clear();
-  ASSERT_THAT(activateCalls, ElementsAre(component2, component1));
+      onAddDependencyCalls,
+      ElementsAre(OnAddDependencyCall{
+          world,
+          shovelerEntityComponentId(entityId1, componentType1Id),
+          shovelerEntityComponentId(entityId1, componentType2Id)}));
 
+  shovelerComponentActivate(component2);
+  ASSERT_THAT(activateComponentCalls, ElementsAre(component2, component1));
+  ASSERT_THAT(
+      onActivateComponentCalls,
+      ElementsAre(
+          OnActivateComponentCall{world, entity1, component2},
+          OnActivateComponentCall{world, entity1, component1}));
+
+  onAddDependencyCalls.clear();
   shovelerComponentUpdateCanonicalFieldEntityId(
       component1, COMPONENT_TYPE_1_FIELD_DEPENDENCY_REACTIVATE, entityId2);
   ASSERT_THAT(
-      dependencyCallbackCalls,
-      ElementsAre(
-          IsRemovedDependency(entityId1, componentType1Id, entityId1, componentType2Id),
-          IsAddedDependency(entityId1, componentType1Id, entityId2, componentType2Id)));
-  ASSERT_THAT(deactivateCalls, ElementsAre(component1));
+      onRemoveDependencyCalls,
+      ElementsAre(OnRemoveDependencyCall{
+          world,
+          shovelerEntityComponentId(entityId1, componentType1Id),
+          shovelerEntityComponentId(entityId1, componentType2Id)}));
+  ASSERT_THAT(
+      onAddDependencyCalls,
+      ElementsAre(OnAddDependencyCall{
+          world,
+          shovelerEntityComponentId(entityId1, componentType1Id),
+          shovelerEntityComponentId(entityId2, componentType2Id)}));
+  ASSERT_THAT(deactivateComponentCalls, ElementsAre(component1));
+  ASSERT_THAT(
+      onDeactivateComponentCalls,
+      ElementsAre(OnDeactivateComponentCall{world, entity1, component1}));
 }
 
-static void updateAuthoritativeComponent(
+void onAddEntity(ShovelerWorld* world, ShovelerWorldEntity* entity, void* testPointer) {
+  auto* test = static_cast<ShovelerWorldTest*>(testPointer);
+  test->onAddEntityCalls.emplace_back(ShovelerWorldTest::OnAddEntityCall{world, entity});
+}
+
+void onRemoveEntity(ShovelerWorld* world, long long int entityId, void* testPointer) {
+  auto* test = static_cast<ShovelerWorldTest*>(testPointer);
+  test->onRemoveEntityCalls.emplace_back(ShovelerWorldTest::OnRemoveEntityCall{world, entityId});
+}
+
+void onAddComponent(
     ShovelerWorld* world,
+    ShovelerWorldEntity* entity,
+    ShovelerComponent* component,
+    void* testPointer) {
+  auto* test = static_cast<ShovelerWorldTest*>(testPointer);
+  test->onAddComponentCalls.emplace_back(
+      ShovelerWorldTest::OnAddComponentCall{world, entity, component});
+}
+
+void onUpdateComponent(
+    ShovelerWorld* world,
+    ShovelerWorldEntity* entity,
     ShovelerComponent* component,
     int fieldId,
     const ShovelerComponentField* field,
     const ShovelerComponentFieldValue* value,
+    bool isAuthoritative,
     void* testPointer) {
-  ShovelerWorldTest* test = (ShovelerWorldTest*) testPointer;
-  test->updateAuthoritativeComponentCalls.emplace_back(
-      ShovelerWorldTest::UpdateAuthoritativeComponentCall{world, component, field, value});
+  auto* test = static_cast<ShovelerWorldTest*>(testPointer);
+  test->onUpdateComponentCalls.push_back(ShovelerWorldTest::OnUpdateComponentCall{
+      world, entity, component, fieldId, field, value, isAuthoritative});
+}
+void onActivateComponent(
+    ShovelerWorld* world,
+    ShovelerWorldEntity* entity,
+    ShovelerComponent* component,
+    void* testPointer) {
+  auto* test = static_cast<ShovelerWorldTest*>(testPointer);
+  test->onActivateComponentCalls.emplace_back(
+      ShovelerWorldTest::OnActivateComponentCall{world, entity, component});
 }
 
-static void dependencyCallback(
+void onDeactivateComponent(
+    ShovelerWorld* world,
+    ShovelerWorldEntity* entity,
+    ShovelerComponent* component,
+    void* testPointer) {
+  auto* test = static_cast<ShovelerWorldTest*>(testPointer);
+  test->onDeactivateComponentCalls.emplace_back(
+      ShovelerWorldTest::OnDeactivateComponentCall{world, entity, component});
+}
+
+void onDelegateComponent(
+    ShovelerWorld* world,
+    ShovelerWorldEntity* entity,
+    const char* componentTypeId,
+    void* testPointer) {
+  auto* test = static_cast<ShovelerWorldTest*>(testPointer);
+  test->onDelegateComponentCalls.emplace_back(
+      ShovelerWorldTest::OnDelegateComponentCall{world, entity, componentTypeId});
+}
+
+void onUndelegateComponent(
+    ShovelerWorld* world,
+    ShovelerWorldEntity* entity,
+    const char* componentTypeId,
+    void* testPointer) {
+  auto* test = static_cast<ShovelerWorldTest*>(testPointer);
+  test->onUndelegateComponentCalls.emplace_back(
+      ShovelerWorldTest::OnUndelegateComponentCall{world, entity, componentTypeId});
+}
+
+void onRemoveComponent(
+    ShovelerWorld* world,
+    ShovelerWorldEntity* entity,
+    const char* componentTypeId,
+    void* testPointer) {
+  auto* test = static_cast<ShovelerWorldTest*>(testPointer);
+  test->onRemoveComponentCalls.emplace_back(
+      ShovelerWorldTest::OnRemoveComponentCall{world, entity, componentTypeId});
+}
+
+void onAddDependency(
     ShovelerWorld* world,
     const ShovelerEntityComponentId* dependencySource,
     const ShovelerEntityComponentId* dependencyTarget,
-    bool added,
     void* testPointer) {
-  ShovelerWorldTest* test = (ShovelerWorldTest*) testPointer;
-  test->dependencyCallbackCalls.emplace_back(
-      DependencyCallbackCall{world, *dependencySource, *dependencyTarget, added});
+  auto* test = static_cast<ShovelerWorldTest*>(testPointer);
+  test->onAddDependencyCalls.emplace_back(
+      ShovelerWorldTest::OnAddDependencyCall{world, *dependencySource, *dependencyTarget});
+}
+
+void onRemoveDependency(
+    ShovelerWorld* world,
+    const ShovelerEntityComponentId* dependencySource,
+    const ShovelerEntityComponentId* dependencyTarget,
+    void* testPointer) {
+  auto* test = static_cast<ShovelerWorldTest*>(testPointer);
+  test->onRemoveDependencyCalls.emplace_back(
+      ShovelerWorldTest::OnRemoveDependencyCall{world, *dependencySource, *dependencyTarget});
 }
 
 static void* activateComponent(ShovelerComponent* component, void* testPointer) {
-  ShovelerWorldTest* test = (ShovelerWorldTest*) testPointer;
-  test->activateCalls.emplace_back(component);
+  auto* test = static_cast<ShovelerWorldTest*>(testPointer);
+  test->activateComponentCalls.emplace_back(component);
   return test;
 }
 
 static void deactivateComponent(ShovelerComponent* component, void* testPointer) {
-  ShovelerWorldTest* test = (ShovelerWorldTest*) testPointer;
-  test->deactivateCalls.emplace_back(component);
+  auto* test = static_cast<ShovelerWorldTest*>(testPointer);
+  test->deactivateComponentCalls.emplace_back(component);
 }

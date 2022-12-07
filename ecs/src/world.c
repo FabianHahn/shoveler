@@ -2,6 +2,7 @@
 
 #include <glib.h>
 #include <stdlib.h> // malloc free
+#include <string.h> // memset
 
 #include "shoveler/component.h"
 #include "shoveler/component_system.h"
@@ -16,12 +17,15 @@ static ShovelerComponent* getComponent(
     long long int entityId,
     const char* componentTypeId,
     void* userData);
-static void worldUpdateAuthoritativeComponent(
+static void worldUpdateComponent(
     ShovelerComponent* component,
     int fieldId,
     const ShovelerComponentField* field,
     const ShovelerComponentFieldValue* value,
-    void* userData);
+    bool isAuthoritative,
+    void* worldPointer);
+static void worldActivateComponent(ShovelerComponent* component, void* worldPointer);
+static void worldDeactivateComponent(ShovelerComponent* component, void* worldPointer);
 static void addDependency(
     ShovelerComponent* component,
     long long int targetEntityId,
@@ -43,26 +47,28 @@ static void freeEntity(void* entityPointer);
 static void freeComponent(void* componentPointer);
 static void freeDependencyArray(void* dependencyArrayPointer);
 
+ShovelerWorldCallbacks shovelerWorldCallbacks() {
+  ShovelerWorldCallbacks callbacks;
+  memset(&callbacks, 0, sizeof(ShovelerWorldCallbacks));
+  return callbacks;
+}
+
 ShovelerWorld* shovelerWorldCreate(
-    ShovelerSchema* schema,
-    ShovelerSystem* system,
-    ShovelerWorldUpdateAuthoritativeComponentFunction* updateAuthoritativeComponent,
-    void* updateAuthoritativeComponentUserData) {
+    ShovelerSchema* schema, ShovelerSystem* system, ShovelerWorldCallbacks* callbacks) {
   ShovelerWorld* world = malloc(sizeof(ShovelerWorld));
   world->entities = g_hash_table_new_full(g_int64_hash, g_int64_equal, NULL, freeEntity);
   world->dependencies = g_hash_table_new_full(
       shovelerEntityComponentIdHash, shovelerEntityComponentIdEqual, free, freeDependencyArray);
   world->reverseDependencies = g_hash_table_new_full(
       shovelerEntityComponentIdHash, shovelerEntityComponentIdEqual, free, freeDependencyArray);
-  world->dependencyCallbacks = g_array_new(
-      /* zeroTerminated */ false, /* clear */ true, sizeof(ShovelerWorldDependencyCallback));
   world->schema = schema;
   world->system = system;
-  world->updateAuthoritativeComponent = updateAuthoritativeComponent;
-  world->updateAuthoritativeComponentUserData = updateAuthoritativeComponentUserData;
+  world->callbacks = callbacks;
   world->componentWorldAdapter = malloc(sizeof(ShovelerComponentWorldAdapter));
   world->componentWorldAdapter->getComponent = getComponent;
-  world->componentWorldAdapter->updateAuthoritativeComponent = worldUpdateAuthoritativeComponent;
+  world->componentWorldAdapter->onUpdateComponentField = worldUpdateComponent;
+  world->componentWorldAdapter->onActivateComponent = worldActivateComponent;
+  world->componentWorldAdapter->onDeactivateComponent = worldDeactivateComponent;
   world->componentWorldAdapter->addDependency = addDependency;
   world->componentWorldAdapter->removeDependency = removeDependency;
   world->componentWorldAdapter->forEachReverseDependency = forEachReverseDependency;
@@ -91,6 +97,11 @@ ShovelerWorldEntity* shovelerWorldAddEntity(ShovelerWorld* world, long long int 
   }
 
   shovelerLogTrace("Added entity %lld.", entity->id);
+
+  if (world->callbacks->onAddEntity != NULL) {
+    world->callbacks->onAddEntity(world, entity, world->callbacks->userData);
+  }
+
   return entity;
 }
 
@@ -114,6 +125,11 @@ bool shovelerWorldRemoveEntity(ShovelerWorld* world, long long int entityId) {
   }
 
   shovelerLogTrace("Removed entity %lld.", entityId);
+
+  if (world->callbacks->onRemoveEntity != NULL) {
+    world->callbacks->onRemoveEntity(world, entityId, world->callbacks->userData);
+  }
+
   return true;
 }
 
@@ -158,6 +174,11 @@ ShovelerComponent* shovelerWorldEntityAddComponent(
 
   world->numComponents++;
   shovelerLogTrace("Added component '%s' to entity %lld.", componentTypeId, entity->id);
+
+  if (world->callbacks->onAddComponent != NULL) {
+    world->callbacks->onAddComponent(world, entity, component, world->callbacks->userData);
+  }
+
   return component;
 }
 
@@ -178,6 +199,10 @@ bool shovelerWorldEntityRemoveComponent(ShovelerWorldEntity* entity, const char*
   world->numComponents--;
   shovelerLogTrace("Removed component '%s' from entity %lld.", componentTypeId, entity->id);
 
+  if (world->callbacks->onRemoveComponent != NULL) {
+    world->callbacks->onRemoveComponent(world, entity, componentTypeId, world->callbacks->userData);
+  }
+
   return true;
 }
 
@@ -188,6 +213,11 @@ void shovelerWorldEntityDelegateComponent(
   ShovelerComponent* component = g_hash_table_lookup(entity->components, componentTypeId);
   if (component != NULL) {
     shovelerComponentDelegate(component);
+  }
+
+  if (entity->world->callbacks->onDelegateComponent != NULL) {
+    entity->world->callbacks->onDelegateComponent(
+        entity->world, entity, componentTypeId, entity->world->callbacks->userData);
   }
 }
 
@@ -203,33 +233,11 @@ void shovelerWorldEntityUndelegateComponent(
   if (component != NULL) {
     shovelerComponentUndelegate(component);
   }
-}
 
-const ShovelerWorldDependencyCallback* shovelerWorldAddDependencyCallback(
-    ShovelerWorld* world, ShovelerWorldDependencyCallbackFunction* function, void* userData) {
-  ShovelerWorldDependencyCallback callback;
-  callback.function = function;
-  callback.userData = userData;
-
-  g_array_append_val(world->dependencyCallbacks, callback);
-  return &g_array_index(
-      world->dependencyCallbacks,
-      ShovelerWorldDependencyCallback,
-      world->dependencyCallbacks->len - 1);
-}
-
-bool shovelerWorldRemoveDependencyCallback(
-    ShovelerWorld* world, const ShovelerWorldDependencyCallback* callback) {
-  for (int i = 0; i < world->dependencyCallbacks->len; i++) {
-    ShovelerWorldDependencyCallback* currentCallback =
-        &g_array_index(world->dependencyCallbacks, ShovelerWorldDependencyCallback, i);
-    if (currentCallback == callback) {
-      g_array_remove_index_fast(world->dependencyCallbacks, i);
-      return true;
-    }
+  if (entity->world->callbacks->onUndelegateComponent != NULL) {
+    entity->world->callbacks->onUndelegateComponent(
+        entity->world, entity, componentTypeId, entity->world->callbacks->userData);
   }
-
-  return true;
 }
 
 void shovelerWorldFree(ShovelerWorld* world) {
@@ -247,7 +255,6 @@ void shovelerWorldFree(ShovelerWorld* world) {
   g_hash_table_destroy(world->entities);
   g_hash_table_destroy(world->reverseDependencies);
   g_hash_table_destroy(world->dependencies);
-  g_array_free(world->dependencyCallbacks, /* freeSegment */ true);
   free(world->componentWorldAdapter);
   free(world);
 }
@@ -267,16 +274,48 @@ static ShovelerComponent* getComponent(
   return g_hash_table_lookup(entity->components, componentTypeId);
 }
 
-static void worldUpdateAuthoritativeComponent(
+static void worldUpdateComponent(
     ShovelerComponent* component,
     int fieldId,
     const ShovelerComponentField* field,
     const ShovelerComponentFieldValue* value,
+    bool isAuthoritative,
     void* worldPointer) {
   ShovelerWorld* world = (ShovelerWorld*) worldPointer;
 
-  world->updateAuthoritativeComponent(
-      world, component, fieldId, field, value, world->updateAuthoritativeComponentUserData);
+  if (world->callbacks->onUpdateComponent != NULL) {
+    ShovelerWorldEntity* entity = shovelerWorldGetEntity(world, component->entityId);
+    assert(entity != NULL);
+    world->callbacks->onUpdateComponent(
+        world,
+        entity,
+        component,
+        fieldId,
+        field,
+        value,
+        isAuthoritative,
+        world->callbacks->userData);
+  }
+}
+
+static void worldActivateComponent(ShovelerComponent* component, void* worldPointer) {
+  ShovelerWorld* world = (ShovelerWorld*) worldPointer;
+
+  if (world->callbacks->onActivateComponent != NULL) {
+    ShovelerWorldEntity* entity = shovelerWorldGetEntity(world, component->entityId);
+    assert(entity != NULL);
+    world->callbacks->onActivateComponent(world, entity, component, world->callbacks->userData);
+  }
+}
+
+static void worldDeactivateComponent(ShovelerComponent* component, void* worldPointer) {
+  ShovelerWorld* world = (ShovelerWorld*) worldPointer;
+
+  if (world->callbacks->onDeactivateComponent != NULL) {
+    ShovelerWorldEntity* entity = shovelerWorldGetEntity(world, component->entityId);
+    assert(entity != NULL);
+    world->callbacks->onDeactivateComponent(world, entity, component, world->callbacks->userData);
+  }
 }
 
 static void addDependency(
@@ -311,15 +350,6 @@ static void addDependency(
   g_array_append_val(dependencies, dependencyTarget);
   g_array_append_val(reverseDependencies, dependencySource);
 
-  for (int i = 0; i < world->dependencyCallbacks->len; i++) {
-    ShovelerWorldDependencyCallback* callback =
-        &g_array_index(world->dependencyCallbacks, ShovelerWorldDependencyCallback, i);
-    if (callback->function != NULL) {
-      callback->function(
-          world, &dependencySource, &dependencyTarget, /* added */ true, callback->userData);
-    }
-  }
-
   world->numComponentDependencies++;
 
   // Only print dependencies to other entities. Otherwise, we print all dummy dependencies added by
@@ -331,6 +361,11 @@ static void addDependency(
         component->entityId,
         targetComponentTypeId,
         targetEntityId);
+  }
+
+  if (world->callbacks->onAddDependency != NULL) {
+    world->callbacks->onAddDependency(
+        world, &dependencySource, &dependencyTarget, world->callbacks->userData);
   }
 }
 
@@ -369,15 +404,6 @@ static bool removeDependency(
     g_hash_table_remove(world->reverseDependencies, &dependencyTarget);
   }
 
-  for (int i = 0; i < world->dependencyCallbacks->len; i++) {
-    ShovelerWorldDependencyCallback* callback =
-        &g_array_index(world->dependencyCallbacks, ShovelerWorldDependencyCallback, i);
-    if (callback->function != NULL) {
-      callback->function(
-          world, &dependencySource, &dependencyTarget, /* added */ false, callback->userData);
-    }
-  }
-
   world->numComponentDependencies--;
 
   // Only print dependencies to other entities. Otherwise, we print all dummy dependencies removed
@@ -389,6 +415,11 @@ static bool removeDependency(
         component->entityId,
         targetComponentTypeId,
         targetEntityId);
+  }
+
+  if (world->callbacks->onRemoveDependency != NULL) {
+    world->callbacks->onRemoveDependency(
+        world, &dependencySource, &dependencyTarget, world->callbacks->userData);
   }
 
   return true;
