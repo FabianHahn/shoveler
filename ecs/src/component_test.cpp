@@ -10,6 +10,8 @@ extern "C" {
 #include "test_component_types.h"
 }
 
+#include "component_field_value_wrapper.h"
+
 using ::testing::ElementsAre;
 using ::testing::IsEmpty;
 using ::testing::SizeIs;
@@ -23,12 +25,15 @@ static ShovelerComponent* getComponent(
     long long int entityId,
     const char* componentTypeId,
     void* userData);
-static void updateAuthoritativeComponent(
+static void onUpdateComponentField(
     ShovelerComponent* component,
     int fieldId,
     const ShovelerComponentField* field,
     const ShovelerComponentFieldValue* value,
-    void* userData);
+    bool isCanonical,
+    void* testPointer);
+static void onActivateComponent(ShovelerComponent* component, void* userData);
+static void onDeactivateComponent(ShovelerComponent* component, void* userData);
 static void addDependency(
     ShovelerComponent* component,
     long long int targetEntityId,
@@ -71,10 +76,13 @@ class ShovelerComponentTest : public ::testing::Test {
 public:
   virtual void SetUp() {
     worldAdapter.getComponent = getComponent;
-    worldAdapter.updateAuthoritativeComponent = updateAuthoritativeComponent;
+    worldAdapter.forEachReverseDependency = forEachReverseDependency;
     worldAdapter.addDependency = addDependency;
     worldAdapter.removeDependency = removeDependency;
-    worldAdapter.forEachReverseDependency = forEachReverseDependency;
+    worldAdapter.onUpdateComponentField = onUpdateComponentField;
+    worldAdapter.onActivateComponent = onActivateComponent;
+    worldAdapter.onDeactivateComponent = onDeactivateComponent;
+
     worldAdapter.userData = this;
 
     systemAdapter.requiresAuthority = requiresAuthority;
@@ -94,9 +102,9 @@ public:
     component1 = shovelerComponentCreate(&worldAdapter, &systemAdapter, entityId1, componentType1);
     component2 = shovelerComponentCreate(&worldAdapter, &systemAdapter, entityId2, componentType2);
     component3 = shovelerComponentCreate(&worldAdapter, &systemAdapter, entityId1, componentType3);
-    ASSERT_TRUE(component1 != NULL);
-    ASSERT_TRUE(component2 != NULL);
-    ASSERT_TRUE(component3 != NULL);
+    ASSERT_TRUE(component1 != nullptr);
+    ASSERT_TRUE(component2 != nullptr);
+    ASSERT_TRUE(component3 != nullptr);
   }
 
   virtual void TearDown() {
@@ -120,12 +128,16 @@ public:
   ShovelerComponent* component2;
   ShovelerComponent* component3;
 
-  struct UpdateAuthoritativeComponentCall {
+  struct OnUpdateComponentFieldCall {
     ShovelerComponent* component;
+    int fieldId;
     const ShovelerComponentField* field;
-    const ShovelerComponentFieldValue* value;
+    ShovelerComponentFieldValueWrapper value;
+    bool isCanonical;
   };
-  std::vector<UpdateAuthoritativeComponentCall> updateAuthoritativeComponentCalls;
+  std::vector<OnUpdateComponentFieldCall> onUpdateComponentFieldCalls;
+  std::vector<ShovelerComponent*> onActivateComponentCalls;
+  std::vector<ShovelerComponent*> onDeactivateComponentCalls;
 
   std::map<std::pair<long long int, std::string>, std::set<ShovelerComponent*>> reverseDependencies;
 
@@ -134,7 +146,7 @@ public:
     ShovelerComponent* component;
     int fieldId;
     const ShovelerComponentField* field;
-    ShovelerComponentFieldValue* fieldValue;
+    ShovelerComponentFieldValueWrapper value;
   };
   std::vector<LiveUpdateCall> liveUpdateCalls;
 
@@ -144,6 +156,11 @@ public:
     int fieldId;
     const ShovelerComponentField* field;
     ShovelerComponent* dependencyComponent;
+
+    bool operator==(const LiveUpdateDependencyCall& other) const {
+      return component == other.component && fieldId == other.fieldId && field == other.field &&
+          dependencyComponent == other.dependencyComponent;
+    }
   };
   std::vector<LiveUpdateDependencyCall> liveUpdateDependencyCalls;
 
@@ -156,6 +173,21 @@ public:
   std::vector<ShovelerComponent*> deactivateCalls;
 };
 
+MATCHER_P5(
+    IsWorldUpdateComponentIntValueCall, component, fieldId, field, intValue, isCanonical, "") {
+  const ShovelerComponentTest::OnUpdateComponentFieldCall& call = arg;
+  return call.component == component && call.fieldId == fieldId && call.field == field &&
+      call.value->type == SHOVELER_COMPONENT_FIELD_TYPE_INT && call.value->isSet &&
+      call.value->intValue == intValue && call.isCanonical == isCanonical;
+}
+
+MATCHER_P4(IsLiveUpdateStringValueCall, component, fieldId, field, stringValue, "") {
+  const ShovelerComponentTest::LiveUpdateCall& call = arg;
+  return call.component == component && call.fieldId == fieldId && call.field == field &&
+      call.value->type == SHOVELER_COMPONENT_FIELD_TYPE_STRING && call.value->isSet &&
+      std::string(call.value->stringValue) == stringValue;
+}
+
 TEST_F(ShovelerComponentTest, activateDeactivate) {
   ASSERT_FALSE(shovelerComponentIsActive(component1));
 
@@ -163,9 +195,11 @@ TEST_F(ShovelerComponentTest, activateDeactivate) {
   ASSERT_TRUE(activated);
   ASSERT_TRUE(shovelerComponentIsActive(component1));
   ASSERT_THAT(activateCalls, ElementsAre(component1));
+  ASSERT_THAT(onActivateComponentCalls, ElementsAre(component1));
 
   shovelerComponentDeactivate(component1);
   ASSERT_FALSE(shovelerComponentIsActive(component1));
+  ASSERT_THAT(onDeactivateComponentCalls, ElementsAre(component1));
 }
 
 TEST_F(ShovelerComponentTest, activateThroughDependencyActivation) {
@@ -186,6 +220,7 @@ TEST_F(ShovelerComponentTest, activateThroughDependencyActivation) {
   ASSERT_TRUE(shovelerComponentIsActive(component1))
       << "component 1 has also been activated after activating its dependency";
   ASSERT_THAT(activateCalls, ElementsAre(component2, component1));
+  ASSERT_THAT(onActivateComponentCalls, ElementsAre(component2, component1));
 }
 
 TEST_F(ShovelerComponentTest, deactivateWhenAddingUnsatisfiedDependency) {
@@ -193,11 +228,13 @@ TEST_F(ShovelerComponentTest, deactivateWhenAddingUnsatisfiedDependency) {
   ASSERT_TRUE(activated);
   ASSERT_TRUE(shovelerComponentIsActive(component1));
   ASSERT_THAT(activateCalls, ElementsAre(component1));
+  ASSERT_THAT(onActivateComponentCalls, ElementsAre(component1));
 
   shovelerComponentUpdateCanonicalFieldEntityId(
       component1, COMPONENT_TYPE_1_FIELD_DEPENDENCY_REACTIVATE, entityId2);
   ASSERT_THAT(deactivateCalls, ElementsAre(component1))
       << "component 1 should be deactivated after adding unsatisfied dependency";
+  ASSERT_THAT(onDeactivateComponentCalls, ElementsAre(component1));
   ASSERT_FALSE(shovelerComponentIsActive(component1));
 }
 
@@ -212,6 +249,7 @@ TEST_F(ShovelerComponentTest, deactivateReverseDependencies) {
   shovelerComponentDeactivate(component2);
   ASSERT_THAT(deactivateCalls, ElementsAre(component1, component2))
       << "component 1 has also been deactivated after deactivating its dependency";
+  ASSERT_THAT(onDeactivateComponentCalls, ElementsAre(component1, component2));
   ASSERT_FALSE(shovelerComponentIsActive(component1));
 }
 
@@ -219,62 +257,80 @@ TEST_F(ShovelerComponentTest, deactivateFreedComponent) {
   shovelerComponentActivate(component1);
   shovelerComponentFree(component1);
   ASSERT_THAT(deactivateCalls, ElementsAre(component1));
+  ASSERT_THAT(onDeactivateComponentCalls, ElementsAre(component1));
 
-  component1 = NULL;
+  component1 = nullptr;
 }
 
-TEST_F(ShovelerComponentTest, updateConfiguration) {
-  const int newConfigurationValue = 27;
+TEST_F(ShovelerComponentTest, updateField) {
+  const int newFieldValue = 27;
 
   int firstValue = shovelerComponentGetFieldValueInt(component1, COMPONENT_TYPE_1_FIELD_PRIMITIVE);
   ASSERT_EQ(firstValue, 0);
 
   bool updated = shovelerComponentUpdateCanonicalFieldInt(
-      component1, COMPONENT_TYPE_1_FIELD_PRIMITIVE, newConfigurationValue);
+      component1, COMPONENT_TYPE_1_FIELD_PRIMITIVE, newFieldValue);
   ASSERT_TRUE(updated);
+  ASSERT_THAT(
+      onUpdateComponentFieldCalls,
+      ElementsAre(IsWorldUpdateComponentIntValueCall(
+          component1,
+          COMPONENT_TYPE_1_FIELD_PRIMITIVE,
+          &componentType1->fields[COMPONENT_TYPE_1_FIELD_PRIMITIVE],
+          newFieldValue,
+          /* isCanonical */ true)));
 
   int secondValue = shovelerComponentGetFieldValueInt(component1, COMPONENT_TYPE_1_FIELD_PRIMITIVE);
-  ASSERT_EQ(secondValue, newConfigurationValue);
+  ASSERT_EQ(secondValue, newFieldValue);
 }
 
-TEST_F(ShovelerComponentTest, updateConfigurationWithReactivation) {
-  const int newConfigurationValue = 27;
+TEST_F(ShovelerComponentTest, updateFieldWithReactivation) {
+  const int newFieldValue = 27;
 
   shovelerComponentActivate(component1);
   activateCalls.clear();
+  onActivateComponentCalls.clear();
 
   bool updated = shovelerComponentUpdateCanonicalFieldInt(
-      component1, COMPONENT_TYPE_1_FIELD_PRIMITIVE, newConfigurationValue);
+      component1, COMPONENT_TYPE_1_FIELD_PRIMITIVE, newFieldValue);
   ASSERT_TRUE(updated);
+  ASSERT_THAT(onUpdateComponentFieldCalls, SizeIs(1));
   ASSERT_THAT(liveUpdateCalls, IsEmpty());
   ASSERT_THAT(deactivateCalls, ElementsAre(component1));
+  ASSERT_THAT(onDeactivateComponentCalls, ElementsAre(component1));
   ASSERT_THAT(activateCalls, ElementsAre(component1));
+  ASSERT_THAT(onActivateComponentCalls, ElementsAre(component1));
 }
 
 TEST_F(ShovelerComponentTest, updateConfigurationLive) {
-  const char* newConfigurationValue = "new value";
+  const char* newFieldValue = "new value";
 
   shovelerComponentDelegate(component2);
   shovelerComponentActivate(component2);
   ASSERT_THAT(activateCalls, ElementsAre(component2));
+  ASSERT_THAT(onActivateComponentCalls, ElementsAre(component2));
   activateCalls.clear();
+  onActivateComponentCalls.clear();
 
   bool updated = shovelerComponentUpdateCanonicalFieldString(
-      component2, COMPONENT_TYPE_2_FIELD_PRIMITIVE_LIVE_UPDATE, newConfigurationValue);
+      component2, COMPONENT_TYPE_2_FIELD_PRIMITIVE_LIVE_UPDATE, newFieldValue);
   ASSERT_TRUE(updated);
-  ASSERT_THAT(liveUpdateCalls, SizeIs(1));
-  ASSERT_EQ(liveUpdateCalls[0].component, component2);
-  ASSERT_EQ(liveUpdateCalls[0].fieldId, COMPONENT_TYPE_2_FIELD_PRIMITIVE_LIVE_UPDATE);
-  ASSERT_EQ(
-      liveUpdateCalls[0].field,
-      &component2->type->fields[COMPONENT_TYPE_2_FIELD_PRIMITIVE_LIVE_UPDATE]);
-  ASSERT_STREQ(liveUpdateCalls[0].fieldValue->stringValue, newConfigurationValue);
+  ASSERT_THAT(onUpdateComponentFieldCalls, SizeIs(1));
+  ASSERT_THAT(
+      liveUpdateCalls,
+      ElementsAre(IsLiveUpdateStringValueCall(
+          component2,
+          COMPONENT_TYPE_2_FIELD_PRIMITIVE_LIVE_UPDATE,
+          &component2->type->fields[COMPONENT_TYPE_2_FIELD_PRIMITIVE_LIVE_UPDATE],
+          newFieldValue)));
   ASSERT_THAT(activateCalls, IsEmpty());
+  ASSERT_THAT(onActivateComponentCalls, IsEmpty());
   ASSERT_THAT(deactivateCalls, IsEmpty());
+  ASSERT_THAT(onDeactivateComponentCalls, IsEmpty());
 
   const char* newValue = shovelerComponentGetFieldValueString(
       component2, COMPONENT_TYPE_2_FIELD_PRIMITIVE_LIVE_UPDATE);
-  ASSERT_STREQ(newValue, newConfigurationValue);
+  ASSERT_STREQ(newValue, newFieldValue);
 }
 
 TEST_F(ShovelerComponentTest, updateConfigurationLiveUpdatesReverseDependency) {
@@ -288,20 +344,24 @@ TEST_F(ShovelerComponentTest, updateConfigurationLiveUpdatesReverseDependency) {
   bool activated = shovelerComponentActivate(component1);
   ASSERT_TRUE(activated);
   activateCalls.clear();
+  onActivateComponentCalls.clear();
 
   propagateNextLiveUpdate = true;
   bool updated = shovelerComponentUpdateCanonicalFieldString(
       component2, COMPONENT_TYPE_2_FIELD_PRIMITIVE_LIVE_UPDATE, newConfigurationValue);
   ASSERT_TRUE(updated);
-  ASSERT_THAT(liveUpdateDependencyCalls, SizeIs(1));
-  ASSERT_EQ(liveUpdateDependencyCalls[0].component, component1);
-  ASSERT_EQ(liveUpdateDependencyCalls[0].fieldId, COMPONENT_TYPE_1_FIELD_DEPENDENCY_LIVE_UPDATE);
-  ASSERT_EQ(
-      liveUpdateDependencyCalls[0].field,
-      &component1->type->fields[COMPONENT_TYPE_1_FIELD_DEPENDENCY_LIVE_UPDATE]);
-  ASSERT_EQ(liveUpdateDependencyCalls[0].dependencyComponent, component2);
+  ASSERT_THAT(onUpdateComponentFieldCalls, SizeIs(2));
+  ASSERT_THAT(
+      liveUpdateDependencyCalls,
+      ElementsAre(LiveUpdateDependencyCall{
+          component1,
+          COMPONENT_TYPE_1_FIELD_DEPENDENCY_LIVE_UPDATE,
+          &component1->type->fields[COMPONENT_TYPE_1_FIELD_DEPENDENCY_LIVE_UPDATE],
+          component2}));
   ASSERT_THAT(activateCalls, IsEmpty());
+  ASSERT_THAT(onActivateComponentCalls, IsEmpty());
   ASSERT_THAT(deactivateCalls, IsEmpty());
+  ASSERT_THAT(onDeactivateComponentCalls, IsEmpty());
 }
 
 TEST_F(ShovelerComponentTest, updateConfigurationLiveWithoutPropagation) {
@@ -315,14 +375,18 @@ TEST_F(ShovelerComponentTest, updateConfigurationLiveWithoutPropagation) {
   bool activated = shovelerComponentActivate(component1);
   ASSERT_TRUE(activated);
   activateCalls.clear();
+  onActivateComponentCalls.clear();
 
   propagateNextLiveUpdate = false;
   bool updated = shovelerComponentUpdateCanonicalFieldString(
       component2, COMPONENT_TYPE_2_FIELD_PRIMITIVE_LIVE_UPDATE, newConfigurationValue);
   ASSERT_TRUE(updated);
+  ASSERT_THAT(onUpdateComponentFieldCalls, SizeIs(2));
   ASSERT_THAT(liveUpdateDependencyCalls, IsEmpty());
   ASSERT_THAT(activateCalls, IsEmpty());
+  ASSERT_THAT(onActivateComponentCalls, IsEmpty());
   ASSERT_THAT(deactivateCalls, IsEmpty());
+  ASSERT_THAT(onDeactivateComponentCalls, IsEmpty());
 }
 
 TEST_F(ShovelerComponentTest, updateComponentUpdatesReverseDependency) {
@@ -336,20 +400,24 @@ TEST_F(ShovelerComponentTest, updateComponentUpdatesReverseDependency) {
   bool activated = shovelerComponentActivate(component1);
   ASSERT_TRUE(activated);
   activateCalls.clear();
+  onActivateComponentCalls.clear();
 
   propagateNextUpdate = true;
   bool updatePropagated = shovelerComponentUpdate(component2, dt);
   ASSERT_TRUE(updatePropagated);
   ASSERT_THAT(updateCalls, ElementsAre(std::make_pair(component2, dt)));
-  ASSERT_THAT(liveUpdateDependencyCalls, SizeIs(1));
-  ASSERT_EQ(liveUpdateDependencyCalls[0].component, component1);
-  ASSERT_EQ(liveUpdateDependencyCalls[0].fieldId, COMPONENT_TYPE_1_FIELD_DEPENDENCY_LIVE_UPDATE);
-  ASSERT_EQ(
-      liveUpdateDependencyCalls[0].field,
-      &component1->type->fields[COMPONENT_TYPE_1_FIELD_DEPENDENCY_LIVE_UPDATE]);
-  ASSERT_EQ(liveUpdateDependencyCalls[0].dependencyComponent, component2);
+  ASSERT_THAT(onUpdateComponentFieldCalls, SizeIs(1));
+  ASSERT_THAT(
+      liveUpdateDependencyCalls,
+      ElementsAre(LiveUpdateDependencyCall{
+          component1,
+          COMPONENT_TYPE_1_FIELD_DEPENDENCY_LIVE_UPDATE,
+          &component1->type->fields[COMPONENT_TYPE_1_FIELD_DEPENDENCY_LIVE_UPDATE],
+          component2}));
   ASSERT_THAT(activateCalls, IsEmpty());
+  ASSERT_THAT(onActivateComponentCalls, IsEmpty());
   ASSERT_THAT(deactivateCalls, IsEmpty());
+  ASSERT_THAT(onDeactivateComponentCalls, IsEmpty());
 }
 
 TEST_F(ShovelerComponentTest, updateConfigurationLiveReactivatesReverseDependency) {
@@ -363,14 +431,18 @@ TEST_F(ShovelerComponentTest, updateConfigurationLiveReactivatesReverseDependenc
   bool activated = shovelerComponentActivate(component1);
   ASSERT_TRUE(activated);
   activateCalls.clear();
+  onActivateComponentCalls.clear();
 
   propagateNextLiveUpdate = true;
   bool updated = shovelerComponentUpdateCanonicalFieldString(
       component2, COMPONENT_TYPE_2_FIELD_PRIMITIVE_LIVE_UPDATE, newConfigurationValue);
   ASSERT_TRUE(updated);
+  ASSERT_THAT(onUpdateComponentFieldCalls, SizeIs(2));
   ASSERT_THAT(liveUpdateDependencyCalls, IsEmpty());
   ASSERT_THAT(deactivateCalls, ElementsAre(component1));
+  ASSERT_THAT(onDeactivateComponentCalls, ElementsAre(component1));
   ASSERT_THAT(activateCalls, ElementsAre(component1));
+  ASSERT_THAT(onActivateComponentCalls, ElementsAre(component1));
 }
 
 TEST_F(ShovelerComponentTest, updateComponentReactivatesReverseDependency) {
@@ -384,13 +456,17 @@ TEST_F(ShovelerComponentTest, updateComponentReactivatesReverseDependency) {
   bool activated = shovelerComponentActivate(component1);
   ASSERT_TRUE(activated);
   activateCalls.clear();
+  onActivateComponentCalls.clear();
 
   propagateNextUpdate = true;
   bool updatePropagated = shovelerComponentUpdate(component2, dt);
   ASSERT_TRUE(updatePropagated);
+  ASSERT_THAT(onUpdateComponentFieldCalls, SizeIs(1));
   ASSERT_THAT(liveUpdateDependencyCalls, IsEmpty());
   ASSERT_THAT(deactivateCalls, ElementsAre(component1));
+  ASSERT_THAT(onDeactivateComponentCalls, ElementsAre(component1));
   ASSERT_THAT(activateCalls, ElementsAre(component1));
+  ASSERT_THAT(onActivateComponentCalls, ElementsAre(component1));
 }
 
 TEST_F(ShovelerComponentTest, nonPropagatingUpdateComponentDoesntAffectReverseDependency) {
@@ -406,14 +482,18 @@ TEST_F(ShovelerComponentTest, nonPropagatingUpdateComponentDoesntAffectReverseDe
   bool activated = shovelerComponentActivate(component1);
   ASSERT_TRUE(activated);
   activateCalls.clear();
+  onActivateComponentCalls.clear();
 
   propagateNextUpdate = false;
   bool updatePropagated = shovelerComponentUpdate(component2, dt);
   ASSERT_FALSE(updatePropagated);
   ASSERT_THAT(updateCalls, ElementsAre(std::make_pair(component2, dt)));
+  ASSERT_THAT(onUpdateComponentFieldCalls, SizeIs(2));
   ASSERT_THAT(liveUpdateDependencyCalls, IsEmpty());
-  ASSERT_THAT(deactivateCalls, IsEmpty());
   ASSERT_THAT(activateCalls, IsEmpty());
+  ASSERT_THAT(onActivateComponentCalls, IsEmpty());
+  ASSERT_THAT(deactivateCalls, IsEmpty());
+  ASSERT_THAT(onDeactivateComponentCalls, IsEmpty());
 }
 
 TEST_F(ShovelerComponentTest, doublePropagateUpdate) {
@@ -432,20 +512,24 @@ TEST_F(ShovelerComponentTest, doublePropagateUpdate) {
   bool secondDependencyActivated = shovelerComponentActivate(component3);
   ASSERT_TRUE(secondDependencyActivated);
   activateCalls.clear();
+  onActivateComponentCalls.clear();
 
   propagateNextUpdate = true;
   propagateNextLiveUpdateDependency = true;
   bool updatePropagated = shovelerComponentUpdate(component2, dt);
   ASSERT_TRUE(updatePropagated);
-  ASSERT_THAT(liveUpdateDependencyCalls, SizeIs(1));
-  ASSERT_EQ(liveUpdateDependencyCalls[0].component, component1);
-  ASSERT_EQ(liveUpdateDependencyCalls[0].fieldId, COMPONENT_TYPE_1_FIELD_DEPENDENCY_LIVE_UPDATE);
-  ASSERT_EQ(
-      liveUpdateDependencyCalls[0].field,
-      &component1->type->fields[COMPONENT_TYPE_1_FIELD_DEPENDENCY_LIVE_UPDATE]);
-  ASSERT_EQ(liveUpdateDependencyCalls[0].dependencyComponent, component2);
+  ASSERT_THAT(onUpdateComponentFieldCalls, SizeIs(2));
+  ASSERT_THAT(
+      liveUpdateDependencyCalls,
+      ElementsAre(LiveUpdateDependencyCall{
+          component1,
+          COMPONENT_TYPE_1_FIELD_DEPENDENCY_LIVE_UPDATE,
+          &component1->type->fields[COMPONENT_TYPE_1_FIELD_DEPENDENCY_LIVE_UPDATE],
+          component2}));
   ASSERT_THAT(deactivateCalls, ElementsAre(component3));
+  ASSERT_THAT(onDeactivateComponentCalls, ElementsAre(component3));
   ASSERT_THAT(activateCalls, ElementsAre(component3));
+  ASSERT_THAT(onActivateComponentCalls, ElementsAre(component3));
 }
 
 TEST_F(ShovelerComponentTest, dontPropagateLiveDependencyUpdate) {
@@ -464,20 +548,24 @@ TEST_F(ShovelerComponentTest, dontPropagateLiveDependencyUpdate) {
   bool secondDependencyActivated = shovelerComponentActivate(component3);
   ASSERT_TRUE(secondDependencyActivated);
   activateCalls.clear();
+  onActivateComponentCalls.clear();
 
   propagateNextUpdate = true;
   propagateNextLiveUpdateDependency = false;
   bool updatePropagated = shovelerComponentUpdate(component2, dt);
   ASSERT_TRUE(updatePropagated);
-  ASSERT_THAT(liveUpdateDependencyCalls, SizeIs(1));
-  ASSERT_EQ(liveUpdateDependencyCalls[0].component, component1);
-  ASSERT_EQ(liveUpdateDependencyCalls[0].fieldId, COMPONENT_TYPE_1_FIELD_DEPENDENCY_LIVE_UPDATE);
-  ASSERT_EQ(
-      liveUpdateDependencyCalls[0].field,
-      &component1->type->fields[COMPONENT_TYPE_1_FIELD_DEPENDENCY_LIVE_UPDATE]);
-  ASSERT_EQ(liveUpdateDependencyCalls[0].dependencyComponent, component2);
-  ASSERT_THAT(deactivateCalls, IsEmpty());
+  ASSERT_THAT(onUpdateComponentFieldCalls, SizeIs(2));
+  ASSERT_THAT(
+      liveUpdateDependencyCalls,
+      ElementsAre(LiveUpdateDependencyCall{
+          component1,
+          COMPONENT_TYPE_1_FIELD_DEPENDENCY_LIVE_UPDATE,
+          &component1->type->fields[COMPONENT_TYPE_1_FIELD_DEPENDENCY_LIVE_UPDATE],
+          component2}));
   ASSERT_THAT(activateCalls, IsEmpty());
+  ASSERT_THAT(onActivateComponentCalls, IsEmpty());
+  ASSERT_THAT(deactivateCalls, IsEmpty());
+  ASSERT_THAT(onDeactivateComponentCalls, IsEmpty());
 }
 
 static ShovelerComponent* getComponent(
@@ -485,7 +573,7 @@ static ShovelerComponent* getComponent(
     long long int entityId,
     const char* componentTypeId,
     void* testPointer) {
-  ShovelerComponentTest* test = (ShovelerComponentTest*) testPointer;
+  auto* test = static_cast<ShovelerComponentTest*>(testPointer);
 
   if (entityId == entityId1 && componentTypeId == componentType1Id) {
     return test->component1;
@@ -499,18 +587,29 @@ static ShovelerComponent* getComponent(
     return test->component3;
   }
 
-  return NULL;
+  return nullptr;
 }
 
-static void updateAuthoritativeComponent(
+static void onUpdateComponentField(
     ShovelerComponent* component,
     int fieldId,
     const ShovelerComponentField* field,
     const ShovelerComponentFieldValue* value,
+    bool isCanonical,
     void* testPointer) {
-  ShovelerComponentTest* test = (ShovelerComponentTest*) testPointer;
-  test->updateAuthoritativeComponentCalls.emplace_back(
-      ShovelerComponentTest::UpdateAuthoritativeComponentCall{component, field, value});
+  auto* test = static_cast<ShovelerComponentTest*>(testPointer);
+  test->onUpdateComponentFieldCalls.push_back(ShovelerComponentTest::OnUpdateComponentFieldCall{
+      component, fieldId, field, value, isCanonical});
+}
+
+static void onActivateComponent(ShovelerComponent* component, void* testPointer) {
+  auto* test = static_cast<ShovelerComponentTest*>(testPointer);
+  test->onActivateComponentCalls.emplace_back(component);
+}
+
+static void onDeactivateComponent(ShovelerComponent* component, void* testPointer) {
+  auto* test = static_cast<ShovelerComponentTest*>(testPointer);
+  test->onDeactivateComponentCalls.emplace_back(component);
 }
 
 static void addDependency(
@@ -518,7 +617,7 @@ static void addDependency(
     long long int targetEntityId,
     const char* targetComponentTypeId,
     void* testPointer) {
-  ShovelerComponentTest* test = (ShovelerComponentTest*) testPointer;
+  auto* test = static_cast<ShovelerComponentTest*>(testPointer);
 
   auto dependencyTarget = std::make_pair(targetEntityId, targetComponentTypeId);
   test->reverseDependencies[dependencyTarget].insert(component);
@@ -529,7 +628,7 @@ static bool removeDependency(
     long long int targetEntityId,
     const char* targetComponentTypeId,
     void* testPointer) {
-  ShovelerComponentTest* test = (ShovelerComponentTest*) testPointer;
+  auto* test = static_cast<ShovelerComponentTest*>(testPointer);
 
   auto dependencyTarget = std::make_pair(targetEntityId, targetComponentTypeId);
   test->reverseDependencies[dependencyTarget].erase(component);
@@ -541,18 +640,18 @@ static void forEachReverseDependency(
     ShovelerComponentWorldAdapterForEachReverseDependencyCallbackFunction* callbackFunction,
     void* callbackUserData,
     void* testPointer) {
-  ShovelerComponentTest* test = (ShovelerComponentTest*) testPointer;
+  auto* test = static_cast<ShovelerComponentTest*>(testPointer);
 
   auto dependencyTarget = std::make_pair(component->entityId, component->type->id);
   for (ShovelerComponent* sourceComponent : test->reverseDependencies[dependencyTarget]) {
-    if (sourceComponent != NULL) {
+    if (sourceComponent != nullptr) {
       callbackFunction(sourceComponent, component, callbackUserData);
     }
   }
 }
 
 static bool requiresAuthority(ShovelerComponent* component, void* testPointer) {
-  ShovelerComponentTest* test = (ShovelerComponentTest*) testPointer;
+  auto* test = static_cast<ShovelerComponentTest*>(testPointer);
 
   if (component->type == test->componentType2) {
     return true;
@@ -566,7 +665,7 @@ static bool canLiveUpdateField(
     int fieldId,
     const ShovelerComponentField* field,
     void* testPointer) {
-  ShovelerComponentTest* test = (ShovelerComponentTest*) testPointer;
+  auto* test = static_cast<ShovelerComponentTest*>(testPointer);
 
   if (component->type == test->componentType2 &&
       field->name == componentType2FieldPrimitiveLiveUpdate) {
@@ -581,7 +680,7 @@ static bool canLiveUpdateDependencyField(
     int fieldId,
     const ShovelerComponentField* field,
     void* testPointer) {
-  ShovelerComponentTest* test = (ShovelerComponentTest*) testPointer;
+  auto* test = static_cast<ShovelerComponentTest*>(testPointer);
 
   if (component->type == test->componentType1 &&
       field->name == componentType1FieldDependencyLiveUpdate) {
@@ -597,8 +696,8 @@ static bool liveUpdateField(
     const ShovelerComponentField* field,
     ShovelerComponentFieldValue* fieldValue,
     void* testPointer) {
-  ShovelerComponentTest* test = (ShovelerComponentTest*) testPointer;
-  test->liveUpdateCalls.emplace_back(
+  auto* test = static_cast<ShovelerComponentTest*>(testPointer);
+  test->liveUpdateCalls.push_back(
       ShovelerComponentTest::LiveUpdateCall{component, fieldId, field, fieldValue});
   return test->propagateNextLiveUpdate;
 }
@@ -609,30 +708,30 @@ static bool liveUpdateDependencyField(
     const ShovelerComponentField* field,
     ShovelerComponent* dependencyComponent,
     void* testPointer) {
-  ShovelerComponentTest* test = (ShovelerComponentTest*) testPointer;
+  auto* test = static_cast<ShovelerComponentTest*>(testPointer);
   test->liveUpdateDependencyCalls.emplace_back(ShovelerComponentTest::LiveUpdateDependencyCall{
       component, fieldId, field, dependencyComponent});
   return test->propagateNextLiveUpdateDependency;
 }
 
 static void* activateComponent(ShovelerComponent* component, void* testPointer) {
-  ShovelerComponentTest* test = (ShovelerComponentTest*) testPointer;
+  auto* test = static_cast<ShovelerComponentTest*>(testPointer);
   test->activateCalls.emplace_back(component);
 
   if (test->failNextActivate) {
-    return NULL;
+    return nullptr;
   }
 
   return test;
 }
 
 static bool updateComponent(ShovelerComponent* component, double dt, void* testPointer) {
-  ShovelerComponentTest* test = (ShovelerComponentTest*) testPointer;
+  auto* test = static_cast<ShovelerComponentTest*>(testPointer);
   test->updateCalls.emplace_back(component, dt);
   return test->propagateNextUpdate;
 }
 
 static void deactivateComponent(ShovelerComponent* component, void* testPointer) {
-  ShovelerComponentTest* test = (ShovelerComponentTest*) testPointer;
+  auto* test = static_cast<ShovelerComponentTest*>(testPointer);
   test->deactivateCalls.emplace_back(component);
 }

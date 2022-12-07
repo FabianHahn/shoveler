@@ -93,6 +93,8 @@ bool shovelerComponentActivate(ShovelerComponent* component) {
   shovelerLogTrace(
       "Activated component '%s' of entity %lld.", component->type->id, component->entityId);
 
+  component->worldAdapter->onActivateComponent(component, component->worldAdapter->userData);
+
   component->worldAdapter->forEachReverseDependency(
       component,
       activateReverseDependency,
@@ -118,6 +120,8 @@ void shovelerComponentDeactivate(ShovelerComponent* component) {
 
   shovelerLogTrace(
       "Deactivated component '%s' of entity %lld.", component->type->id, component->entityId);
+
+  component->worldAdapter->onDeactivateComponent(component, component->worldAdapter->userData);
 }
 
 bool shovelerComponentUpdateField(
@@ -146,9 +150,6 @@ bool shovelerComponentUpdateField(
           fieldId);
       return false;
     }
-
-    component->worldAdapter->updateAuthoritativeComponent(
-        component, fieldId, field, value, component->worldAdapter->userData);
   }
 
   bool wasActive = component->systemData != NULL;
@@ -168,6 +169,9 @@ bool shovelerComponentUpdateField(
 
   // update option to its new value
   shovelerComponentFieldAssignValue(fieldValue, value);
+
+  component->worldAdapter->onUpdateComponentField(
+      component, fieldId, field, value, isCanonical, component->worldAdapter->userData);
 
   if (isDependencyUpdate) {
     // Add the new dependencies, which might deactivate the component if the dependency isn't

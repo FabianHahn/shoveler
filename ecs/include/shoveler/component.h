@@ -11,103 +11,95 @@ typedef struct ShovelerComponentStruct ShovelerComponent; // forward declaration
 typedef struct ShovelerComponentTypeStruct
     ShovelerComponentType; // forward declaration: component_type.h
 typedef struct ShovelerComponentWorldAdapterStruct
-    ShovelerComponentWorldAdapter; // forward delcaration: below
+    ShovelerComponentWorldAdapter; // forward declaration: below
 
 typedef void(ShovelerComponentWorldAdapterForEachReverseDependencyCallbackFunction)(
     ShovelerComponent* sourceComponent, ShovelerComponent* targetComponent, void* userData);
 
-typedef ShovelerComponent*(ShovelerComponentWorldAdapterGetComponentFunction)(
-    ShovelerComponent* component,
-    long long int entityId,
-    const char* componentTypeId,
-    void* userData);
-typedef void(ShovelerComponentWorldAdapterUpdateAuthoritativeComponentFunction)(
-    ShovelerComponent* component,
-    int fieldId,
-    const ShovelerComponentField* field,
-    const ShovelerComponentFieldValue* value,
-    void* userData);
-typedef void(ShovelerComponentWorldAdapterAddDependencyFunction)(
-    ShovelerComponent* component,
-    long long int targetEntityId,
-    const char* targetComponentTypeId,
-    void* userData);
-typedef bool(ShovelerComponentWorldAdapterRemoveDependencyFunction)(
-    ShovelerComponent* component,
-    long long int targetEntityId,
-    const char* targetComponentTypeId,
-    void* userData);
-typedef void(ShovelerComponentWorldAdapterForEachReverseDependencyFunction)(
-    ShovelerComponent* component,
-    ShovelerComponentWorldAdapterForEachReverseDependencyCallbackFunction* callbackFunction,
-    void* callbackUserData,
-    void* adapterUserData);
-
 // Adapter struct to make a component integrate with a world.
 typedef struct ShovelerComponentWorldAdapterStruct {
-  ShovelerComponentWorldAdapterGetComponentFunction* getComponent;
-  ShovelerComponentWorldAdapterUpdateAuthoritativeComponentFunction* updateAuthoritativeComponent;
-  ShovelerComponentWorldAdapterAddDependencyFunction* addDependency;
-  ShovelerComponentWorldAdapterRemoveDependencyFunction* removeDependency;
-  ShovelerComponentWorldAdapterForEachReverseDependencyFunction* forEachReverseDependency;
+  ShovelerComponent* (*getComponent)(
+      ShovelerComponent* component,
+      long long int entityId,
+      const char* componentTypeId,
+      void* userData);
+  void (*forEachReverseDependency)(
+      ShovelerComponent* component,
+      ShovelerComponentWorldAdapterForEachReverseDependencyCallbackFunction* callbackFunction,
+      void* callbackUserData,
+      void* adapterUserData);
+  void (*addDependency)(
+      ShovelerComponent* component,
+      long long int targetEntityId,
+      const char* targetComponentTypeId,
+      void* userData);
+  bool (*removeDependency)(
+      ShovelerComponent* component,
+      long long int targetEntityId,
+      const char* targetComponentTypeId,
+      void* userData);
+
+  void (*onUpdateComponentField)(
+      ShovelerComponent* component,
+      int fieldId,
+      const ShovelerComponentField* field,
+      const ShovelerComponentFieldValue* value,
+      bool isCanonical,
+      void* userData);
+  void (*onActivateComponent)(ShovelerComponent* component, void* userData);
+  void (*onDeactivateComponent)(ShovelerComponent* component, void* userData);
+
   void* userData;
 } ShovelerComponentWorldAdapter;
-
-typedef bool(ShovelerComponentSystemAdapterRequiresAuthorityFunction)(
-    ShovelerComponent* component, void* userData);
-typedef bool(ShovelerComponentSystemAdapterCanLiveUpdateFieldFunction)(
-    ShovelerComponent* component, int fieldId, const ShovelerComponentField* field, void* userData);
-typedef bool(ShovelerComponentSystemAdapterCanLiveUpdateDependencyFieldFunction)(
-    ShovelerComponent* component, int fieldId, const ShovelerComponentField* field, void* userData);
-typedef bool(ShovelerComponentSystemAdapterLiveUpdateFieldFunction)(
-    ShovelerComponent* component,
-    int fieldId,
-    const ShovelerComponentField* field,
-    ShovelerComponentFieldValue* fieldValue,
-    void* userData);
-typedef bool(ShovelerComponentSystemAdapterLiveUpdateDependencyFieldFunction)(
-    ShovelerComponent* component,
-    int fieldId,
-    const ShovelerComponentField* field,
-    ShovelerComponent* dependencyComponent,
-    void* userData);
-typedef void*(ShovelerComponentSystemAdapterActivateComponentFunction)(
-    ShovelerComponent* component, void* userData);
-typedef bool(ShovelerComponentSystemAdapterUpdateComponentFunction)(
-    ShovelerComponent* component, double dt, void* userData);
-typedef void(ShovelerComponentSystemAdapterDeactivateComponentFunction)(
-    ShovelerComponent* component, void* userData);
 
 // Adapter struct to make a component integrate with a system.
 typedef struct ShovelerComponentSystemAdapterStruct {
   /** Returns true if the specified component requires authority to be activated in this system. */
-  ShovelerComponentSystemAdapterRequiresAuthorityFunction* requiresAuthority;
+  bool (*requiresAuthority)(ShovelerComponent* component, void* userData);
   /**
    * If the specified field can be live updated, this indicates that the component can be
    * updated by calling liveUpdateField instead of deactivating and reactivating it.
    */
-  ShovelerComponentSystemAdapterCanLiveUpdateFieldFunction* canLiveUpdateField;
+  bool (*canLiveUpdateField)(
+      ShovelerComponent* component,
+      int fieldId,
+      const ShovelerComponentField* field,
+      void* userData);
   /**
    * If the specified dependency field can be live updated, this indicates that the component
    * can be updated by calling liveUpdateDependencyField instead of deactivating and
    * reactivating it.
    */
-  ShovelerComponentSystemAdapterCanLiveUpdateFieldFunction* canLiveUpdateDependencyField;
+  bool (*canLiveUpdateDependencyField)(
+      ShovelerComponent* component,
+      int fieldId,
+      const ShovelerComponentField* field,
+      void* userData);
   /** Returns true if the update should be propagated down to its reverse dependencies. */
-  ShovelerComponentSystemAdapterLiveUpdateFieldFunction* liveUpdateField;
+  bool (*liveUpdateField)(
+      ShovelerComponent* component,
+      int fieldId,
+      const ShovelerComponentField* field,
+      ShovelerComponentFieldValue* fieldValue,
+      void* userData);
   /** Returns true if the update should be propagated down to its reverse dependencies. */
-  ShovelerComponentSystemAdapterLiveUpdateDependencyFieldFunction* liveUpdateDependencyField;
+  bool (*liveUpdateDependencyField)(
+      ShovelerComponent* component,
+      int fieldId,
+      const ShovelerComponentField* field,
+      ShovelerComponent* dependencyComponent,
+      void* userData);
   /** Activates the specified component, returning non-NULL data if successful. */
-  ShovelerComponentSystemAdapterActivateComponentFunction* activateComponent;
+  void* (*activateComponent)(ShovelerComponent* component, void* userData);
   /**
    * Updates a component for the specified component if it is active.
    *
    * In case the component is updated and the function returns true, this update is then propagated
    * recursively to other components depending on it.
    */
-  ShovelerComponentSystemAdapterUpdateComponentFunction* updateComponent;
+  bool (*updateComponent)(ShovelerComponent* component, double dt, void* userData);
   /** Deactivates the specified component and frees its data. */
-  ShovelerComponentSystemAdapterDeactivateComponentFunction* deactivateComponent;
+  void (*deactivateComponent)(ShovelerComponent* component, void* userData);
   void* userData;
 } ShovelerComponentSystemAdapter;
 
