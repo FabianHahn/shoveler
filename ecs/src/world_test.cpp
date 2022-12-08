@@ -88,6 +88,8 @@ public:
     ShovelerComponentSystem* componentSystem3 =
         shovelerSystemForComponentType(system, componentType3);
     componentSystem2->requiresAuthority = true;
+    componentSystem1->fieldOptions[COMPONENT_TYPE_1_FIELD_DEPENDENCY_LIVE_UPDATE].liveUpdateField =
+        shovelerComponentSystemLiveUpdateFieldNoop;
     componentSystem1->activateComponent = activateComponent;
     componentSystem2->activateComponent = activateComponent;
     componentSystem3->activateComponent = activateComponent;
@@ -446,6 +448,61 @@ TEST_F(ShovelerWorldTest, addRemoveDependency) {
   ASSERT_THAT(
       onDeactivateComponentCalls,
       ElementsAre(OnDeactivateComponentCall{world, entity1, component1}));
+}
+
+TEST_F(ShovelerWorldTest, addRemoveDoubleDependency) {
+  ShovelerWorldEntity* entity1 = shovelerWorldAddEntity(world, entityId1);
+  ShovelerComponent* component1 = shovelerWorldEntityAddComponent(entity1, componentType1Id);
+  ShovelerComponent* component2 = shovelerWorldEntityAddComponent(entity1, componentType2Id);
+  shovelerWorldEntityDelegateComponent(entity1, componentType2Id);
+
+  // Set two dependencies from component1 to component2.
+  shovelerComponentUpdateCanonicalFieldEntityId(
+      component1, COMPONENT_TYPE_1_FIELD_DEPENDENCY_LIVE_UPDATE, entityId1);
+  shovelerComponentUpdateCanonicalFieldEntityId(
+      component1, COMPONENT_TYPE_1_FIELD_DEPENDENCY_REACTIVATE, entityId1);
+  ASSERT_THAT(
+      onAddDependencyCalls,
+      ElementsAre(
+          OnAddDependencyCall{
+              world,
+              shovelerEntityComponentId(entityId1, componentType1Id),
+              shovelerEntityComponentId(entityId1, componentType2Id)},
+          OnAddDependencyCall{
+              world,
+              shovelerEntityComponentId(entityId1, componentType1Id),
+              shovelerEntityComponentId(entityId1, componentType2Id)}));
+
+  // Activate component2, make sure that component1 is also activated.
+  shovelerComponentActivate(component2);
+  ASSERT_THAT(activateComponentCalls, ElementsAre(component2, component1));
+  ASSERT_THAT(
+      onActivateComponentCalls,
+      ElementsAre(
+          OnActivateComponentCall{world, entity1, component2},
+          OnActivateComponentCall{world, entity1, component1}));
+
+  // Remove the dependency that can be live updated.
+  onRemoveDependencyCalls.clear();
+  shovelerComponentClearField(
+      component1, COMPONENT_TYPE_1_FIELD_DEPENDENCY_LIVE_UPDATE, /* isCanonical */ true);
+  ASSERT_THAT(
+      onRemoveDependencyCalls,
+      ElementsAre(OnRemoveDependencyCall{
+          world,
+          shovelerEntityComponentId(entityId1, componentType1Id),
+          shovelerEntityComponentId(entityId1, componentType2Id)}));
+  ASSERT_THAT(deactivateComponentCalls, IsEmpty());
+  ASSERT_THAT(onDeactivateComponentCalls, IsEmpty());
+
+  // If we deactivate component2, component1 should still also deactivate.
+  shovelerComponentDeactivate(component2);
+  ASSERT_THAT(deactivateComponentCalls, ElementsAre(component1, component2));
+  ASSERT_THAT(
+      onDeactivateComponentCalls,
+      ElementsAre(
+          OnDeactivateComponentCall{world, entity1, component1},
+          OnDeactivateComponentCall{world, entity1, component2}));
 }
 
 void onAddEntity(ShovelerWorld* world, ShovelerWorldEntity* entity, void* testPointer) {

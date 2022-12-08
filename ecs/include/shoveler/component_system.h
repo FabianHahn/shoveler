@@ -66,7 +66,7 @@ static inline bool shovelerComponentSystemLiveUpdateFieldNoop(
 }
 
 /**
- * A ShovelerComponentSystemLiveUpdateFieldFunction that does nothiung and propagates the update
+ * A ShovelerComponentSystemLiveUpdateFieldFunction that does nothing and propagates the update
  * to reverse dependencies.
  */
 static inline bool shovelerComponentSystemLiveUpdateFieldPropagate(

@@ -387,7 +387,7 @@ static void updateReverseDependency(
     if (!sourceComponent->systemAdapter->canLiveUpdateDependencyField(
             sourceComponent, fieldId, field, sourceComponent->systemAdapter->userData)) {
       // At least one dependency field on the source component doesn't know how to live
-      // update the system, so we need to deactivate and reactivate it.
+      // update, so we need to deactivate and reactivate the component.
       // This also means that we can stop iterating over the remaining fields, since they
       // will be reinitialized even if they could be live updated and pointed to the same
       // target.

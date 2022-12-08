@@ -57,7 +57,7 @@ typedef struct ShovelerComponentSystemAdapterStruct {
   /** Returns true if the specified component requires authority to be activated in this system. */
   bool (*requiresAuthority)(ShovelerComponent* component, void* userData);
   /**
-   * If the specified field can be live updated, this indicates that the component can be
+   * If the specified field's value can be live updated, this indicates that the component can be
    * updated by calling liveUpdateField instead of deactivating and reactivating it.
    */
   bool (*canLiveUpdateField)(
@@ -66,9 +66,8 @@ typedef struct ShovelerComponentSystemAdapterStruct {
       const ShovelerComponentField* field,
       void* userData);
   /**
-   * If the specified dependency field can be live updated, this indicates that the component
-   * can be updated by calling liveUpdateDependencyField instead of deactivating and
-   * reactivating it.
+   * If the dependency of a field can be live updated, this indicates that the component can be
+   * updated by calling liveUpdateDependencyField instead of deactivating and reactivating it.
    */
   bool (*canLiveUpdateDependencyField)(
       ShovelerComponent* component,
