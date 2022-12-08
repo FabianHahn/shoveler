@@ -111,9 +111,9 @@ typedef struct ShovelerWorldEntityStruct {
   ShovelerWorld* world;
   long long int id;
   char* label;
-  /** map from string component type name to (ShovelerComponent *) */
+  /** map from string component type ID to (ShovelerComponent *) */
   /* private */ GHashTable* components;
-  /** set of component type names */
+  /** set of component type IDs */
   /* private */ GHashTable* authoritativeComponents;
 } ShovelerWorldEntity;
 
