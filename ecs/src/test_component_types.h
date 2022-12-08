@@ -1,7 +1,8 @@
 #ifndef SHOVELER_TEST_COMPONENT_TYPES_H
 #define SHOVELER_TEST_COMPONENT_TYPES_H
 
-#include "shoveler/component_type.h"
+#include <shoveler/component_field.h>
+#include <shoveler/component_type.h>
 
 static const char* componentType1Id = "component_type_1";
 static const char* componentType2Id = "component_type_2";
