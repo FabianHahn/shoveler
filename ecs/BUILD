@@ -4,6 +4,7 @@ cc_library(
     name = "ecs",
     srcs = [
         "src/client_op.c",
+        "src/client_op_emitter.c",
         "src/client_property_manager.c",
         "src/component.c",
         "src/component_field.c",
@@ -18,6 +19,7 @@ cc_library(
     ],
     hdrs = [
         "include/shoveler/client_op.h",
+        "include/shoveler/client_op_emitter.h",
         "include/shoveler/client_property_manager.h",
         "include/shoveler/component.h",
         "include/shoveler/component_field.h",
@@ -40,6 +42,7 @@ cc_library(
 cc_test(
     name = "ecs_tests",
     srcs = [
+        "src/client_op_emitter_test.cpp",
         "src/client_op_test.cpp",
         "src/client_op_wrapper.h",
         "src/client_property_manager_test.cpp",
