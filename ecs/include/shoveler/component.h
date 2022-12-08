@@ -44,7 +44,7 @@ typedef struct ShovelerComponentWorldAdapterStruct {
       int fieldId,
       const ShovelerComponentField* field,
       const ShovelerComponentFieldValue* value,
-      bool isCanonical,
+      bool isAuthoritative,
       void* userData);
   void (*onActivateComponent)(ShovelerComponent* component, void* userData);
   void (*onDeactivateComponent)(ShovelerComponent* component, void* userData);
@@ -124,8 +124,7 @@ void shovelerComponentDeactivate(ShovelerComponent* component);
 /**
  * Updates a configuration option with the specified id on this component.
  *
- * If isCanonical is true, no authority check is performed and the update is applied without
- * invoking the authoritative update handler.
+ * If isAuthoritative is true, no authority check is performed and the update is always applied.
  */
 bool shovelerComponentUpdateField(
     ShovelerComponent* component,
@@ -201,7 +200,7 @@ static inline bool shovelerComponentUpdateFieldEntityId(
   value.type = SHOVELER_COMPONENT_FIELD_TYPE_ENTITY_ID;
   value.isSet = true;
   value.entityIdValue = entityIdValue;
-  return shovelerComponentUpdateField(component, id, &value, /* isCanonical */ false);
+  return shovelerComponentUpdateField(component, id, &value, /* isAuthoritative */ false);
 }
 
 static inline bool shovelerComponentUpdateFieldEntityIdArray(
@@ -211,7 +210,7 @@ static inline bool shovelerComponentUpdateFieldEntityIdArray(
   value.isSet = true;
   value.entityIdArrayValue.entityIds = (long long int*) entityIds; // won't be modified
   value.entityIdArrayValue.size = size;
-  return shovelerComponentUpdateField(component, id, &value, /* isCanonical */ false);
+  return shovelerComponentUpdateField(component, id, &value, /* isAuthoritative */ false);
 }
 
 static inline bool shovelerComponentUpdateFieldFloat(
@@ -220,7 +219,7 @@ static inline bool shovelerComponentUpdateFieldFloat(
   value.type = SHOVELER_COMPONENT_FIELD_TYPE_FLOAT;
   value.isSet = true;
   value.floatValue = floatValue;
-  return shovelerComponentUpdateField(component, id, &value, /* isCanonical */ false);
+  return shovelerComponentUpdateField(component, id, &value, /* isAuthoritative */ false);
 }
 
 static inline bool shovelerComponentUpdateFieldBool(
@@ -229,7 +228,7 @@ static inline bool shovelerComponentUpdateFieldBool(
   value.type = SHOVELER_COMPONENT_FIELD_TYPE_BOOL;
   value.isSet = true;
   value.boolValue = boolValue;
-  return shovelerComponentUpdateField(component, id, &value, /* isCanonical */ false);
+  return shovelerComponentUpdateField(component, id, &value, /* isAuthoritative */ false);
 }
 
 static inline bool shovelerComponentUpdateFieldInt(
@@ -238,7 +237,7 @@ static inline bool shovelerComponentUpdateFieldInt(
   value.type = SHOVELER_COMPONENT_FIELD_TYPE_INT;
   value.isSet = true;
   value.intValue = intValue;
-  return shovelerComponentUpdateField(component, id, &value, /* isCanonical */ false);
+  return shovelerComponentUpdateField(component, id, &value, /* isAuthoritative */ false);
 }
 
 static inline bool shovelerComponentUpdateFieldString(
@@ -247,7 +246,7 @@ static inline bool shovelerComponentUpdateFieldString(
   value.type = SHOVELER_COMPONENT_FIELD_TYPE_STRING;
   value.isSet = true;
   value.stringValue = (char*) stringValue; // won't be modified
-  return shovelerComponentUpdateField(component, id, &value, /* isCanonical */ false);
+  return shovelerComponentUpdateField(component, id, &value, /* isAuthoritative */ false);
 }
 
 static inline bool shovelerComponentUpdateFieldVector2(
@@ -256,7 +255,7 @@ static inline bool shovelerComponentUpdateFieldVector2(
   value.type = SHOVELER_COMPONENT_FIELD_TYPE_VECTOR2;
   value.isSet = true;
   value.vector2Value = vector2Value;
-  return shovelerComponentUpdateField(component, id, &value, /* isCanonical */ false);
+  return shovelerComponentUpdateField(component, id, &value, /* isAuthoritative */ false);
 }
 
 static inline bool shovelerComponentUpdateFieldVector3(
@@ -265,7 +264,7 @@ static inline bool shovelerComponentUpdateFieldVector3(
   value.type = SHOVELER_COMPONENT_FIELD_TYPE_VECTOR3;
   value.isSet = true;
   value.vector3Value = vector3Value;
-  return shovelerComponentUpdateField(component, id, &value, /* isCanonical */ false);
+  return shovelerComponentUpdateField(component, id, &value, /* isAuthoritative */ false);
 }
 
 static inline bool shovelerComponentUpdateFieldVector4(
@@ -274,7 +273,7 @@ static inline bool shovelerComponentUpdateFieldVector4(
   value.type = SHOVELER_COMPONENT_FIELD_TYPE_VECTOR4;
   value.isSet = true;
   value.vector4Value = vector4Value;
-  return shovelerComponentUpdateField(component, id, &value, /* isCanonical */ false);
+  return shovelerComponentUpdateField(component, id, &value, /* isAuthoritative */ false);
 }
 
 static inline bool shovelerComponentUpdateFieldBytes(
@@ -284,7 +283,7 @@ static inline bool shovelerComponentUpdateFieldBytes(
   value.isSet = true;
   value.bytesValue.data = (unsigned char*) data; // won't be modified
   value.bytesValue.size = size;
-  return shovelerComponentUpdateField(component, id, &value, /* isCanonical */ false);
+  return shovelerComponentUpdateField(component, id, &value, /* isAuthoritative */ false);
 }
 
 static inline bool shovelerComponentUpdateCanonicalFieldEntityId(
@@ -293,7 +292,7 @@ static inline bool shovelerComponentUpdateCanonicalFieldEntityId(
   value.type = SHOVELER_COMPONENT_FIELD_TYPE_ENTITY_ID;
   value.isSet = true;
   value.entityIdValue = entityIdValue;
-  return shovelerComponentUpdateField(component, id, &value, /* isCanonical */ true);
+  return shovelerComponentUpdateField(component, id, &value, /* isAuthoritative */ true);
 }
 
 static inline bool shovelerComponentUpdateCanonicalFieldEntityIdArray(
@@ -303,7 +302,7 @@ static inline bool shovelerComponentUpdateCanonicalFieldEntityIdArray(
   value.isSet = true;
   value.entityIdArrayValue.entityIds = (long long int*) entityIds; // won't be modified
   value.entityIdArrayValue.size = size;
-  return shovelerComponentUpdateField(component, id, &value, /* isCanonical */ true);
+  return shovelerComponentUpdateField(component, id, &value, /* isAuthoritative */ true);
 }
 
 static inline bool shovelerComponentUpdateCanonicalFieldFloat(
@@ -312,7 +311,7 @@ static inline bool shovelerComponentUpdateCanonicalFieldFloat(
   value.type = SHOVELER_COMPONENT_FIELD_TYPE_FLOAT;
   value.isSet = true;
   value.floatValue = floatValue;
-  return shovelerComponentUpdateField(component, id, &value, /* isCanonical */ true);
+  return shovelerComponentUpdateField(component, id, &value, /* isAuthoritative */ true);
 }
 
 static inline bool shovelerComponentUpdateCanonicalFieldBool(
@@ -321,7 +320,7 @@ static inline bool shovelerComponentUpdateCanonicalFieldBool(
   value.type = SHOVELER_COMPONENT_FIELD_TYPE_BOOL;
   value.isSet = true;
   value.boolValue = boolValue;
-  return shovelerComponentUpdateField(component, id, &value, /* isCanonical */ true);
+  return shovelerComponentUpdateField(component, id, &value, /* isAuthoritative */ true);
 }
 
 static inline bool shovelerComponentUpdateCanonicalFieldInt(
@@ -330,7 +329,7 @@ static inline bool shovelerComponentUpdateCanonicalFieldInt(
   value.type = SHOVELER_COMPONENT_FIELD_TYPE_INT;
   value.isSet = true;
   value.intValue = intValue;
-  return shovelerComponentUpdateField(component, id, &value, /* isCanonical */ true);
+  return shovelerComponentUpdateField(component, id, &value, /* isAuthoritative */ true);
 }
 
 static inline bool shovelerComponentUpdateCanonicalFieldString(
@@ -339,7 +338,7 @@ static inline bool shovelerComponentUpdateCanonicalFieldString(
   value.type = SHOVELER_COMPONENT_FIELD_TYPE_STRING;
   value.isSet = true;
   value.stringValue = (char*) stringValue; // won't be modified
-  return shovelerComponentUpdateField(component, id, &value, /* isCanonical */ true);
+  return shovelerComponentUpdateField(component, id, &value, /* isAuthoritative */ true);
 }
 
 static inline bool shovelerComponentUpdateCanonicalFieldVector2(
@@ -348,7 +347,7 @@ static inline bool shovelerComponentUpdateCanonicalFieldVector2(
   value.type = SHOVELER_COMPONENT_FIELD_TYPE_VECTOR2;
   value.isSet = true;
   value.vector2Value = vector2Value;
-  return shovelerComponentUpdateField(component, id, &value, /* isCanonical */ true);
+  return shovelerComponentUpdateField(component, id, &value, /* isAuthoritative */ true);
 }
 
 static inline bool shovelerComponentUpdateCanonicalFieldVector3(
@@ -357,7 +356,7 @@ static inline bool shovelerComponentUpdateCanonicalFieldVector3(
   value.type = SHOVELER_COMPONENT_FIELD_TYPE_VECTOR3;
   value.isSet = true;
   value.vector3Value = vector3Value;
-  return shovelerComponentUpdateField(component, id, &value, /* isCanonical */ true);
+  return shovelerComponentUpdateField(component, id, &value, /* isAuthoritative */ true);
 }
 
 static inline bool shovelerComponentUpdateCanonicalFieldVector4(
@@ -366,7 +365,7 @@ static inline bool shovelerComponentUpdateCanonicalFieldVector4(
   value.type = SHOVELER_COMPONENT_FIELD_TYPE_VECTOR4;
   value.isSet = true;
   value.vector4Value = vector4Value;
-  return shovelerComponentUpdateField(component, id, &value, /* isCanonical */ true);
+  return shovelerComponentUpdateField(component, id, &value, /* isAuthoritative */ true);
 }
 
 static inline bool shovelerComponentUpdateCanonicalFieldBytes(
@@ -376,7 +375,7 @@ static inline bool shovelerComponentUpdateCanonicalFieldBytes(
   value.isSet = true;
   value.bytesValue.data = (unsigned char*) data; // won't be modified
   value.bytesValue.size = size;
-  return shovelerComponentUpdateField(component, id, &value, /* isCanonical */ true);
+  return shovelerComponentUpdateField(component, id, &value, /* isAuthoritative */ true);
 }
 
 static inline bool shovelerComponentHasFieldValue(ShovelerComponent* component, int id) {

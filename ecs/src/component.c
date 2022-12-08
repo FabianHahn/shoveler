@@ -171,7 +171,7 @@ bool shovelerComponentUpdateField(
   shovelerComponentFieldAssignValue(fieldValue, value);
 
   component->worldAdapter->onUpdateComponentField(
-      component, fieldId, field, value, isCanonical, component->worldAdapter->userData);
+      component, fieldId, field, value, !isCanonical, component->worldAdapter->userData);
 
   if (isDependencyUpdate) {
     // Add the new dependencies, which might deactivate the component if the dependency isn't

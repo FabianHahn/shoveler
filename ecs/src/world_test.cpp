@@ -359,7 +359,7 @@ TEST_F(ShovelerWorldTest, updateAuthoritativeComponent) {
           COMPONENT_TYPE_1_FIELD_PRIMITIVE,
           &component1->type->fields[COMPONENT_TYPE_1_FIELD_PRIMITIVE],
           newFieldValue,
-          /* isAuthoritative */ false)));
+          /* isAuthoritative */ true)));
 }
 
 TEST_F(ShovelerWorldTest, delegateUndelegate) {
@@ -485,7 +485,7 @@ TEST_F(ShovelerWorldTest, addRemoveDoubleDependency) {
   // Remove the dependency that can be live updated.
   onRemoveDependencyCalls.clear();
   shovelerComponentClearField(
-      component1, COMPONENT_TYPE_1_FIELD_DEPENDENCY_LIVE_UPDATE, /* isCanonical */ true);
+      component1, COMPONENT_TYPE_1_FIELD_DEPENDENCY_LIVE_UPDATE, /* isAuthoritative */ true);
   ASSERT_THAT(
       onRemoveDependencyCalls,
       ElementsAre(OnRemoveDependencyCall{

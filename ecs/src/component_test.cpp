@@ -133,7 +133,7 @@ public:
     int fieldId;
     const ShovelerComponentField* field;
     ShovelerComponentFieldValueWrapper value;
-    bool isCanonical;
+    bool isAuthoritative;
   };
   std::vector<OnUpdateComponentFieldCall> onUpdateComponentFieldCalls;
   std::vector<ShovelerComponent*> onActivateComponentCalls;
@@ -174,11 +174,11 @@ public:
 };
 
 MATCHER_P5(
-    IsWorldUpdateComponentIntValueCall, component, fieldId, field, intValue, isCanonical, "") {
+    IsWorldUpdateComponentIntValueCall, component, fieldId, field, intValue, isAuthoritative, "") {
   const ShovelerComponentTest::OnUpdateComponentFieldCall& call = arg;
   return call.component == component && call.fieldId == fieldId && call.field == field &&
       call.value->type == SHOVELER_COMPONENT_FIELD_TYPE_INT && call.value->isSet &&
-      call.value->intValue == intValue && call.isCanonical == isCanonical;
+      call.value->intValue == intValue && call.isAuthoritative == isAuthoritative;
 }
 
 MATCHER_P4(IsLiveUpdateStringValueCall, component, fieldId, field, stringValue, "") {
@@ -278,7 +278,7 @@ TEST_F(ShovelerComponentTest, updateField) {
           COMPONENT_TYPE_1_FIELD_PRIMITIVE,
           &componentType1->fields[COMPONENT_TYPE_1_FIELD_PRIMITIVE],
           newFieldValue,
-          /* isCanonical */ true)));
+          /* isAuthoritative */ false)));
 
   int secondValue = shovelerComponentGetFieldValueInt(component1, COMPONENT_TYPE_1_FIELD_PRIMITIVE);
   ASSERT_EQ(secondValue, newFieldValue);

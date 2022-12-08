@@ -31,6 +31,9 @@ typedef struct ShovelerWorldCallbacksStruct {
    *  * If the field can be Live field updated, the live update callback has not been called yet.
    *  * For a dependency field, previous dependencies have been removed but new ones have not been
    *    added yet.
+   *
+   * If isAuthoritative is true, that means we're dealing with a non-canonical update and the
+   * component is delegated, i.e. it should be forwarded to an authoritative server.
    */
   void (*onUpdateComponent)(
       ShovelerWorld* world,
