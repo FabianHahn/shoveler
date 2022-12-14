@@ -21,9 +21,6 @@ typedef enum {
   SHOVELER_CLIENT_OP_REMOVE_COMPONENT,
 } ShovelerClientOpType;
 
-typedef struct ShovelerClientOpNoopStruct {
-} ShovelerClientOpNoop;
-
 typedef struct ShovelerClientOpAddEntityStruct {
   long long int entityId;
 } ShovelerClientOpAddEntity;
@@ -72,7 +69,6 @@ typedef struct ShovelerClientOpRemoveComponentStruct {
 typedef struct ShovelerClientOpStruct {
   ShovelerClientOpType type;
   union {
-    ShovelerClientOpNoop noop;
     ShovelerClientOpAddEntity addEntity;
     ShovelerClientOpRemoveEntity removeEntity;
     ShovelerClientOpAddComponent addComponent;

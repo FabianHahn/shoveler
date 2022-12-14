@@ -15,9 +15,6 @@ typedef enum {
   SHOVELER_SERVER_OP_UPDATE_COMPONENT,
 } ShovelerServerOpType;
 
-typedef struct ShovelerServerOpNoopStruct {
-} ShovelerServerOpNoop;
-
 typedef struct ShovelerServerOpAddEntityInterestStruct {
   long long int entityId;
 } ShovelerServerOpAddEntityInterest;
@@ -36,7 +33,6 @@ typedef struct ShovelerServerOpUpdateComponentStruct {
 typedef struct ShovelerServerOpStruct {
   ShovelerServerOpType type;
   union {
-    ShovelerServerOpNoop noop;
     ShovelerServerOpAddEntityInterest addEntityInterest;
     ShovelerServerOpRemoveEntityInterest removeEntityInterest;
     ShovelerServerOpUpdateComponent updateComponent;

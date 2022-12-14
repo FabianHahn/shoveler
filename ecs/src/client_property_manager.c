@@ -4,8 +4,8 @@
 #include <shoveler/log.h>
 #include <stdlib.h>
 
-_Static_assert(sizeof(gpointer) == sizeof(int64_t), "pointers must be 64 bits");
-_Static_assert(sizeof(gpointer) == sizeof(long long int), "pointers must be 64 bits");
+static_assert(sizeof(gpointer) == sizeof(int64_t), "pointers must be 64 bits");
+static_assert(sizeof(gpointer) == sizeof(long long int), "pointers must be 64 bits");
 
 #define CLIENT_ID_TO_POINTER(i) ((gpointer)(long long int) (i))
 #define ENTITY_ID_TO_POINTER(i) ((gpointer)(long long int) (i))
