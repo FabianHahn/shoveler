@@ -7,10 +7,14 @@ cc_library(
     srcs = glob(["*.c"]),
     hdrs = glob(["*.h"]),
     copts = select({
-        "@//:windows": [],
-        "//conditions:default": [
-            "-Wno-implicit-function-declaration",
+        "@//:windows_zig_cc": [
+            "-Wno-deprecated-non-prototype",
         ],
+        "@//:linux": [
+            "-Wno-implicit-function-declaration",
+            "-Wno-deprecated-non-prototype",
+        ],
+        "//conditions:default": [],
     }),
     includes = ["."],
 )
