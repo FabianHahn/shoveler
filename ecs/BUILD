@@ -4,6 +4,7 @@ cc_library(
     name = "ecs",
     srcs = [
         "src/client_connection_manager.c",
+        "src/client_network_adapter.c",
         "src/client_op.c",
         "src/client_op_emitter.c",
         "src/client_property_manager.c",
@@ -24,6 +25,7 @@ cc_library(
     ],
     hdrs = [
         "include/shoveler/client_connection_manager.h",
+        "include/shoveler/client_network_adapter.h",
         "include/shoveler/client_op.h",
         "include/shoveler/client_op_emitter.h",
         "include/shoveler/client_property_manager.h",
@@ -53,6 +55,7 @@ cc_test(
     name = "ecs_tests",
     srcs = [
         "src/client_connection_manager_test.cpp",
+        "src/client_network_adapter_event_wrapper.h",
         "src/client_op_emitter_test.cpp",
         "src/client_op_test.cpp",
         "src/client_op_wrapper.h",
