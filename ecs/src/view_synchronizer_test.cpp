@@ -90,29 +90,36 @@ public:
     ShovelerServerOp serverOp = shovelerServerOp();
     serverOp.type = SHOVELER_SERVER_OP_ADD_ENTITY_INTEREST;
     serverOp.addEntityInterest.entityId = entityId;
-
-    auto deleter = [](GString* string) { g_string_free(string, /* freeSegment */ true); };
-    std::unique_ptr<GString, decltype(deleter)> buffer{g_string_new(""), deleter};
-    if (!shovelerServerOpSerialize(
-            &serverOp, viewSynchronizer->componentTypeIndexer, buffer.get())) {
-      return false;
-    }
-
-    return client->sendMessage(
-        reinterpret_cast<const unsigned char*>(buffer->str),
-        static_cast<int>(buffer->len),
-        client->userData);
+    return SendServerOp(client, &serverOp);
   }
 
   bool SendRemoveEntityInterest(ShovelerClientNetworkAdapter* client, long long int entityId) {
     ShovelerServerOp serverOp = shovelerServerOp();
     serverOp.type = SHOVELER_SERVER_OP_REMOVE_ENTITY_INTEREST;
     serverOp.removeEntityInterest.entityId = entityId;
+    return SendServerOp(client, &serverOp);
+  }
 
+  bool SendUpdateComponent(
+      ShovelerClientNetworkAdapter* client,
+      long long int entityId,
+      const char* componentTypeId,
+      int fieldId,
+      const ShovelerComponentFieldValue* fieldValue) {
+    ShovelerServerOp serverOp = shovelerServerOp();
+    serverOp.type = SHOVELER_SERVER_OP_UPDATE_COMPONENT;
+    serverOp.updateComponent.entityId = entityId;
+    serverOp.updateComponent.componentTypeId = componentTypeId;
+    serverOp.updateComponent.fieldId = fieldId;
+    serverOp.updateComponent.fieldValue = fieldValue;
+    return SendServerOp(client, &serverOp);
+  }
+
+  bool SendServerOp(ShovelerClientNetworkAdapter* client, const ShovelerServerOp* serverOp) {
     auto deleter = [](GString* string) { g_string_free(string, /* freeSegment */ true); };
     std::unique_ptr<GString, decltype(deleter)> buffer{g_string_new(""), deleter};
     if (!shovelerServerOpSerialize(
-            &serverOp, viewSynchronizer->componentTypeIndexer, buffer.get())) {
+            serverOp, viewSynchronizer->componentTypeIndexer, buffer.get())) {
       return false;
     }
 
@@ -415,4 +422,62 @@ TEST_F(ShovelerViewSynchronizerTest, reassignAuthority) {
   ASSERT_THAT(
       ReceiveClientOps(client2),
       ElementsAre(IsDelegateComponentOp(testEntityId1, componentType1Id)));
+}
+
+TEST_F(ShovelerViewSynchronizerTest, authoritativeUpdate) {
+  const char* testComponentFieldValue = "the bird is the word";
+
+  void* clientHandle1 = shovelerInMemoryNetworkAdapterConnectClient(inMemoryNetworkAdapter);
+  void* clientHandle2 = shovelerInMemoryNetworkAdapterConnectClient(inMemoryNetworkAdapter);
+  auto* client1 = shovelerInMemoryNetworkAdapterGetClient(inMemoryNetworkAdapter, clientHandle1);
+  auto* client2 = shovelerInMemoryNetworkAdapterGetClient(inMemoryNetworkAdapter, clientHandle2);
+
+  SendAddEntityInterest(client1, testEntityId1);
+  SendAddEntityInterest(client2, testEntityId1);
+  shovelerViewSynchronizerUpdate(viewSynchronizer);
+  auto clientId1 = clientConnectedCalls[0];
+
+  shovelerServerControllerDelegateComponent(server, testEntityId1, componentType2Id, clientId1);
+
+  // Flush received ops for all clients.
+  ReceiveClientOps(client1);
+  ReceiveClientOps(client2);
+
+  // Send a component update from the authoritative client.
+  ShovelerComponentFieldValue fieldValue;
+  shovelerComponentFieldInitValue(&fieldValue, SHOVELER_COMPONENT_FIELD_TYPE_STRING);
+  fieldValue.isSet = true;
+  fieldValue.stringValue = const_cast<char*>(testComponentFieldValue); // not modified
+  bool sent = SendUpdateComponent(
+      client1,
+      testEntityId1,
+      componentType2Id,
+      COMPONENT_TYPE_2_FIELD_PRIMITIVE_LIVE_UPDATE,
+      &fieldValue);
+  ASSERT_TRUE(sent);
+
+  // Assert that the other client receives it.
+  shovelerViewSynchronizerUpdate(viewSynchronizer);
+  ASSERT_THAT(ReceiveClientOps(client1), IsEmpty());
+  ASSERT_THAT(
+      ReceiveClientOps(client2),
+      ElementsAre(IsUpdateComponentOp(
+          testEntityId1,
+          componentType2Id,
+          COMPONENT_TYPE_2_FIELD_PRIMITIVE_LIVE_UPDATE,
+          &fieldValue)));
+
+  // Send a component update from the non-authoritative client.
+  bool nonAuthoritativeSent = SendUpdateComponent(
+      client2,
+      testEntityId1,
+      componentType2Id,
+      COMPONENT_TYPE_2_FIELD_PRIMITIVE_LIVE_UPDATE,
+      &fieldValue);
+  ASSERT_TRUE(nonAuthoritativeSent);
+
+  // Assert that the other client doesn't receive it.
+  shovelerViewSynchronizerUpdate(viewSynchronizer);
+  ASSERT_THAT(ReceiveClientOps(client1), IsEmpty());
+  ASSERT_THAT(ReceiveClientOps(client2), IsEmpty());
 }
