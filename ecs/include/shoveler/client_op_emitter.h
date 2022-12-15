@@ -14,7 +14,8 @@ typedef struct ShovelerWorldEntityStruct ShovelerWorldEntity;
 typedef struct ShovelerWorldStruct ShovelerWorld;
 
 typedef struct ShovelerClientOpEmitterAdapterStruct {
-  void (*prepareEntityInterest)(long long int entityId, GArray* clientIdArray, void* userData);
+  void (*prepareEntityInterest)(
+      long long int entityId, const char* componentTypeId, GArray* clientIdArray, void* userData);
   void (*prepareClientAuthority)(
       int64_t clientId, long long int entityId, GArray* componentTypeIdArray, void* userData);
   void (*prepareClientActivations)(

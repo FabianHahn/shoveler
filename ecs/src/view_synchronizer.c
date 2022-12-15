@@ -27,7 +27,8 @@ static void onUpdateComponent(
     void* userData);
 static void onRemoveComponent(
     ShovelerWorld* world, ShovelerWorldEntity* entity, const char* componentTypeId, void* userData);
-static void prepareEntityInterest(long long int entityId, GArray* clientIdArray, void* userData);
+static void prepareEntityInterest(
+    long long int entityId, const char* componentTypeId, GArray* clientIdArray, void* userData);
 static void prepareClientAuthority(
     int64_t clientId, long long int entityId, GArray* componentTypeIdArray, void* userData);
 static void prepareClientActivations(
@@ -191,10 +192,13 @@ static void onRemoveComponent(
 }
 
 static void prepareEntityInterest(
-    long long int entityId, GArray* clientIdArray, void* viewSynchronizerPointer) {
+    long long int entityId,
+    const char* componentTypeId,
+    GArray* clientIdArray,
+    void* viewSynchronizerPointer) {
   ShovelerViewSynchronizer* viewSynchronizer = viewSynchronizerPointer;
   shovelerClientPropertyManagerGetEntityInterest(
-      viewSynchronizer->clientPropertyManager, entityId, clientIdArray);
+      viewSynchronizer->clientPropertyManager, entityId, componentTypeId, clientIdArray);
 }
 
 static void prepareClientAuthority(

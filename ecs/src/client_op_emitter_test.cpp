@@ -29,7 +29,8 @@ const long long int testEntityId1 = 1;
 const long long int testEntityId2 = 2;
 const long long int testEntityId3 = 3;
 
-void prepareEntityInterest(long long int entityId, GArray* clientIdArray, void* userData);
+void prepareEntityInterest(
+    long long int entityId, const char* componentTypeId, GArray* clientIdArray, void* userData);
 void prepareClientAuthority(
     int64_t clientId, long long int entityId, GArray* componentTypeIdArray, void* userData);
 void prepareClientActivations(
@@ -105,11 +106,17 @@ public:
   std::vector<EmittedOp> emittedOps;
 };
 
-void prepareEntityInterest(long long int entityId, GArray* clientIdArray, void* testPointer) {
+void prepareEntityInterest(
+    long long int entityId, const char* componentTypeId, GArray* clientIdArray, void* testPointer) {
   if (entityId == testEntityId1) {
-    g_array_set_size(clientIdArray, 2);
-    g_array_index(clientIdArray, int64_t, 0) = testClientId1;
-    g_array_index(clientIdArray, int64_t, 1) = testClientId2;
+    if (componentTypeId == componentType2Id) {
+      g_array_set_size(clientIdArray, 1);
+      g_array_index(clientIdArray, int64_t, 0) = testClientId2;
+    } else {
+      g_array_set_size(clientIdArray, 2);
+      g_array_index(clientIdArray, int64_t, 0) = testClientId1;
+      g_array_index(clientIdArray, int64_t, 1) = testClientId2;
+    }
   } else if (entityId == testEntityId2) {
     g_array_set_size(clientIdArray, 1);
     g_array_index(clientIdArray, int64_t, 0) = testClientId1;
@@ -120,9 +127,9 @@ void prepareEntityInterest(long long int entityId, GArray* clientIdArray, void* 
 
 void prepareClientAuthority(
     int64_t clientId, long long int entityId, GArray* componentTypeIdArray, void* userData) {
-  if (entityId == testEntityId1) {
+  if (clientId == testClientId1 && entityId == testEntityId1) {
     g_array_set_size(componentTypeIdArray, 1);
-    g_array_index(componentTypeIdArray, const char*, 0) = componentType3Id;
+    g_array_index(componentTypeIdArray, const char*, 0) = componentType2Id;
   } else {
     g_array_set_size(componentTypeIdArray, 0);
   }
@@ -209,7 +216,7 @@ TEST_F(ShovelerClientOpEmitterTest, checkout) {
               IsUpdateComponentOp(
                   testEntityId1, componentType2Id, COMPONENT_TYPE_2_FIELD_PRIMITIVE_LIVE_UPDATE)),
           IsEmittedOp(
-              ElementsAre(testClientId1), IsDelegateComponentOp(testEntityId1, componentType3Id))));
+              ElementsAre(testClientId1), IsDelegateComponentOp(testEntityId1, componentType2Id))));
 }
 
 TEST_F(ShovelerClientOpEmitterTest, uncheckout) {
@@ -258,7 +265,7 @@ TEST_F(ShovelerClientOpEmitterTest, addComponent) {
               UnorderedElementsAre(testClientId1, testClientId2),
               IsAddComponentOp(testEntityId1, componentType1Id)),
           IsEmittedOp(
-              UnorderedElementsAre(testClientId1, testClientId2),
+              UnorderedElementsAre(testClientId2),
               IsAddComponentOp(testEntityId1, componentType2Id)),
           IsEmittedOp(
               UnorderedElementsAre(testClientId1),
@@ -322,7 +329,7 @@ TEST_F(ShovelerClientOpEmitterTest, updateComponent) {
               IsUpdateComponentOp(
                   testEntityId1, componentType1Id, COMPONENT_TYPE_1_FIELD_DEPENDENCY_REACTIVATE)),
           IsEmittedOp(
-              UnorderedElementsAre(testClientId1, testClientId2),
+              UnorderedElementsAre(testClientId2),
               IsUpdateComponentOp(
                   testEntityId1, componentType2Id, COMPONENT_TYPE_2_FIELD_PRIMITIVE_LIVE_UPDATE)),
           IsEmittedOp(
@@ -435,7 +442,7 @@ TEST_F(ShovelerClientOpEmitterTest, removeComponent) {
               UnorderedElementsAre(testClientId1, testClientId2),
               IsRemoveComponentOp(testEntityId1, componentType1Id)),
           IsEmittedOp(
-              UnorderedElementsAre(testClientId1, testClientId2),
+              UnorderedElementsAre(testClientId2),
               IsRemoveComponentOp(testEntityId1, componentType2Id)),
           IsEmittedOp(
               UnorderedElementsAre(testClientId1),

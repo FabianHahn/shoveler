@@ -51,10 +51,15 @@ bool shovelerClientPropertyManagerRemoveEntityInterest(
     ShovelerClientPropertyManager* clientPropertyManager, int64_t clientId, long long int entityId);
 bool shovelerClientPropertyManagerHasEntityInterest(
     ShovelerClientPropertyManager* clientPropertyManager, int64_t clientId, long long int entityId);
-/** Returns the client IDs interested in a given entity ID. */
+/**
+ * Returns the client IDs interested in a given entity.
+ *
+ * If componentTypeId is specified, excludes the authoritative client for that component.
+ */
 void shovelerClientPropertyManagerGetEntityInterest(
     ShovelerClientPropertyManager* clientPropertyManager,
     long long int entityId,
+    const char* componentTypeId,
     GArray* outputArray);
 
 bool shovelerClientPropertyManagerAddComponentAuthority(

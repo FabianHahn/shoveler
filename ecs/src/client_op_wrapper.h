@@ -68,6 +68,15 @@ MATCHER_P3(IsUpdateComponentOp, entityId, componentTypeId, fieldId, "") {
       call->updateComponent.fieldId == fieldId;
 }
 
+MATCHER_P4(IsUpdateComponentOp, entityId, componentTypeId, fieldId, fieldValue, "") {
+  const ShovelerClientOpWrapper& call = arg;
+  return call->type == SHOVELER_CLIENT_OP_UPDATE_COMPONENT &&
+      call->updateComponent.entityId == entityId &&
+      call->updateComponent.componentTypeId == componentTypeId &&
+      call->updateComponent.fieldId == fieldId &&
+      shovelerComponentFieldCompareValue(call->updateComponent.fieldValue, fieldValue);
+}
+
 MATCHER_P2(IsActivateComponentOp, entityId, componentTypeId, "") {
   const ShovelerClientOpWrapper& call = arg;
   return call->type == SHOVELER_CLIENT_OP_ACTIVATE_COMPONENT &&

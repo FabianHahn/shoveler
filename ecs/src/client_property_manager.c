@@ -123,6 +123,7 @@ bool shovelerClientPropertyManagerHasEntityInterest(
 void shovelerClientPropertyManagerGetEntityInterest(
     ShovelerClientPropertyManager* clientPropertyManager,
     long long int entityId,
+    const char* componentTypeId,
     GArray* outputArray) {
   ShovelerClientPropertyManagerEntityProperties* entityProperties =
       g_hash_table_lookup(clientPropertyManager->entityProperties, &entityId);
@@ -131,14 +132,37 @@ void shovelerClientPropertyManagerGetEntityInterest(
     return;
   }
 
-  g_array_set_size(outputArray, g_hash_table_size(entityProperties->interestedClients));
+  bool filterAuthoritativeComponent = componentTypeId != NULL;
+  int64_t authoritativeClientId = 0;
+  if (componentTypeId != NULL) {
+    gpointer value;
+    if (g_hash_table_lookup_extended(
+            entityProperties->componentAuthority,
+            componentTypeId,
+            /* origKey */ NULL,
+            &value)) {
+      authoritativeClientId = POINTER_TO_CLIENT_ID(value);
+    } else {
+      // If we cannot find the component, that is equivalent to not filtering by authoritative
+      // component.
+      filterAuthoritativeComponent = false;
+    }
+  }
+
+  g_array_set_size(outputArray, 0);
 
   GHashTableIter iter;
-  gpointer clientId;
+  gpointer clientIdValue;
   g_hash_table_iter_init(&iter, entityProperties->interestedClients);
   int i = 0;
-  while (g_hash_table_iter_next(&iter, (gpointer*) &clientId, /* value */ NULL)) {
-    g_array_index(outputArray, int64_t, i) = POINTER_TO_CLIENT_ID(clientId);
+  while (g_hash_table_iter_next(&iter, (gpointer*) &clientIdValue, /* value */ NULL)) {
+    int64_t clientId = POINTER_TO_CLIENT_ID(clientIdValue);
+
+    if (filterAuthoritativeComponent && clientId == authoritativeClientId) {
+      continue;
+    }
+
+    g_array_append_val(outputArray, clientId);
     i++;
   }
 }

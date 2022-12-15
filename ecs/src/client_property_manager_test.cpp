@@ -120,11 +120,14 @@ TEST_F(ShovelerClientPropertyManagerTest, entityInterest) {
   shovelerClientPropertyManagerAddEntityInterest(
       clientPropertyManager, testClientId2, testEntityId1);
 
-  shovelerClientPropertyManagerGetEntityInterest(clientPropertyManager, testEntityId1, clientIds);
+  shovelerClientPropertyManagerGetEntityInterest(
+      clientPropertyManager, testEntityId1, /* componentTypeId */ nullptr, clientIds);
   ASSERT_THAT(ClientIdsVector(), UnorderedElementsAre(testClientId1, testClientId2));
-  shovelerClientPropertyManagerGetEntityInterest(clientPropertyManager, testEntityId2, clientIds);
+  shovelerClientPropertyManagerGetEntityInterest(
+      clientPropertyManager, testEntityId2, /* componentTypeId */ nullptr, clientIds);
   ASSERT_THAT(ClientIdsVector(), UnorderedElementsAre(testClientId1));
-  shovelerClientPropertyManagerGetEntityInterest(clientPropertyManager, testEntityId3, clientIds);
+  shovelerClientPropertyManagerGetEntityInterest(
+      clientPropertyManager, testEntityId3, /* componentTypeId */ nullptr, clientIds);
   ASSERT_THAT(ClientIdsVector(), IsEmpty());
 }
 
@@ -164,6 +167,41 @@ TEST_F(ShovelerClientPropertyManagerTest, componentAuthority) {
   ASSERT_TRUE(authorityReassigned);
   ASSERT_TRUE(shovelerClientPropertyManagerHasComponentAuthority(
       clientPropertyManager, testClientId2, testEntityId1, testComponentTypeId1));
+}
+
+TEST_F(ShovelerClientPropertyManagerTest, entityComponentInterest) {
+  shovelerClientPropertyManagerAddClient(clientPropertyManager, testClientId1);
+  shovelerClientPropertyManagerAddClient(clientPropertyManager, testClientId2);
+  shovelerClientPropertyManagerAddEntityInterest(
+      clientPropertyManager, testClientId1, testEntityId1);
+  shovelerClientPropertyManagerAddEntityInterest(
+      clientPropertyManager, testClientId1, testEntityId2);
+  shovelerClientPropertyManagerAddEntityInterest(
+      clientPropertyManager, testClientId2, testEntityId1);
+  shovelerClientPropertyManagerAddComponentAuthority(
+      clientPropertyManager, testClientId1, testEntityId1, testComponentTypeId1);
+  shovelerClientPropertyManagerAddComponentAuthority(
+      clientPropertyManager, testClientId2, testEntityId1, testComponentTypeId2);
+  shovelerClientPropertyManagerAddComponentAuthority(
+      clientPropertyManager, testClientId1, testEntityId2, testComponentTypeId1);
+
+  // Validate that entity component interest doesn't include authoritative clients.
+  shovelerClientPropertyManagerGetEntityInterest(
+      clientPropertyManager, testEntityId1, testComponentTypeId1, clientIds);
+  ASSERT_THAT(ClientIdsVector(), UnorderedElementsAre(testClientId2));
+  shovelerClientPropertyManagerGetEntityInterest(
+      clientPropertyManager, testEntityId1, testComponentTypeId2, clientIds);
+  ASSERT_THAT(ClientIdsVector(), UnorderedElementsAre(testClientId1));
+  shovelerClientPropertyManagerGetEntityInterest(
+      clientPropertyManager, testEntityId2, testComponentTypeId1, clientIds);
+  ASSERT_THAT(ClientIdsVector(), IsEmpty());
+
+  // Undelegate a component and make sure component interest now includes both clients again.
+  shovelerClientPropertyManagerRemoveComponentAuthority(
+      clientPropertyManager, testClientId1, testEntityId1, testComponentTypeId1);
+  shovelerClientPropertyManagerGetEntityInterest(
+      clientPropertyManager, testEntityId1, testComponentTypeId1, clientIds);
+  ASSERT_THAT(ClientIdsVector(), UnorderedElementsAre(testClientId1, testClientId2));
 }
 
 TEST_F(ShovelerClientPropertyManagerTest, clientAuthority) {

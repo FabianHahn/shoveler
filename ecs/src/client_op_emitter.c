@@ -6,7 +6,8 @@
 #include <shoveler/world.h>
 #include <stdlib.h>
 
-static bool prepareEntityInterest(ShovelerClientOpEmitter* clientOpEmitter, long long int entityId);
+static bool prepareEntityInterest(
+    ShovelerClientOpEmitter* clientOpEmitter, long long int entityId, const char* componentTypeId);
 static void emitAddEntity(ShovelerClientOpEmitter* clientOpEmitter, ShovelerWorldEntity* entity);
 static void emitRemoveEntity(ShovelerClientOpEmitter* clientOpEmitter, long long int entityId);
 static void emitAddComponent(
@@ -94,7 +95,7 @@ void shovelerClientOpEmitterUncheckoutEntity(
 
 void shovelerClientOpEmitterAddEntity(
     ShovelerClientOpEmitter* clientOpEmitter, ShovelerWorldEntity* entity) {
-  if (!prepareEntityInterest(clientOpEmitter, entity->id)) {
+  if (!prepareEntityInterest(clientOpEmitter, entity->id, /* componentTypeId */ NULL)) {
     return;
   }
 
@@ -103,7 +104,7 @@ void shovelerClientOpEmitterAddEntity(
 
 void shovelerClientOpEmitterRemoveEntity(
     ShovelerClientOpEmitter* clientOpEmitter, long long int entityId) {
-  if (!prepareEntityInterest(clientOpEmitter, entityId)) {
+  if (!prepareEntityInterest(clientOpEmitter, entityId, /* componentTypeId */ NULL)) {
     return;
   }
 
@@ -112,7 +113,7 @@ void shovelerClientOpEmitterRemoveEntity(
 
 void shovelerClientOpEmitterAddComponent(
     ShovelerClientOpEmitter* clientOpEmitter, ShovelerComponent* component) {
-  if (!prepareEntityInterest(clientOpEmitter, component->entityId)) {
+  if (!prepareEntityInterest(clientOpEmitter, component->entityId, component->type->id)) {
     return;
   }
 
@@ -124,7 +125,7 @@ void shovelerClientOpEmitterUpdateComponent(
     ShovelerComponent* component,
     int fieldId,
     const ShovelerComponentFieldValue* value) {
-  if (!prepareEntityInterest(clientOpEmitter, component->entityId)) {
+  if (!prepareEntityInterest(clientOpEmitter, component->entityId, component->type->id)) {
     return;
   }
 
@@ -173,7 +174,7 @@ void shovelerClientOpEmitterDeactivateComponent(
 
 void shovelerClientOpEmitterRemoveComponent(
     ShovelerClientOpEmitter* clientOpEmitter, long long int entityId, const char* componentTypeId) {
-  if (!prepareEntityInterest(clientOpEmitter, entityId)) {
+  if (!prepareEntityInterest(clientOpEmitter, entityId, componentTypeId)) {
     return;
   }
 
@@ -181,9 +182,12 @@ void shovelerClientOpEmitterRemoveComponent(
 }
 
 static bool prepareEntityInterest(
-    ShovelerClientOpEmitter* clientOpEmitter, long long int entityId) {
+    ShovelerClientOpEmitter* clientOpEmitter, long long int entityId, const char* componentTypeId) {
   clientOpEmitter->adapter->prepareEntityInterest(
-      entityId, clientOpEmitter->clientIdArray, clientOpEmitter->adapter->userData);
+      entityId,
+      componentTypeId,
+      clientOpEmitter->clientIdArray,
+      clientOpEmitter->adapter->userData);
   return clientOpEmitter->clientIdArray->len > 0;
 }
 
