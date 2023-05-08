@@ -89,15 +89,15 @@ http_archive(
     url = "https://github.com/madler/zlib/archive/v1.2.12.tar.gz",
 )
 
-BAZEL_ZIG_CC_VERSION = "v1.0.0-rc4"
-
 http_archive(
-    name = "bazel-zig-cc",
-    sha256 = "af784b604c08f385358113dc41e22736369a8ad09951fecf31dd13c35f4aaa62",
-    strip_prefix = "bazel-zig-cc-{}".format(BAZEL_ZIG_CC_VERSION),
-    urls = ["https://git.sr.ht/~motiejus/bazel-zig-cc/archive/{}.tar.gz".format(BAZEL_ZIG_CC_VERSION)],
+    name = "hermetic_cc_toolchain",
+    # Windows patch on top of 2.0.0-rc1
+    sha256 = "070413b7e9c76e6241819652c9dffae424e867869b864b0ab3a5d3784da87c15",
+    strip_prefix = "hermetic_cc_toolchain-disable-windows-dynamic-linking",
+    url =
+        "https://github.com/FabianHahn/hermetic_cc_toolchain/archive/refs/heads/disable-windows-dynamic-linking.zip",
 )
 
-load("@bazel-zig-cc//toolchain:defs.bzl", zig_toolchains = "toolchains")
+load("@hermetic_cc_toolchain//toolchain:defs.bzl", zig_toolchains = "toolchains")
 
 zig_toolchains()
