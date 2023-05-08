@@ -92,6 +92,9 @@ TEST_F(ShovelerClientPropertyManagerTest, clientInterest) {
   bool added = shovelerClientPropertyManagerAddEntityInterest(
       clientPropertyManager, testClientId1, testEntityId1);
   ASSERT_TRUE(added);
+  bool addedAgain = shovelerClientPropertyManagerAddEntityInterest(
+      clientPropertyManager, testClientId1, testEntityId1);
+  ASSERT_FALSE(addedAgain);
   ASSERT_TRUE(shovelerClientPropertyManagerHasEntityInterest(
       clientPropertyManager, testClientId1, testEntityId1));
   bool addedNonExisting = shovelerClientPropertyManagerAddEntityInterest(

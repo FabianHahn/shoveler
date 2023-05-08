@@ -68,7 +68,7 @@ bool shovelerClientPropertyManagerAddEntityInterest(
     return false;
   }
 
-  if (g_hash_table_contains(clientProperties->interestedEntities, &entityId)) {
+  if (g_hash_table_contains(clientProperties->interestedEntities, ENTITY_ID_TO_POINTER(entityId))) {
     return false;
   }
 

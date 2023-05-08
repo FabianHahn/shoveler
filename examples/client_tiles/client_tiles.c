@@ -1,4 +1,6 @@
 #include <shoveler/camera/perspective.h>
+#include <shoveler/client_op.h>
+#include <shoveler/client_property_manager.h>
 #include <shoveler/client_system.h>
 #include <shoveler/component.h>
 #include <shoveler/component_field.h>
@@ -8,10 +10,14 @@
 #include <shoveler/game.h>
 #include <shoveler/global.h>
 #include <shoveler/image/png.h>
+#include <shoveler/in_memory_network_adapter.h>
 #include <shoveler/map.h>
 #include <shoveler/material/texture.h>
 #include <shoveler/opengl.h>
+#include <shoveler/server_op.h>
+#include <shoveler/system.h>
 #include <shoveler/types.h>
+#include <shoveler/view_synchronizer.h>
 #include <shoveler/world.h>
 #include <stdlib.h> // EXIT_FAILURE, EXIT_SUCCESS
 
@@ -20,6 +26,8 @@
 static double time = 0.0;
 
 static void updateGame(ShovelerGame* game, double dt);
+static bool receiveClientEvent(
+    const ShovelerClientNetworkAdapterEvent* event, void* clientContextPointer);
 static void onUpdateComponent(
     ShovelerWorld* world,
     ShovelerWorldEntity* entity,
@@ -29,10 +37,31 @@ static void onUpdateComponent(
     const ShovelerComponentFieldValue* value,
     bool isAuthoritative,
     void* userData);
+static void onClientConnected(
+    ShovelerViewSynchronizer* viewSynchronizer, int64_t clientId, void* serverContextPointer);
+static void onClientDisconnected(
+    ShovelerViewSynchronizer* viewSynchronizer,
+    int64_t clientId,
+    const char* reason,
+    void* serverContextPointer);
 
-static ShovelerWorld* world = NULL;
+typedef struct {
+  ShovelerViewSynchronizer* viewSynchronizer;
+  long long int nextEntityId;
+} ShovelerServerContext;
+
+typedef struct {
+  void* clientHandle;
+  ShovelerClientNetworkAdapter* client;
+  ShovelerWorld* world;
+  ShovelerComponentTypeIndexer* componentTypeIndexer;
+  ShovelerClientOpWithData* deserializedOp;
+} ShovelerClientContext;
 
 int main(int argc, char* argv[]) {
+  shovelerLogInit("shoveler/", SHOVELER_LOG_LEVEL_INFO_UP, stdout);
+  shovelerGlobalInit();
+
   if (argc != 9) {
     shovelerLogError(
         "Usage:\n\t%s <tileset png> <tileset columns> <tileset rows> <character png> <character2 "
@@ -95,13 +124,34 @@ int main(int argc, char* argv[]) {
   ShovelerWorldCallbacks worldCallbacks = shovelerWorldCallbacks();
   worldCallbacks.onUpdateComponent = onUpdateComponent;
   ShovelerClientSystem* clientSystem = shovelerClientSystemCreate(game, &worldCallbacks);
-  world = clientSystem->world;
 
-  long long int nextEntityId = 1;
+  ShovelerInMemoryNetworkAdapter* inMemoryNetworkAdapter = shovelerInMemoryNetworkAdapterCreate();
+  ShovelerServerNetworkAdapter* serverNetworkAdapter =
+      shovelerInMemoryNetworkAdapterGetServer(inMemoryNetworkAdapter);
+
+  ShovelerServerContext serverContext;
+  serverContext.nextEntityId = 1;
+
+  ShovelerViewSynchronizerCallbacks viewSynchronizerCallbacks;
+  viewSynchronizerCallbacks.onClientConnected = onClientConnected;
+  viewSynchronizerCallbacks.onClientDisconnected = onClientDisconnected;
+  viewSynchronizerCallbacks.userData = &serverContext;
+  ShovelerSystem* serverSystem = shovelerSystemCreate();
+  serverContext.viewSynchronizer = shovelerViewSynchronizerCreate(
+      clientSystem->schema, serverSystem, serverNetworkAdapter, &viewSynchronizerCallbacks);
+
+  ShovelerClientContext clientContext;
+  clientContext.clientHandle = shovelerInMemoryNetworkAdapterConnectClient(inMemoryNetworkAdapter);
+  clientContext.client =
+      shovelerInMemoryNetworkAdapterGetClient(inMemoryNetworkAdapter, clientContext.clientHandle);
+  clientContext.world = clientSystem->world;
+  clientContext.componentTypeIndexer = serverContext.viewSynchronizer->componentTypeIndexer;
+  clientContext.deserializedOp = shovelerClientOpCreateWithData(/* inputClientOp */ NULL);
+
   shovelerClientTilesSeederInit(
-      world,
+      serverContext.viewSynchronizer->world,
       map,
-      &nextEntityId,
+      &serverContext.nextEntityId,
       tilesetPngFilename,
       tilesetPngColumns,
       tilesetPngRows,
@@ -111,13 +161,50 @@ int main(int argc, char* argv[]) {
       character4PngFilename,
       characterShiftAmount);
 
+  GString* serializedOp = g_string_new("");
+  for (long long int entityId = 1; entityId < serverContext.nextEntityId; entityId++) {
+    ShovelerServerOp serverOp;
+    serverOp.type = SHOVELER_SERVER_OP_ADD_ENTITY_INTEREST;
+    serverOp.addEntityInterest.entityId = entityId;
+
+    g_string_set_size(serializedOp, 0);
+    if (!shovelerServerOpSerialize(&serverOp, clientContext.componentTypeIndexer, serializedOp)) {
+      shovelerLogWarning("Failed to serialize server op.");
+      break;
+    }
+
+    if (!clientContext.client->sendMessage(
+            (const unsigned char*) serializedOp->str,
+            (int) serializedOp->len,
+            clientContext.client->userData)) {
+      shovelerLogWarning("Failed to send server op.");
+      break;
+    }
+  }
+  g_string_free(serializedOp, /* freeSegment */ true);
+
   shovelerOpenGLCheckSuccess();
 
   while (shovelerGameIsRunning(game)) {
+    shovelerViewSynchronizerUpdate(serverContext.viewSynchronizer);
+
+    while (clientContext.client->receiveEvent(
+        receiveClientEvent, &clientContext, clientContext.client->userData)) {
+    }
+
     shovelerGameRenderFrame(game);
   }
   shovelerLogInfo("Exiting main loop, goodbye.");
 
+  shovelerClientOpFreeWithData(clientContext.deserializedOp);
+
+  shovelerInMemoryNetworkAdapterDisconnectClient(
+      inMemoryNetworkAdapter, clientContext.clientHandle, "shutting down");
+  shovelerViewSynchronizerUpdate(serverContext.viewSynchronizer);
+
+  shovelerViewSynchronizerFree(serverContext.viewSynchronizer);
+  shovelerSystemFree(serverSystem);
+  shovelerInMemoryNetworkAdapterFree(inMemoryNetworkAdapter);
   shovelerClientSystemFree(clientSystem);
   shovelerMapFree(map);
   shovelerGameFree(game);
@@ -131,6 +218,40 @@ static void updateGame(ShovelerGame* game, double dt) {
   shovelerCameraUpdateView(game->camera);
 
   time += dt;
+}
+
+static bool receiveClientEvent(
+    const ShovelerClientNetworkAdapterEvent* event, void* clientContextPointer) {
+  ShovelerClientContext* clientContext = clientContextPointer;
+  switch (event->type) {
+  case SHOVELER_CLIENT_NETWORK_ADAPTER_EVENT_TYPE_NONE:
+    break;
+  case SHOVELER_CLIENT_NETWORK_ADAPTER_EVENT_TYPE_CLIENT_CONNECTED:
+    shovelerLogInfo("Client connected to server.");
+    break;
+  case SHOVELER_CLIENT_NETWORK_ADAPTER_EVENT_TYPE_CLIENT_DISCONNECTED:
+    shovelerLogInfo("Client disconnected from server: %s", event->payload->str);
+    break;
+  case SHOVELER_CLIENT_NETWORK_ADAPTER_EVENT_TYPE_MESSAGE: {
+    int readIndex = 0;
+    if (!shovelerClientOpDeserialize(
+            clientContext->deserializedOp,
+            clientContext->componentTypeIndexer,
+            (const unsigned char*) event->payload->str,
+            (int) event->payload->len,
+            &readIndex)) {
+      shovelerLogWarning("Failed to deserialize client op.");
+      return false;
+    }
+
+    if (!shovelerWorldApplyClientOp(clientContext->world, &clientContext->deserializedOp->op)) {
+      shovelerLogWarning("Failed to apply client op.");
+      return false;
+    }
+  } break;
+  }
+
+  return true;
 }
 
 static void onUpdateComponent(
@@ -156,4 +277,19 @@ static void onUpdateComponent(
       printedValue->str);
 
   g_string_free(printedValue, true);
+}
+
+static void onClientConnected(
+    ShovelerViewSynchronizer* viewSynchronizer, int64_t clientId, void* serverContextPointer) {
+  ShovelerServerContext* serverContext = serverContextPointer;
+  shovelerLogInfo("Server connected client %" PRIu64 ".", clientId);
+  // TODO: make sure client components get activated
+}
+
+static void onClientDisconnected(
+    ShovelerViewSynchronizer* viewSynchronizer,
+    int64_t clientId,
+    const char* reason,
+    void* serverContextPointer) {
+  shovelerLogInfo("Server disconnected client %" PRIu64 ": %s.", clientId, reason);
 }

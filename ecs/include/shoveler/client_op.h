@@ -87,6 +87,7 @@ typedef struct ShovelerClientOpWithDataStruct {
 } ShovelerClientOpWithData;
 
 ShovelerClientOp shovelerClientOp();
+/** inputClientOp can be NULL */
 ShovelerClientOpWithData* shovelerClientOpCreateWithData(const ShovelerClientOp* inputClientOp);
 void shovelerClientOpInitWithData(
     ShovelerClientOpWithData* clientOp, const ShovelerClientOp* inputClientOp);
