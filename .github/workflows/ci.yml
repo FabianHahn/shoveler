@@ -1,0 +1,26 @@
+name: ci
+run-name: CI run triggered by @${{ github.actor }}
+on: [push]
+jobs:
+  linux-ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Mount bazel cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/bazel
+          key: ${{ runner.os }}-bazel-${{ hashFiles('.bazelversion', '.bazelrc', 'WORKSPACE') }}
+          restore-keys: |
+            ${{ runner.os }}-bazel-
+      - name: Install clang-format
+        run: sudo apt-get install -y clang-format-11
+      - name: Run clang-format
+        run: ./clang-format.sh
+      - name: Build (Windows)
+        run: bazelisk build --config windows ...
+      - name: Build and Test (Linux)
+        run: |
+          bazelisk build --config linux ...
+          bazelisk test --config linux ...
