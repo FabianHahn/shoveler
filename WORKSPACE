@@ -89,13 +89,15 @@ http_archive(
     url = "https://github.com/madler/zlib/archive/v1.2.12.tar.gz",
 )
 
+HERMETIC_CC_TOOLCHAIN_VERSION = "v2.0.0"
+
 http_archive(
     name = "hermetic_cc_toolchain",
-    # Windows patch on top of 2.0.0-rc1
-    sha256 = "070413b7e9c76e6241819652c9dffae424e867869b864b0ab3a5d3784da87c15",
-    strip_prefix = "hermetic_cc_toolchain-disable-windows-dynamic-linking",
-    url =
-        "https://github.com/FabianHahn/hermetic_cc_toolchain/archive/refs/heads/disable-windows-dynamic-linking.zip",
+    sha256 = "57f03a6c29793e8add7bd64186fc8066d23b5ffd06fe9cc6b0b8c499914d3a65",
+    urls = [
+        "https://mirror.bazel.build/github.com/uber/hermetic_cc_toolchain/releases/download/{0}/hermetic_cc_toolchain-{0}.tar.gz".format(HERMETIC_CC_TOOLCHAIN_VERSION),
+        "https://github.com/uber/hermetic_cc_toolchain/releases/download/{0}/hermetic_cc_toolchain-{0}.tar.gz".format(HERMETIC_CC_TOOLCHAIN_VERSION),
+    ],
 )
 
 load("@hermetic_cc_toolchain//toolchain:defs.bzl", zig_toolchains = "toolchains")
