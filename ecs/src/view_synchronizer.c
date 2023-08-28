@@ -7,6 +7,7 @@
 #include <shoveler/component_type_indexer.h>
 #include <shoveler/log.h>
 #include <shoveler/schema.h>
+#include <shoveler/world.h>
 #include <stdlib.h>
 
 static void onAddEntity(ShovelerWorld* world, ShovelerWorldEntity* entity, void* userData);
@@ -27,15 +28,17 @@ static void onUpdateComponent(
     void* userData);
 static void onRemoveComponent(
     ShovelerWorld* world, ShovelerWorldEntity* entity, const char* componentTypeId, void* userData);
+static void getEntityComponents(long long entityId, GArray* componentTypeIdArray, void* userData);
 static void prepareEntityInterest(
     long long int entityId, const char* componentTypeId, GArray* clientIdArray, void* userData);
 static void prepareClientAuthority(
     int64_t clientId, long long int entityId, GArray* componentTypeIdArray, void* userData);
-static void prepareClientActivations(
-    int64_t clientId,
-    long long int entityId,
-    GArray* componentTypeIdArray,
-    void* viewSynchronizerPointer);
+static ShovelerClientOpEmitterAdapterClientDeactivations* prepareClientDeactivations(
+    int64_t clientId, long long int entityId, void* userData);
+static bool clientDeactivationsGet(
+    ShovelerClientOpEmitterAdapterClientDeactivations* clientDeactivations,
+    const char* componentTypeId,
+    void* userData);
 static void onEmitOp(
     ShovelerClientOpEmitter* clientOpEmitter,
     const int64_t* clientIds,
@@ -79,9 +82,11 @@ ShovelerViewSynchronizer* shovelerViewSynchronizerCreate(
 
   viewSynchronizer->clientPropertyManager = shovelerClientPropertyManagerCreate();
 
+  viewSynchronizer->clientOpEmitterAdapter.getEntityComponents = getEntityComponents;
   viewSynchronizer->clientOpEmitterAdapter.prepareEntityInterest = prepareEntityInterest;
   viewSynchronizer->clientOpEmitterAdapter.prepareClientAuthority = prepareClientAuthority;
-  viewSynchronizer->clientOpEmitterAdapter.prepareClientActivations = prepareClientActivations;
+  viewSynchronizer->clientOpEmitterAdapter.prepareClientDeactivations = prepareClientDeactivations;
+  viewSynchronizer->clientOpEmitterAdapter.clientDeactivationsGet = clientDeactivationsGet;
   viewSynchronizer->clientOpEmitterAdapter.onEmitOp = onEmitOp;
   viewSynchronizer->clientOpEmitterAdapter.userData = viewSynchronizer;
   viewSynchronizer->clientOpEmitter =
@@ -191,6 +196,20 @@ static void onRemoveComponent(
       viewSynchronizer->clientOpEmitter, entity->id, componentTypeId);
 }
 
+static void getEntityComponents(
+    long long entityId, GArray* componentTypeIdArray, void* viewSynchronizerPointer) {
+  ShovelerViewSynchronizer* viewSynchronizer = viewSynchronizerPointer;
+  ShovelerWorldEntity* entity = shovelerWorldGetEntity(viewSynchronizer->world, entityId);
+
+  g_array_set_size(componentTypeIdArray, 0);
+  GHashTableIter iter;
+  const char* componentTypeId;
+  g_hash_table_iter_init(&iter, entity->components);
+  while (g_hash_table_iter_next(&iter, (gpointer*) &componentTypeId, /* value */ NULL)) {
+    g_array_append_val(componentTypeIdArray, componentTypeId);
+  }
+}
+
 static void prepareEntityInterest(
     long long int entityId,
     const char* componentTypeId,
@@ -211,14 +230,19 @@ static void prepareClientAuthority(
       viewSynchronizer->clientPropertyManager, clientId, entityId, componentTypeIdArray);
 }
 
-static void prepareClientActivations(
-    int64_t clientId,
-    long long int entityId,
-    GArray* componentTypeIdArray,
+static ShovelerClientOpEmitterAdapterClientDeactivations* prepareClientDeactivations(
+    int64_t clientId, long long int entityId, void* viewSynchronizerPointer) {
+  ShovelerViewSynchronizer* viewSynchronizer = viewSynchronizerPointer;
+  return shovelerClientPropertyManagerGetClientDeactivations(
+      viewSynchronizer->clientPropertyManager, clientId, entityId);
+}
+
+static bool clientDeactivationsGet(
+    ShovelerClientOpEmitterAdapterClientDeactivations* clientDeactivations,
+    const char* componentTypeId,
     void* viewSynchronizerPointer) {
   ShovelerViewSynchronizer* viewSynchronizer = viewSynchronizerPointer;
-  shovelerClientPropertyManagerGetClientActivations(
-      viewSynchronizer->clientPropertyManager, clientId, entityId, componentTypeIdArray);
+  return shovelerClientPropertyManagerClientDeactivationsGet(clientDeactivations, componentTypeId);
 }
 
 static void onEmitOp(

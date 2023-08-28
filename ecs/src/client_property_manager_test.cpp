@@ -45,11 +45,17 @@ public:
     return result;
   }
 
-  std::vector<const char*> GetClientActivations(int64_t clientId, long long int entityId) const {
+  std::vector<const char*> GetClientDeactivations(int64_t clientId, long long int entityId) const {
     std::vector<const char*> result;
+
+    auto* clientDeactivations = shovelerClientPropertyManagerGetClientDeactivations(
+        clientPropertyManager, clientId, entityId);
+    if (clientDeactivations == NULL) {
+      return result;
+    }
+
     GArray* array = g_array_new(/* zeroTerminated */ false, /* clear */ false, sizeof(const char*));
-    shovelerClientPropertyManagerGetClientActivations(
-        clientPropertyManager, clientId, entityId, array);
+    shovelerClientPropertyManagerClientDeactivationsGetAll(clientDeactivations, array);
 
     for (guint i = 0; i < array->len; i++) {
       result.push_back(g_array_index(array, const char*, i));
@@ -57,6 +63,14 @@ public:
 
     g_array_free(array, /* freeSegment */ true);
     return result;
+  }
+
+  bool GetComponentDeactivation(
+      int64_t clientId, long long int entityId, const char* componentTypeId) const {
+    return shovelerClientPropertyManagerClientDeactivationsGet(
+        shovelerClientPropertyManagerGetClientDeactivations(
+            clientPropertyManager, clientId, entityId),
+        componentTypeId);
   }
 
   std::vector<int64_t> ClientIdsVector() const {
@@ -222,59 +236,51 @@ TEST_F(ShovelerClientPropertyManagerTest, clientAuthority) {
   ASSERT_THAT(GetClientAuthority(testClientId1, testEntityId3), IsEmpty());
 }
 
-TEST_F(ShovelerClientPropertyManagerTest, componentActivation) {
+TEST_F(ShovelerClientPropertyManagerTest, componentDeactivation) {
   shovelerClientPropertyManagerAddClient(clientPropertyManager, testClientId1);
   shovelerClientPropertyManagerAddClient(clientPropertyManager, testClientId2);
 
-  ASSERT_FALSE(shovelerClientPropertyManagerGetComponentActivation(
-      clientPropertyManager, testClientId1, testEntityId1, testComponentTypeId1));
-  ASSERT_FALSE(shovelerClientPropertyManagerGetComponentActivation(
-      clientPropertyManager, testClientId1, testEntityId1, testComponentTypeId2));
-  bool activationAdded = shovelerClientPropertyManagerAddComponentActivation(
+  ASSERT_FALSE(GetComponentDeactivation(testClientId1, testEntityId1, testComponentTypeId1));
+  ASSERT_FALSE(GetComponentDeactivation(testClientId1, testEntityId1, testComponentTypeId2));
+  bool activationAdded = shovelerClientPropertyManagerAddComponentDeactivation(
       clientPropertyManager, testClientId1, testEntityId1, testComponentTypeId1);
   ASSERT_TRUE(activationAdded);
-  ASSERT_TRUE(shovelerClientPropertyManagerGetComponentActivation(
-      clientPropertyManager, testClientId1, testEntityId1, testComponentTypeId1));
-  ASSERT_FALSE(shovelerClientPropertyManagerGetComponentActivation(
-      clientPropertyManager, testClientId1, testEntityId1, testComponentTypeId2));
-  bool activationAddedAgain = shovelerClientPropertyManagerAddComponentActivation(
+  ASSERT_TRUE(GetComponentDeactivation(testClientId1, testEntityId1, testComponentTypeId1));
+  ASSERT_FALSE(GetComponentDeactivation(testClientId1, testEntityId1, testComponentTypeId2));
+  bool activationAddedAgain = shovelerClientPropertyManagerAddComponentDeactivation(
       clientPropertyManager, testClientId1, testEntityId1, testComponentTypeId1);
   ASSERT_FALSE(activationAddedAgain);
 
-  bool activationDoubleAdded = shovelerClientPropertyManagerAddComponentActivation(
+  bool activationDoubleAdded = shovelerClientPropertyManagerAddComponentDeactivation(
       clientPropertyManager, testClientId2, testEntityId1, testComponentTypeId1);
   ASSERT_TRUE(activationDoubleAdded);
-  ASSERT_TRUE(shovelerClientPropertyManagerGetComponentActivation(
-      clientPropertyManager, testClientId1, testEntityId1, testComponentTypeId1));
-  ASSERT_TRUE(shovelerClientPropertyManagerGetComponentActivation(
-      clientPropertyManager, testClientId2, testEntityId1, testComponentTypeId1));
+  ASSERT_TRUE(GetComponentDeactivation(testClientId1, testEntityId1, testComponentTypeId1));
+  ASSERT_TRUE(GetComponentDeactivation(testClientId2, testEntityId1, testComponentTypeId1));
 
-  bool activationRemoved = shovelerClientPropertyManagerRemoveComponentActivation(
+  bool activationRemoved = shovelerClientPropertyManagerRemoveComponentDeactivation(
       clientPropertyManager, testClientId1, testEntityId1, testComponentTypeId1);
   ASSERT_TRUE(activationRemoved);
-  ASSERT_FALSE(shovelerClientPropertyManagerGetComponentActivation(
-      clientPropertyManager, testClientId1, testEntityId1, testComponentTypeId1));
-  ASSERT_TRUE(shovelerClientPropertyManagerGetComponentActivation(
-      clientPropertyManager, testClientId2, testEntityId1, testComponentTypeId1));
+  ASSERT_FALSE(GetComponentDeactivation(testClientId1, testEntityId1, testComponentTypeId1));
+  ASSERT_TRUE(GetComponentDeactivation(testClientId2, testEntityId1, testComponentTypeId1));
   bool activationRemovedAgain = shovelerClientPropertyManagerRemoveComponentAuthority(
       clientPropertyManager, testClientId1, testEntityId1, testComponentTypeId1);
   ASSERT_FALSE(activationRemovedAgain);
 }
 
-TEST_F(ShovelerClientPropertyManagerTest, clientActivation) {
+TEST_F(ShovelerClientPropertyManagerTest, clientDectivations) {
   shovelerClientPropertyManagerAddClient(clientPropertyManager, testClientId1);
   shovelerClientPropertyManagerAddClient(clientPropertyManager, testClientId2);
 
-  shovelerClientPropertyManagerAddComponentActivation(
+  shovelerClientPropertyManagerAddComponentDeactivation(
       clientPropertyManager, testClientId1, testEntityId1, testComponentTypeId1);
-  shovelerClientPropertyManagerAddComponentActivation(
+  shovelerClientPropertyManagerAddComponentDeactivation(
       clientPropertyManager, testClientId1, testEntityId1, testComponentTypeId2);
-  shovelerClientPropertyManagerAddComponentActivation(
+  shovelerClientPropertyManagerAddComponentDeactivation(
       clientPropertyManager, testClientId2, testEntityId1, testComponentTypeId1);
   ASSERT_THAT(
-      GetClientActivations(testClientId1, testEntityId1),
+      GetClientDeactivations(testClientId1, testEntityId1),
       UnorderedElementsAre(testComponentTypeId1, testComponentTypeId2));
   ASSERT_THAT(
-      GetClientActivations(testClientId2, testEntityId1), ElementsAre(testComponentTypeId1));
-  ASSERT_THAT(GetClientActivations(testClientId1, testEntityId2), IsEmpty());
+      GetClientDeactivations(testClientId2, testEntityId1), ElementsAre(testComponentTypeId1));
+  ASSERT_THAT(GetClientDeactivations(testClientId1, testEntityId2), IsEmpty());
 }

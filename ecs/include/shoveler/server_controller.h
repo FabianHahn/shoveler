@@ -32,12 +32,12 @@ bool shovelerServerControllerUndelegateComponent(
     long long int entityId,
     const char* componentTypeId,
     int64_t clientId);
-bool shovelerServerControllerActivateComponent(
+bool shovelerServerControllerDeactivateComponent(
     ShovelerServerController* serverController,
     long long int entityId,
     const char* componentTypeId,
     int64_t clientId);
-bool shovelerServerControllerDeactivateComponent(
+bool shovelerServerControllerUndeactivateComponent(
     ShovelerServerController* serverController,
     long long int entityId,
     const char* componentTypeId,

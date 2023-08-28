@@ -9,6 +9,7 @@
  *  - an entity component being delegated/undelegated to/from a particular client
  *
  * In practice, the adapter is usually implemented by:
+ *  - getEntityComponents calls are handled by a World
  *  - forwarding prepare* calls that return affected client lists to a ClientPropertyManager
  *  - forwarding onEmitOp callbacks to a ClientConnectionManager
  */
@@ -28,13 +29,24 @@ typedef struct ShovelerClientOpEmitterStruct ShovelerClientOpEmitter;
 typedef struct ShovelerWorldEntityStruct ShovelerWorldEntity;
 typedef struct ShovelerWorldStruct ShovelerWorld;
 
+typedef void* ShovelerClientOpEmitterAdapterClientDeactivations;
+
 typedef struct ShovelerClientOpEmitterAdapterStruct {
+  // World information retrieval
+  /** Returns list of (const char *) component type IDs in the output array */
+  void (*getEntityComponents)(long long entityId, GArray* componentTypeIdArray, void* userData);
+
+  // Client property retrieval
   void (*prepareEntityInterest)(
       long long int entityId, const char* componentTypeId, GArray* clientIdArray, void* userData);
   void (*prepareClientAuthority)(
       int64_t clientId, long long int entityId, GArray* componentTypeIdArray, void* userData);
-  void (*prepareClientActivations)(
-      int64_t clientId, long long int entityId, GArray* componentTypeIdArray, void* userData);
+  ShovelerClientOpEmitterAdapterClientDeactivations* (*prepareClientDeactivations)(
+      int64_t clientId, long long int entityId, void* userData);
+  bool (*clientDeactivationsGet)(
+      ShovelerClientOpEmitterAdapterClientDeactivations* clientDeactivations,
+      const char* componentTypeId,
+      void* userData);
 
   void (*onEmitOp)(
       ShovelerClientOpEmitter* clientOpEmitter,

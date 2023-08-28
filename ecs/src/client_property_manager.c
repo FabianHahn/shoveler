@@ -298,7 +298,7 @@ bool shovelerClientPropertyManagerHasComponentAuthority(
   return authoritativeComponentId == clientId;
 }
 
-bool shovelerClientPropertyManagerAddComponentActivation(
+bool shovelerClientPropertyManagerAddComponentDeactivation(
     ShovelerClientPropertyManager* clientPropertyManager,
     int64_t clientId,
     long long int entityId,
@@ -311,15 +311,15 @@ bool shovelerClientPropertyManagerAddComponentActivation(
 
   ShovelerClientPropertyManagerClientEntityProperties* clientEntityProperties =
       createOrGetClientEntityProperties(clientProperties, entityId);
-  if (g_hash_table_contains(clientEntityProperties->activatedComponents, componentTypeId)) {
+  if (g_hash_table_contains(clientEntityProperties->deactivatedComponents, componentTypeId)) {
     return false;
   }
 
-  g_hash_table_add(clientEntityProperties->activatedComponents, (gpointer) componentTypeId);
+  g_hash_table_add(clientEntityProperties->deactivatedComponents, (gpointer) componentTypeId);
   return true;
 }
 
-bool shovelerClientPropertyManagerRemoveComponentActivation(
+bool shovelerClientPropertyManagerRemoveComponentDeactivation(
     ShovelerClientPropertyManager* clientPropertyManager,
     int64_t clientId,
     long long int entityId,
@@ -336,59 +336,53 @@ bool shovelerClientPropertyManagerRemoveComponentActivation(
     return false;
   }
 
-  if (!g_hash_table_contains(clientEntityProperties->activatedComponents, componentTypeId)) {
+  if (!g_hash_table_contains(clientEntityProperties->deactivatedComponents, componentTypeId)) {
     return false;
   }
 
-  g_hash_table_remove(clientEntityProperties->activatedComponents, (gpointer) componentTypeId);
+  g_hash_table_remove(clientEntityProperties->deactivatedComponents, (gpointer) componentTypeId);
   return true;
 }
 
-void shovelerClientPropertyManagerGetClientActivations(
+ShovelerClientPropertyManagerClientDeactivations*
+shovelerClientPropertyManagerGetClientDeactivations(
     ShovelerClientPropertyManager* clientPropertyManager,
     int64_t clientId,
-    long long int entityId,
-    GArray* outputArray) {
-  g_array_set_size(outputArray, 0);
-
+    long long int entityId) {
   ShovelerClientPropertyManagerClientProperties* clientProperties =
       g_hash_table_lookup(clientPropertyManager->clientProperties, &clientId);
   if (clientProperties == NULL) {
-    return;
+    return NULL;
   }
 
+  return g_hash_table_lookup(clientProperties->entityProperties, &entityId);
+}
+
+void shovelerClientPropertyManagerClientDeactivationsGetAll(
+    ShovelerClientPropertyManagerClientDeactivations* clientDeactivations, GArray* outputArray) {
   ShovelerClientPropertyManagerClientEntityProperties* clientEntityProperties =
-      g_hash_table_lookup(clientProperties->entityProperties, &entityId);
-  if (clientEntityProperties == NULL) {
-    return;
-  }
+      (ShovelerClientPropertyManagerClientEntityProperties*) clientDeactivations;
+
+  g_array_set_size(outputArray, 0);
 
   GHashTableIter iter;
   const char* componentTypeId;
-  g_hash_table_iter_init(&iter, clientEntityProperties->activatedComponents);
+  g_hash_table_iter_init(&iter, clientEntityProperties->deactivatedComponents);
   while (g_hash_table_iter_next(&iter, (gpointer*) &componentTypeId, /* value */ NULL)) {
     g_array_append_val(outputArray, componentTypeId);
   }
 }
 
-bool shovelerClientPropertyManagerGetComponentActivation(
-    ShovelerClientPropertyManager* clientPropertyManager,
-    int64_t clientId,
-    long long int entityId,
+bool shovelerClientPropertyManagerClientDeactivationsGet(
+    ShovelerClientPropertyManagerClientDeactivations* clientDeactivations,
     const char* componentTypeId) {
-  ShovelerClientPropertyManagerClientProperties* clientProperties =
-      g_hash_table_lookup(clientPropertyManager->clientProperties, &clientId);
-  if (clientProperties == NULL) {
-    return false;
-  }
-
   ShovelerClientPropertyManagerClientEntityProperties* clientEntityProperties =
-      g_hash_table_lookup(clientProperties->entityProperties, &entityId);
+      (ShovelerClientPropertyManagerClientEntityProperties*) clientDeactivations;
   if (clientEntityProperties == NULL) {
     return false;
   }
 
-  return g_hash_table_contains(clientEntityProperties->activatedComponents, componentTypeId);
+  return g_hash_table_contains(clientEntityProperties->deactivatedComponents, componentTypeId);
 }
 
 static ShovelerClientPropertyManagerClientEntityProperties* createOrGetClientEntityProperties(
@@ -400,7 +394,7 @@ static ShovelerClientPropertyManagerClientEntityProperties* createOrGetClientEnt
     clientEntityProperties->entityId = entityId;
     clientEntityProperties->authoritativeComponents =
         g_hash_table_new(g_direct_hash, g_direct_equal);
-    clientEntityProperties->activatedComponents = g_hash_table_new(g_direct_hash, g_direct_equal);
+    clientEntityProperties->deactivatedComponents = g_hash_table_new(g_direct_hash, g_direct_equal);
     g_hash_table_insert(
         clientProperties->entityProperties,
         &clientEntityProperties->entityId,
@@ -427,7 +421,7 @@ static ShovelerClientPropertyManagerEntityProperties* createOrGetEntityPropertie
 static void freeClientEntityProperties(void* clientEntityPropertiesPointer) {
   ShovelerClientPropertyManagerClientEntityProperties* clientEntityProperties =
       clientEntityPropertiesPointer;
-  g_hash_table_destroy(clientEntityProperties->activatedComponents);
+  g_hash_table_destroy(clientEntityProperties->deactivatedComponents);
   g_hash_table_destroy(clientEntityProperties->authoritativeComponents);
   free(clientEntityProperties);
 }

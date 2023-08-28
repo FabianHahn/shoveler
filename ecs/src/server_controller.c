@@ -68,31 +68,12 @@ bool shovelerServerControllerUndelegateComponent(
   return true;
 }
 
-bool shovelerServerControllerActivateComponent(
-    ShovelerServerController* serverController,
-    long long int entityId,
-    const char* componentTypeId,
-    int64_t clientId) {
-  if (!shovelerClientPropertyManagerAddComponentActivation(
-          serverController->clientPropertyManager, clientId, entityId, componentTypeId)) {
-    return false;
-  }
-
-  if (shovelerClientPropertyManagerHasEntityInterest(
-          serverController->clientPropertyManager, clientId, entityId)) {
-    // Entity has interest, we need to send an activate op.
-    shovelerClientOpEmitterActivateComponent(
-        serverController->clientOpEmitter, entityId, componentTypeId, clientId);
-  }
-  return true;
-}
-
 bool shovelerServerControllerDeactivateComponent(
     ShovelerServerController* serverController,
     long long int entityId,
     const char* componentTypeId,
     int64_t clientId) {
-  if (!shovelerClientPropertyManagerRemoveComponentActivation(
+  if (!shovelerClientPropertyManagerAddComponentDeactivation(
           serverController->clientPropertyManager, clientId, entityId, componentTypeId)) {
     return false;
   }
@@ -101,6 +82,25 @@ bool shovelerServerControllerDeactivateComponent(
           serverController->clientPropertyManager, clientId, entityId)) {
     // Entity has interest, we need to send a deactivate op.
     shovelerClientOpEmitterDeactivateComponent(
+        serverController->clientOpEmitter, entityId, componentTypeId, clientId);
+  }
+  return true;
+}
+
+bool shovelerServerControllerUndeactivateComponent(
+    ShovelerServerController* serverController,
+    long long int entityId,
+    const char* componentTypeId,
+    int64_t clientId) {
+  if (!shovelerClientPropertyManagerRemoveComponentDeactivation(
+          serverController->clientPropertyManager, clientId, entityId, componentTypeId)) {
+    return false;
+  }
+
+  if (shovelerClientPropertyManagerHasEntityInterest(
+          serverController->clientPropertyManager, clientId, entityId)) {
+    // Entity has interest, we need to send an activate op.
+    shovelerClientOpEmitterActivateComponent(
         serverController->clientOpEmitter, entityId, componentTypeId, clientId);
   }
   return true;

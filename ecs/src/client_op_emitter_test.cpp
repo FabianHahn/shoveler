@@ -29,15 +29,17 @@ const long long int testEntityId1 = 1;
 const long long int testEntityId2 = 2;
 const long long int testEntityId3 = 3;
 
+void getEntityComponents(long long entityId, GArray* componentTypeIdArray, void* userData);
 void prepareEntityInterest(
     long long int entityId, const char* componentTypeId, GArray* clientIdArray, void* userData);
 void prepareClientAuthority(
     int64_t clientId, long long int entityId, GArray* componentTypeIdArray, void* userData);
-void prepareClientActivations(
-    int64_t clientId,
-    long long int entityId,
-    GArray* componentTypeIdArray,
-    void* viewSynchronizerPointer);
+ShovelerClientOpEmitterAdapterClientDeactivations* prepareClientDeactivations(
+    int64_t clientId, long long int entityId, void* userData);
+bool clientDeactivationsGet(
+    ShovelerClientOpEmitterAdapterClientDeactivations* clientDeactivations,
+    const char* componentTypeId,
+    void* userData);
 void onEmitOp(
     ShovelerClientOpEmitter* clientOpEmitter,
     const int64_t* clientIds,
@@ -68,9 +70,11 @@ public:
     entity3 = shovelerWorldAddEntity(world, testEntityId3);
     entity3Component3 = shovelerWorldEntityAddComponent(entity3, componentType3Id);
 
+    clientOpEmitterAdapter.getEntityComponents = getEntityComponents;
     clientOpEmitterAdapter.prepareEntityInterest = prepareEntityInterest;
     clientOpEmitterAdapter.prepareClientAuthority = prepareClientAuthority;
-    clientOpEmitterAdapter.prepareClientActivations = prepareClientActivations;
+    clientOpEmitterAdapter.prepareClientDeactivations = prepareClientDeactivations;
+    clientOpEmitterAdapter.clientDeactivationsGet = clientDeactivationsGet;
     clientOpEmitterAdapter.onEmitOp = onEmitOp;
     clientOpEmitterAdapter.userData = this;
     clientOpEmitter = shovelerClientOpEmitterCreate(&clientOpEmitterAdapter);
@@ -106,6 +110,8 @@ public:
   std::vector<EmittedOp> emittedOps;
 };
 
+void getEntityComponents(long long entityId, GArray* componentTypeIdArray, void* userData) {}
+
 void prepareEntityInterest(
     long long int entityId, const char* componentTypeId, GArray* clientIdArray, void* testPointer) {
   if (entityId == testEntityId1) {
@@ -135,16 +141,26 @@ void prepareClientAuthority(
   }
 }
 
-void prepareClientActivations(
-    int64_t clientId,
-    long long int entityId,
-    GArray* componentTypeIdArray,
-    void* viewSynchronizerPointer) {
-  if (entityId == testEntityId1) {
-    g_array_set_size(componentTypeIdArray, 1);
-    g_array_index(componentTypeIdArray, const char*, 0) = componentType1Id;
+ShovelerClientOpEmitterAdapterClientDeactivations* prepareClientDeactivations(
+    int64_t clientId, long long int entityId, void* userData) {
+  if (clientId == testClientId1) {
+    // haxx: pack the entity into the client deactivations pointer;
+    return reinterpret_cast<ShovelerClientOpEmitterAdapterClientDeactivations*>(entityId);
+  }
+
+  return NULL;
+}
+
+bool clientDeactivationsGet(
+    ShovelerClientOpEmitterAdapterClientDeactivations* clientDeactivations,
+    const char* componentTypeId,
+    void* userData) {
+  // haxx: unpack the entity into the client deactivations pointer;
+  auto entityId = reinterpret_cast<long long int>(clientDeactivations);
+  if (entityId == testEntityId1 && componentTypeId == componentType1Id) {
+    return true;
   } else {
-    g_array_set_size(componentTypeIdArray, 0);
+    return false;
   }
 }
 
@@ -208,9 +224,9 @@ TEST_F(ShovelerClientOpEmitterTest, checkout) {
               IsUpdateComponentOp(
                   testEntityId1, componentType1Id, COMPONENT_TYPE_1_FIELD_DEPENDENCY_REACTIVATE)),
           IsEmittedOp(
-              ElementsAre(testClientId1), IsActivateComponentOp(testEntityId1, componentType1Id)),
-          IsEmittedOp(
               ElementsAre(testClientId1), IsAddComponentOp(testEntityId1, componentType2Id)),
+          IsEmittedOp(
+              ElementsAre(testClientId1), IsActivateComponentOp(testEntityId1, componentType2Id)),
           IsEmittedOp(
               ElementsAre(testClientId1),
               IsUpdateComponentOp(
@@ -266,10 +282,19 @@ TEST_F(ShovelerClientOpEmitterTest, addComponent) {
               IsAddComponentOp(testEntityId1, componentType1Id)),
           IsEmittedOp(
               UnorderedElementsAre(testClientId2),
+              IsActivateComponentOp(testEntityId1, componentType1Id)),
+          IsEmittedOp(
+              UnorderedElementsAre(testClientId2),
               IsAddComponentOp(testEntityId1, componentType2Id)),
           IsEmittedOp(
+              UnorderedElementsAre(testClientId2),
+              IsActivateComponentOp(testEntityId1, componentType2Id)),
+          IsEmittedOp(
               UnorderedElementsAre(testClientId1),
-              IsAddComponentOp(testEntityId2, componentType1Id))));
+              IsAddComponentOp(testEntityId2, componentType1Id)),
+          IsEmittedOp(
+              UnorderedElementsAre(testClientId1),
+              IsActivateComponentOp(testEntityId2, componentType1Id))));
 }
 
 TEST_F(ShovelerClientOpEmitterTest, updateComponent) {

@@ -215,13 +215,10 @@ TEST_F(ShovelerViewSynchronizerTest, checkoutUncheckout) {
   ASSERT_THAT(clientConnectedCalls, SizeIs(1));
   auto clientId = clientConnectedCalls[0];
 
-  // Predelegate and preactivate components on the entity we are going to add interest to.
+  // Predelegate components on the entity we are going to add interest to.
   bool delegated =
       shovelerServerControllerDelegateComponent(server, testEntityId1, componentType3Id, clientId);
   ASSERT_TRUE(delegated);
-  bool activated =
-      shovelerServerControllerActivateComponent(server, testEntityId1, componentType1Id, clientId);
-  ASSERT_TRUE(activated);
 
   // Add interest over preexisting entity and assure it gets checked out.
   bool addEntityInterestSent = SendAddEntityInterest(client, testEntityId1);
@@ -245,7 +242,9 @@ TEST_F(ShovelerViewSynchronizerTest, checkoutUncheckout) {
               testEntityId1, componentType2Id, COMPONENT_TYPE_2_FIELD_PRIMITIVE_LIVE_UPDATE)));
   ASSERT_THAT(
       ReceiveClientOps(client),
-      ElementsAre(IsActivateComponentOp(testEntityId1, componentType1Id)));
+      UnorderedElementsAre(
+          IsActivateComponentOp(testEntityId1, componentType1Id),
+          IsActivateComponentOp(testEntityId1, componentType2Id)));
 
   // Remove interest over the entity and assure it gets uncheckouted.
   bool removeEntityInterestSent = SendRemoveEntityInterest(client, testEntityId1);
@@ -278,8 +277,8 @@ TEST_F(ShovelerViewSynchronizerTest, addRemove) {
   ASSERT_TRUE(updated);
   shovelerServerControllerDelegateComponent(server, testEntityId4, componentType2Id, clientId1);
   shovelerServerControllerUndelegateComponent(server, testEntityId4, componentType2Id, clientId1);
-  shovelerServerControllerActivateComponent(server, testEntityId4, componentType2Id, clientId1);
   shovelerServerControllerDeactivateComponent(server, testEntityId4, componentType2Id, clientId1);
+  shovelerServerControllerUndeactivateComponent(server, testEntityId4, componentType2Id, clientId1);
   shovelerWorldEntityRemoveComponent(entity4, componentType2Id);
   shovelerWorldRemoveEntity(world, testEntityId4);
   ASSERT_THAT(
@@ -287,12 +286,14 @@ TEST_F(ShovelerViewSynchronizerTest, addRemove) {
       ElementsAre(
           IsAddEntityOp(testEntityId4),
           IsAddComponentOp(testEntityId4, componentType2Id),
+          IsActivateComponentOp(testEntityId4, componentType2Id),
           IsUpdateComponentOp(
               testEntityId4, componentType2Id, COMPONENT_TYPE_2_FIELD_PRIMITIVE_LIVE_UPDATE),
           IsDelegateComponentOp(testEntityId4, componentType2Id),
           IsUndelegateComponentOp(testEntityId4, componentType2Id),
-          IsActivateComponentOp(testEntityId4, componentType2Id),
           IsDeactivateComponentOp(testEntityId4, componentType2Id),
+          IsActivateComponentOp(testEntityId4, componentType2Id),
+
           IsRemoveComponentOp(testEntityId4, componentType2Id),
           IsRemoveEntityOp(testEntityId4)));
   ASSERT_THAT(ReceiveClientOps(client2), IsEmpty());

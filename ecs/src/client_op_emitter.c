@@ -74,15 +74,19 @@ void shovelerClientOpEmitterCheckoutEntity(
     }
   }
 
-  clientOpEmitter->adapter->prepareClientActivations(
-      clientId,
-      entity->id,
-      clientOpEmitter->componentTypeIdArray,
-      clientOpEmitter->adapter->userData);
+  clientOpEmitter->adapter->getEntityComponents(
+      entity->id, clientOpEmitter->componentTypeIdArray, clientOpEmitter->adapter->userData);
+  ShovelerClientOpEmitterAdapterClientDeactivations* clientDeactivations =
+      clientOpEmitter->adapter->prepareClientDeactivations(
+          clientId, entity->id, clientOpEmitter->adapter->userData);
   for (int i = 0; i < clientOpEmitter->componentTypeIdArray->len; i++) {
     const char* componentTypeId =
         g_array_index(clientOpEmitter->componentTypeIdArray, const char*, i);
-    emitActivateComponent(clientOpEmitter, entity->id, componentTypeId);
+    if (clientDeactivations == NULL ||
+        !clientOpEmitter->adapter->clientDeactivationsGet(
+            clientDeactivations, componentTypeId, clientOpEmitter->adapter->userData)) {
+      emitActivateComponent(clientOpEmitter, entity->id, componentTypeId);
+    }
   }
 }
 
@@ -118,6 +122,22 @@ void shovelerClientOpEmitterAddComponent(
   }
 
   emitAddComponent(clientOpEmitter, component);
+
+  // Filter out clients with interest that have a deactivation override.
+  for (guint i = 0; i < clientOpEmitter->clientIdArray->len; i++) {
+    int64_t clientId = g_array_index(clientOpEmitter->clientIdArray, int64_t, i);
+    ShovelerClientOpEmitterAdapterClientDeactivations* clientDeactivations =
+        clientOpEmitter->adapter->prepareClientDeactivations(
+            clientId, component->entityId, clientOpEmitter->adapter->userData);
+    if (clientDeactivations != NULL &&
+        clientOpEmitter->adapter->clientDeactivationsGet(
+            clientDeactivations, component->type->id, clientOpEmitter->adapter->userData)) {
+      g_array_remove_index_fast(clientOpEmitter->clientIdArray, i);
+      // re-read this index
+      i--;
+    }
+  }
+  emitActivateComponent(clientOpEmitter, component->entityId, component->type->id);
 }
 
 void shovelerClientOpEmitterUpdateComponent(
@@ -274,6 +294,11 @@ static void emitRemoveComponent(
 }
 
 static void emitOp(ShovelerClientOpEmitter* clientOpEmitter, const ShovelerClientOp* clientOp) {
+  if (clientOpEmitter->clientIdArray->len == 0) {
+    // nothing to emit
+    return;
+  }
+
   clientOpEmitter->adapter->onEmitOp(
       clientOpEmitter,
       (const int64_t*) clientOpEmitter->clientIdArray->data,

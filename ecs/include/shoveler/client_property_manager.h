@@ -26,12 +26,14 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+typedef void* ShovelerClientPropertyManagerClientDeactivations;
+
 typedef struct ShovelerClientPropertyManagerClientEntityPropertiesStruct {
   long long int entityId;
   /** set of component type IDs */
   GHashTable* authoritativeComponents;
   /** set of component type IDs */
-  GHashTable* activatedComponents;
+  GHashTable* deactivatedComponents;
 } ShovelerClientPropertyManagerClientEntityProperties;
 
 typedef struct ShovelerClientPropertyManagerClientPropertiesStruct {
@@ -110,26 +112,24 @@ bool shovelerClientPropertyManagerHasComponentAuthority(
     long long int entityId,
     const char* componentTypeId);
 
-bool shovelerClientPropertyManagerAddComponentActivation(
+bool shovelerClientPropertyManagerAddComponentDeactivation(
     ShovelerClientPropertyManager* clientPropertyManager,
     int64_t clientId,
     long long int entityId,
     const char* componentTypeId);
-bool shovelerClientPropertyManagerRemoveComponentActivation(
+bool shovelerClientPropertyManagerRemoveComponentDeactivation(
     ShovelerClientPropertyManager* clientPropertyManager,
     int64_t clientId,
     long long int entityId,
     const char* componentTypeId);
-/** Returns the activated component type IDs on the specified entity for the given client. */
-void shovelerClientPropertyManagerGetClientActivations(
-    ShovelerClientPropertyManager* clientPropertyManager,
-    int64_t clientId,
-    long long int entityId,
-    GArray* outputArray);
-bool shovelerClientPropertyManagerGetComponentActivation(
-    ShovelerClientPropertyManager* clientPropertyManager,
-    int64_t clientId,
-    long long int entityId,
+/** Returns the deactivated component type IDs on the specified entity for the given client. */
+ShovelerClientPropertyManagerClientDeactivations*
+shovelerClientPropertyManagerGetClientDeactivations(
+    ShovelerClientPropertyManager* clientPropertyManager, int64_t clientId, long long int entityId);
+void shovelerClientPropertyManagerClientDeactivationsGetAll(
+    ShovelerClientPropertyManagerClientDeactivations* clientDeactivations, GArray* outputArray);
+bool shovelerClientPropertyManagerClientDeactivationsGet(
+    ShovelerClientPropertyManagerClientDeactivations* clientDeactivations,
     const char* componentTypeId);
 
 #endif
