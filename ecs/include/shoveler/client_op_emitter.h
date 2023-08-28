@@ -1,3 +1,18 @@
+/**
+ * A ClientOpEmitter is responsible for sending ClientOps in response to function calls that
+ * notify it of changes to the world. Depending on the event, the client op emitter will then use
+ * its adapter to retrieve the list of clients affected by this change. Finally, it will emit ops to
+ * the respective affected clients. The change events are:
+ *  - an entity being (un)checked out on a particular client
+ *  - an entity being added/removed to/from the world
+ *  - an entity component being added/removed/updated
+ *  - an entity component being delegated/undelegated to/from a particular client
+ *
+ * In practice, the adapter is usually implemented by:
+ *  - forwarding prepare* calls that return affected client lists to a ClientPropertyManager
+ *  - forwarding onEmitOp callbacks to a ClientConnectionManager
+ */
+
 #ifndef SHOVELER_CLIENT_OP_EMITTER_H
 #define SHOVELER_CLIENT_OP_EMITTER_H
 
