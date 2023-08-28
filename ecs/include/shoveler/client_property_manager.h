@@ -1,3 +1,24 @@
+/**
+ * The ClientPropertyManager stores the server-side state of all clients with respect to how they
+ * see the world.
+ *
+ * For each client, it stores:
+ *  - What entities they are interested in.
+ *  - For each entity, which components they have authority over.
+ *  - For each entity, which components have been server side deactivated. By default, components
+ *    a client is interested in get activated automatically.
+ *
+ * For efficient lookups, the client property manager also stores entity keyed lookup tables to
+ * quickly determine the set of interested clients for an entity and which client is authoritative
+ * for which component.
+ *
+ * Note that the client property manager generally only stores state about the clients, but not the
+ * world. This means that interest or authority can be granted to clients without the respective
+ * entities and/or components existing in the world (yet). It is the ClientOpEmitter's job to query
+ * the client property manager on world changes to determine whether pre-existing authority or
+ * interest would lead to ops being emitted due to chose changes.
+ */
+
 #ifndef SHOVELER_CLIENT_PROPERTY_MANAGER_H
 #define SHOVELER_CLIENT_PROPERTY_MANAGER_H
 
