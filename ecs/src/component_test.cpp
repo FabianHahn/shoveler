@@ -268,9 +268,9 @@ TEST_F(ShovelerComponentTest, updateField) {
   int firstValue = shovelerComponentGetFieldValueInt(component1, COMPONENT_TYPE_1_FIELD_PRIMITIVE);
   ASSERT_EQ(firstValue, 0);
 
-  bool updated = shovelerComponentUpdateCanonicalFieldInt(
+  auto status = shovelerComponentUpdateCanonicalFieldInt(
       component1, COMPONENT_TYPE_1_FIELD_PRIMITIVE, newFieldValue);
-  ASSERT_TRUE(updated);
+  ASSERT_EQ(status, SHOVELER_COMPONENT_UPDATE_FIELD_SUCCESS);
   ASSERT_THAT(
       onUpdateComponentFieldCalls,
       ElementsAre(IsWorldUpdateComponentIntValueCall(
@@ -291,9 +291,9 @@ TEST_F(ShovelerComponentTest, updateFieldWithReactivation) {
   activateCalls.clear();
   onActivateComponentCalls.clear();
 
-  bool updated = shovelerComponentUpdateCanonicalFieldInt(
+  auto status = shovelerComponentUpdateCanonicalFieldInt(
       component1, COMPONENT_TYPE_1_FIELD_PRIMITIVE, newFieldValue);
-  ASSERT_TRUE(updated);
+  ASSERT_EQ(status, SHOVELER_COMPONENT_UPDATE_FIELD_SUCCESS);
   ASSERT_THAT(onUpdateComponentFieldCalls, SizeIs(1));
   ASSERT_THAT(liveUpdateCalls, IsEmpty());
   ASSERT_THAT(deactivateCalls, ElementsAre(component1));
@@ -312,9 +312,9 @@ TEST_F(ShovelerComponentTest, updateConfigurationLive) {
   activateCalls.clear();
   onActivateComponentCalls.clear();
 
-  bool updated = shovelerComponentUpdateCanonicalFieldString(
+  auto status = shovelerComponentUpdateCanonicalFieldString(
       component2, COMPONENT_TYPE_2_FIELD_PRIMITIVE_LIVE_UPDATE, newFieldValue);
-  ASSERT_TRUE(updated);
+  ASSERT_EQ(status, SHOVELER_COMPONENT_UPDATE_FIELD_SUCCESS);
   ASSERT_THAT(onUpdateComponentFieldCalls, SizeIs(1));
   ASSERT_THAT(
       liveUpdateCalls,
@@ -347,9 +347,9 @@ TEST_F(ShovelerComponentTest, updateConfigurationLiveUpdatesReverseDependency) {
   onActivateComponentCalls.clear();
 
   propagateNextLiveUpdate = true;
-  bool updated = shovelerComponentUpdateCanonicalFieldString(
+  auto status = shovelerComponentUpdateCanonicalFieldString(
       component2, COMPONENT_TYPE_2_FIELD_PRIMITIVE_LIVE_UPDATE, newConfigurationValue);
-  ASSERT_TRUE(updated);
+  ASSERT_EQ(status, SHOVELER_COMPONENT_UPDATE_FIELD_SUCCESS);
   ASSERT_THAT(onUpdateComponentFieldCalls, SizeIs(2));
   ASSERT_THAT(
       liveUpdateDependencyCalls,
@@ -378,9 +378,9 @@ TEST_F(ShovelerComponentTest, updateConfigurationLiveWithoutPropagation) {
   onActivateComponentCalls.clear();
 
   propagateNextLiveUpdate = false;
-  bool updated = shovelerComponentUpdateCanonicalFieldString(
+  auto status = shovelerComponentUpdateCanonicalFieldString(
       component2, COMPONENT_TYPE_2_FIELD_PRIMITIVE_LIVE_UPDATE, newConfigurationValue);
-  ASSERT_TRUE(updated);
+  ASSERT_EQ(status, SHOVELER_COMPONENT_UPDATE_FIELD_SUCCESS);
   ASSERT_THAT(onUpdateComponentFieldCalls, SizeIs(2));
   ASSERT_THAT(liveUpdateDependencyCalls, IsEmpty());
   ASSERT_THAT(activateCalls, IsEmpty());
@@ -434,9 +434,9 @@ TEST_F(ShovelerComponentTest, updateConfigurationLiveReactivatesReverseDependenc
   onActivateComponentCalls.clear();
 
   propagateNextLiveUpdate = true;
-  bool updated = shovelerComponentUpdateCanonicalFieldString(
+  auto status = shovelerComponentUpdateCanonicalFieldString(
       component2, COMPONENT_TYPE_2_FIELD_PRIMITIVE_LIVE_UPDATE, newConfigurationValue);
-  ASSERT_TRUE(updated);
+  ASSERT_EQ(status, SHOVELER_COMPONENT_UPDATE_FIELD_SUCCESS);
   ASSERT_THAT(onUpdateComponentFieldCalls, SizeIs(2));
   ASSERT_THAT(liveUpdateDependencyCalls, IsEmpty());
   ASSERT_THAT(deactivateCalls, ElementsAre(component1));

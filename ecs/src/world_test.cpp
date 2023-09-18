@@ -352,9 +352,9 @@ TEST_F(ShovelerWorldTest, updateAuthoritativeComponent) {
   ShovelerComponent* component1 =
       shovelerWorldEntityAddComponent(entity1, componentType1Id, /* status */ NULL);
 
-  bool updated =
+  auto status =
       shovelerComponentUpdateFieldInt(component1, COMPONENT_TYPE_1_FIELD_PRIMITIVE, newFieldValue);
-  ASSERT_TRUE(updated);
+  ASSERT_EQ(status, SHOVELER_COMPONENT_UPDATE_FIELD_SUCCESS);
   ASSERT_THAT(
       onUpdateComponentCalls,
       ElementsAre(IsOnUpdateComponentIntValueCall(

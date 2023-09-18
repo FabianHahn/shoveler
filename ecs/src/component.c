@@ -124,7 +124,7 @@ void shovelerComponentDeactivate(ShovelerComponent* component) {
   component->worldAdapter->onDeactivateComponent(component, component->worldAdapter->userData);
 }
 
-bool shovelerComponentUpdateField(
+ShovelerComponentUpdateFieldStatus shovelerComponentUpdateField(
     ShovelerComponent* component,
     int fieldId,
     const ShovelerComponentFieldValue* value,
@@ -136,7 +136,7 @@ bool shovelerComponentUpdateField(
   ShovelerComponentFieldValue* fieldValue = &component->fieldValues[fieldId];
 
   if (value != NULL && field->type != value->type) {
-    return false;
+    return SHOVELER_COMPONENT_UPDATE_FIELD_TYPE_MISMATCH;
   }
 
   if (!isCanonical) {
@@ -148,7 +148,7 @@ bool shovelerComponentUpdateField(
           component->type->id,
           field->name,
           fieldId);
-      return false;
+      return SHOVELER_COMPONENT_UPDATE_FIELD_NOT_AUTHORITATIVE;
     }
   }
 
@@ -202,7 +202,7 @@ bool shovelerComponentUpdateField(
     }
   }
 
-  return true;
+  return SHOVELER_COMPONENT_UPDATE_FIELD_SUCCESS;
 }
 
 bool shovelerComponentClearField(ShovelerComponent* component, int fieldId, bool isCanonical) {

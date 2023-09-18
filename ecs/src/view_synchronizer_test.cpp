@@ -274,12 +274,12 @@ TEST_F(ShovelerViewSynchronizerTest, addRemove) {
   auto* entity4 = shovelerWorldAddEntity(world, testEntityId4);
   auto* entity4Component2 =
       shovelerWorldEntityAddComponent(entity4, componentType2Id, /* status */ NULL);
-  bool updated = shovelerComponentUpdateField(
+  auto status = shovelerComponentUpdateField(
       entity4Component2,
       COMPONENT_TYPE_2_FIELD_PRIMITIVE_LIVE_UPDATE,
       &entity1Component2->fieldValues[COMPONENT_TYPE_2_FIELD_PRIMITIVE_LIVE_UPDATE],
       /* isCanonical */ true);
-  ASSERT_TRUE(updated);
+  ASSERT_EQ(status, SHOVELER_COMPONENT_UPDATE_FIELD_SUCCESS);
   shovelerServerControllerDelegateComponent(server, testEntityId4, componentType2Id, clientId1);
   shovelerServerControllerUndelegateComponent(server, testEntityId4, componentType2Id, clientId1);
   shovelerServerControllerDeactivateComponent(server, testEntityId4, componentType2Id, clientId1);
