@@ -71,12 +71,16 @@ public:
     world = shovelerViewSynchronizerGetWorld(viewSynchronizer);
 
     entity1 = shovelerWorldAddEntity(world, testEntityId1);
-    entity1Component1 = shovelerWorldEntityAddComponent(entity1, componentType1Id);
-    entity1Component2 = shovelerWorldEntityAddComponent(entity1, componentType2Id);
+    entity1Component1 =
+        shovelerWorldEntityAddComponent(entity1, componentType1Id, /* status */ NULL);
+    entity1Component2 =
+        shovelerWorldEntityAddComponent(entity1, componentType2Id, /* status */ NULL);
     entity2 = shovelerWorldAddEntity(world, testEntityId2);
-    entity2Component1 = shovelerWorldEntityAddComponent(entity2, componentType1Id);
+    entity2Component1 =
+        shovelerWorldEntityAddComponent(entity2, componentType1Id, /* status */ NULL);
     entity3 = shovelerWorldAddEntity(world, testEntityId3);
-    entity3Component3 = shovelerWorldEntityAddComponent(entity3, componentType3Id);
+    entity3Component3 =
+        shovelerWorldEntityAddComponent(entity3, componentType3Id, /* status */ NULL);
   }
 
   virtual void TearDown() {
@@ -268,7 +272,8 @@ TEST_F(ShovelerViewSynchronizerTest, addRemove) {
 
   // Mess around with entity 4, and assure that client 1 sees it all while client 2 sees none of it.
   auto* entity4 = shovelerWorldAddEntity(world, testEntityId4);
-  auto* entity4Component2 = shovelerWorldEntityAddComponent(entity4, componentType2Id);
+  auto* entity4Component2 =
+      shovelerWorldEntityAddComponent(entity4, componentType2Id, /* status */ NULL);
   bool updated = shovelerComponentUpdateField(
       entity4Component2,
       COMPONENT_TYPE_2_FIELD_PRIMITIVE_LIVE_UPDATE,

@@ -305,15 +305,18 @@ TEST_F(ShovelerWorldTest, addRemoveEntity) {
 TEST_F(ShovelerWorldTest, addRemoveComponent) {
   ShovelerWorldEntity* entity1 = shovelerWorldAddEntity(world, entityId1);
   ShovelerWorldEntity* entity2 = shovelerWorldAddEntity(world, entityId2);
-  ShovelerComponent* component1 = shovelerWorldEntityAddComponent(entity1, componentType1Id);
+  ShovelerComponent* component1 =
+      shovelerWorldEntityAddComponent(entity1, componentType1Id, /* status */ NULL);
   ASSERT_NE(component1, nullptr);
   ASSERT_EQ(component1->entityId, entityId1);
   ASSERT_THAT(onAddComponentCalls, ElementsAre(OnAddComponentCall{world, entity1, component1}));
-  ShovelerComponent* addedAgain = shovelerWorldEntityAddComponent(entity1, componentType1Id);
+  ShovelerComponent* addedAgain =
+      shovelerWorldEntityAddComponent(entity1, componentType1Id, /* status */ NULL);
   ASSERT_EQ(addedAgain, nullptr) << "cannot add the same component twice";
 
   onAddComponentCalls.clear();
-  ShovelerComponent* component2 = shovelerWorldEntityAddComponent(entity1, componentType2Id);
+  ShovelerComponent* component2 =
+      shovelerWorldEntityAddComponent(entity1, componentType2Id, /* status */ NULL);
   ASSERT_NE(component2, nullptr);
   ASSERT_NE(component1, component2);
   ASSERT_EQ(component2->entityId, entityId1);
@@ -322,7 +325,8 @@ TEST_F(ShovelerWorldTest, addRemoveComponent) {
   ASSERT_EQ(shovelerWorldEntityGetComponent(entity1, componentType2Id), component2);
 
   onAddComponentCalls.clear();
-  ShovelerComponent* component3 = shovelerWorldEntityAddComponent(entity2, componentType1Id);
+  ShovelerComponent* component3 =
+      shovelerWorldEntityAddComponent(entity2, componentType1Id, /* status */ NULL);
   ASSERT_NE(component3, nullptr);
   ASSERT_NE(component1, component3);
   ASSERT_EQ(component3->entityId, entityId2);
@@ -345,7 +349,8 @@ TEST_F(ShovelerWorldTest, updateAuthoritativeComponent) {
 
   ShovelerWorldEntity* entity1 = shovelerWorldAddEntity(world, entityId1);
   shovelerWorldEntityDelegateComponent(entity1, componentType1Id);
-  ShovelerComponent* component1 = shovelerWorldEntityAddComponent(entity1, componentType1Id);
+  ShovelerComponent* component1 =
+      shovelerWorldEntityAddComponent(entity1, componentType1Id, /* status */ NULL);
 
   bool updated =
       shovelerComponentUpdateFieldInt(component1, COMPONENT_TYPE_1_FIELD_PRIMITIVE, newFieldValue);
@@ -364,8 +369,10 @@ TEST_F(ShovelerWorldTest, updateAuthoritativeComponent) {
 
 TEST_F(ShovelerWorldTest, delegateUndelegate) {
   ShovelerWorldEntity* entity1 = shovelerWorldAddEntity(world, entityId1);
-  ShovelerComponent* component1 = shovelerWorldEntityAddComponent(entity1, componentType1Id);
-  ShovelerComponent* component2 = shovelerWorldEntityAddComponent(entity1, componentType2Id);
+  ShovelerComponent* component1 =
+      shovelerWorldEntityAddComponent(entity1, componentType1Id, /* status */ NULL);
+  ShovelerComponent* component2 =
+      shovelerWorldEntityAddComponent(entity1, componentType2Id, /* status */ NULL);
   shovelerComponentUpdateCanonicalFieldEntityId(
       component1, COMPONENT_TYPE_1_FIELD_DEPENDENCY_REACTIVATE, entityId1);
 
@@ -403,8 +410,10 @@ TEST_F(ShovelerWorldTest, delegateUndelegate) {
 
 TEST_F(ShovelerWorldTest, addRemoveDependency) {
   ShovelerWorldEntity* entity1 = shovelerWorldAddEntity(world, entityId1);
-  ShovelerComponent* component1 = shovelerWorldEntityAddComponent(entity1, componentType1Id);
-  ShovelerComponent* component2 = shovelerWorldEntityAddComponent(entity1, componentType2Id);
+  ShovelerComponent* component1 =
+      shovelerWorldEntityAddComponent(entity1, componentType1Id, /* status */ NULL);
+  ShovelerComponent* component2 =
+      shovelerWorldEntityAddComponent(entity1, componentType2Id, /* status */ NULL);
   ASSERT_THAT(onAddDependencyCalls, IsEmpty()); // dependency fields are optional
 
   shovelerWorldEntityDelegateComponent(entity1, componentType2Id);
@@ -452,8 +461,10 @@ TEST_F(ShovelerWorldTest, addRemoveDependency) {
 
 TEST_F(ShovelerWorldTest, addRemoveDoubleDependency) {
   ShovelerWorldEntity* entity1 = shovelerWorldAddEntity(world, entityId1);
-  ShovelerComponent* component1 = shovelerWorldEntityAddComponent(entity1, componentType1Id);
-  ShovelerComponent* component2 = shovelerWorldEntityAddComponent(entity1, componentType2Id);
+  ShovelerComponent* component1 =
+      shovelerWorldEntityAddComponent(entity1, componentType1Id, /* status */ NULL);
+  ShovelerComponent* component2 =
+      shovelerWorldEntityAddComponent(entity1, componentType2Id, /* status */ NULL);
   shovelerWorldEntityDelegateComponent(entity1, componentType2Id);
 
   // Set two dependencies from component1 to component2.

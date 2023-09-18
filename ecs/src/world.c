@@ -134,7 +134,9 @@ bool shovelerWorldRemoveEntity(ShovelerWorld* world, long long int entityId) {
 }
 
 ShovelerComponent* shovelerWorldEntityAddComponent(
-    ShovelerWorldEntity* entity, const char* componentTypeId) {
+    ShovelerWorldEntity* entity,
+    const char* componentTypeId,
+    ShovelerWorldEntityAddComponentStatus* status) {
   ShovelerWorld* world = entity->world;
 
   ShovelerComponentType* componentType =
@@ -145,6 +147,9 @@ ShovelerComponent* shovelerWorldEntityAddComponent(
         "%lld, ignoring.",
         componentTypeId,
         entity->id);
+    if (status != NULL) {
+      *status = SHOVELER_WORLD_ENTITY_ADD_COMPONENT_INVALID_TYPE;
+    }
     return NULL;
   }
 
@@ -155,6 +160,9 @@ ShovelerComponent* shovelerWorldEntityAddComponent(
         "Tried to already existing component '%s' to entity %lld, ignoring.",
         componentTypeId,
         entity->id);
+    if (status != NULL) {
+      *status = SHOVELER_WORLD_ENTITY_ADD_COMPONENT_ALREADY_EXISTS;
+    }
     return NULL;
   }
 
@@ -164,8 +172,7 @@ ShovelerComponent* shovelerWorldEntityAddComponent(
       world->componentWorldAdapter, componentSystem->componentAdapter, entity->id, componentType);
 
   if (!g_hash_table_insert(entity->components, (gpointer) component->type->id, component)) {
-    shovelerComponentFree(component);
-    return NULL;
+    assert(false);
   }
 
   if (g_hash_table_lookup(entity->authoritativeComponents, (gpointer) componentTypeId) != NULL) {
@@ -179,6 +186,9 @@ ShovelerComponent* shovelerWorldEntityAddComponent(
     world->callbacks->onAddComponent(world, entity, component, world->callbacks->userData);
   }
 
+  if (status != NULL) {
+    *status = SHOVELER_WORLD_ENTITY_ADD_COMPONENT_SUCCESS;
+  }
   return component;
 }
 

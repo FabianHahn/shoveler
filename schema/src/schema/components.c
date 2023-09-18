@@ -8,7 +8,7 @@
 void shovelerWorldEntityAddPositionAbsoluteComponent(
     ShovelerWorldEntity* entity, ShovelerVector3 positionCoordinates) {
   ShovelerComponent* component =
-      shovelerWorldEntityAddComponent(entity, shovelerComponentTypeIdPosition);
+      shovelerWorldEntityAddComponent(entity, shovelerComponentTypeIdPosition, /* status */ NULL);
   shovelerComponentUpdateCanonicalFieldInt(
       component,
       SHOVELER_COMPONENT_POSITION_FIELD_ID_TYPE,
@@ -21,7 +21,7 @@ void shovelerWorldEntityAddPositionAbsoluteComponent(
 void shovelerWorldEntityAddDrawableComponent(
     ShovelerWorldEntity* entity, ShovelerComponentDrawableType drawableType) {
   ShovelerComponent* component =
-      shovelerWorldEntityAddComponent(entity, shovelerComponentTypeIdDrawable);
+      shovelerWorldEntityAddComponent(entity, shovelerComponentTypeIdDrawable, /* status */ NULL);
   shovelerComponentUpdateCanonicalFieldInt(
       component, SHOVELER_COMPONENT_DRAWABLE_FIELD_ID_TYPE, drawableType);
   shovelerComponentActivate(component);
@@ -32,7 +32,7 @@ void shovelerWorldEntityAddResourceComponent(
   assert(bufferSize > 0);
 
   ShovelerComponent* component =
-      shovelerWorldEntityAddComponent(entity, shovelerComponentTypeIdResource);
+      shovelerWorldEntityAddComponent(entity, shovelerComponentTypeIdResource, /* status */ NULL);
   shovelerComponentUpdateCanonicalFieldBytes(
       component, SHOVELER_COMPONENT_RESOURCE_FIELD_ID_BUFFER, buffer, bufferSize);
   shovelerComponentActivate(component);
@@ -41,7 +41,7 @@ void shovelerWorldEntityAddResourceComponent(
 void shovelerWorldEntityAddImageComponent(
     ShovelerWorldEntity* entity, ShovelerComponentImageFormat format, long long int resource) {
   ShovelerComponent* component =
-      shovelerWorldEntityAddComponent(entity, shovelerComponentTypeIdImage);
+      shovelerWorldEntityAddComponent(entity, shovelerComponentTypeIdImage, /* status */ NULL);
   shovelerComponentUpdateCanonicalFieldInt(
       component, SHOVELER_COMPONENT_IMAGE_FIELD_ID_FORMAT, format);
   shovelerComponentUpdateCanonicalFieldEntityId(
@@ -52,7 +52,7 @@ void shovelerWorldEntityAddImageComponent(
 void shovelerWorldEntityAddSamplerComponent(
     ShovelerWorldEntity* entity, bool interpolate, bool useMipmaps, bool clamp) {
   ShovelerComponent* component =
-      shovelerWorldEntityAddComponent(entity, shovelerComponentTypeIdSampler);
+      shovelerWorldEntityAddComponent(entity, shovelerComponentTypeIdSampler, /* status */ NULL);
   shovelerComponentUpdateCanonicalFieldBool(
       component, SHOVELER_COMPONENT_SAMPLER_FIELD_ID_INTERPOLATE, interpolate);
   shovelerComponentUpdateCanonicalFieldBool(
@@ -64,7 +64,7 @@ void shovelerWorldEntityAddSamplerComponent(
 
 void shovelerWorldEntityAddTextureImageComponent(ShovelerWorldEntity* entity, long long int image) {
   ShovelerComponent* component =
-      shovelerWorldEntityAddComponent(entity, shovelerComponentTypeIdTexture);
+      shovelerWorldEntityAddComponent(entity, shovelerComponentTypeIdTexture, /* status */ NULL);
   shovelerComponentUpdateCanonicalFieldInt(
       component, SHOVELER_COMPONENT_TEXTURE_FIELD_ID_TYPE, SHOVELER_COMPONENT_TEXTURE_TYPE_IMAGE);
   shovelerComponentUpdateCanonicalFieldEntityId(
@@ -75,7 +75,7 @@ void shovelerWorldEntityAddTextureImageComponent(ShovelerWorldEntity* entity, lo
 void shovelerWorldEntityAddTilesetComponent(
     ShovelerWorldEntity* entity, long long int image, int numColumns, int numRows, int padding) {
   ShovelerComponent* component =
-      shovelerWorldEntityAddComponent(entity, shovelerComponentTypeIdTileset);
+      shovelerWorldEntityAddComponent(entity, shovelerComponentTypeIdTileset, /* status */ NULL);
   shovelerComponentUpdateCanonicalFieldEntityId(
       component, SHOVELER_COMPONENT_TILESET_FIELD_ID_IMAGE, image);
   shovelerComponentUpdateCanonicalFieldInt(
@@ -89,7 +89,7 @@ void shovelerWorldEntityAddTilesetComponent(
 
 void shovelerWorldEntityAddMaterialTileSpriteComponent(ShovelerWorldEntity* entity) {
   ShovelerComponent* component =
-      shovelerWorldEntityAddComponent(entity, shovelerComponentTypeIdMaterial);
+      shovelerWorldEntityAddComponent(entity, shovelerComponentTypeIdMaterial, /* status */ NULL);
   shovelerComponentUpdateCanonicalFieldInt(
       component,
       SHOVELER_COMPONENT_MATERIAL_FIELD_ID_TYPE,
@@ -99,7 +99,7 @@ void shovelerWorldEntityAddMaterialTileSpriteComponent(ShovelerWorldEntity* enti
 
 void shovelerWorldEntityAddMaterialTilemapComponent(ShovelerWorldEntity* entity) {
   ShovelerComponent* component =
-      shovelerWorldEntityAddComponent(entity, shovelerComponentTypeIdMaterial);
+      shovelerWorldEntityAddComponent(entity, shovelerComponentTypeIdMaterial, /* status */ NULL);
   shovelerComponentUpdateCanonicalFieldInt(
       component,
       SHOVELER_COMPONENT_MATERIAL_FIELD_ID_TYPE,
@@ -113,7 +113,7 @@ void shovelerWorldEntityAddMaterialCanvasComponent(
     ShovelerVector2 regionPosition,
     ShovelerVector2 regionSize) {
   ShovelerComponent* component =
-      shovelerWorldEntityAddComponent(entity, shovelerComponentTypeIdMaterial);
+      shovelerWorldEntityAddComponent(entity, shovelerComponentTypeIdMaterial, /* status */ NULL);
   shovelerComponentUpdateCanonicalFieldInt(
       component,
       SHOVELER_COMPONENT_MATERIAL_FIELD_ID_TYPE,
@@ -129,7 +129,7 @@ void shovelerWorldEntityAddMaterialCanvasComponent(
 
 void shovelerWorldEntityAddCanvasComponent(ShovelerWorldEntity* entity, int numLayers) {
   ShovelerComponent* component =
-      shovelerWorldEntityAddComponent(entity, shovelerComponentTypeIdCanvas);
+      shovelerWorldEntityAddComponent(entity, shovelerComponentTypeIdCanvas, /* status */ NULL);
   shovelerComponentUpdateCanonicalFieldInt(
       component, SHOVELER_COMPONENT_CANVAS_FIELD_ID_NUM_LAYERS, numLayers);
   shovelerComponentActivate(component);
@@ -141,8 +141,8 @@ void shovelerWorldEntityAddTilemapCollidersComponent(
     int numRows,
     unsigned char* colliders,
     int collidersSize) {
-  ShovelerComponent* component =
-      shovelerWorldEntityAddComponent(entity, shovelerComponentTypeIdTilemapColliders);
+  ShovelerComponent* component = shovelerWorldEntityAddComponent(
+      entity, shovelerComponentTypeIdTilemapColliders, /* status */ NULL);
   shovelerComponentUpdateCanonicalFieldInt(
       component, SHOVELER_COMPONENT_TILEMAP_COLLIDERS_OPTION_NUM_COLUMNS, numColumns);
   shovelerComponentUpdateCanonicalFieldInt(
@@ -159,8 +159,8 @@ void shovelerWorldEntityAddTilemapTilesDirectComponent(
     unsigned char* columns,
     unsigned char* rows,
     unsigned char* ids) {
-  ShovelerComponent* component =
-      shovelerWorldEntityAddComponent(entity, shovelerComponentTypeIdTilemapTiles);
+  ShovelerComponent* component = shovelerWorldEntityAddComponent(
+      entity, shovelerComponentTypeIdTilemapTiles, /* status */ NULL);
   shovelerComponentUpdateCanonicalFieldInt(
       component, SHOVELER_COMPONENT_TILEMAP_TILES_OPTION_NUM_COLUMNS, numColumns);
   shovelerComponentUpdateCanonicalFieldInt(
@@ -184,7 +184,7 @@ void shovelerWorldEntityAddTilemapComponent(
     long long int* tilesets,
     int tilesetsSize) {
   ShovelerComponent* component =
-      shovelerWorldEntityAddComponent(entity, shovelerComponentTypeIdTilemap);
+      shovelerWorldEntityAddComponent(entity, shovelerComponentTypeIdTilemap, /* status */ NULL);
   shovelerComponentUpdateCanonicalFieldEntityId(
       component, SHOVELER_COMPONENT_TILEMAP_FIELD_ID_TILES, tiles);
   shovelerComponentUpdateCanonicalFieldEntityId(
@@ -196,8 +196,8 @@ void shovelerWorldEntityAddTilemapComponent(
 
 void shovelerWorldEntityAddTilemapSpriteComponent(
     ShovelerWorldEntity* entity, long long int material, long long int tilemap) {
-  ShovelerComponent* component =
-      shovelerWorldEntityAddComponent(entity, shovelerComponentTypeIdTilemapSprite);
+  ShovelerComponent* component = shovelerWorldEntityAddComponent(
+      entity, shovelerComponentTypeIdTilemapSprite, /* status */ NULL);
   shovelerComponentUpdateCanonicalFieldEntityId(
       component, SHOVELER_COMPONENT_TILEMAP_SPRITE_FIELD_ID_MATERIAL, material);
   shovelerComponentUpdateCanonicalFieldEntityId(
@@ -212,7 +212,7 @@ void shovelerWorldEntityAddTileSpriteComponent(
     int tilesetColumn,
     int tilesetRow) {
   ShovelerComponent* component =
-      shovelerWorldEntityAddComponent(entity, shovelerComponentTypeIdTileSprite);
+      shovelerWorldEntityAddComponent(entity, shovelerComponentTypeIdTileSprite, /* status */ NULL);
   shovelerComponentUpdateCanonicalFieldEntityId(
       component, SHOVELER_COMPONENT_TILE_SPRITE_FIELD_ID_MATERIAL, material);
   shovelerComponentUpdateCanonicalFieldEntityId(
@@ -231,8 +231,8 @@ void shovelerWorldEntityAddTileSpriteAnimationComponent(
     ShovelerCoordinateMapping positionMappingX,
     ShovelerCoordinateMapping positionMappingY,
     float moveAmountThreshold) {
-  ShovelerComponent* component =
-      shovelerWorldEntityAddComponent(entity, shovelerComponentTypeIdTileSpriteAnimation);
+  ShovelerComponent* component = shovelerWorldEntityAddComponent(
+      entity, shovelerComponentTypeIdTileSpriteAnimation, /* status */ NULL);
   shovelerComponentUpdateCanonicalFieldEntityId(
       component, SHOVELER_COMPONENT_TILE_SPRITE_ANIMATION_OPTION_POSITION, position);
   shovelerComponentUpdateCanonicalFieldEntityId(
@@ -263,7 +263,7 @@ void shovelerWorldEntityAddSpriteTilemapComponent(
     ShovelerVector2 size,
     long long int tilemapSprite) {
   ShovelerComponent* component =
-      shovelerWorldEntityAddComponent(entity, shovelerComponentTypeIdSprite);
+      shovelerWorldEntityAddComponent(entity, shovelerComponentTypeIdSprite, /* status */ NULL);
   shovelerComponentUpdateCanonicalFieldEntityId(
       component, SHOVELER_COMPONENT_SPRITE_FIELD_ID_POSITION, position);
   shovelerComponentUpdateCanonicalFieldInt(
@@ -294,7 +294,7 @@ void shovelerWorldEntityAddSpriteTileComponent(
     ShovelerVector2 size,
     long long int tileSprite) {
   ShovelerComponent* component =
-      shovelerWorldEntityAddComponent(entity, shovelerComponentTypeIdSprite);
+      shovelerWorldEntityAddComponent(entity, shovelerComponentTypeIdSprite, /* status */ NULL);
   shovelerComponentUpdateCanonicalFieldEntityId(
       component, SHOVELER_COMPONENT_SPRITE_FIELD_ID_POSITION, position);
   shovelerComponentUpdateCanonicalFieldInt(
@@ -326,7 +326,7 @@ void shovelerWorldEntityAddModelComponent(
     bool castsShadow,
     ShovelerComponentModelPolygonMode polygonMode) {
   ShovelerComponent* component =
-      shovelerWorldEntityAddComponent(entity, shovelerComponentTypeIdModel);
+      shovelerWorldEntityAddComponent(entity, shovelerComponentTypeIdModel, /* status */ NULL);
   shovelerComponentUpdateCanonicalFieldEntityId(
       component, SHOVELER_COMPONENT_MODEL_FIELD_ID_POSITION, position);
   shovelerComponentUpdateCanonicalFieldEntityId(
@@ -350,7 +350,7 @@ void shovelerWorldEntityAddModelComponent(
 
 void shovelerWorldEntityAddClientComponent(ShovelerWorldEntity* entity, long long int position) {
   ShovelerComponent* component =
-      shovelerWorldEntityAddComponent(entity, shovelerComponentTypeIdClient);
+      shovelerWorldEntityAddComponent(entity, shovelerComponentTypeIdClient, /* status */ NULL);
   shovelerComponentUpdateCanonicalFieldEntityId(
       component, SHOVELER_COMPONENT_CLIENT_FIELD_ID_POSITION, position);
   shovelerComponentActivate(component);

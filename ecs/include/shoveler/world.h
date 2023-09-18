@@ -117,6 +117,12 @@ typedef struct ShovelerWorldEntityStruct {
   /* private */ GHashTable* authoritativeComponents;
 } ShovelerWorldEntity;
 
+typedef enum {
+  SHOVELER_WORLD_ENTITY_ADD_COMPONENT_SUCCESS,
+  SHOVELER_WORLD_ENTITY_ADD_COMPONENT_INVALID_TYPE,
+  SHOVELER_WORLD_ENTITY_ADD_COMPONENT_ALREADY_EXISTS,
+} ShovelerWorldEntityAddComponentStatus;
+
 /** Caller retains ownership over passed objects. */
 ShovelerWorld* shovelerWorldCreate(
     ShovelerSchema* schema, ShovelerSystem* system, ShovelerWorldCallbacks* callbacks);
@@ -124,7 +130,9 @@ ShovelerComponentWorldAdapter* shovelerWorldGetComponentAdapter(ShovelerWorld* w
 ShovelerWorldEntity* shovelerWorldAddEntity(ShovelerWorld* world, long long int entityId);
 bool shovelerWorldRemoveEntity(ShovelerWorld* world, long long int entityId);
 ShovelerComponent* shovelerWorldEntityAddComponent(
-    ShovelerWorldEntity* entity, const char* componentTypeId);
+    ShovelerWorldEntity* entity,
+    const char* componentTypeId,
+    ShovelerWorldEntityAddComponentStatus* status);
 bool shovelerWorldEntityRemoveComponent(ShovelerWorldEntity* entity, const char* componentTypeId);
 void shovelerWorldEntityDelegateComponent(ShovelerWorldEntity* entity, const char* componentTypeId);
 bool shovelerWorldEntityIsAuthoritative(ShovelerWorldEntity* entity, const char* componentTypeId);

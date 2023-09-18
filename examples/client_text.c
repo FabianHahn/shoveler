@@ -92,20 +92,20 @@ int main(int argc, char* argv[]) {
   game->controller->lockTiltY = true;
 
   ShovelerWorldEntity* fontEntity = shovelerWorldAddEntity(world, 1);
-  ShovelerComponent* resourceComponent =
-      shovelerWorldEntityAddComponent(fontEntity, shovelerComponentTypeIdResource);
+  ShovelerComponent* resourceComponent = shovelerWorldEntityAddComponent(
+      fontEntity, shovelerComponentTypeIdResource, /* status */ NULL);
   shovelerComponentUpdateCanonicalFieldBytes(
       resourceComponent, SHOVELER_COMPONENT_RESOURCE_FIELD_ID_BUFFER, contents, contentsSize);
   shovelerComponentActivate(resourceComponent);
   ShovelerComponent* fontComponent =
-      shovelerWorldEntityAddComponent(fontEntity, shovelerComponentTypeIdFont);
+      shovelerWorldEntityAddComponent(fontEntity, shovelerComponentTypeIdFont, /* status */ NULL);
   shovelerComponentUpdateCanonicalFieldString(
       fontComponent, SHOVELER_COMPONENT_FONT_FIELD_ID_NAME, "OpenSans");
   shovelerComponentUpdateCanonicalFieldEntityId(
       fontComponent, SHOVELER_COMPONENT_FONT_FIELD_ID_RESOURCE, 1);
   shovelerComponentActivate(fontComponent);
-  ShovelerComponent* fontAtlasComponent =
-      shovelerWorldEntityAddComponent(fontEntity, shovelerComponentTypeIdFontAtlas);
+  ShovelerComponent* fontAtlasComponent = shovelerWorldEntityAddComponent(
+      fontEntity, shovelerComponentTypeIdFontAtlas, /* status */ NULL);
   shovelerComponentUpdateCanonicalFieldEntityId(
       fontAtlasComponent, SHOVELER_COMPONENT_FONT_ATLAS_FIELD_ID_FONT, 1);
   shovelerComponentUpdateCanonicalFieldInt(
@@ -113,13 +113,13 @@ int main(int argc, char* argv[]) {
   shovelerComponentUpdateCanonicalFieldInt(
       fontAtlasComponent, SHOVELER_COMPONENT_FONT_ATLAS_FIELD_ID_PADDING, 1);
   shovelerComponentActivate(fontAtlasComponent);
-  ShovelerComponent* fontAtlasTextureComponent =
-      shovelerWorldEntityAddComponent(fontEntity, shovelerComponentTypeIdFontAtlasTexture);
+  ShovelerComponent* fontAtlasTextureComponent = shovelerWorldEntityAddComponent(
+      fontEntity, shovelerComponentTypeIdFontAtlasTexture, /* status */ NULL);
   shovelerComponentUpdateCanonicalFieldEntityId(
       fontAtlasTextureComponent, SHOVELER_COMPONENT_FONT_ATLAS_TEXTURE_FIELD_ID_FONT_ATLAS, 1);
   shovelerComponentActivate(fontAtlasTextureComponent);
-  ShovelerComponent* textTextureRendererComponent =
-      shovelerWorldEntityAddComponent(fontEntity, shovelerComponentTypeIdTextTextureRenderer);
+  ShovelerComponent* textTextureRendererComponent = shovelerWorldEntityAddComponent(
+      fontEntity, shovelerComponentTypeIdTextTextureRenderer, /* status */ NULL);
   shovelerComponentUpdateCanonicalFieldEntityId(
       textTextureRendererComponent,
       SHOVELER_COMPONENT_TEXT_TEXTURE_RENDERER_FIELD_ID_FONT_ATLAS_TEXTURE,
@@ -127,8 +127,8 @@ int main(int argc, char* argv[]) {
   shovelerComponentActivate(textTextureRendererComponent);
 
   ShovelerWorldEntity* textEntity = shovelerWorldAddEntity(world, 2);
-  ShovelerComponent* textureComponent =
-      shovelerWorldEntityAddComponent(textEntity, shovelerComponentTypeIdTexture);
+  ShovelerComponent* textureComponent = shovelerWorldEntityAddComponent(
+      textEntity, shovelerComponentTypeIdTexture, /* status */ NULL);
   shovelerComponentUpdateCanonicalFieldInt(
       textureComponent,
       SHOVELER_COMPONENT_TEXTURE_FIELD_ID_TYPE,
@@ -138,8 +138,8 @@ int main(int argc, char* argv[]) {
   shovelerComponentUpdateCanonicalFieldString(
       textureComponent, SHOVELER_COMPONENT_TEXTURE_FIELD_ID_TEXT, "shoveler");
   shovelerComponentActivate(textureComponent);
-  ShovelerComponent* samplerComponent =
-      shovelerWorldEntityAddComponent(textEntity, shovelerComponentTypeIdSampler);
+  ShovelerComponent* samplerComponent = shovelerWorldEntityAddComponent(
+      textEntity, shovelerComponentTypeIdSampler, /* status */ NULL);
   shovelerComponentUpdateCanonicalFieldBool(
       samplerComponent, SHOVELER_COMPONENT_SAMPLER_FIELD_ID_INTERPOLATE, true);
   shovelerComponentUpdateCanonicalFieldBool(
@@ -147,15 +147,15 @@ int main(int argc, char* argv[]) {
   shovelerComponentUpdateCanonicalFieldBool(
       samplerComponent, SHOVELER_COMPONENT_SAMPLER_FIELD_ID_CLAMP, true);
   shovelerComponentActivate(samplerComponent);
-  ShovelerComponent* drawableComponent =
-      shovelerWorldEntityAddComponent(textEntity, shovelerComponentTypeIdDrawable);
+  ShovelerComponent* drawableComponent = shovelerWorldEntityAddComponent(
+      textEntity, shovelerComponentTypeIdDrawable, /* status */ NULL);
   shovelerComponentUpdateCanonicalFieldInt(
       drawableComponent,
       SHOVELER_COMPONENT_DRAWABLE_FIELD_ID_TYPE,
       SHOVELER_COMPONENT_DRAWABLE_TYPE_QUAD);
   shovelerComponentActivate(drawableComponent);
-  ShovelerComponent* materialComponent =
-      shovelerWorldEntityAddComponent(textEntity, shovelerComponentTypeIdMaterial);
+  ShovelerComponent* materialComponent = shovelerWorldEntityAddComponent(
+      textEntity, shovelerComponentTypeIdMaterial, /* status */ NULL);
   shovelerComponentUpdateCanonicalFieldInt(
       materialComponent,
       SHOVELER_COMPONENT_MATERIAL_FIELD_ID_TYPE,
@@ -174,7 +174,7 @@ int main(int argc, char* argv[]) {
       materialComponent, SHOVELER_COMPONENT_MATERIAL_FIELD_ID_TEXTURE_SAMPLER, 2);
   shovelerComponentActivate(materialComponent);
   ShovelerComponent* modelComponent =
-      shovelerWorldEntityAddComponent(textEntity, shovelerComponentTypeIdModel);
+      shovelerWorldEntityAddComponent(textEntity, shovelerComponentTypeIdModel, /* status */ NULL);
   shovelerComponentUpdateCanonicalFieldEntityId(
       modelComponent, SHOVELER_COMPONENT_MODEL_FIELD_ID_POSITION, 2);
   shovelerComponentUpdateCanonicalFieldEntityId(
@@ -198,8 +198,8 @@ int main(int argc, char* argv[]) {
       SHOVELER_COMPONENT_MODEL_FIELD_ID_POLYGON_MODE,
       SHOVELER_COMPONENT_MODEL_POLYGON_MODE_FILL);
   shovelerComponentActivate(modelComponent);
-  ShovelerComponent* positionComponent =
-      shovelerWorldEntityAddComponent(textEntity, shovelerComponentTypeIdPosition);
+  ShovelerComponent* positionComponent = shovelerWorldEntityAddComponent(
+      textEntity, shovelerComponentTypeIdPosition, /* status */ NULL);
   shovelerComponentUpdateCanonicalFieldInt(
       positionComponent,
       SHOVELER_COMPONENT_POSITION_FIELD_ID_TYPE,

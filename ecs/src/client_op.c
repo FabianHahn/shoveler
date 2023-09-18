@@ -430,8 +430,8 @@ bool shovelerWorldApplyClientOp(ShovelerWorld* world, const ShovelerClientOp* cl
       return false;
     }
 
-    ShovelerComponent* component =
-        shovelerWorldEntityAddComponent(entity, clientOp->addComponent.componentTypeId);
+    ShovelerComponent* component = shovelerWorldEntityAddComponent(
+        entity, clientOp->addComponent.componentTypeId, /* status */ NULL);
     return component != NULL;
   }
   case SHOVELER_CLIENT_OP_UPDATE_COMPONENT: {
