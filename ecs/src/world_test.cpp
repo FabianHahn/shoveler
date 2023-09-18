@@ -376,18 +376,16 @@ TEST_F(ShovelerWorldTest, delegateUndelegate) {
   shovelerComponentUpdateCanonicalFieldEntityId(
       component1, COMPONENT_TYPE_1_FIELD_DEPENDENCY_REACTIVATE, entityId1);
 
-  // Try to activate component 2, which should fail because it requires authority but isn't
-  // delegated.
-  bool activated = shovelerComponentActivate(component2);
-  ASSERT_FALSE(activated);
+  auto activatedStatus = shovelerComponentActivate(component2);
+  ASSERT_EQ(activatedStatus, SHOVELER_COMPONENT_ACTIVATE_NOT_AUTHORITATIVE);
 
   shovelerWorldEntityDelegateComponent(entity1, componentType2Id);
   ASSERT_THAT(
       onDelegateComponentCalls,
       ElementsAre(OnDelegateComponentCall{world, entity1, componentType2Id}));
 
-  activated = shovelerComponentActivate(component2);
-  ASSERT_TRUE(activated);
+  activatedStatus = shovelerComponentActivate(component2);
+  ASSERT_EQ(activatedStatus, SHOVELER_COMPONENT_ACTIVATE_SUCCESS);
   ASSERT_THAT(activateComponentCalls, ElementsAre(component2, component1));
   ASSERT_THAT(
       onActivateComponentCalls,

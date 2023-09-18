@@ -69,25 +69,25 @@ ShovelerComponent* shovelerComponentCreate(
   return component;
 }
 
-bool shovelerComponentActivate(ShovelerComponent* component) {
+ShovelerComponentActivateStatus shovelerComponentActivate(ShovelerComponent* component) {
   if (shovelerComponentIsActive(component)) {
-    return true;
+    return SHOVELER_COMPONENT_ACTIVATE_ALREADY_ACTIVE;
   }
 
   bool requiresAuthority =
       component->systemAdapter->requiresAuthority(component, component->systemAdapter->userData);
   if (requiresAuthority && !component->isAuthoritative) {
-    return false;
+    return SHOVELER_COMPONENT_ACTIVATE_NOT_AUTHORITATIVE;
   }
 
   if (!checkDependenciesActive(component)) {
-    return false;
+    return SHOVELER_COMPONENT_ACTIVATE_DEPENDENCIES_INACTIVE;
   }
 
   component->systemData =
       component->systemAdapter->activateComponent(component, component->systemAdapter->userData);
   if (component->systemData == NULL) {
-    return false;
+    return SHOVELER_COMPONENT_ACTIVATE_ACTIVATION_FAILURE;
   }
 
   shovelerLogTrace(
@@ -101,7 +101,7 @@ bool shovelerComponentActivate(ShovelerComponent* component) {
       /* callbackUserData */ NULL,
       component->worldAdapter->userData);
 
-  return true;
+  return SHOVELER_COMPONENT_ACTIVATE_SUCCESS;
 }
 
 void shovelerComponentDeactivate(ShovelerComponent* component) {

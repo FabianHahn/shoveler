@@ -115,6 +115,14 @@ typedef struct ShovelerComponentStruct {
 } ShovelerComponent;
 
 typedef enum {
+  SHOVELER_COMPONENT_ACTIVATE_SUCCESS,
+  SHOVELER_COMPONENT_ACTIVATE_ALREADY_ACTIVE,
+  SHOVELER_COMPONENT_ACTIVATE_NOT_AUTHORITATIVE,
+  SHOVELER_COMPONENT_ACTIVATE_DEPENDENCIES_INACTIVE,
+  SHOVELER_COMPONENT_ACTIVATE_ACTIVATION_FAILURE
+} ShovelerComponentActivateStatus;
+
+typedef enum {
   SHOVELER_COMPONENT_UPDATE_FIELD_SUCCESS,
   SHOVELER_COMPONENT_UPDATE_FIELD_TYPE_MISMATCH,
   SHOVELER_COMPONENT_UPDATE_FIELD_NOT_AUTHORITATIVE
@@ -125,7 +133,7 @@ ShovelerComponent* shovelerComponentCreate(
     ShovelerComponentSystemAdapter* systemAdapter,
     long long int entityId,
     ShovelerComponentType* componentType);
-bool shovelerComponentActivate(ShovelerComponent* component);
+ShovelerComponentActivateStatus shovelerComponentActivate(ShovelerComponent* component);
 void shovelerComponentDeactivate(ShovelerComponent* component);
 /**
  * Updates a configuration option with the specified id on this component.

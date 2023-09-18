@@ -191,8 +191,8 @@ MATCHER_P4(IsLiveUpdateStringValueCall, component, fieldId, field, stringValue, 
 TEST_F(ShovelerComponentTest, activateDeactivate) {
   ASSERT_FALSE(shovelerComponentIsActive(component1));
 
-  bool activated = shovelerComponentActivate(component1);
-  ASSERT_TRUE(activated);
+  auto activatedStatus = shovelerComponentActivate(component1);
+  ASSERT_EQ(activatedStatus, SHOVELER_COMPONENT_ACTIVATE_SUCCESS);
   ASSERT_TRUE(shovelerComponentIsActive(component1));
   ASSERT_THAT(activateCalls, ElementsAre(component1));
   ASSERT_THAT(onActivateComponentCalls, ElementsAre(component1));
@@ -206,26 +206,30 @@ TEST_F(ShovelerComponentTest, activateThroughDependencyActivation) {
   shovelerComponentUpdateCanonicalFieldEntityId(
       component1, COMPONENT_TYPE_1_FIELD_DEPENDENCY_REACTIVATE, entityId2);
 
-  bool activated = shovelerComponentActivate(component1);
-  ASSERT_FALSE(activated);
+  auto activatedStatus = shovelerComponentActivate(component1);
+  ASSERT_EQ(activatedStatus, SHOVELER_COMPONENT_ACTIVATE_DEPENDENCIES_INACTIVE);
   ASSERT_FALSE(shovelerComponentIsActive(component1));
 
-  bool dependencyActivatedBeforeDelegation = shovelerComponentActivate(component2);
-  ASSERT_FALSE(dependencyActivatedBeforeDelegation);
+  auto dependencyActivatedBeforeDelegationStatus = shovelerComponentActivate(component2);
+  ASSERT_EQ(
+      dependencyActivatedBeforeDelegationStatus, SHOVELER_COMPONENT_ACTIVATE_NOT_AUTHORITATIVE);
 
   shovelerComponentDelegate(component2);
-  bool dependencyActivated = shovelerComponentActivate(component2);
-  ASSERT_TRUE(dependencyActivated);
+  auto dependencyActivatedStatus = shovelerComponentActivate(component2);
+  ASSERT_EQ(dependencyActivatedStatus, SHOVELER_COMPONENT_ACTIVATE_SUCCESS);
   ASSERT_TRUE(shovelerComponentIsActive(component2));
   ASSERT_TRUE(shovelerComponentIsActive(component1))
       << "component 1 has also been activated after activating its dependency";
   ASSERT_THAT(activateCalls, ElementsAre(component2, component1));
   ASSERT_THAT(onActivateComponentCalls, ElementsAre(component2, component1));
+
+  activatedStatus = shovelerComponentActivate(component1);
+  ASSERT_EQ(activatedStatus, SHOVELER_COMPONENT_ACTIVATE_ALREADY_ACTIVE);
 }
 
 TEST_F(ShovelerComponentTest, deactivateWhenAddingUnsatisfiedDependency) {
-  bool activated = shovelerComponentActivate(component1);
-  ASSERT_TRUE(activated);
+  auto activatedStatus = shovelerComponentActivate(component1);
+  ASSERT_EQ(activatedStatus, SHOVELER_COMPONENT_ACTIVATE_SUCCESS);
   ASSERT_TRUE(shovelerComponentIsActive(component1));
   ASSERT_THAT(activateCalls, ElementsAre(component1));
   ASSERT_THAT(onActivateComponentCalls, ElementsAre(component1));
@@ -339,17 +343,15 @@ TEST_F(ShovelerComponentTest, updateConfigurationLiveUpdatesReverseDependency) {
   shovelerComponentUpdateCanonicalFieldEntityId(
       component1, COMPONENT_TYPE_1_FIELD_DEPENDENCY_LIVE_UPDATE, entityId2);
   shovelerComponentDelegate(component2);
-  bool dependencyActivated = shovelerComponentActivate(component2);
-  ASSERT_TRUE(dependencyActivated);
-  bool activated = shovelerComponentActivate(component1);
-  ASSERT_TRUE(activated);
+  auto dependencyActivatedStatus = shovelerComponentActivate(component2);
+  ASSERT_EQ(dependencyActivatedStatus, SHOVELER_COMPONENT_ACTIVATE_SUCCESS);
   activateCalls.clear();
   onActivateComponentCalls.clear();
 
   propagateNextLiveUpdate = true;
-  auto status = shovelerComponentUpdateCanonicalFieldString(
+  auto updateStatus = shovelerComponentUpdateCanonicalFieldString(
       component2, COMPONENT_TYPE_2_FIELD_PRIMITIVE_LIVE_UPDATE, newConfigurationValue);
-  ASSERT_EQ(status, SHOVELER_COMPONENT_UPDATE_FIELD_SUCCESS);
+  ASSERT_EQ(updateStatus, SHOVELER_COMPONENT_UPDATE_FIELD_SUCCESS);
   ASSERT_THAT(onUpdateComponentFieldCalls, SizeIs(2));
   ASSERT_THAT(
       liveUpdateDependencyCalls,
@@ -370,17 +372,15 @@ TEST_F(ShovelerComponentTest, updateConfigurationLiveWithoutPropagation) {
   shovelerComponentUpdateCanonicalFieldEntityId(
       component1, COMPONENT_TYPE_1_FIELD_DEPENDENCY_LIVE_UPDATE, entityId2);
   shovelerComponentDelegate(component2);
-  bool dependencyActivated = shovelerComponentActivate(component2);
-  ASSERT_TRUE(dependencyActivated);
-  bool activated = shovelerComponentActivate(component1);
-  ASSERT_TRUE(activated);
+  auto dependencyActivatedStatus = shovelerComponentActivate(component2);
+  ASSERT_EQ(dependencyActivatedStatus, SHOVELER_COMPONENT_ACTIVATE_SUCCESS);
   activateCalls.clear();
   onActivateComponentCalls.clear();
 
   propagateNextLiveUpdate = false;
-  auto status = shovelerComponentUpdateCanonicalFieldString(
+  auto updateStatus = shovelerComponentUpdateCanonicalFieldString(
       component2, COMPONENT_TYPE_2_FIELD_PRIMITIVE_LIVE_UPDATE, newConfigurationValue);
-  ASSERT_EQ(status, SHOVELER_COMPONENT_UPDATE_FIELD_SUCCESS);
+  ASSERT_EQ(updateStatus, SHOVELER_COMPONENT_UPDATE_FIELD_SUCCESS);
   ASSERT_THAT(onUpdateComponentFieldCalls, SizeIs(2));
   ASSERT_THAT(liveUpdateDependencyCalls, IsEmpty());
   ASSERT_THAT(activateCalls, IsEmpty());
@@ -395,10 +395,8 @@ TEST_F(ShovelerComponentTest, updateComponentUpdatesReverseDependency) {
   shovelerComponentUpdateCanonicalFieldEntityId(
       component1, COMPONENT_TYPE_1_FIELD_DEPENDENCY_LIVE_UPDATE, entityId2);
   shovelerComponentDelegate(component2);
-  bool dependencyActivated = shovelerComponentActivate(component2);
-  ASSERT_TRUE(dependencyActivated);
-  bool activated = shovelerComponentActivate(component1);
-  ASSERT_TRUE(activated);
+  auto dependencyActivatedStatus = shovelerComponentActivate(component2);
+  ASSERT_EQ(dependencyActivatedStatus, SHOVELER_COMPONENT_ACTIVATE_SUCCESS);
   activateCalls.clear();
   onActivateComponentCalls.clear();
 
@@ -426,17 +424,15 @@ TEST_F(ShovelerComponentTest, updateConfigurationLiveReactivatesReverseDependenc
   shovelerComponentUpdateCanonicalFieldEntityId(
       component1, COMPONENT_TYPE_1_FIELD_DEPENDENCY_REACTIVATE, entityId2);
   shovelerComponentDelegate(component2);
-  bool dependencyActivated = shovelerComponentActivate(component2);
-  ASSERT_TRUE(dependencyActivated);
-  bool activated = shovelerComponentActivate(component1);
-  ASSERT_TRUE(activated);
+  auto dependencyActivatedStatus = shovelerComponentActivate(component2);
+  ASSERT_EQ(dependencyActivatedStatus, SHOVELER_COMPONENT_ACTIVATE_SUCCESS);
   activateCalls.clear();
   onActivateComponentCalls.clear();
 
   propagateNextLiveUpdate = true;
-  auto status = shovelerComponentUpdateCanonicalFieldString(
+  auto updateStatus = shovelerComponentUpdateCanonicalFieldString(
       component2, COMPONENT_TYPE_2_FIELD_PRIMITIVE_LIVE_UPDATE, newConfigurationValue);
-  ASSERT_EQ(status, SHOVELER_COMPONENT_UPDATE_FIELD_SUCCESS);
+  ASSERT_EQ(updateStatus, SHOVELER_COMPONENT_UPDATE_FIELD_SUCCESS);
   ASSERT_THAT(onUpdateComponentFieldCalls, SizeIs(2));
   ASSERT_THAT(liveUpdateDependencyCalls, IsEmpty());
   ASSERT_THAT(deactivateCalls, ElementsAre(component1));
@@ -451,10 +447,8 @@ TEST_F(ShovelerComponentTest, updateComponentReactivatesReverseDependency) {
   shovelerComponentUpdateCanonicalFieldEntityId(
       component1, COMPONENT_TYPE_1_FIELD_DEPENDENCY_REACTIVATE, entityId2);
   shovelerComponentDelegate(component2);
-  bool dependencyActivated = shovelerComponentActivate(component2);
-  ASSERT_TRUE(dependencyActivated);
-  bool activated = shovelerComponentActivate(component1);
-  ASSERT_TRUE(activated);
+  auto dependencyActivatedStatus = shovelerComponentActivate(component2);
+  ASSERT_EQ(dependencyActivatedStatus, SHOVELER_COMPONENT_ACTIVATE_SUCCESS);
   activateCalls.clear();
   onActivateComponentCalls.clear();
 
@@ -477,10 +471,8 @@ TEST_F(ShovelerComponentTest, nonPropagatingUpdateComponentDoesntAffectReverseDe
   shovelerComponentUpdateCanonicalFieldEntityId(
       component1, COMPONENT_TYPE_1_FIELD_DEPENDENCY_REACTIVATE, entityId2);
   shovelerComponentDelegate(component2);
-  bool dependencyActivated = shovelerComponentActivate(component2);
-  ASSERT_TRUE(dependencyActivated);
-  bool activated = shovelerComponentActivate(component1);
-  ASSERT_TRUE(activated);
+  auto dependencyActivatedStatus = shovelerComponentActivate(component2);
+  ASSERT_EQ(dependencyActivatedStatus, SHOVELER_COMPONENT_ACTIVATE_SUCCESS);
   activateCalls.clear();
   onActivateComponentCalls.clear();
 
@@ -502,15 +494,13 @@ TEST_F(ShovelerComponentTest, doublePropagateUpdate) {
   shovelerComponentUpdateCanonicalFieldEntityId(
       component1, COMPONENT_TYPE_1_FIELD_DEPENDENCY_LIVE_UPDATE, entityId2);
   shovelerComponentDelegate(component2);
-  bool dependencyActivated = shovelerComponentActivate(component2);
-  ASSERT_TRUE(dependencyActivated);
-  bool activated = shovelerComponentActivate(component1);
-  ASSERT_TRUE(activated);
+  auto dependencyActivatedStatus = shovelerComponentActivate(component2);
+  ASSERT_EQ(dependencyActivatedStatus, SHOVELER_COMPONENT_ACTIVATE_SUCCESS);
 
   shovelerComponentUpdateCanonicalFieldEntityId(
       component3, COMPONENT_TYPE_3_FIELD_DEPENDENCY, entityId1);
-  bool secondDependencyActivated = shovelerComponentActivate(component3);
-  ASSERT_TRUE(secondDependencyActivated);
+  auto secondDependencyActivatedStatus = shovelerComponentActivate(component3);
+  ASSERT_EQ(secondDependencyActivatedStatus, SHOVELER_COMPONENT_ACTIVATE_SUCCESS);
   activateCalls.clear();
   onActivateComponentCalls.clear();
 
@@ -538,15 +528,13 @@ TEST_F(ShovelerComponentTest, dontPropagateLiveDependencyUpdate) {
   shovelerComponentUpdateCanonicalFieldEntityId(
       component1, COMPONENT_TYPE_1_FIELD_DEPENDENCY_LIVE_UPDATE, entityId2);
   shovelerComponentDelegate(component2);
-  bool dependencyActivated = shovelerComponentActivate(component2);
-  ASSERT_TRUE(dependencyActivated);
-  bool activated = shovelerComponentActivate(component1);
-  ASSERT_TRUE(activated);
+  auto dependencyActivatedStatus = shovelerComponentActivate(component2);
+  ASSERT_EQ(dependencyActivatedStatus, SHOVELER_COMPONENT_ACTIVATE_SUCCESS);
 
   shovelerComponentUpdateCanonicalFieldEntityId(
       component3, COMPONENT_TYPE_3_FIELD_DEPENDENCY, entityId1);
-  bool secondDependencyActivated = shovelerComponentActivate(component3);
-  ASSERT_TRUE(secondDependencyActivated);
+  auto secondDependencyActivatedStatus = shovelerComponentActivate(component3);
+  ASSERT_EQ(secondDependencyActivatedStatus, SHOVELER_COMPONENT_ACTIVATE_SUCCESS);
   activateCalls.clear();
   onActivateComponentCalls.clear();
 
