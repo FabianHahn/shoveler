@@ -107,6 +107,5 @@ bool shovelerClientOpDeserialize(
     int bufferSize,
     int* readIndex);
 char* shovelerClientOpDebugPrint(const ShovelerClientOp* clientOp);
-bool shovelerWorldApplyClientOp(ShovelerWorld* world, const ShovelerClientOp* clientOp);
 
 #endif

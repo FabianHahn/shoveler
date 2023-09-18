@@ -2,6 +2,7 @@
 #include <shoveler/client_op.h>
 #include <shoveler/client_property_manager.h>
 #include <shoveler/client_system.h>
+#include <shoveler/client_world_updater.h>
 #include <shoveler/component.h>
 #include <shoveler/component_field.h>
 #include <shoveler/component_type.h>
@@ -54,6 +55,7 @@ typedef struct {
   void* clientHandle;
   ShovelerClientNetworkAdapter* client;
   ShovelerWorld* world;
+  ShovelerClientWorldUpdater clientWorldUpdater;
   ShovelerComponentTypeIndexer* componentTypeIndexer;
   ShovelerClientOpWithData* deserializedOp;
 } ShovelerClientContext;
@@ -145,6 +147,7 @@ int main(int argc, char* argv[]) {
   clientContext.client =
       shovelerInMemoryNetworkAdapterGetClient(inMemoryNetworkAdapter, clientContext.clientHandle);
   clientContext.world = clientSystem->world;
+  clientContext.clientWorldUpdater = shovelerClientWorldUpdater(clientContext.world);
   clientContext.componentTypeIndexer = serverContext.viewSynchronizer->componentTypeIndexer;
   clientContext.deserializedOp = shovelerClientOpCreateWithData(/* inputClientOp */ NULL);
 
@@ -244,8 +247,16 @@ static bool receiveClientEvent(
       return false;
     }
 
-    if (!shovelerWorldApplyClientOp(clientContext->world, &clientContext->deserializedOp->op)) {
-      shovelerLogWarning("Failed to apply client op.");
+    ShovelerClientWorldUpdaterStatus status = shovelerClientWorldUpdaterApplyOp(
+        &clientContext->clientWorldUpdater, &clientContext->deserializedOp->op);
+    if (status != SHOVELER_CLIENT_WORLD_UPDATER_SUCCESS &&
+        status != SHOVELER_CLIENT_WORLD_UPDATER_DEPENDENCIES_INACTIVE) {
+      char* clientOpDebugPrint = shovelerClientOpDebugPrint(&clientContext->deserializedOp->op);
+      shovelerLogWarning(
+          "Failed to apply client op %s: %s",
+          clientOpDebugPrint,
+          shovelerClientWorldUpdaterStatusToString(status));
+      free(clientOpDebugPrint);
       return false;
     }
   } break;

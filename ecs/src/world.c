@@ -121,7 +121,7 @@ bool shovelerWorldRemoveEntity(ShovelerWorld* world, long long int entityId) {
   assert(g_hash_table_size(entity->components) == 0);
 
   if (!g_hash_table_remove(world->entities, &entityId)) {
-    return false;
+    assert(false);
   }
 
   shovelerLogTrace("Removed entity %lld.", entityId);
