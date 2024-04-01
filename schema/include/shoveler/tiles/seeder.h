@@ -1,38 +1,28 @@
 #ifndef SHOVELER_TILES_SEEDER_H
 #define SHOVELER_TILES_SEEDER_H
 
-#include <shoveler/entity_id_allocator.h>
-#include <shoveler/map.h>
-#include <shoveler/world.h>
+#include <shoveler/types.h>
 
-typedef struct {
+typedef struct ShovelerEntityIdAllocatorStruct ShovelerEntityIdAllocator;
+typedef struct ShovelerMapStruct ShovelerMap;
+typedef struct ShovelerWorldStruct ShovelerWorld;
+
+typedef struct ShovelerTilesSeederStruct {
+  ShovelerWorld* world;
+  ShovelerMap* map;
+  ShovelerEntityIdAllocator* entityIdAllocator;
+  long long int quadDrawableEntityId;
   long long int tilesetEntityId;
   long long int tilesetPngEntityId;
-  long long int tilemapMaterialEntityId;
+  long long int characterTilesetEntityIds[4];
   long long int canvasEntityId;
-  long long int quadDrawableEntityId;
-} ShovelerTilesSeedBase;
+  long long int tilemapMaterialEntityId;
+  int nextPlayerTilesetIndex;
+} ShovelerTilesSeeder;
 
-typedef struct {
-  long long int backgroundEntityId;
-  long long int foregroundEntityId;
-  long long int chunkEntityId;
-} ShovelerTilesSeedChunk;
-
-void shovelerTilesSeedMap(
+ShovelerTilesSeeder shovelerTilesSeederInit(
     ShovelerWorld* world,
-    ShovelerEntityIdAllocator* entityIdAllocator,
     ShovelerMap* map,
-    const char* tilesetPngFilename,
-    int tilesetPngColumns,
-    int tilesetPngRows,
-    const char* character1PngFilename,
-    const char* character2PngFilename,
-    const char* character3PngFilename,
-    const char* character4PngFilename,
-    int characterShiftAmount);
-ShovelerTilesSeedBase shovelerTilesSeedBase(
-    ShovelerWorld* world,
     ShovelerEntityIdAllocator* entityIdAllocator,
     const char* tilesetPngFilename,
     int tilesetPngColumns,
@@ -42,10 +32,7 @@ ShovelerTilesSeedBase shovelerTilesSeedBase(
     const char* character3PngFilename,
     const char* character4PngFilename,
     int characterShiftAmount);
-ShovelerTilesSeedChunk shovelerTilesSeedChunk(
-    ShovelerWorld* world,
-    ShovelerEntityIdAllocator* entityIdAllocator,
-    ShovelerMapChunk* chunk,
-    ShovelerTilesSeedBase seedBase);
+
+void shovelerTilesSeederSpawnPlayer(ShovelerTilesSeeder* seeder, ShovelerVector2 position);
 
 #endif

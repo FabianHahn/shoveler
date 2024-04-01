@@ -4,14 +4,14 @@
 #include <glib.h>
 #include <stdbool.h>
 
-typedef struct {
+typedef struct ShovelerEntityIdAllocatorStruct {
   long long int nextFreshEntityId;
   /** set of (long long int) entity IDs */
   GHashTable* allocations;
   GArray* freeList;
 } ShovelerEntityIdAllocator;
 
-ShovelerEntityIdAllocator* shovelerCreateEntityIdAllocator();
+ShovelerEntityIdAllocator* shovelerEntityIdAllocatorCreate();
 long long int shovelerEntityIdAllocatorAllocate(ShovelerEntityIdAllocator* allocator);
 bool shovelerEntityIdAllocatorDeallocate(
     ShovelerEntityIdAllocator* allocator, long long int entityId);

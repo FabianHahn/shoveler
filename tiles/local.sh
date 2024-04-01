@@ -2,11 +2,11 @@
 
 set -euxo pipefail
 
-cd "$(dirname "$0")/../.."
+cd "$(dirname "$0")/.."
 
-bazel build --config linux //examples/client_tiles
+bazel build --config linux //tiles:local
 
-bazel-bin/examples/client_tiles/client_tiles \
+bazel-bin/tiles/local \
   ../shoveler-assets/tilesets/field/spring.png \
   7 \
   2 \

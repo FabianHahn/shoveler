@@ -11,87 +11,95 @@ void shovelerWorldEntityAddPositionAbsoluteComponent(
 void shovelerWorldEntityAddDrawableComponent(
     ShovelerWorldEntity* entity, ShovelerComponentDrawableType drawableType);
 void shovelerWorldEntityAddResourceComponent(
-    ShovelerWorldEntity* entity, unsigned char* buffer, int bufferSize);
+    ShovelerWorldEntity* entity, const unsigned char* buffer, int bufferSize);
 void shovelerWorldEntityAddImageComponent(
-    ShovelerWorldEntity* entity, ShovelerComponentImageFormat format, long long int resource);
+    ShovelerWorldEntity* entity,
+    ShovelerComponentImageFormat format,
+    long long int resourceEntityId);
 void shovelerWorldEntityAddSamplerComponent(
     ShovelerWorldEntity* entity, bool interpolate, bool useMipmaps, bool clamp);
-void shovelerWorldEntityAddTextureImageComponent(ShovelerWorldEntity* entity, long long int image);
+void shovelerWorldEntityAddTextureImageComponent(
+    ShovelerWorldEntity* entity, long long int imageEntityId);
 void shovelerWorldEntityAddTilesetComponent(
-    ShovelerWorldEntity* entity, long long int image, int numColumns, int numRows, int padding);
-void shovelerWorldEntityAddMaterialTileSpriteComponent(ShovelerWorldEntity* entity);
-void shovelerWorldEntityAddMaterialTilemapComponent(ShovelerWorldEntity* entity);
+    ShovelerWorldEntity* entity,
+    long long int imageEntityId,
+    int numColumns,
+    int numRows,
+    int padding);
 void shovelerWorldEntityAddMaterialCanvasComponent(
     ShovelerWorldEntity* entity,
-    long long int canvas,
-    ShovelerVector2 regionPosition,
+    long long int canvasEntityId,
+    ShovelerVector2 position,
     ShovelerVector2 regionSize);
+void shovelerWorldEntityAddMaterialTileSpriteComponent(ShovelerWorldEntity* entity);
+void shovelerWorldEntityAddMaterialTilemapComponent(ShovelerWorldEntity* entity);
 void shovelerWorldEntityAddCanvasComponent(ShovelerWorldEntity* entity, int numLayers);
 void shovelerWorldEntityAddTilemapCollidersComponent(
     ShovelerWorldEntity* entity,
     int numColumns,
     int numRows,
-    unsigned char* colliders,
+    const unsigned char* colliders,
     int collidersSize);
 void shovelerWorldEntityAddTilemapTilesDirectComponent(
     ShovelerWorldEntity* entity,
     int numColumns,
     int numRows,
-    unsigned char* columns,
-    unsigned char* rows,
-    unsigned char* ids);
+    const unsigned char* columns,
+    const unsigned char* rows,
+    const unsigned char* ids);
 void shovelerWorldEntityAddTilemapComponent(
     ShovelerWorldEntity* entity,
-    long long int tiles,
-    long long int colliders,
-    long long int* tilesets,
+    long long int tilesEntityId,
+    long long int collidersEntityId,
+    const long long int* tilesetsEntityIds,
     int tilesetsSize);
 void shovelerWorldEntityAddTilemapSpriteComponent(
-    ShovelerWorldEntity* entity, long long int material, long long int tilemap);
+    ShovelerWorldEntity* entity, long long int materialEntityId, long long int tilemapEntityId);
 void shovelerWorldEntityAddTileSpriteComponent(
     ShovelerWorldEntity* entity,
-    long long int material,
-    long long int tileset,
+    long long int materialEntityId,
+    long long int EntityId,
     int tilesetColumn,
     int tilesetRow);
 void shovelerWorldEntityAddTileSpriteAnimationComponent(
     ShovelerWorldEntity* entity,
-    long long int position,
-    long long int tileSprite,
+    long long int positionEntityId,
+    long long int tileSpriteEntityId,
     ShovelerCoordinateMapping positionMappingX,
     ShovelerCoordinateMapping positionMappingY,
     float moveAmountThreshold);
 void shovelerWorldEntityAddSpriteTilemapComponent(
     ShovelerWorldEntity* entity,
-    long long int position,
+    long long int positionEntityId,
     ShovelerCoordinateMapping positionMappingX,
     ShovelerCoordinateMapping positionMappingY,
     bool enableCollider,
-    long long int canvas,
+    long long int canvasEntityId,
     int layer,
     ShovelerVector2 size,
-    long long int tilemapSprite);
+    long long int tilemapSpriteEntityId);
 void shovelerWorldEntityAddSpriteTileComponent(
     ShovelerWorldEntity* entity,
     long long int position,
     ShovelerCoordinateMapping positionMappingX,
     ShovelerCoordinateMapping positionMappingY,
     bool enableCollider,
-    long long int canvas,
+    long long int canvasEntityId,
     int layer,
     ShovelerVector2 size,
-    long long int tileSprite);
+    long long int tileSpriteEntityId);
 void shovelerWorldEntityAddModelComponent(
     ShovelerWorldEntity* entity,
-    long long int position,
-    long long int drawable,
-    long long int material,
+    long long int positionEntityId,
+    long long int drawableEntityId,
+    long long int materialEntityId,
     ShovelerVector3 rotation,
     ShovelerVector3 scale,
     bool visible,
     bool emitter,
     bool castsShadow,
     ShovelerComponentModelPolygonMode polygonMode);
-void shovelerWorldEntityAddClientComponent(ShovelerWorldEntity* entity, long long int position);
+void shovelerWorldEntityAddClientComponent(
+    ShovelerWorldEntity* entity, long long int positionEntityId);
 
 #endif

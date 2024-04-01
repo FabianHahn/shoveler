@@ -10,48 +10,16 @@
 #include "shoveler/schema/components.h"
 #include "shoveler/tiles/tileset.h"
 
-static const int chunkSize = 10;
-
 static GString* getImageData(ShovelerImage* image);
-static bool addCharacterAnimationTilesetEntity(
+static long long int addCharacterAnimationTilesetEntity(
     ShovelerWorld* world,
     ShovelerEntityIdAllocator* entityIdAllocator,
     const char* filename,
     int shiftAmount);
 
-void shovelerTilesSeedMap(
+ShovelerTilesSeeder shovelerTilesSeederInit(
     ShovelerWorld* world,
-    ShovelerEntityIdAllocator* entityIdAllocator,
     ShovelerMap* map,
-    const char* tilesetPngFilename,
-    int tilesetPngColumns,
-    int tilesetPngRows,
-    const char* character1PngFilename,
-    const char* character2PngFilename,
-    const char* character3PngFilename,
-    const char* character4PngFilename,
-    int characterShiftAmount) {
-  ShovelerTilesSeedBase seedBase = shovelerTilesSeedBase(
-      world,
-      entityIdAllocator,
-      tilesetPngFilename,
-      tilesetPngColumns,
-      tilesetPngRows,
-      character1PngFilename,
-      character2PngFilename,
-      character3PngFilename,
-      character4PngFilename,
-      characterShiftAmount);
-
-  for (int i = 0; i < map->dimensions.numChunkColumns * map->dimensions.numChunkRows; i++) {
-    ShovelerMapChunk* chunk = &map->chunks[i];
-
-    shovelerTilesSeedChunk(world, entityIdAllocator, chunk, seedBase);
-  }
-}
-
-ShovelerTilesSeedBase shovelerTilesSeedBase(
-    ShovelerWorld* world,
     ShovelerEntityIdAllocator* entityIdAllocator,
     const char* tilesetPngFilename,
     int tilesetPngColumns,
@@ -61,26 +29,19 @@ ShovelerTilesSeedBase shovelerTilesSeedBase(
     const char* character3PngFilename,
     const char* character4PngFilename,
     int characterShiftAmount) {
-  ShovelerTilesSeedBase seedBase;
+  ShovelerTilesSeeder seeder;
+  seeder.world = world;
+  seeder.map = map;
+  seeder.entityIdAllocator = entityIdAllocator;
 
-  { // bootstrap
-    ShovelerWorldEntity* entity =
-        shovelerWorldAddEntity(world, shovelerEntityIdAllocatorAllocate(entityIdAllocator));
-    entity->label = strdup("bootstrap");
-    shovelerWorldEntityAddPositionAbsoluteComponent(
-        entity, shovelerVector3(-100.0f, -100.0f, -100.0f));
-  }
-
-  seedBase.quadDrawableEntityId = shovelerEntityIdAllocatorAllocate(entityIdAllocator);
+  seeder.quadDrawableEntityId = shovelerEntityIdAllocatorAllocate(entityIdAllocator);
   { // quad drawable
-    ShovelerWorldEntity* entity = shovelerWorldAddEntity(world, seedBase.quadDrawableEntityId);
+    ShovelerWorldEntity* entity = shovelerWorldAddEntity(world, seeder.quadDrawableEntityId);
     entity->label = strdup("drawable");
-    shovelerWorldEntityAddPositionAbsoluteComponent(
-        entity, shovelerVector3(-100.0f, -100.0f, -100.0f));
     shovelerWorldEntityAddDrawableComponent(entity, SHOVELER_COMPONENT_DRAWABLE_TYPE_QUAD);
   }
 
-  seedBase.tilesetEntityId = shovelerEntityIdAllocatorAllocate(entityIdAllocator);
+  seeder.tilesetEntityId = shovelerEntityIdAllocatorAllocate(entityIdAllocator);
   { // tileset
     ShovelerImage* tilesetImage;
     int tilesetColumns;
@@ -89,12 +50,10 @@ ShovelerTilesSeedBase shovelerTilesSeedBase(
     GString* imageData = getImageData(tilesetImage);
     shovelerImageFree(tilesetImage);
 
-    ShovelerWorldEntity* entity = shovelerWorldAddEntity(world, seedBase.tilesetEntityId);
+    ShovelerWorldEntity* entity = shovelerWorldAddEntity(world, seeder.tilesetEntityId);
     entity->label = strdup("tileset");
-    shovelerWorldEntityAddPositionAbsoluteComponent(
-        entity, shovelerVector3(-100.0f, -100.0f, -100.0f));
     shovelerWorldEntityAddResourceComponent(
-        entity, (unsigned char*) imageData->str, imageData->len);
+        entity, (const unsigned char*) imageData->str, (int) imageData->len);
     shovelerWorldEntityAddImageComponent(
         entity, SHOVELER_COMPONENT_IMAGE_FORMAT_PNG, /* resource */ 0);
     shovelerWorldEntityAddSamplerComponent(
@@ -106,51 +65,47 @@ ShovelerTilesSeedBase shovelerTilesSeedBase(
     g_string_free(imageData, true);
   }
 
-  seedBase.tilesetPngEntityId = shovelerEntityIdAllocatorAllocate(entityIdAllocator);
+  seeder.tilesetPngEntityId = shovelerEntityIdAllocatorAllocate(entityIdAllocator);
   { // tileset png
     ShovelerImage* tilesetPngImage = shovelerImagePngReadFile(tilesetPngFilename);
     GString* tilesetPngData = getImageData(tilesetPngImage);
     shovelerImageFree(tilesetPngImage);
 
-    ShovelerWorldEntity* entity = shovelerWorldAddEntity(world, seedBase.tilesetPngEntityId);
+    ShovelerWorldEntity* entity = shovelerWorldAddEntity(world, seeder.tilesetPngEntityId);
     entity->label = strdup("tileset");
-    shovelerWorldEntityAddPositionAbsoluteComponent(
-        entity, shovelerVector3(-100.0f, -100.0f, -100.0f));
     shovelerWorldEntityAddResourceComponent(
-        entity, (unsigned char*) tilesetPngData->str, tilesetPngData->len);
+        entity, (const unsigned char*) tilesetPngData->str, (int) tilesetPngData->len);
     shovelerWorldEntityAddImageComponent(
-        entity, SHOVELER_COMPONENT_IMAGE_FORMAT_PNG, /* resource */ 0);
+        entity, SHOVELER_COMPONENT_IMAGE_FORMAT_PNG, /* resourceEntityId */ 0);
     shovelerWorldEntityAddSamplerComponent(
-        entity, /* interpolate */ true, /* useMipmaps */ false, /* clamp */ true);
+        entity,
+        /* interpolate */ true,
+        /* useMipmaps */ false,
+        /* clamp */ true);
     shovelerWorldEntityAddTextureImageComponent(entity, /* image */ 0);
     shovelerWorldEntityAddTilesetComponent(
-        entity, /* image */ 0, tilesetPngColumns, tilesetPngRows, /* padding */ 1);
+        entity,
+        /* image */ 0,
+        tilesetPngColumns,
+        tilesetPngRows,
+        /* padding */ 1);
 
     g_string_free(tilesetPngData, true);
   }
 
-  // character 1 animation tileset
-  addCharacterAnimationTilesetEntity(
+  seeder.characterTilesetEntityIds[0] = addCharacterAnimationTilesetEntity(
       world, entityIdAllocator, character1PngFilename, characterShiftAmount);
-
-  // character 2 animation tileset
-  addCharacterAnimationTilesetEntity(
+  seeder.characterTilesetEntityIds[1] = addCharacterAnimationTilesetEntity(
       world, entityIdAllocator, character2PngFilename, characterShiftAmount);
-
-  // character 3 animation tileset
-  addCharacterAnimationTilesetEntity(
+  seeder.characterTilesetEntityIds[2] = addCharacterAnimationTilesetEntity(
       world, entityIdAllocator, character3PngFilename, characterShiftAmount);
-
-  // character 4 animation tileset
-  addCharacterAnimationTilesetEntity(
+  seeder.characterTilesetEntityIds[3] = addCharacterAnimationTilesetEntity(
       world, entityIdAllocator, character4PngFilename, characterShiftAmount);
 
-  seedBase.canvasEntityId = shovelerEntityIdAllocatorAllocate(entityIdAllocator);
-  { // canvas
-    ShovelerWorldEntity* entity = shovelerWorldAddEntity(world, seedBase.canvasEntityId);
+  seeder.canvasEntityId = shovelerEntityIdAllocatorAllocate(entityIdAllocator);
+  {
+    ShovelerWorldEntity* entity = shovelerWorldAddEntity(world, seeder.canvasEntityId);
     entity->label = strdup("canvas");
-    shovelerWorldEntityAddPositionAbsoluteComponent(
-        entity, shovelerVector3(-100.0f, -100.0f, -100.0f));
     shovelerWorldEntityAddMaterialTileSpriteComponent(entity);
     shovelerWorldEntityAddCanvasComponent(entity, /* numLayers */ 3);
   }
@@ -159,133 +114,165 @@ ShovelerTilesSeedBase shovelerTilesSeedBase(
     ShovelerWorldEntity* entity =
         shovelerWorldAddEntity(world, shovelerEntityIdAllocatorAllocate(entityIdAllocator));
     entity->label = strdup("material");
-    shovelerWorldEntityAddPositionAbsoluteComponent(
-        entity, shovelerVector3(-100.0f, -100.0f, -100.0f));
     shovelerWorldEntityAddMaterialTileSpriteComponent(entity);
   }
 
-  seedBase.tilemapMaterialEntityId = shovelerEntityIdAllocatorAllocate(entityIdAllocator);
+  seeder.tilemapMaterialEntityId = shovelerEntityIdAllocatorAllocate(entityIdAllocator);
   { // tilemap material
-    ShovelerWorldEntity* entity = shovelerWorldAddEntity(world, seedBase.tilemapMaterialEntityId);
+    ShovelerWorldEntity* entity = shovelerWorldAddEntity(world, seeder.tilemapMaterialEntityId);
     entity->label = strdup("material");
-    shovelerWorldEntityAddPositionAbsoluteComponent(
-        entity, shovelerVector3(-100.0f, -100.0f, -100.0f));
     shovelerWorldEntityAddMaterialTilemapComponent(entity);
   }
 
-  return seedBase;
+  ShovelerVector2 chunkSize2d =
+      shovelerVector2((float) map->dimensions.chunkSize, (float) map->dimensions.chunkSize);
+  ShovelerVector3 chunkScale3d = shovelerVector3(
+      0.5f * (float) map->dimensions.chunkSize, 0.5f * (float) map->dimensions.chunkSize, 1.0f);
+  for (int chunkX = 0; chunkX < map->dimensions.numChunkColumns; chunkX++) {
+    for (int chunkY = 0; chunkY < map->dimensions.numChunkRows; chunkY++) {
+      ShovelerMapChunk* chunk = shovelerMapGetChunk(map, chunkX, chunkY);
+
+      long long int tilesets[] = {seeder.tilesetEntityId, seeder.tilesetPngEntityId};
+      { // chunk background
+        ShovelerWorldEntity* entity =
+            shovelerWorldAddEntity(world, shovelerEntityIdAllocatorAllocate(entityIdAllocator));
+        entity->label = strdup("chunk background");
+        shovelerWorldEntityAddPositionAbsoluteComponent(
+            entity, shovelerVector3(chunk->position.values[0], chunk->position.values[1], 0.0f));
+        shovelerWorldEntityAddTilemapCollidersComponent(
+            entity,
+            /* numColumns */ map->dimensions.chunkSize,
+            /* numRows */ map->dimensions.chunkSize,
+            chunk->backgroundTiles.tilesetColliders,
+            /* collidersSize */ map->dimensions.chunkSize * map->dimensions.chunkSize);
+        shovelerWorldEntityAddTilemapTilesDirectComponent(
+            entity,
+            /* numColumns */ map->dimensions.chunkSize,
+            /* numRows */ map->dimensions.chunkSize,
+            chunk->backgroundTiles.tilesetColumns,
+            chunk->backgroundTiles.tilesetRows,
+            chunk->backgroundTiles.tilesetIds);
+        shovelerWorldEntityAddTilemapComponent(
+            entity,
+            /* tilesEntityId */ 0,
+            /* collidersEntityId */ 0,
+            tilesets,
+            /* numTilesets */ 2);
+        shovelerWorldEntityAddTilemapSpriteComponent(
+            entity, seeder.tilemapMaterialEntityId, /* tilemapEntityId */ 0);
+        shovelerWorldEntityAddSpriteTilemapComponent(
+            entity,
+            /* position */ 0,
+            SHOVELER_COORDINATE_MAPPING_POSITIVE_X,
+            SHOVELER_COORDINATE_MAPPING_POSITIVE_Y,
+            /* enableCollider */ true,
+            seeder.canvasEntityId,
+            /* layer */ 0,
+            /* size */ chunkSize2d,
+            /* tilemapSprite */ 0);
+      }
+
+      { // chunk foreground
+        ShovelerWorldEntity* entity =
+            shovelerWorldAddEntity(world, shovelerEntityIdAllocatorAllocate(entityIdAllocator));
+        entity->label = strdup("chunk foreground");
+        shovelerWorldEntityAddPositionAbsoluteComponent(
+            entity, shovelerVector3(chunk->position.values[0], chunk->position.values[1], 0.0f));
+        shovelerWorldEntityAddTilemapCollidersComponent(
+            entity,
+            /* numColumns */ map->dimensions.chunkSize,
+            /* numRows */ map->dimensions.chunkSize,
+            chunk->foregroundTiles.tilesetColliders,
+            /* collidersSize */ map->dimensions.chunkSize * map->dimensions.chunkSize);
+        shovelerWorldEntityAddTilemapTilesDirectComponent(
+            entity,
+            /* numColumns */ map->dimensions.chunkSize,
+            /* numRows */ map->dimensions.chunkSize,
+            chunk->foregroundTiles.tilesetColumns,
+            chunk->foregroundTiles.tilesetRows,
+            chunk->foregroundTiles.tilesetIds);
+        shovelerWorldEntityAddTilemapComponent(
+            entity,
+            /* tilesEntityId */ 0,
+            /* collidersEntityId */ 0,
+            tilesets,
+            /* numTilesets */ 2);
+        shovelerWorldEntityAddTilemapSpriteComponent(
+            entity, seeder.tilemapMaterialEntityId, /* tilemapEntityId */ 0);
+        shovelerWorldEntityAddSpriteTilemapComponent(
+            entity,
+            /* position */ 0,
+            SHOVELER_COORDINATE_MAPPING_POSITIVE_X,
+            SHOVELER_COORDINATE_MAPPING_POSITIVE_Y,
+            /* enableCollider */ true,
+            seeder.canvasEntityId,
+            /* layer */ 0,
+            /* size */ chunkSize2d,
+            /* tilemapSprite */ 0);
+      }
+
+      { // chunk
+        ShovelerWorldEntity* entity =
+            shovelerWorldAddEntity(world, shovelerEntityIdAllocatorAllocate(entityIdAllocator));
+        entity->label = strdup("chunk");
+        shovelerWorldEntityAddPositionAbsoluteComponent(
+            entity, shovelerVector3(chunk->position.values[0], chunk->position.values[1], 0.0f));
+        shovelerWorldEntityAddMaterialCanvasComponent(
+            entity, seeder.canvasEntityId, chunk->position, /* regionSize */ chunkSize2d);
+        shovelerWorldEntityAddModelComponent(
+            entity,
+            /* position */ 0,
+            seeder.quadDrawableEntityId,
+            /* material */ 0,
+            /* rotation */ shovelerVector3(0.0f, 0.0f, 0.0f),
+            /* scale */ chunkScale3d,
+            /* visible */ true,
+            /* emitter */ true,
+            /* castsShadow */ false,
+            SHOVELER_COMPONENT_MODEL_POLYGON_MODE_FILL);
+      }
+    }
+  }
+
+  seeder.nextPlayerTilesetIndex = 0;
+
+  return seeder;
 }
 
-ShovelerTilesSeedChunk shovelerTilesSeedChunk(
-    ShovelerWorld* world,
-    ShovelerEntityIdAllocator* entityIdAllocator,
-    ShovelerMapChunk* chunk,
-    ShovelerTilesSeedBase seedBase) {
-  ShovelerTilesSeedChunk seedChunk;
+void shovelerTilesSeederSpawnPlayer(ShovelerTilesSeeder* seeder, ShovelerVector2 position) {
+  long long int playerEntityId = shovelerEntityIdAllocatorAllocate(seeder->entityIdAllocator);
 
-  ShovelerVector3 chunkPosition =
-      shovelerVector3(chunk->position.values[0], chunk->position.values[1], 0.0f);
+  ShovelerWorldEntity* entity = shovelerWorldAddEntity(seeder->world, playerEntityId);
+  entity->label = strdup("player");
+  shovelerWorldEntityAddPositionAbsoluteComponent(
+      entity, shovelerVector3(position.values[0], position.values[1], 5.0f));
+  shovelerWorldEntityDelegateComponent(entity, shovelerComponentTypeIdPosition);
+  shovelerWorldEntityAddClientComponent(entity, /* position */ 0);
+  shovelerWorldEntityAddTileSpriteComponent(
+      entity,
+      /* materialEntityId */ seeder->canvasEntityId,
+      seeder->characterTilesetEntityIds[seeder->nextPlayerTilesetIndex],
+      /* tilesetColumn */ 0,
+      /* tilesetRow */ 0);
+  shovelerWorldEntityAddTileSpriteAnimationComponent(
+      entity,
+      /* position */ 0,
+      /* tileSprite */ 0,
+      SHOVELER_COORDINATE_MAPPING_POSITIVE_X,
+      SHOVELER_COORDINATE_MAPPING_POSITIVE_Y,
+      /* moveAmountThreshold */ 0.5f);
+  shovelerWorldEntityAddSpriteTileComponent(
+      entity,
+      /* position */ 0,
+      SHOVELER_COORDINATE_MAPPING_POSITIVE_X,
+      SHOVELER_COORDINATE_MAPPING_POSITIVE_Y,
+      /* enableCollider */ false,
+      seeder->canvasEntityId,
+      /* layer */ 1,
+      shovelerVector2(1.0f, 1.0f),
+      /* tileSprite */ 0);
 
-  seedChunk.backgroundEntityId = shovelerEntityIdAllocatorAllocate(entityIdAllocator);
-  { // chunk background
-    ShovelerWorldEntity* entity = shovelerWorldAddEntity(world, seedChunk.backgroundEntityId);
-    entity->label = strdup("chunk_background");
-    shovelerWorldEntityAddPositionAbsoluteComponent(entity, chunkPosition);
-    shovelerWorldEntityAddTilemapCollidersComponent(
-        entity,
-        /* numColumns */ chunkSize,
-        /* numRows */ chunkSize,
-        chunk->backgroundTiles.tilesetColliders,
-        /* collidersSize */ chunkSize * chunkSize);
-    shovelerWorldEntityAddTilemapTilesDirectComponent(
-        entity,
-        /* numColums */ chunkSize,
-        /* numRows */ chunkSize,
-        chunk->backgroundTiles.tilesetColumns,
-        chunk->backgroundTiles.tilesetRows,
-        chunk->backgroundTiles.tilesetIds);
-    shovelerWorldEntityAddTilemapComponent(
-        entity,
-        /* tiles */ 0,
-        /* collider */ 0,
-        /* tilesets */ (long long int[]){seedBase.tilesetEntityId, seedBase.tilesetPngEntityId},
-        /* numTilesets */ 2);
-    shovelerWorldEntityAddTilemapSpriteComponent(
-        entity, seedBase.tilemapMaterialEntityId, /* tilemap */ 0);
-    shovelerWorldEntityAddSpriteTilemapComponent(
-        entity,
-        /* position */ 0,
-        SHOVELER_COORDINATE_MAPPING_POSITIVE_X,
-        SHOVELER_COORDINATE_MAPPING_POSITIVE_Y,
-        /* enableCollider */ true,
-        seedBase.canvasEntityId,
-        /* layer */ 0,
-        /* size */ shovelerVector2((float) chunkSize, (float) chunkSize),
-        /* tilemapSprite */ 0);
-  }
-
-  seedChunk.foregroundEntityId = shovelerEntityIdAllocatorAllocate(entityIdAllocator);
-  { // chunk foreground
-    ShovelerWorldEntity* entity = shovelerWorldAddEntity(world, seedChunk.foregroundEntityId);
-    entity->label = strdup("chunk_foreground");
-    shovelerWorldEntityAddPositionAbsoluteComponent(entity, chunkPosition);
-    shovelerWorldEntityAddTilemapCollidersComponent(
-        entity,
-        /* numColums */ chunkSize,
-        /* numRows */ chunkSize,
-        chunk->foregroundTiles.tilesetColliders,
-        /* collidersSize */ chunkSize * chunkSize);
-    shovelerWorldEntityAddTilemapTilesDirectComponent(
-        entity,
-        /* numColums */ chunkSize,
-        /* numRows */ chunkSize,
-        chunk->foregroundTiles.tilesetColumns,
-        chunk->foregroundTiles.tilesetRows,
-        chunk->foregroundTiles.tilesetIds);
-    shovelerWorldEntityAddTilemapComponent(
-        entity,
-        /* tiles */ 0,
-        /* collider */ 0,
-        /* tilesets */ (long long int[]){seedBase.tilesetEntityId, seedBase.tilesetPngEntityId},
-        /* numTilesets */ 2);
-    shovelerWorldEntityAddTilemapSpriteComponent(
-        entity, seedBase.tilemapMaterialEntityId, /* tilemap */ 0);
-    shovelerWorldEntityAddSpriteTilemapComponent(
-        entity,
-        /* position */ 0,
-        SHOVELER_COORDINATE_MAPPING_POSITIVE_X,
-        SHOVELER_COORDINATE_MAPPING_POSITIVE_Y,
-        /* enableCollider */ true,
-        seedBase.canvasEntityId,
-        /* layer */ 2,
-        /* size */ shovelerVector2((float) chunkSize, (float) chunkSize),
-        /* tilemapSprite */ 0);
-  }
-
-  seedChunk.chunkEntityId = shovelerEntityIdAllocatorAllocate(entityIdAllocator);
-  { // chunk
-    ShovelerWorldEntity* entity = shovelerWorldAddEntity(world, seedChunk.chunkEntityId);
-    entity->label = strdup("chunk_foreground");
-    shovelerWorldEntityAddPositionAbsoluteComponent(entity, chunkPosition);
-    shovelerWorldEntityAddMaterialCanvasComponent(
-        entity,
-        seedBase.canvasEntityId,
-        chunk->position,
-        /* regionSize */ shovelerVector2((float) chunkSize, (float) chunkSize));
-    shovelerWorldEntityAddModelComponent(
-        entity,
-        /* position */ 0,
-        seedBase.quadDrawableEntityId,
-        /* material */ 0,
-        /* rotation */ shovelerVector3(0.0f, 0.0f, 0.0f),
-        /* scale */ shovelerVector3(0.5f * (float) chunkSize, 0.5f * (float) chunkSize, 1.0f),
-        /* visible */ true,
-        /* emitter */ true,
-        /* castsShadow */ false,
-        SHOVELER_COMPONENT_MODEL_POLYGON_MODE_FILL);
-  }
-
-  return seedChunk;
+  seeder->nextPlayerTilesetIndex = (seeder->nextPlayerTilesetIndex + 1) % 4;
 }
 
 static GString* getImageData(ShovelerImage* image) {
@@ -297,13 +284,13 @@ static GString* getImageData(ShovelerImage* image) {
   shovelerFileRead(tempImageFilename, &contents, &contentsSize);
 
   GString* data = g_string_new("");
-  g_string_append_len(data, (gchar*) contents, contentsSize);
+  g_string_append_len(data, (gchar*) contents, (gssize) contentsSize);
   free(contents);
 
   return data;
 }
 
-static bool addCharacterAnimationTilesetEntity(
+static long long int addCharacterAnimationTilesetEntity(
     ShovelerWorld* world,
     ShovelerEntityIdAllocator* entityIdAllocator,
     const char* filename,
@@ -315,24 +302,29 @@ static bool addCharacterAnimationTilesetEntity(
   shovelerImageFree(characterPngImage);
   shovelerImageFree(characterAnimationTilesetImage);
 
-  ShovelerWorldEntity* entity =
-      shovelerWorldAddEntity(world, shovelerEntityIdAllocatorAllocate(entityIdAllocator));
+  long long int tilesetEntityId = shovelerEntityIdAllocatorAllocate(entityIdAllocator);
+  ShovelerWorldEntity* entity = shovelerWorldAddEntity(world, tilesetEntityId);
   entity->label = strdup("tileset");
-  shovelerWorldEntityAddPositionAbsoluteComponent(
-      entity, shovelerVector3(-100.0f, -100.0f, -100.0f));
   shovelerWorldEntityAddResourceComponent(
       entity,
-      (unsigned char*) characterAnimationTilesetPngData->str,
-      characterAnimationTilesetPngData->len);
+      (const unsigned char*) characterAnimationTilesetPngData->str,
+      (int) characterAnimationTilesetPngData->len);
   shovelerWorldEntityAddImageComponent(
-      entity, SHOVELER_COMPONENT_IMAGE_FORMAT_PNG, /* resource */ 0);
+      entity, SHOVELER_COMPONENT_IMAGE_FORMAT_PNG, /* resourceEntityId */ 0);
   shovelerWorldEntityAddSamplerComponent(
-      entity, /* interpolate */ true, /* useMipmaps */ false, /* clamp */ true);
+      entity,
+      /* interpolate */ true,
+      /* useMipmaps */ false,
+      /* clamp */ true);
   shovelerWorldEntityAddTextureImageComponent(entity, /* image */ 0);
   shovelerWorldEntityAddTilesetComponent(
-      entity, /* image */ 0, /* columns */ 4, /* rows */ 3, /* padding */ 1);
+      entity,
+      /* image */ 0,
+      /* columns */ 4,
+      /* rows */ 3,
+      /* padding */ 1);
 
   g_string_free(characterAnimationTilesetPngData, true);
 
-  return true;
+  return tilesetEntityId;
 }

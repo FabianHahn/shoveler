@@ -2,7 +2,7 @@
 
 #include <stdlib.h>
 
-ShovelerEntityIdAllocator* shovelerCreateEntityIdAllocator() {
+ShovelerEntityIdAllocator* shovelerEntityIdAllocatorCreate() {
   ShovelerEntityIdAllocator* allocator = malloc(sizeof(ShovelerEntityIdAllocator));
   allocator->nextFreshEntityId = 1;
   allocator->allocations = g_hash_table_new_full(g_int64_hash, g_int64_equal, free, NULL);
