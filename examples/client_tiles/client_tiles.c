@@ -49,6 +49,7 @@ static void onClientDisconnected(
 typedef struct {
   ShovelerViewSynchronizer* viewSynchronizer;
   long long int nextEntityId;
+  ShovelerClientTilesSeeder seeder;
 } ShovelerServerContext;
 
 typedef struct {
@@ -151,7 +152,7 @@ int main(int argc, char* argv[]) {
   clientContext.componentTypeIndexer = serverContext.viewSynchronizer->componentTypeIndexer;
   clientContext.deserializedOp = shovelerClientOpCreateWithData(/* inputClientOp */ NULL);
 
-  shovelerClientTilesSeederInit(
+  serverContext.seeder = shovelerClientTilesSeederInit(
       serverContext.viewSynchronizer->world,
       map,
       &serverContext.nextEntityId,
@@ -164,6 +165,8 @@ int main(int argc, char* argv[]) {
       character4PngFilename,
       characterShiftAmount);
 
+  shovelerClientTilesSeederSpawnPlayer(&serverContext.seeder, shovelerVector2(0.5f, 0.5f));
+  
   GString* serializedOp = g_string_new("");
   for (long long int entityId = 1; entityId < serverContext.nextEntityId; entityId++) {
     ShovelerServerOp serverOp;

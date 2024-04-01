@@ -16,7 +16,7 @@ static GString* getImageData(ShovelerImage* image);
 static long long int addCharacterAnimationTilesetEntity(
     ShovelerWorld* world, long long int* nextEntityId, const char* filename, int shiftAmount);
 
-void shovelerClientTilesSeederInit(
+ShovelerClientTilesSeeder shovelerClientTilesSeederInit(
     ShovelerWorld* world,
     ShovelerMap* map,
     long long int* nextEntityId,
@@ -28,14 +28,19 @@ void shovelerClientTilesSeederInit(
     const char* character3PngFilename,
     const char* character4PngFilename,
     int characterShiftAmount) {
-  long long int quadDrawableEntityId = *nextEntityId;
+  ShovelerClientTilesSeeder seeder;
+  seeder.world = world;
+  seeder.map = map;
+  seeder.nextEntityId = nextEntityId;
+
+  seeder.quadDrawableEntityId = *nextEntityId;
   {
     ShovelerWorldEntity* entity = shovelerWorldAddEntity(world, (*nextEntityId)++);
     entity->label = strdup("quad drawable");
     shovelerWorldEntityAddDrawableQuad(entity);
   }
 
-  long long int tilesetEntityId = *nextEntityId;
+  seeder.tilesetEntityId = *nextEntityId;
   {
     ShovelerImage* tilesetPngImage = shovelerImagePngReadFile(tilesetPngFilename);
     GString* tilesetPngData = getImageData(tilesetPngImage);
@@ -62,16 +67,16 @@ void shovelerClientTilesSeederInit(
     g_string_free(tilesetPngData, true);
   }
 
-  long long int character1TilesetEntityId = addCharacterAnimationTilesetEntity(
+  seeder.characterTilesetEntityIds[0] = addCharacterAnimationTilesetEntity(
       world, nextEntityId, character1PngFilename, characterShiftAmount);
-  addCharacterAnimationTilesetEntity(
+  seeder.characterTilesetEntityIds[1] = addCharacterAnimationTilesetEntity(
       world, nextEntityId, character2PngFilename, characterShiftAmount);
-  addCharacterAnimationTilesetEntity(
+  seeder.characterTilesetEntityIds[2] = addCharacterAnimationTilesetEntity(
       world, nextEntityId, character3PngFilename, characterShiftAmount);
-  addCharacterAnimationTilesetEntity(
+  seeder.characterTilesetEntityIds[3] = addCharacterAnimationTilesetEntity(
       world, nextEntityId, character4PngFilename, characterShiftAmount);
 
-  long long int canvasEntityId = *nextEntityId;
+  seeder.canvasEntityId = *nextEntityId;
   {
     ShovelerWorldEntity* entity = shovelerWorldAddEntity(world, (*nextEntityId)++);
     entity->label = strdup("canvas");
@@ -85,7 +90,7 @@ void shovelerClientTilesSeederInit(
     shovelerWorldEntityAddMaterialTileSprite(entity);
   }
 
-  long long int tilemapMaterialEntityId = *nextEntityId;
+  seeder.tilemapMaterialEntityId = *nextEntityId;
   {
     ShovelerWorldEntity* entity = shovelerWorldAddEntity(world, (*nextEntityId)++);
     entity->label = strdup("tilemap material");
@@ -100,6 +105,9 @@ void shovelerClientTilesSeederInit(
     for (int chunkY = 0; chunkY < map->dimensions.numChunkRows; chunkY++) {
       ShovelerMapChunk* chunk = shovelerMapGetChunk(map, chunkX, chunkY);
 
+      long long int tilesets[] = {
+          seeder.tilesetEntityId,
+          /* no autumn/summer distinction here yet */ seeder.tilesetEntityId};
       {
         ShovelerWorldEntity* entity = shovelerWorldAddEntity(world, (*nextEntityId)++);
         entity->label = strdup("chunk background");
@@ -117,7 +125,6 @@ void shovelerClientTilesSeederInit(
             chunk->backgroundTiles.tilesetColumns,
             chunk->backgroundTiles.tilesetRows,
             chunk->backgroundTiles.tilesetIds);
-        long long int tilesets[] = {tilesetEntityId, tilesetEntityId};
         shovelerWorldEntityAddTilemap(
             entity,
             /* tilesEntityId */ 0,
@@ -125,14 +132,14 @@ void shovelerClientTilesSeederInit(
             tilesets,
             /* numTilesets */ 2);
         shovelerWorldEntityAddTilemapSprite(
-            entity, tilemapMaterialEntityId, /* tilemapEntityId */ 0);
+            entity, seeder.tilemapMaterialEntityId, /* tilemapEntityId */ 0);
         shovelerWorldEntityAddSpriteTilemap(
             entity,
             /* position */ 0,
             SHOVELER_COORDINATE_MAPPING_POSITIVE_X,
             SHOVELER_COORDINATE_MAPPING_POSITIVE_Y,
             /* enableCollider */ true,
-            canvasEntityId,
+            seeder.canvasEntityId,
             /* layer */ 0,
             /* size */ chunkSize2d,
             /* tilemapSprite */ 0);
@@ -155,7 +162,6 @@ void shovelerClientTilesSeederInit(
             chunk->foregroundTiles.tilesetColumns,
             chunk->foregroundTiles.tilesetRows,
             chunk->foregroundTiles.tilesetIds);
-        long long int tilesets[] = {tilesetEntityId, tilesetEntityId};
         shovelerWorldEntityAddTilemap(
             entity,
             /* tilesEntityId */ 0,
@@ -163,14 +169,14 @@ void shovelerClientTilesSeederInit(
             tilesets,
             /* numTilesets */ 2);
         shovelerWorldEntityAddTilemapSprite(
-            entity, tilemapMaterialEntityId, /* tilemapEntityId */ 0);
+            entity, seeder.tilemapMaterialEntityId, /* tilemapEntityId */ 0);
         shovelerWorldEntityAddSpriteTilemap(
             entity,
             /* position */ 0,
             SHOVELER_COORDINATE_MAPPING_POSITIVE_X,
             SHOVELER_COORDINATE_MAPPING_POSITIVE_Y,
             /* enableCollider */ true,
-            canvasEntityId,
+            seeder.canvasEntityId,
             /* layer */ 0,
             /* size */ chunkSize2d,
             /* tilemapSprite */ 0);
@@ -182,11 +188,11 @@ void shovelerClientTilesSeederInit(
         shovelerWorldEntityAddPosition(
             entity, chunk->position.values[0], chunk->position.values[1], 0.0f);
         shovelerWorldEntityAddMaterialCanvas(
-            entity, canvasEntityId, chunk->position, /* regionSize */ chunkSize2d);
+            entity, seeder.canvasEntityId, chunk->position, /* regionSize */ chunkSize2d);
         shovelerWorldEntityAddModel(
             entity,
             /* position */ 0,
-            quadDrawableEntityId,
+            seeder.quadDrawableEntityId,
             /* material */ 0,
             /* rotation */ shovelerVector3(0.0f, 0.0f, 0.0f),
             /* scale */ chunkScale3d,
@@ -198,36 +204,43 @@ void shovelerClientTilesSeederInit(
     }
   }
 
-  {
-    ShovelerWorldEntity* entity = shovelerWorldAddEntity(world, (*nextEntityId)++);
-    entity->label = strdup("player");
-    shovelerWorldEntityAddPosition(entity, 0.5f, 0.5f, 5.0f);
-    shovelerWorldEntityDelegateComponent(entity, shovelerComponentTypeIdPosition);
-    shovelerWorldEntityAddClient(entity, /* position */ 0);
-    shovelerWorldEntityAddTileSprite(
-        entity,
-        /* materialEntityId */ canvasEntityId,
-        character1TilesetEntityId,
-        /* tilesetColumn */ 0,
-        /* tilesetRow */ 0);
-    shovelerWorldEntityAddTileSpriteAnimation(
-        entity,
-        /* position */ 0,
-        /* tileSprite */ 0,
-        SHOVELER_COORDINATE_MAPPING_POSITIVE_X,
-        SHOVELER_COORDINATE_MAPPING_POSITIVE_Y,
-        /* moveAmountThreshold */ 0.5f);
-    shovelerWorldEntityAddSpriteTile(
-        entity,
-        /* position */ 0,
-        SHOVELER_COORDINATE_MAPPING_POSITIVE_X,
-        SHOVELER_COORDINATE_MAPPING_POSITIVE_Y,
-        /* enableCollider */ false,
-        canvasEntityId,
-        /* layer */ 1,
-        shovelerVector2(1.0f, 1.0f),
-        /* tileSprite */ 0);
-  }
+  seeder.nextPlayerTilesetIndex = 0;
+
+  return seeder;
+}
+
+void shovelerClientTilesSeederSpawnPlayer(
+    ShovelerClientTilesSeeder* seeder, ShovelerVector2 position) {
+  ShovelerWorldEntity* entity = shovelerWorldAddEntity(seeder->world, (*seeder->nextEntityId)++);
+  entity->label = strdup("player");
+  shovelerWorldEntityAddPosition(entity, position.values[0], position.values[1], 5.0f);
+  shovelerWorldEntityDelegateComponent(entity, shovelerComponentTypeIdPosition);
+  shovelerWorldEntityAddClient(entity, /* position */ 0);
+  shovelerWorldEntityAddTileSprite(
+      entity,
+      /* materialEntityId */ seeder->canvasEntityId,
+      seeder->characterTilesetEntityIds[seeder->nextPlayerTilesetIndex],
+      /* tilesetColumn */ 0,
+      /* tilesetRow */ 0);
+  shovelerWorldEntityAddTileSpriteAnimation(
+      entity,
+      /* position */ 0,
+      /* tileSprite */ 0,
+      SHOVELER_COORDINATE_MAPPING_POSITIVE_X,
+      SHOVELER_COORDINATE_MAPPING_POSITIVE_Y,
+      /* moveAmountThreshold */ 0.5f);
+  shovelerWorldEntityAddSpriteTile(
+      entity,
+      /* position */ 0,
+      SHOVELER_COORDINATE_MAPPING_POSITIVE_X,
+      SHOVELER_COORDINATE_MAPPING_POSITIVE_Y,
+      /* enableCollider */ false,
+      seeder->canvasEntityId,
+      /* layer */ 1,
+      shovelerVector2(1.0f, 1.0f),
+      /* tileSprite */ 0);
+
+  seeder->nextPlayerTilesetIndex = (seeder->nextPlayerTilesetIndex + 1) % 4;
 }
 
 static GString* getImageData(ShovelerImage* image) {
