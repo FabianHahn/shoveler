@@ -29,7 +29,7 @@ platform(
 
 config_setting(
     name = "linux",
-    constraint_values = ["@bazel_tools//platforms:linux"],
+    constraint_values = ["@platforms//os:linux"],
 )
 
 config_setting(

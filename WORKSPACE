@@ -16,8 +16,8 @@ bazel_skylib_workspace()
 load("@bazel_skylib//lib:versions.bzl", "versions")
 
 versions.check(
-    maximum_bazel_version = "5.1.1",
-    minimum_bazel_version = "5.1.1",
+    maximum_bazel_version = "6.5.0",
+    minimum_bazel_version = "6.5.0",
 )
 
 # We make thirdparty/ its own bazel workspace because it allows to run `bazel build ...` without
