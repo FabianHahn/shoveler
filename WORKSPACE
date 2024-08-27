@@ -29,9 +29,9 @@ local_repository(
 
 http_archive(
     name = "fakeglib",
-    sha256 = "9e28f304c01493f13d46027330b04f3936bf3ca2c47815664cd8d9b5d113584c",
-    strip_prefix = "fakeglib-823da8d10e96d62286fb538b70863366fd43b505",
-    url = "https://github.com/FabianHahn/fakeglib/archive/823da8d10e96d62286fb538b70863366fd43b505.tar.gz",
+    sha256 = "c73648af1fdeab5d43c3a5e92107f2dfa43e0595e16f0d701e68e2fa939c8074",
+    strip_prefix = "fakeglib-1.0.0",
+    url = "https://github.com/FabianHahn/fakeglib/archive/refs/tags/v1.0.0.tar.gz",
 )
 
 http_archive(
